@@ -6,10 +6,15 @@ on:
       - master
   workflow_dispatch:
 
+concurrency:
+  group: deploy-production
+  cancel-in-progress: true
+
 jobs:
   deploy:
     name: Deploy application
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Deploy over SSH
@@ -19,10 +24,12 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
           port: ${{ secrets.SSH_PORT || 22 }}
+          timeout: 30s
+          command_timeout: 10m
           script_stop: true
           script: |
-            set -e
+            set -eu
             cd /home/u949878161/domains/autoloker.com/public_html/dev.autoloker.com
-            git pull origin master
-            composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+            git pull --ff-only origin master
+            composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader --no-progress
             php artisan migrate --force
