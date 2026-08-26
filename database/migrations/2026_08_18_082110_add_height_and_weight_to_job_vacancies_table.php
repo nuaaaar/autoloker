@@ -12,23 +12,29 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('job_vacancies', function (Blueprint $table) {
+            if (! Schema::hasColumn('job_vacancies', 'min_height')) {
+                $table->unsignedSmallInteger('min_height')
+                    ->nullable()
+                    ->after('max_age');
+            }
 
-            $table->unsignedSmallInteger('min_height')
-                ->nullable()
-                ->after('max_age');
+            if (! Schema::hasColumn('job_vacancies', 'max_height')) {
+                $table->unsignedSmallInteger('max_height')
+                    ->nullable()
+                    ->after('min_height');
+            }
 
-            $table->unsignedSmallInteger('max_height')
-                ->nullable()
-                ->after('min_height');
+            if (! Schema::hasColumn('job_vacancies', 'min_weight')) {
+                $table->unsignedSmallInteger('min_weight')
+                    ->nullable()
+                    ->after('max_height');
+            }
 
-            $table->unsignedSmallInteger('min_weight')
-                ->nullable()
-                ->after('max_height');
-
-            $table->unsignedSmallInteger('max_weight')
-                ->nullable()
-                ->after('min_weight');
-
+            if (! Schema::hasColumn('job_vacancies', 'max_weight')) {
+                $table->unsignedSmallInteger('max_weight')
+                    ->nullable()
+                    ->after('min_weight');
+            }
         });
     }
 
