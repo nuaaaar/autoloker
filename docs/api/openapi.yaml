@@ -1,0 +1,326 @@
+openapi: 3.1.0
+info:
+  title: Autoloker API
+  version: 1.0.0
+  description: API documentation for user registration.
+
+servers:
+  - url: http://localhost
+    description: Local development server
+
+paths:
+  /api/register:
+    post:
+      summary: Register a user
+      description: |
+        Registers a security, company, or BUJP account using the existing
+        users, user_*, and role-specific profile models.
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/RegisterSecurityRequest'
+                - $ref: '#/components/schemas/RegisterCompanyRequest'
+            examples:
+              security:
+                $ref: '#/components/examples/SecurityRequest'
+              company:
+                $ref: '#/components/examples/CompanyRequest'
+          multipart/form-data:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/RegisterSecurityRequest'
+                - $ref: '#/components/schemas/RegisterCompanyRequest'
+                - $ref: '#/components/schemas/RegisterBujpRequest'
+            examples:
+              security:
+                $ref: '#/components/examples/SecurityRequest'
+              company:
+                $ref: '#/components/examples/CompanyRequest'
+              bujp:
+                $ref: '#/components/examples/BujpRequest'
+      responses:
+        '201':
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+              examples:
+                security:
+                  $ref: '#/components/examples/SecurityResponse'
+                company:
+                  $ref: '#/components/examples/CompanyResponse'
+                bujp:
+                  $ref: '#/components/examples/BujpResponse'
+        '422':
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '500':
+          description: Registration failed because of a server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    RegisterSecurityRequest:
+      type: object
+      required:
+        - role
+        - name
+        - email
+        - phone_number
+        - password
+        - password_confirmation
+        - agree
+      properties:
+        role:
+          type: string
+          const: security
+          description: Stored as satpam in users.role.
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          maxLength: 100
+        phone_number:
+          type: string
+          minLength: 10
+          maxLength: 15
+          description: Non-numeric characters are removed; a leading 0 is converted to 62.
+        password:
+          $ref: '#/components/schemas/Password'
+        password_confirmation:
+          type: string
+          format: password
+        agree:
+          type: boolean
+          const: true
+
+    RegisterCompanyRequest:
+      type: object
+      required:
+        - role
+        - name
+        - email
+        - password
+        - password_confirmation
+        - agree
+      properties:
+        role:
+          type: string
+          const: company
+        name:
+          type: string
+          minLength: 3
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          maxLength: 100
+        password:
+          $ref: '#/components/schemas/Password'
+        password_confirmation:
+          type: string
+          format: password
+        agree:
+          type: boolean
+          const: true
+        nib:
+          type: string
+          maxLength: 50
+          description: Optional NIB stored on the company profile.
+
+    RegisterBujpRequest:
+      type: object
+      required:
+        - role
+        - name
+        - email
+        - password
+        - password_confirmation
+        - agree
+        - sio_number
+        - sio_expired_date
+        - sio_file
+      properties:
+        role:
+          type: string
+          const: bujp
+        name:
+          type: string
+          maxLength: 150
+        email:
+          type: string
+          format: email
+        password:
+          $ref: '#/components/schemas/Password'
+        password_confirmation:
+          type: string
+          format: password
+        agree:
+          type: boolean
+          const: true
+        nib:
+          type: string
+          maxLength: 50
+          description: Optional NIB stored on the BUJP profile.
+        sio_number:
+          type: string
+          maxLength: 100
+        sio_expired_date:
+          type: string
+          format: date
+          description: Must be after today.
+        sio_file:
+          type: string
+          format: binary
+          description: PDF, JPG, JPEG, or PNG; maximum 5 MB.
+
+    Password:
+      type: string
+      format: password
+      minLength: 8
+      maxLength: 50
+      pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$'
+      description: Must contain a lowercase letter, uppercase letter, and number.
+
+    RegisterResponse:
+      type: object
+      required:
+        - status
+        - message
+        - data
+      properties:
+        status:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Registration successful.
+        data:
+          $ref: '#/components/schemas/RegisteredUser'
+
+    RegisteredUser:
+      type: object
+      required:
+        - id
+        - uuid
+        - role
+        - name
+        - email
+      properties:
+        id:
+          type: integer
+          example: 42
+        uuid:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum: [satpam, company, bujp]
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+
+    ValidationErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: boolean
+          example: false
+        message:
+          type: string
+
+  examples:
+    SecurityRequest:
+      summary: Security registration request
+      value:
+        role: security
+        name: Budi Santoso
+        email: budi@example.com
+        phone_number: '081234567890'
+        password: Secret123
+        password_confirmation: Secret123
+        agree: true
+    CompanyRequest:
+      summary: Company registration request
+      value:
+        role: company
+        name: PT Example
+        email: admin@example.com
+        nib: '1234567890123'
+        password: Secret123
+        password_confirmation: Secret123
+        agree: true
+    BujpRequest:
+      summary: BUJP registration request
+      value:
+        role: bujp
+        name: PT Security Services
+        email: admin@security.example
+        nib: '1234567890123'
+        sio_number: SIO-001
+        sio_expired_date: '2027-08-27'
+        sio_file: '[binary file: sio.pdf]'
+        password: Secret123
+        password_confirmation: Secret123
+        agree: true
+    SecurityResponse:
+      summary: Security registration response
+      value:
+        status: true
+        message: Registration successful.
+        data:
+          id: 42
+          uuid: 550e8400-e29b-41d4-a716-446655440000
+          role: satpam
+          name: Budi Santoso
+          email: budi@example.com
+    CompanyResponse:
+      summary: Company registration response
+      value:
+        status: true
+        message: Registration successful.
+        data:
+          id: 43
+          uuid: 550e8400-e29b-41d4-a716-446655440001
+          role: company
+          name: PT Example
+          email: admin@example.com
+    BujpResponse:
+      summary: BUJP registration response
+      value:
+        status: true
+        message: Registration successful.
+        data:
+          id: 44
+          uuid: 550e8400-e29b-41d4-a716-446655440002
+          role: bujp
+          name: PT Security Services
+          email: admin@security.example
