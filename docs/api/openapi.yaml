@@ -2,13 +2,109 @@ openapi: 3.1.0
 info:
   title: Autoloker API
   version: 1.0.0
-  description: API documentation for user registration.
+  description: API documentation for mobile authentication and user registration.
 
 servers:
   - url: http://localhost
     description: Local development server
 
 paths:
+  /api/login:
+    post:
+      summary: Log in to a mobile account
+      description: Authenticates a security, company, or BUJP user with an email or phone number.
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              role: security
+              identifier: budi@example.com
+              password: Secret123
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+        '422':
+          description: Invalid credentials, role mismatch, inactive account, or validation failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+      security: []
+
+  /api/me:
+    get:
+      summary: Get the authenticated mobile user
+      operationId: getAuthenticatedUser
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current user and role-specific profile state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeResponse'
+        '401':
+          description: Missing, invalid, expired, or revoked access token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/refresh-token:
+    post:
+      summary: Refresh mobile access tokens
+      description: Exchanges a refresh token for a new access token and rotated refresh token.
+      operationId: refreshAccessToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: Tokens refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          description: Invalid, expired, or revoked refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security: []
+
+  /api/logout:
+    post:
+      summary: Log out the current mobile session
+      operationId: logoutUser
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '401':
+          description: Missing, invalid, expired, or revoked access token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /api/register:
     post:
       summary: Register a user
@@ -71,6 +167,184 @@ paths:
 
 components:
   schemas:
+    LoginRequest:
+      type: object
+      required: [role, identifier, password]
+      properties:
+        role:
+          type: string
+          enum: [security, company, bujp]
+          description: security maps to the stored satpam role.
+        identifier:
+          type: string
+          maxLength: 150
+          description: User email or phone number.
+        password:
+          type: string
+          format: password
+
+    RefreshTokenRequest:
+      type: object
+      required: [refresh_token]
+      properties:
+        refresh_token:
+          type: string
+
+    TokenResponse:
+      type: object
+      required: [status, data]
+      properties:
+        status:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/TokenData'
+
+    AuthenticationResponse:
+      type: object
+      required: [status, message, data]
+      properties:
+        status:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Login successful.
+        data:
+          allOf:
+            - $ref: '#/components/schemas/TokenData'
+            - type: object
+              required: [user]
+              properties:
+                user:
+                  $ref: '#/components/schemas/AuthenticatedUser'
+
+    TokenData:
+      type: object
+      required: [access_token, refresh_token, token_type, expires_in]
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        token_type:
+          type: string
+          enum: [Bearer]
+        expires_in:
+          type: integer
+          example: 3600
+
+    MeResponse:
+      type: object
+      required: [status, data]
+      properties:
+        status:
+          type: boolean
+          example: true
+        data:
+          type: object
+          required: [user]
+          properties:
+            user:
+              $ref: '#/components/schemas/AuthenticatedUser'
+
+    AuthenticatedUser:
+      type: object
+      required: [id, uuid, role, name, email, status, profile, capabilities]
+      properties:
+        id:
+          type: integer
+        uuid:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum: [satpam, company, bujp]
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone_number:
+          type: [string, 'null']
+        avatar:
+          type: [string, 'null']
+        status:
+          type: string
+          enum: [active, non-active]
+        email_verified:
+          type: boolean
+        profile:
+          oneOf:
+            - $ref: '#/components/schemas/SecurityProfileState'
+            - $ref: '#/components/schemas/BusinessProfileState'
+          nullable: true
+        capabilities:
+          $ref: '#/components/schemas/Capabilities'
+
+    SecurityProfileState:
+      $ref: '#/components/schemas/ProfileState'
+
+    BusinessProfileState:
+      $ref: '#/components/schemas/ProfileState'
+
+    ProfileState:
+      type: object
+      required: [type, id, uuid, profile_completion, is_verified, is_active]
+      properties:
+        type:
+          type: string
+          enum: [security, company, bujp]
+        id:
+          type: integer
+        uuid:
+          type: string
+          format: uuid
+        profile_completion:
+          $ref: '#/components/schemas/ProfileCompletion'
+        is_verified:
+          type: [boolean, 'null']
+        is_active:
+          type: boolean
+
+    ProfileCompletion:
+      type: object
+      required: [progress, completed, total, missing]
+      properties:
+        progress:
+          type: integer
+          minimum: 0
+          maximum: 100
+        completed:
+          type: integer
+        total:
+          type: integer
+        missing:
+          type: array
+          items:
+            type: string
+
+    Capabilities:
+      type: object
+      required: [profile_complete, profile_verified, can_access_protected_features]
+      properties:
+        profile_complete:
+          type: boolean
+        profile_verified:
+          type: boolean
+        can_access_protected_features:
+          type: boolean
+
+    MessageResponse:
+      type: object
+      required: [status, message]
+      properties:
+        status:
+          type: boolean
+          example: true
+        message:
+          type: string
+
     RegisterSecurityRequest:
       type: object
       required:
@@ -257,6 +531,11 @@ components:
         message:
           type: string
 
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque token
   examples:
     SecurityRequest:
       summary: Security registration request
