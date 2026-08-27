@@ -39,6 +39,212 @@ paths:
                 $ref: '#/components/schemas/ValidationErrorResponse'
       security: []
 
+  /api/masters/positions:
+    get:
+      summary: List security positions
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Active positions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReferenceListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+  /api/masters/abilities:
+    get:
+      summary: List security abilities
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Active abilities
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReferenceListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+  /api/masters/placements:
+    get:
+      summary: List security placements
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Active placements
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReferenceListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+  /api/masters/industries:
+    get:
+      summary: List business industries
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Active industries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReferenceListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+  /api/locations/provinces:
+    get:
+      summary: List provinces
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Provinces
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocationListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+  /api/locations/cities:
+    get:
+      summary: List cities for a province
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: province_code
+          in: query
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Cities
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocationListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /api/locations/districts:
+    get:
+      summary: List districts for a city
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: city_code
+          in: query
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Districts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocationListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /api/locations/villages:
+    get:
+      summary: List villages for a district
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: district_code
+          in: query
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Villages
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocationListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /api/profile:
+    get:
+      summary: Get the complete authenticated profile
+      operationId: getAuthenticatedProfile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Complete role-specific profile values and state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileResponse'
+        '401':
+          description: Missing, invalid, expired, or revoked access token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      summary: Partially update the authenticated profile
+      operationId: updateAuthenticatedProfile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/UpdateSecurityProfileRequest'
+                - $ref: '#/components/schemas/UpdateCompanyProfileRequest'
+                - $ref: '#/components/schemas/UpdateBujpProfileRequest'
+            examples:
+              security:
+                $ref: '#/components/examples/UpdateSecurityProfileRequest'
+              company:
+                $ref: '#/components/examples/UpdateCompanyProfileRequest'
+              bujp:
+                $ref: '#/components/examples/UpdateBujpProfileRequest'
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/UpdateSecurityProfileRequest'
+                - $ref: '#/components/schemas/UpdateCompanyProfileRequest'
+                - $ref: '#/components/schemas/UpdateBujpProfileRequest'
+            examples:
+              security:
+                $ref: '#/components/examples/UpdateSecurityProfileRequest'
+              company:
+                $ref: '#/components/examples/UpdateCompanyProfileRequest'
+              bujp:
+                $ref: '#/components/examples/UpdateBujpProfileRequest'
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileUpdateResponse'
+        '401':
+          description: Missing, invalid, expired, or revoked access token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Profile validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
   /api/me:
     get:
       summary: Get the authenticated mobile user
@@ -252,28 +458,19 @@ components:
       type: object
       required: [id, uuid, role, name, email, status, profile, capabilities]
       properties:
-        id:
-          type: integer
-        uuid:
-          type: string
-          format: uuid
+        id: {type: integer}
+        uuid: {type: string, format: uuid}
         role:
           type: string
           enum: [satpam, company, bujp]
-        name:
-          type: string
-        email:
-          type: string
-          format: email
-        phone_number:
-          type: [string, 'null']
-        avatar:
-          type: [string, 'null']
+        name: {type: string}
+        email: {type: string, format: email}
+        phone_number: {type: [string, 'null']}
+        avatar: {type: [string, 'null']}
         status:
           type: string
           enum: [active, non-active]
-        email_verified:
-          type: boolean
+        email_verified: {type: boolean}
         profile:
           oneOf:
             - $ref: '#/components/schemas/SecurityProfileState'
@@ -281,6 +478,85 @@ components:
           nullable: true
         capabilities:
           $ref: '#/components/schemas/Capabilities'
+
+    ReferenceListResponse:
+      type: object
+      required: [status, data]
+      properties:
+        status: {type: boolean}
+        data:
+          type: array
+          items:
+            type: object
+            required: [title]
+            properties:
+              title: {type: string}
+
+    LocationListResponse:
+      type: object
+      required: [status, data]
+      properties:
+        status: {type: boolean}
+        data:
+          type: array
+          items:
+            type: object
+            required: [code, name]
+            properties:
+              code: {type: string}
+              name: {type: string}
+    ProfileResponse:
+      type: object
+      required: [status, data]
+      properties:
+        status:
+          type: boolean
+        data:
+          type: object
+          required: [profile]
+          properties:
+            profile:
+              $ref: '#/components/schemas/FullProfile'
+
+    ProfileUpdateResponse:
+      type: object
+      required: [status, message, data]
+      properties:
+        status:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+          required: [profile]
+          properties:
+            profile:
+              $ref: '#/components/schemas/FullProfile'
+
+    FullProfile:
+      allOf:
+        - $ref: '#/components/schemas/ProfileState'
+        - type: object
+          required: [data]
+          properties:
+            data:
+              type: object
+              additionalProperties: true
+
+    UpdateSecurityProfileRequest:
+      type: object
+      description: Partial security profile fields. All properties are optional.
+      additionalProperties: true
+
+    UpdateCompanyProfileRequest:
+      type: object
+      description: Partial company profile fields. All properties are optional.
+      additionalProperties: true
+
+    UpdateBujpProfileRequest:
+      type: object
+      description: Partial BUJP profile fields. All properties are optional.
+      additionalProperties: true
 
     SecurityProfileState:
       $ref: '#/components/schemas/ProfileState'
@@ -531,6 +807,19 @@ components:
         message:
           type: string
 
+  responses:
+    ValidationError:
+      description: Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationErrorResponse'
+    Unauthenticated:
+      description: Missing, invalid, expired, or revoked access token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
   securitySchemes:
     bearerAuth:
       type: http
@@ -570,6 +859,97 @@ components:
         password: Secret123
         password_confirmation: Secret123
         agree: true
+    UpdateSecurityProfileRequest:
+      summary: Complete security profile update
+      description: Send all fields to complete a security profile; omit fields for partial updates.
+      value:
+        name: Budi Santoso
+        birth_place: Balikpapan
+        birth_date: '1995-01-15'
+        gender: laki-laki
+        address: Jalan Sudirman No. 10
+        phone_number: '081234567890'
+        email: budi@example.com
+        ktp_number: '6471011501950001'
+        registration_number: SAT-2026-0001
+        work_experience: 3-5 Tahun
+        province: Kalimantan Timur
+        city: Balikpapan
+        district: Balikpapan Selatan
+        village: Damai
+        height: '170'
+        width: '65'
+        is_out_of_town_agree: true
+        is_shift_agree: true
+        ability: Pengamanan objek vital, patroli
+        placements: Perkantoran, pusat perbelanjaan
+        self_description: Berpengalaman sebagai petugas keamanan.
+        additional_note: Bersedia ditempatkan sesuai kebutuhan.
+        work_status: Aktif
+        company_name: PT Aman Sentosa
+        position: Security Officer
+        sim: SIM C
+    UpdateCompanyProfileRequest:
+      summary: Complete company profile update
+      description: Send all fields to complete a company profile; omit fields for partial updates.
+      value:
+        company_name: PT Example Indonesia
+        industry: Teknologi Informasi
+        description: Penyedia solusi teknologi.
+        npwp: '012345678901234'
+        nib: '9123456789012'
+        business_license: IUI-2026-001
+        email: company@example.com
+        phone: '0215551234'
+        website: https://example.com
+        province: DKI Jakarta
+        city: Jakarta Selatan
+        district: Kebayoran Baru
+        village: Senayan
+        postal_code: '12190'
+        address: Jalan Asia Afrika No. 8
+        instagram: https://instagram.com/example
+        facebook: https://facebook.com/example
+        linkedin: https://linkedin.com/company/example
+        youtube: https://youtube.com/@example
+    UpdateBujpProfileRequest:
+      summary: Complete BUJP profile update
+      description: Send all fields to complete a BUJP profile; omit fields for partial updates.
+      value:
+        company_name: PT Security Services
+        industry: Jasa Keamanan
+        description: Penyedia jasa keamanan profesional.
+        npwp: '012345678901234'
+        nib: '9123456789012'
+        business_license: SIU-2026-001
+        sio_number: SIO-2026-001
+        sio_expired_date: '2027-08-27'
+        sio_file: '[binary file: sio.pdf]'
+        email: admin@security.example
+        phone: '0215551234'
+        website: https://security.example
+        province: DKI Jakarta
+        city: Jakarta Selatan
+        district: Kebayoran Baru
+        village: Senayan
+        postal_code: '12190'
+        address: Jalan Asia Afrika No. 8
+        instagram: https://instagram.com/security
+        facebook: https://facebook.com/security
+        linkedin: https://linkedin.com/company/security
+        youtube: https://youtube.com/@security
+    UpdateSecurityProfileRequestJson:
+      summary: Complete security profile JSON update
+      value:
+        $ref: '#/components/examples/UpdateSecurityProfileRequest/value'
+    UpdateCompanyProfileRequestJson:
+      summary: Complete company profile JSON update
+      value:
+        $ref: '#/components/examples/UpdateCompanyProfileRequest/value'
+    UpdateBujpProfileRequestJson:
+      summary: Complete BUJP profile JSON update
+      value:
+        $ref: '#/components/examples/UpdateBujpProfileRequest/value'
     SecurityResponse:
       summary: Security registration response
       value:
