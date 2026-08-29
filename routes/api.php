@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\ReferenceDataController;
 use App\Http\Controllers\Api\RefreshTokenController;
 use App\Http\Controllers\Api\LogoutController;
 use App\Http\Controllers\Api\RegisterController;
+use App\Http\Controllers\Api\SecurityCertificateController;
+use App\Http\Controllers\Api\SecurityHistoryController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', LoginController::class)->name('api.login');
@@ -16,6 +18,12 @@ Route::middleware('api.token')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('api.profile.update');
     Route::get('/me', MeController::class)->name('api.me');
     Route::post('/logout', LogoutController::class)->name('api.logout');
+    Route::apiResource('security-histories', SecurityHistoryController::class)
+        ->parameters(['security-histories' => 'uuid'])
+        ->except(['create', 'edit']);
+    Route::apiResource('security-certificates', SecurityCertificateController::class)
+        ->parameters(['security-certificates' => 'uuid'])
+        ->except(['create', 'edit']);
 
     Route::prefix('masters')->group(function () {
         Route::get('/positions', [ReferenceDataController::class, 'positions'])->name('api.masters.positions');
