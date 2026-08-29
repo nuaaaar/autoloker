@@ -371,8 +371,236 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /api/security-histories:
+    get:
+      summary: List the authenticated security user's work histories
+      description: Returns only histories belonging to the authenticated satpam user's security profile, ordered newest first.
+      operationId: listSecurityHistories
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Security work histories
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityHistoryListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      summary: Create a security work history
+      description: Creates a work history for the authenticated security profile. Category must be an active master placement title.
+      operationId: createSecurityHistory
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SecurityHistoryRequest'
+            example:
+              position: Security Officer
+              company_name: PT Aman Sentosa
+              location: Balikpapan
+              category: Perkantoran
+              start_date: '2022-01-01'
+              end_date: '2025-01-31'
+              description: Menjaga keamanan area perkantoran dan melakukan patroli.
+              is_current: false
+      responses:
+        '201':
+          description: Security history created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityHistoryResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /api/security-histories/{uuid}:
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the security work history.
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: Get a security work history
+      description: Returns a history only when it belongs to the authenticated security user's profile.
+      operationId: getSecurityHistory
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Security history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityHistoryResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      summary: Replace fields on a security work history
+      operationId: updateSecurityHistory
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SecurityHistoryRequest'
+      responses:
+        '200':
+          description: Security history updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityHistoryResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    patch:
+      summary: Partially update a security work history
+      operationId: partiallyUpdateSecurityHistory
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SecurityHistoryRequest'
+      responses:
+        '200':
+          description: Security history updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityHistoryResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    delete:
+      summary: Delete a security work history
+      operationId: deleteSecurityHistory
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Security history deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
 components:
   schemas:
+    SecurityHistory:
+      type: object
+      required: [uuid, position, company_name, location, category, start_date, end_date, description, is_current]
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        position:
+          type: [string, 'null']
+          description: Security position or job title.
+        company_name:
+          type: [string, 'null']
+        location:
+          type: [string, 'null']
+        category:
+          type: [string, 'null']
+          description: Master placement title from the active master_placements records.
+        start_date:
+          type: [string, 'null']
+          format: date
+        end_date:
+          type: [string, 'null']
+          format: date
+        description:
+          type: [string, 'null']
+        is_current:
+          type: boolean
+
+    SecurityHistoryRequest:
+      type: object
+      additionalProperties: false
+      description: All fields are optional for partial updates. Category is submitted as the master placement title.
+      properties:
+        position: {type: [string, 'null']}
+        company_name: {type: [string, 'null']}
+        location: {type: [string, 'null']}
+        category:
+          type: [string, 'null']
+          description: Must match an active master_placements.title.
+        start_date: {type: [string, 'null'], format: date}
+        end_date: {type: [string, 'null'], format: date}
+        description: {type: [string, 'null']}
+        is_current: {type: boolean}
+
+    SecurityHistoryListResponse:
+      type: object
+      required: [status, data]
+      properties:
+        status: {type: boolean, example: true}
+        data:
+          type: object
+          required: [security_histories]
+          properties:
+            security_histories:
+              type: array
+              items:
+                $ref: '#/components/schemas/SecurityHistory'
+
+    SecurityHistoryResponse:
+      type: object
+      required: [status, data]
+      properties:
+        status: {type: boolean, example: true}
+        message: {type: string}
+        data:
+          type: object
+          required: [security_history]
+          properties:
+            security_history:
+              $ref: '#/components/schemas/SecurityHistory'
+
     LoginRequest:
       type: object
       required: [role, identifier, password]
@@ -816,6 +1044,18 @@ components:
             $ref: '#/components/schemas/ValidationErrorResponse'
     Unauthenticated:
       description: Missing, invalid, expired, or revoked access token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Authenticated user is not a security account.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Security profile or history was not found.
       content:
         application/json:
           schema:
