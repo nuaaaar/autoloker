@@ -1,85 +1,106 @@
 <style>
+    /* =========================================================
+       BADGE
+       ========================================================= */
+
     .badge-active{
-
         padding:4px 10px;
-
         border-radius:20px;
-
         background:#16a34a20;
-
         color:#22c55e;
-
         font-size:11px;
-
         font-weight:600;
-
         border:1px solid #22c55e55;
-
     }
 
     .badge-expired{
-
         padding:4px 10px;
-
         border-radius:20px;
-
         background:#ef444420;
-
         color:#ef4444;
-
         border:1px solid #ef444455;
-
         font-size:11px;
-
     }
 
     .badge-warning{
-
         padding:4px 10px;
-
         border-radius:20px;
-
         background:#e8a40120;
-
         color:#e8a401;
-
         border:1px solid #e8a40155;
-
         font-size:11px;
-
     }
 
     .badge-complete{
-
         padding:4px 10px;
-
         border-radius:20px;
-
         background:#2563eb20;
-
         color:#60a5fa;
-
         border:1px solid #60a5fa55;
-
         font-size:11px;
-
     }
 
+
+    /* =========================================================
+       CERTIFICATE CARD
+       ========================================================= */
+
     .certificate-filter-card {
-        background: #121c32;
-        border: 1px solid #25324a;
-        border-radius: 18px;
-        margin-bottom: 22px;
-        transition: .25s;
+        background:#121c32;
+        border:1px solid #25324a;
+        border-radius:18px;
+        margin-bottom:22px;
+        transition:.25s;
     }
 
     .certificate-card {
-        background: #121c32;
-        border: 1px solid #25324a;
-        border-radius: 18px;
-        margin-bottom: 22px;
-        transition: .25s;
+        background:#121c32;
+        border:1px solid #25324a;
+        border-radius:18px;
+        margin-bottom:22px;
+        transition:.25s;
     }
+
+
+    /* =========================================================
+       LIGHT MODE
+       ========================================================= */
+
+    [data-bs-theme="light"] .certificate-filter-card,
+    [data-bs-theme="light"] .certificate-card {
+        background:#ffffff !important;
+        border:1px solid #e5e7eb !important;
+    }
+
+
+    /* =========================================================
+       BADGE - LIGHT MODE
+       ========================================================= */
+
+    [data-bs-theme="light"] .badge-active {
+        background:rgba(22, 163, 74, .08) !important;
+        color:#15803d !important;
+        border-color:rgba(21, 128, 61, .25) !important;
+    }
+
+    [data-bs-theme="light"] .badge-expired {
+        background:rgba(239, 68, 68, .08) !important;
+        color:#dc2626 !important;
+        border-color:rgba(220, 38, 38, .25) !important;
+    }
+
+    [data-bs-theme="light"] .badge-warning {
+        background:rgba(232, 164, 1, .08) !important;
+        color:#c28500 !important;
+        border-color:rgba(194, 133, 0, .25) !important;
+    }
+
+    [data-bs-theme="light"] .badge-complete {
+        background:rgba(37, 99, 235, .08) !important;
+        color:#2563eb !important;
+        border-color:rgba(37, 99, 235, .25) !important;
+    }
+
 </style>
 
 <div class="card certificate-filter-card mb-4">

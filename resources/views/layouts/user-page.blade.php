@@ -22,6 +22,8 @@
     <link href="/assets/plugins/custom/fullcalendar/fullcalendar.bundle.css" rel="stylesheet" type="text/css" />
     <link href="/assets/plugins/global/plugins.bundle.css" rel="stylesheet" type="text/css" />
     <link href="/assets/css/style.bundle.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
     <style>
         @media (min-width: 992px) {
             [data-kt-app-header-fixed=true][data-kt-app-sidebar-fixed=true][data-kt-app-sidebar-push-header=true] .app-header, [data-kt-app-header-fixed=true][data-kt-app-sidebar-sticky=on][data-kt-app-sidebar-push-header=true] .app-header {
@@ -1384,6 +1386,358 @@
         }
     </style>
 
+    <style>
+        /* =========================================================
+        LIGHT MODE
+        ========================================================= */
+
+        [data-bs-theme="light"] body,
+        [data-bs-theme="light"] .app-default {
+            background-color: #ffffff !important;
+            color: #212529;
+        }
+
+
+        /* =========================================================
+        HEADER
+        ========================================================= */
+
+        [data-bs-theme="light"] .app-header {
+            background-color: #ffffff !important;
+            border-bottom: 1px solid #e5e7eb !important;
+        }
+
+
+        /* =========================================================
+        SEARCH
+        ========================================================= */
+
+        [data-bs-theme="light"] .search-input {
+            background: #f8f9fa !important;
+            border: 1px solid #dfe3e8 !important;
+            color: #212529 !important;
+        }
+
+        [data-bs-theme="light"] .search-input::placeholder {
+            color: #8a94a6 !important;
+        }
+
+        [data-bs-theme="light"] .search-input:focus {
+            background: #ffffff !important;
+            border-color: #e8a401 !important;
+        }
+
+        [data-bs-theme="light"] .search-icon {
+            color: #7d8797 !important;
+        }
+
+
+        /* =========================================================
+        NAVBAR
+        ========================================================= */
+
+        [data-bs-theme="light"] .app-navbar .nav-item {
+            color: #6b7280 !important;
+        }
+
+        [data-bs-theme="light"] .app-navbar .nav-item:hover {
+            color: #e8a401 !important;
+            background: rgba(232, 164, 1, 0.08) !important;
+        }
+
+        [data-bs-theme="light"] .app-navbar .nav-item.active {
+            color: #e8a401 !important;
+        }
+
+
+        /* =========================================================
+        PROFILE
+        ========================================================= */
+
+        [data-bs-theme="light"] .left-sidebar .card {
+            background: #ffffff !important;
+            border: 1px solid #e5e7eb !important;
+        }
+
+        [data-bs-theme="light"] .profile-name {
+            color: #111827 !important;
+        }
+
+        [data-bs-theme="light"] .profile-job {
+            color: #4b5563 !important;
+        }
+
+        [data-bs-theme="light"] .profile-company {
+            color: #6b7280 !important;
+        }
+
+        [data-bs-theme="light"] .profile-card .separator {
+            border-color: #e5e7eb !important;
+        }
+
+        [data-bs-theme="light"] .profile-stat span {
+            color: #6b7280 !important;
+        }
+
+        [data-bs-theme="light"] .profile-stat strong {
+            color: #e8a401 !important;
+        }
+
+
+        /* =========================================================
+        QUICK MENU
+        ========================================================= */
+
+        [data-bs-theme="light"] .menu-title {
+            color: #6b7280 !important;
+        }
+
+        [data-bs-theme="light"] .quick-item {
+            color: #4b5563 !important;
+        }
+
+        [data-bs-theme="light"] .quick-item:hover {
+            background: #f5f6f8 !important;
+            color: #111827 !important;
+        }
+
+        [data-bs-theme="light"] .quick-item i {
+            color: #e8a401 !important;
+        }
+
+
+        /* =========================================================
+        JOB CARD
+        ========================================================= */
+
+        [data-bs-theme="light"] .job-filter-card,
+        [data-bs-theme="light"] .job-card {
+            background: #ffffff !important;
+            border: 1px solid #e5e7eb !important;
+        }
+
+        [data-bs-theme="light"] .job-search {
+            background: #f8f9fa !important;
+        }
+
+        [data-bs-theme="light"] .job-search input {
+            color: #212529 !important;
+        }
+
+        [data-bs-theme="light"] .job-search input::placeholder {
+            color: #8a94a6 !important;
+        }
+
+        [data-bs-theme="light"] .job-search i {
+            color: #7d8797 !important;
+        }
+
+
+        /* =========================================================
+        JOB TEXT
+        ========================================================= */
+
+        [data-bs-theme="light"] .job-title {
+            color: #111827 !important;
+        }
+
+        [data-bs-theme="light"] .company-name,
+        [data-bs-theme="light"] .job-info,
+        [data-bs-theme="light"] .apply-info {
+            color: #6b7280 !important;
+        }
+
+        [data-bs-theme="light"] .salary {
+            color: #d99a00 !important;
+        }
+
+        [data-bs-theme="light"] .job-divider {
+            border-color: #e5e7eb !important;
+        }
+
+        [data-bs-theme="light"] .company-icon {
+            background: #f3f4f6 !important;
+            color: #6b7280 !important;
+        }
+
+
+        /* =========================================================
+        FILTER BUTTON
+        ========================================================= */
+
+        [data-bs-theme="light"] .btn-filter {
+            border-color: #d1d5db !important;
+            color: #6b7280 !important;
+            background: transparent !important;
+        }
+
+        [data-bs-theme="light"] .btn-filter:hover {
+            border-color: #e8a401 !important;
+            color: #e8a401 !important;
+        }
+
+        [data-bs-theme="light"] .btn-filter.active {
+            background: #ffb400 !important;
+            color: #111111 !important;
+            border-color: #ffb400 !important;
+        }
+
+
+        /* =========================================================
+        RIGHT SIDEBAR
+        ========================================================= */
+
+        [data-bs-theme="light"] .right-sidebar .card {
+            background: #ffffff !important;
+            border: 1px solid #e5e7eb !important;
+        }
+
+        [data-bs-theme="light"] .right-title h5 {
+            color: #111827 !important;
+        }
+
+        [data-bs-theme="light"] .right-title a {
+            color: #d99a00 !important;
+        }
+
+
+        /* =========================================================
+        RIGHT SIDEBAR - JOB
+        ========================================================= */
+
+        [data-bs-theme="light"] .job-company {
+            color: #6b7280 !important;
+        }
+
+        [data-bs-theme="light"] .job-title {
+            color: #111827 !important;
+        }
+
+
+        /* =========================================================
+        RIGHT SIDEBAR - TRAINING
+        ========================================================= */
+
+        [data-bs-theme="light"] .training-title {
+            color: #111827 !important;
+        }
+
+        [data-bs-theme="light"] .training-org,
+        [data-bs-theme="light"] .training-date {
+            color: #6b7280 !important;
+        }
+
+        [data-bs-theme="light"] .training-org .bnsp {
+            color: #00a66a !important;
+        }
+
+
+        /* =========================================================
+        REMINDER
+        ========================================================= */
+
+        [data-bs-theme="light"] .reminder-card {
+            background: rgba(244, 180, 0, 0.08) !important;
+            border: 1px solid rgba(244, 180, 0, 0.35) !important;
+        }
+
+        [data-bs-theme="light"] .reminder-text {
+            color: #6b7280 !important;
+        }
+
+        [data-bs-theme="light"] .reminder-text strong,
+        [data-bs-theme="light"] .reminder-title,
+        [data-bs-theme="light"] .reminder-icon,
+        [data-bs-theme="light"] .reminder-link {
+            color: #d99a00 !important;
+        }
+
+
+        /* =========================================================
+        DROPDOWN PROFILE
+        ========================================================= */
+
+        [data-bs-theme="light"] .menu-sub-dropdown {
+            background: #ffffff !important;
+            border: 1px solid #e5e7eb !important;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12) !important;
+        }
+
+        [data-bs-theme="light"] .menu-link,
+        [data-bs-theme="light"] .menu-item .menu-link {
+            color: #374151 !important;
+        }
+
+        [data-bs-theme="light"] .menu-item .menu-link:hover {
+            color: #e8a401 !important;
+            background: rgba(232, 164, 1, 0.08) !important;
+        }
+
+        [data-bs-theme="light"] .separator {
+            border-color: #e5e7eb !important;
+        }
+
+
+        /* =========================================================
+        PROFILE NAME DI HEADER
+        ========================================================= */
+
+        [data-bs-theme="light"] .profile-trigger span {
+            color: #111827 !important;
+        }
+
+
+        /* =========================================================
+        MOBILE BOTTOM NAV
+        ========================================================= */
+
+        [data-bs-theme="light"] .mobile-bottom-nav {
+            background: #ffffff !important;
+            border-top: 1px solid #e5e7eb !important;
+            box-shadow: 0 -3px 12px rgba(0, 0, 0, 0.08) !important;
+        }
+
+        [data-bs-theme="light"] .mobile-bottom-nav a {
+            color: #6b7280 !important;
+        }
+
+        [data-bs-theme="light"] .mobile-bottom-nav a.active {
+            color: #e8a401 !important;
+        }
+
+
+        /* =========================================================
+        BADGE
+        ========================================================= */
+
+        [data-bs-theme="light"] .badge-license {
+            background: rgba(244, 180, 0, 0.08) !important;
+            border-color: rgba(244, 180, 0, 0.35) !important;
+            color: #d99a00 !important;
+        }
+
+        [data-bs-theme="light"] .badge-urgent,
+        [data-bs-theme="light"] .urgent {
+            background: rgba(255, 70, 70, 0.08) !important;
+            color: #dc4c4c !important;
+            border-color: rgba(255, 70, 70, 0.25) !important;
+        }
+
+
+        /* =========================================================
+        FOOTER
+        ========================================================= */
+
+        [data-bs-theme="light"] .right-footer,
+        [data-bs-theme="light"] .right-footer a {
+            color: #6b7280 !important;
+        }
+
+        [data-bs-theme="light"] .right-footer a:hover {
+            color: #111827 !important;
+        }
+    </style>
+
     @yield('style')
 </head>
 
@@ -1394,20 +1748,22 @@
     <script>
         var defaultThemeMode = "light";
         var themeMode;
+
         if (document.documentElement) {
-            if (document.documentElement.hasAttribute("data-bs-theme-mode")) {
-                themeMode = document.documentElement.getAttribute("data-bs-theme-mode");
+
+            if (localStorage.getItem("data-bs-theme") !== null) {
+                themeMode = localStorage.getItem("data-bs-theme");
             } else {
-                if (localStorage.getItem("data-bs-theme") !== null) {
-                    themeMode = localStorage.getItem("data-bs-theme");
-                } else {
-                    themeMode = defaultThemeMode;
-                }
+                themeMode = defaultThemeMode;
             }
+
             if (themeMode === "system") {
-                themeMode = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+                themeMode = window.matchMedia("(prefers-color-scheme: dark)").matches
+                    ? "dark"
+                    : "light";
             }
-            document.documentElement.setAttribute("data-bs-theme", 'dark');
+
+            document.documentElement.setAttribute("data-bs-theme", themeMode);
         }
     </script>
     <div class="d-flex flex-column flex-root app-root" id="kt_app_root">
@@ -1566,8 +1922,40 @@
 
                                         </a>
                                     </div>
+                                    
+                                    {{-- <div class="separator my-5"></div> --}}
 
                                     <div class="menu-item px-5">
+                                    <div class="menu-link px-3 text-white d-flex align-items-center justify-content-between">
+
+                                        <div class="d-flex align-items-center">
+                                            <i class="ki-duotone ki-moon fs-2 me-3 theme-icon"></i>
+
+                                            <span>Tampilan</span>
+                                        </div>
+
+                                        <div class="d-flex align-items-center gap-2">
+
+                                            <button type="button"
+                                                class="btn btn-sm btn-icon btn-light"
+                                                id="btnThemeLight"
+                                                title="Light Mode">
+                                                <i class="ki-duotone ki-sun fs-3"></i>
+                                            </button>
+
+                                            <button type="button"
+                                                class="btn btn-sm btn-icon btn-dark"
+                                                id="btnThemeDark"
+                                                title="Dark Mode">
+                                                <i class="ki-duotone ki-moon fs-3"></i>
+                                            </button>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                    {{-- <div class="menu-item px-5">
                                         <a href="javascript:;" class="menu-link px-3 text-white">
 
                                             <i class="ki-duotone ki-lock fs-2 me-3"></i>
@@ -1575,9 +1963,9 @@
                                             Keamanan Akun
 
                                         </a>
-                                    </div>
+                                    </div> --}}
 
-                                    <div class="menu-item px-5">
+                                    {{-- <div class="menu-item px-5">
                                         <a href="javascript:;" class="menu-link px-3 text-white">
 
                                             <i class="ki-duotone ki-geolocation-home fs-2 me-3"></i>
@@ -1585,7 +1973,7 @@
                                             Bahasa : Indonesia
 
                                         </a>
-                                    </div>
+                                    </div> --}}
 
                                     <div class="separator my-3"></div>
 
@@ -1817,6 +2205,87 @@
             $(".profile-page").addClass("d-none");
 
             $("#" + target).removeClass("d-none");
+
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const html = document.documentElement;
+
+            const btnLight = document.getElementById('btnThemeLight');
+            const btnDark = document.getElementById('btnThemeDark');
+
+            function setTheme(theme) {
+
+                html.setAttribute('data-bs-theme', theme);
+
+                localStorage.setItem('data-bs-theme', theme);
+
+                updateThemeButton(theme);
+            }
+
+            function updateThemeButton(theme) {
+
+                if (!btnLight || !btnDark) {
+                    return;
+                }
+
+                if (theme === 'light') {
+
+                    btnLight.classList.add('active');
+                    btnDark.classList.remove('active');
+
+                    btnLight.classList.remove('btn-light');
+                    btnLight.classList.add('btn-warning');
+
+                    btnDark.classList.remove('btn-dark');
+                    btnDark.classList.add('btn-light');
+
+                } else {
+
+                    btnDark.classList.add('active');
+                    btnLight.classList.remove('active');
+
+                    btnDark.classList.remove('btn-light');
+                    btnDark.classList.add('btn-warning');
+
+                    btnLight.classList.remove('btn-warning');
+                    btnLight.classList.add('btn-light');
+                }
+            }
+
+            // Klik Light
+            if (btnLight) {
+                btnLight.addEventListener('click', function (e) {
+
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    setTheme('light');
+                });
+            }
+
+            // Klik Dark
+            if (btnDark) {
+                btnDark.addEventListener('click', function (e) {
+
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    setTheme('dark');
+                });
+            }
+
+            // Ambil theme saat halaman dibuka
+            let currentTheme = html.getAttribute('data-bs-theme');
+
+            if (!currentTheme) {
+                currentTheme = localStorage.getItem('data-bs-theme') || 'light';
+            }
+
+            updateThemeButton(currentTheme);
 
         });
     </script>

@@ -214,6 +214,70 @@
 
     }
 
+
+    /* ===========================================
+       LIGHT MODE
+    =========================================== */
+
+    [data-bs-theme="light"] .recommend-wrapper{
+        background:#ffffff;
+        border-color:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .recommend-header{
+        border-bottom-color:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .recommend-heading{
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .recommend-subtitle{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .recommend-card{
+        background:#ffffff;
+        border-color:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .recommend-card:hover{
+        border-color:rgba(246,176,0,.45);
+    }
+
+    [data-bs-theme="light"] .recommend-avatar{
+        border-color:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .recommend-name{
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .recommend-position{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .recommend-text{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .recommend-text:before{
+        color:#d18f00;
+    }
+
+    [data-bs-theme="light"] .recommend-empty-icon{
+        background:rgba(246,176,0,.10);
+        border-color:rgba(246,176,0,.25);
+    }
+
+    [data-bs-theme="light"] .recommend-empty-title{
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .recommend-empty-text{
+        color:#64748b;
+    }
+
 </style>
 
 <div id="tab-rekomendasi" class="profile-content">

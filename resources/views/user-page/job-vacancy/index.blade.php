@@ -38,9 +38,32 @@
         .network-breadcrumb .text-muted{
             color:#5b6985 !important;
         }
+
+
+        /* =========================================================
+        LIGHT MODE - BREADCRUMB
+        ========================================================= */
+
+        [data-bs-theme="light"] .network-breadcrumb a {
+            color: #64748b;
+        }
+
+        [data-bs-theme="light"] .network-breadcrumb a:hover {
+            color: #e8a401;
+        }
+
+        [data-bs-theme="light"] .network-breadcrumb .active {
+            color: #1e293b;
+        }
+
+        [data-bs-theme="light"] .network-breadcrumb .text-muted {
+            color: #94a3b8 !important;
+        }
     </style>
 
+
     <style>
+
         .btn-save.saved {
             border-color: #198754;
             color: #198754;
@@ -50,6 +73,7 @@
             border-color: #198754;
             color: #198754;
         }
+
 
         /* =========================================================
         JOB FILTER CARD
@@ -563,10 +587,247 @@
 
             color: #e8a401;
         }
-    </style> 
+
+
+        /* =========================================================
+        LIGHT MODE
+        ========================================================= */
+
+        [data-bs-theme="light"] .job-filter-card {
+            border-color: #dfe4ec;
+            background: #ffffff;
+            color: #1e293b;
+        }
+
+
+        /* SEARCH */
+
+        [data-bs-theme="light"] .job-search i {
+            color: #94a3b8;
+        }
+
+        [data-bs-theme="light"] .job-search input {
+            border-color: #dfe4ec;
+            background: #f8fafc;
+            color: #1e293b;
+        }
+
+        [data-bs-theme="light"] .job-search input::placeholder {
+            color: #94a3b8;
+        }
+
+        [data-bs-theme="light"] .job-search input:hover {
+            border-color: #cbd5e1;
+        }
+
+        [data-bs-theme="light"] .job-search input:focus {
+            border-color: #e8a401;
+
+            box-shadow:
+                0 0 0 2px rgba(232, 164, 1, .08);
+        }
+
+
+        /* FILTER SELECT */
+
+        [data-bs-theme="light"] .job-filter-select {
+            border-color: #dfe4ec;
+
+            background-color: #f8fafc;
+
+            color: #475569;
+        }
+
+        [data-bs-theme="light"] .job-filter-select:hover {
+            border-color: #cbd5e1;
+
+            color: #1e293b;
+        }
+
+        [data-bs-theme="light"] .job-filter-select:focus {
+            border-color: #e8a401;
+
+            box-shadow:
+                0 0 0 2px rgba(232, 164, 1, .08);
+        }
+
+        [data-bs-theme="light"] .job-filter-select option {
+            background: #ffffff;
+            color: #1e293b;
+        }
+
+
+        /* MORE FILTER */
+
+        [data-bs-theme="light"] .btn-more-filter {
+            border-color: #dfe4ec;
+
+            background: #f8fafc;
+
+            color: #475569;
+        }
+
+        [data-bs-theme="light"] .btn-more-filter:hover {
+            background: #f1f5f9;
+
+            border-color: #e8a401;
+
+            color: #e8a401;
+        }
+
+
+        /* MODAL */
+
+        [data-bs-theme="light"] .job-filter-modal {
+            border-color: #dfe4ec;
+
+            background: #ffffff;
+
+            color: #1e293b;
+
+            box-shadow:
+                0 20px 60px rgba(15, 23, 42, .15);
+        }
+
+
+        /* MODAL HEADER */
+
+        [data-bs-theme="light"] .job-filter-modal .modal-header {
+            border-bottom-color: #e2e8f0;
+
+            background: #ffffff;
+        }
+
+        [data-bs-theme="light"] .job-filter-modal-title {
+            color: #1e293b;
+        }
+
+        [data-bs-theme="light"] .job-filter-modal-subtitle {
+            color: #64748b;
+        }
+
+
+        /* CLOSE BUTTON */
+
+        [data-bs-theme="light"] .job-filter-modal .btn-close {
+            filter: none;
+
+            opacity: .6;
+        }
+
+        [data-bs-theme="light"] .job-filter-modal .btn-close:hover {
+            opacity: 1;
+        }
+
+
+        /* MODAL BODY */
+
+        [data-bs-theme="light"] .job-filter-modal .modal-body {
+            background: #ffffff;
+        }
+
+
+        /* SCROLLBAR */
+
+        [data-bs-theme="light"] .job-filter-modal .modal-body::-webkit-scrollbar-track {
+            background: #ffffff;
+        }
+
+        [data-bs-theme="light"] .job-filter-modal .modal-body::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+        }
+
+
+        /* FORM LABEL */
+
+        [data-bs-theme="light"] .filter-form-group label {
+            color: #475569;
+        }
+
+
+        /* MODAL SELECT */
+
+        [data-bs-theme="light"] .filter-form-control {
+            border-color: #dfe4ec;
+
+            background: #f8fafc;
+
+            color: #1e293b;
+        }
+
+        [data-bs-theme="light"] .filter-form-control:hover {
+            border-color: #cbd5e1;
+        }
+
+        [data-bs-theme="light"] .filter-form-control:focus {
+            border-color: #e8a401;
+
+            box-shadow:
+                0 0 0 2px rgba(232, 164, 1, .08);
+        }
+
+        [data-bs-theme="light"] .filter-form-control option {
+            background: #ffffff;
+
+            color: #1e293b;
+        }
+
+
+        /* MODAL FOOTER */
+
+        [data-bs-theme="light"] .job-filter-modal .modal-footer {
+            border-top-color: #e2e8f0;
+
+            background: #ffffff;
+        }
+
+
+        /* RESET */
+
+        [data-bs-theme="light"] .btn-filter-reset {
+            color: #64748b;
+        }
+
+        [data-bs-theme="light"] .btn-filter-reset:hover {
+            background: #f1f5f9;
+
+            color: #1e293b;
+        }
+
+
+        /* APPLY */
+
+        [data-bs-theme="light"] .btn-filter-apply {
+            border-color: #e8a401;
+
+            background: #e8a401;
+
+            color: #ffffff;
+        }
+
+        [data-bs-theme="light"] .btn-filter-apply:hover {
+            background: #f2b313;
+
+            border-color: #f2b313;
+
+            color: #ffffff;
+        }
+
+
+        /* ACTIVE FILTER */
+
+        [data-bs-theme="light"] .job-filter-select.filter-active {
+            border-color: #e8a401;
+
+            background: rgba(232, 164, 1, .08);
+
+            color: #d18f00;
+        }
+
+    </style>
+
 
     <style>
-        
 
         /*
         |--------------------------------------------------------------------------
@@ -619,6 +880,7 @@
         body {
             min-height: 100%;
         }
+
     </style>
 @endsection
 

@@ -1,7 +1,7 @@
 <style>
     /* ===========================
-   PROFILE SKILLS
-=========================== */
+       PROFILE SKILLS
+    =========================== */
 
     .skills-wrapper{
 
@@ -70,6 +70,38 @@
         }
 
     }
+
+
+    /* ===========================
+       LIGHT MODE
+    =========================== */
+
+    [data-bs-theme="light"] .skill-badge{
+
+        background:#f8fafc;
+
+        border-color:#e2e8f0;
+
+        color:#64748b;
+
+    }
+
+    [data-bs-theme="light"] .skill-badge:hover{
+
+        background:#fffbf2;
+
+        border-color:rgba(246,176,0,.35);
+
+        color:#d18f00;
+
+    }
+
+    [data-bs-theme="light"] .profile-section-title{
+
+        color:#1e293b;
+
+    }
+
 </style>
 
 <div class="card profile-section-card">

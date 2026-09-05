@@ -87,23 +87,23 @@
         </a>
 
 
-        <a href="javascript:;" class="quick-item">
+        {{-- <a href="javascript:;" class="quick-item">
 
             <i class="ki-duotone ki-medal-star fs-2"></i>
 
             <span>Sertifikasi Saya</span>
 
-        </a>
+        </a> --}}
 
-        <a href="javascript:;" class="quick-item">
+        <a href="{{ route('user-page.training.my') }}" class="quick-item">
 
             <i class="ki-duotone ki-book-open fs-2"></i>
 
-            <span>Pelatihan</span>
+            <span>Pelatihan Saya</span>
 
         </a>
 
-        <a href="javascript:;" class="quick-item">
+        {{-- <a href="javascript:;" class="quick-item">
 
             <i class="ki-duotone ki-document fs-2"></i>
 
@@ -117,7 +117,7 @@
 
             <span>Halaman TPP Security</span>
 
-        </a>
+        </a> --}}
 
     </div>
 

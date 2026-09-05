@@ -27,6 +27,7 @@ use App\Http\Controllers\Admin\TrainingPublishedController as ADMTrainingPublish
 use App\Http\Controllers\Admin\TrainingClosedController as ADMTrainingClosed;
 use App\Http\Controllers\Admin\TrainingCancelledController as ADMTrainingCancelled;
 use App\Http\Controllers\Admin\TrainingRunningController as ADMTrainingRunning;
+use App\Http\Controllers\Admin\MasterSubscriptionController as ADMMasterSubscription;
 
 use App\Http\Controllers\UserPage\ProfileController as UPProfile;
 use App\Http\Controllers\UserPage\HomeController as UPHome;
@@ -36,6 +37,7 @@ use App\Http\Controllers\UserPage\JobVacancyController as UPPJobVacancy;
 use App\Http\Controllers\UserPage\JobBookmarkController as UPPJobBookmark;
 use App\Http\Controllers\UserPage\JobApplicationController as UPPJobApplication;
 use App\Http\Controllers\UserPage\TrainingController as UPPTraining;
+use App\Http\Controllers\UserPage\TrainingApplicationController as UPPTrainingApplication;
 
 use App\Http\Controllers\User\DashboardUserController as USRDashboard;
 use App\Http\Controllers\User\ProfileController as USRProfile;
@@ -101,6 +103,7 @@ Route::middleware(['auth'])->group(function () {
             Route::resource('certificate', ADMMasterCertificate::class); 
             Route::resource('position-security', ADMMasterPositionSecurity::class); 
             Route::resource('competency-scheme', ADMMasterCompetencyScheme::class); 
+            Route::resource('subscription', ADMMasterSubscription::class); 
         });
 
         Route::prefix('management-user')->name('management-user.')->group(function () {
@@ -237,10 +240,19 @@ Route::middleware(['auth'])->group(function () {
             Route::resource('training', USRTraining::class);
 
             Route::post(
+                '/training/{uuid}/start',
+                [USRTraining::class, 'start']
+            )->name('training.start');
+
+            Route::post(
+                '/training/{uuid}/cancel',
+                [USRTraining::class, 'cancel']
+            )->name('training.cancel');
+
+            Route::post(
                 '/training/{uuid}/close',
                 [USRTraining::class, 'close']
             )->name('training.close');
-
 
             /*
             |--------------------------------------------------------------------------
@@ -275,12 +287,16 @@ Route::middleware(['auth'])->group(function () {
     ->name('logout');
 
     Route::prefix('user-page')->name('user-page.')->group(function () {
+        // Route::get('/coming-soon', function () {
+        //     return view('user-page.coming-soon.index');
+        // })->name('coming-soon');
+
         Route::get('/home', [UPHome::class,'index'])->name('home');
 
         Route::get('/home/jobs',[UPHome::class, 'loadJobs'])->name('home.jobs');
 
         Route::get('/network', function () {
-            return view('user-page.network.index');
+            return view('user-page.coming-soon.index');
         })->name('network');
 
         Route::get('/training', function () {
@@ -288,7 +304,7 @@ Route::middleware(['auth'])->group(function () {
         })->name('training');
 
         Route::get('/certificate', function () {
-            return view('user-page.certificate.index');
+            return view('user-page.coming-soon.index');
         })->name('certificate');
 
         Route::get('/notif', function () {
@@ -317,9 +333,15 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('training')->name('training.')->group(function () {
             Route::get('', [UPPTraining::class,'index'])->name('index');
             Route::get('list', [UPPTraining::class,'list'])->name('list');
-            Route::get('bookmark', [UPPTraining::class,'bookmark'])->name('bookmark');
-            Route::get('my', [UPPTraining::class,'my'])->name('my');
+            Route::get('my', [UPPTraining::class,'myTraining'])->name('my');
             Route::get('{uuid}', [UPPTraining::class,'show'])->name('show');
+            Route::get('/my-training/list',[UPPTraining::class, 'myTrainingList'])->name('my-list');
+
+            // Daftar
+            Route::post('{uuid}/apply',[UPPTrainingApplication::class, 'applyTraining'])->name('apply');
+
+            // Batal Daftar
+            Route::delete('{uuid}/cancel-apply',[UPPTrainingApplication::class, 'cancelTrainingApplication'])->name('apply.cancel');
         });
 
         Route::get('/', [UPProfile::class,'index'])->name('profile');

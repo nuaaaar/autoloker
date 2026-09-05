@@ -7,7 +7,7 @@
 
         border-radius:22px;
 
-        padding: 12px 18px;
+        padding:12px 18px;
 
     }
 
@@ -36,7 +36,7 @@
 
         color:#ffffff;
 
-        font-size: 14px;
+        font-size:14px;
 
         font-weight:700;
 
@@ -50,7 +50,7 @@
 
         color:#8d9bb7;
 
-        font-size: 11px;
+        font-size:11px;
 
         line-height:1.4;
 
@@ -64,7 +64,7 @@
 
         gap:8px;
 
-        height: 32px;
+        height:32px;
 
         padding:0 22px;
 
@@ -76,7 +76,7 @@
 
         color:#111827;
 
-        font-size: 11px;
+        font-size:11px;
 
         font-weight:700;
 
@@ -97,6 +97,62 @@
         color:#111827;
 
     }
+
+
+    /*==================================
+    LIGHT MODE
+    ==================================*/
+
+    [data-bs-theme="light"] .profile-complete-card{
+
+        background:#fffbf2;
+
+        border-color:rgba(246,176,0,.35);
+
+    }
+
+    [data-bs-theme="light"] .profile-complete-icon{
+
+        background:rgba(246,176,0,.10);
+
+        border-color:rgba(246,176,0,.30);
+
+        color:#d18f00;
+
+    }
+
+    [data-bs-theme="light"] .profile-complete-title{
+
+        color:#1e293b;
+
+    }
+
+    [data-bs-theme="light"] .profile-complete-subtitle{
+
+        color:#64748b;
+
+    }
+
+    [data-bs-theme="light"] .btn-profile-complete-now{
+
+        background:#f6b000;
+
+        color:#111827;
+
+    }
+
+    [data-bs-theme="light"] .btn-profile-complete-now:hover{
+
+        background:#ffc21a;
+
+    }
+
+    [data-bs-theme="light"] .btn-profile-complete-now i{
+
+        color:#111827;
+
+    }
+
 
     @media(max-width:768px){
 

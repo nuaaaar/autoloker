@@ -880,6 +880,28 @@
 
                                         </a>
 
+
+                                        <!-- Mulai -->
+                                        <button
+                                            class="btn btn-outline-primary btn-sm me-1"
+                                            onclick="startTraining('${data.uuid}')"
+                                            title="Mulai Pelatihan">
+
+                                            <i class="fas fa-play"></i>
+
+                                        </button>
+
+
+                                        <!-- Batalkan -->
+                                        <button
+                                            class="btn btn-outline-danger btn-sm"
+                                            onclick="cancelTraining('${data.uuid}')"
+                                            title="Batalkan Pelatihan">
+
+                                            <i class="fas fa-times"></i>
+
+                                        </button>
+
                                     `;
 
                                 break;
@@ -924,19 +946,19 @@
 
                                 case "closed":
 
-                                    action += `
+                                    // action += `
 
-                                        <!-- Buka Kembali -->
-                                        <button
-                                            class="btn btn-outline-success btn-sm"
-                                            onclick="reopenTraining('${data.uuid}')"
-                                            title="Buka Kembali">
+                                    //     <!-- Buka Kembali -->
+                                    //     <button
+                                    //         class="btn btn-outline-success btn-sm"
+                                    //         onclick="reopenTraining('${data.uuid}')"
+                                    //         title="Buka Kembali">
 
-                                            <i class="fas fa-lock-open"></i>
+                                    //         <i class="fas fa-lock-open"></i>
 
-                                        </button>
+                                    //     </button>
 
-                                    `;
+                                    // `;
 
                                 break;
 
@@ -1030,5 +1052,233 @@
             });
             table.buttons().container().appendTo('.card-button');
         });
+
+        function startTraining(uuid)
+        {
+            Swal.fire({
+
+                title: 'Mulai Pelatihan?',
+
+                text: 'Apakah Anda yakin ingin memulai pelatihan ini?',
+
+                icon: 'question',
+
+                showCancelButton: true,
+
+                confirmButtonText: 'Ya, Mulai',
+
+                cancelButtonText: 'Batal',
+
+                reverseButtons: true
+
+            }).then((result) => {
+
+                if (!result.isConfirmed) {
+                    return;
+                }
+
+                $.ajax({
+
+                    url: `/dashboard-user/training/${uuid}/start`,
+
+                    type: 'POST',
+
+                    data: {
+                        _token: "{{ csrf_token() }}"
+                    },
+
+                    success: function(response) {
+
+                        Swal.fire({
+
+                            icon: 'success',
+
+                            title: 'Berhasil',
+
+                            text: response.message,
+
+                            timer: 1500,
+
+                            showConfirmButton: false
+
+                        }).then(() => {
+
+                            $('#dataTable').DataTable().ajax.reload(null, false);
+
+                        });
+
+                    },
+
+                    error: function(xhr) {
+
+                        Swal.fire({
+
+                            icon: 'error',
+
+                            title: 'Gagal',
+
+                            text: xhr.responseJSON?.message
+                                ?? 'Terjadi kesalahan saat memulai pelatihan.'
+
+                        });
+
+                    }
+
+                });
+
+            });
+        }
+
+        function cancelTraining(uuid)
+        {
+            Swal.fire({
+
+                title: 'Batalkan Pelatihan?',
+
+                text: 'Pelatihan yang dibatalkan tidak dapat berjalan.',
+
+                icon: 'warning',
+
+                showCancelButton: true,
+
+                confirmButtonText: 'Ya, Batalkan',
+
+                cancelButtonText: 'Tidak',
+
+                reverseButtons: true
+
+            }).then((result) => {
+
+                if (!result.isConfirmed) {
+                    return;
+                }
+
+                $.ajax({
+
+                    url: `/dashboard-user/training/${uuid}/cancel`,
+
+                    type: 'POST',
+
+                    data: {
+                        _token: "{{ csrf_token() }}"
+                    },
+
+                    success: function(response) {
+
+                        Swal.fire({
+
+                            icon: 'success',
+
+                            title: 'Berhasil',
+
+                            text: response.message,
+
+                            timer: 1500,
+
+                            showConfirmButton: false
+
+                        }).then(() => {
+
+                            $('#dataTable').DataTable().ajax.reload(null, false);
+
+                        });
+
+                    },
+
+                    error: function(xhr) {
+
+                        Swal.fire({
+
+                            icon: 'error',
+
+                            title: 'Gagal',
+
+                            text: xhr.responseJSON?.message
+                                ?? 'Terjadi kesalahan saat membatalkan pelatihan.'
+
+                        });
+
+                    }
+
+                });
+
+            });
+        }
+
+        function completeTraining(uuid)
+        {
+            Swal.fire({
+
+                title: 'Selesaikan Pelatihan?',
+
+                text: 'Apakah pelatihan ini sudah selesai dilaksanakan?',
+
+                icon: 'question',
+
+                showCancelButton: true,
+
+                confirmButtonText: 'Ya, Selesaikan',
+
+                cancelButtonText: 'Batal',
+
+                reverseButtons: true
+
+            }).then((result) => {
+
+                if (!result.isConfirmed) {
+                    return;
+                }
+
+                $.ajax({
+
+                    url: `/dashboard-user/training/${uuid}/close`,
+
+                    type: 'POST',
+
+                    data: {
+                        _token: "{{ csrf_token() }}"
+                    },
+
+                    success: function(response) {
+
+                        Swal.fire({
+
+                            icon: 'success',
+
+                            title: 'Berhasil',
+
+                            text: response.message,
+
+                            timer: 1500,
+
+                            showConfirmButton: false
+
+                        }).then(() => {
+
+                            $('#dataTable').DataTable().ajax.reload(null, false);
+
+                        });
+
+                    },
+
+                    error: function(xhr) {
+
+                        Swal.fire({
+
+                            icon: 'error',
+
+                            title: 'Gagal',
+
+                            text: xhr.responseJSON?.message
+                                ?? 'Terjadi kesalahan saat menyelesaikan pelatihan.'
+
+                        });
+
+                    }
+
+                });
+
+            });
+        }
     </script>
 @endsection

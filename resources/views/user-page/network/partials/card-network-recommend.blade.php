@@ -11,7 +11,7 @@
 
         align-items:flex-start;
 
-        margin-bottom: 25px;
+        margin-bottom:25px;
 
     }
 
@@ -19,7 +19,7 @@
 
         color:#F5F7FC;
 
-        font-size: 14px;
+        font-size:14px;
 
         font-weight:700;
 
@@ -31,7 +31,7 @@
 
         color:#8D98B3;
 
-        font-size: 10px;
+        font-size:10px;
 
         margin:0;
 
@@ -41,13 +41,14 @@
 
         color:#E8A401;
 
-        font-size: 11px;
+        font-size:11px;
 
         text-decoration:none;
 
         font-weight:600;
 
     }
+
 
     /*==================================
     MEMBER
@@ -59,7 +60,7 @@
 
         align-items:center;
 
-        gap: 16px;
+        gap:16px;
 
         padding:8px 0;
 
@@ -67,9 +68,9 @@
 
     .site-avatar{
 
-        width: 36px;
+        width:36px;
 
-        height: 36px;
+        height:36px;
 
         border-radius:50%;
 
@@ -81,7 +82,7 @@
 
         color:#fff;
 
-        font-size: 11px;
+        font-size:11px;
 
         font-weight:700;
 
@@ -95,7 +96,7 @@
 
         color:#B2BDD5;
 
-        font-size: 9px;
+        font-size:9px;
 
     }
 
@@ -109,15 +110,16 @@
 
     }
 
+
     /*==================================
     BUTTON
     ==================================*/
 
     .btn-connect-mini{
 
-        width: 95px;
+        width:95px;
 
-        height: 25px;
+        height:25px;
 
         border-radius:30px;
 
@@ -127,7 +129,7 @@
 
         color:#E8A401;
 
-        font-size: 10px;
+        font-size:10px;
 
         font-weight:700;
 
@@ -143,6 +145,7 @@
 
     }
 
+
     /*==================================
     DIVIDER
     ==================================*/
@@ -156,6 +159,70 @@
         /* margin:18px 0; */
 
     }
+
+
+    /*==================================
+    LIGHT MODE
+    ==================================*/
+
+    [data-bs-theme="light"] .network-card-header h5{
+
+        color:#1e293b;
+
+    }
+
+    [data-bs-theme="light"] .network-card-header p{
+
+        color:#64748b;
+
+    }
+
+    [data-bs-theme="light"] .network-card-header a{
+
+        color:#d18f00;
+
+    }
+
+    [data-bs-theme="light"] .site-member h6{
+
+        color:#1e293b;
+
+    }
+
+    [data-bs-theme="light"] .site-desc{
+
+        color:#64748b;
+
+    }
+
+    [data-bs-theme="light"] .site-mutual{
+
+        color:#94a3b8;
+
+    }
+
+    [data-bs-theme="light"] .btn-connect-mini{
+
+        border-color:#E8A401;
+
+        color:#d18f00;
+
+    }
+
+    [data-bs-theme="light"] .btn-connect-mini:hover{
+
+        background:#E8A401;
+
+        color:#111827;
+
+    }
+
+    [data-bs-theme="light"] .site-divider{
+
+        background:#e2e8f0;
+
+    }
+
 
     /*==================================
     RESPONSIVE
@@ -219,8 +286,10 @@
 
         }
 
-        .network-section-card-recommend {
-            margin-bottom: 80px !important;
+        .network-section-card-recommend{
+
+            margin-bottom:80px !important;
+
         }
 
     }

@@ -269,6 +269,84 @@
         }
 
     }
+
+
+    /* ===============================
+       LIGHT MODE
+    =================================*/
+
+    [data-bs-theme="light"] .autoloker-stepper{
+
+        background:#ffffff;
+
+        border-bottom-color:#e2e8f0;
+
+    }
+
+    [data-bs-theme="light"] .step-pill{
+
+        border-color:#dbe3ee;
+
+        color:#64748b;
+
+    }
+
+    [data-bs-theme="light"] .step-pill i{
+
+        color:#64748b;
+
+    }
+
+    [data-bs-theme="light"] .step-item.active .step-pill{
+
+        background:#f6b000;
+
+        color:#111827;
+
+        border-color:#f6b000;
+
+    }
+
+    [data-bs-theme="light"] .step-item.active i{
+
+        color:#111827;
+
+    }
+
+    [data-bs-theme="light"] .step-item.done .step-pill{
+
+        background:rgba(246,176,0,.10);
+
+        color:#d18f00;
+
+        border-color:rgba(246,176,0,.40);
+
+    }
+
+    [data-bs-theme="light"] .step-item.done i{
+
+        color:#d18f00;
+
+    }
+
+    [data-bs-theme="light"] .step-percent{
+
+        color:#d18f00;
+
+    }
+
+    [data-bs-theme="light"] .stepper-progress{
+
+        background:#e2e8f0;
+
+    }
+
+    [data-bs-theme="light"] .stepper-progress-bar{
+
+        background:#f6b000;
+
+    }
+
 </style>
 
 <div class="autoloker-stepper">

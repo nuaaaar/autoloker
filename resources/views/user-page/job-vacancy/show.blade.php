@@ -666,7 +666,220 @@
             }
 
         }
+
+
+        /* ========================================================= */
+        /* LIGHT MODE */
+        /* ========================================================= */
+
+        [data-bs-theme="light"] .job-back {
+            color: #64748b;
+        }
+
+        [data-bs-theme="light"] .job-back:hover {
+            color: #d18f00;
+        }
+
+
+        [data-bs-theme="light"] .job-detail-card {
+            background: #ffffff;
+            border-color: #e2e8f0;
+        }
+
+
+        [data-bs-theme="light"] .job-header-card {
+            border-top-color: #e8a401;
+        }
+
+
+        [data-bs-theme="light"] .job-company-icon {
+            background: #fff7df;
+            color: #d18f00;
+        }
+
+
+        [data-bs-theme="light"] .job-title-row h1 {
+            color: #1e293b;
+        }
+
+
+        [data-bs-theme="light"] .job-company-name {
+            color: #64748b;
+        }
+
+
+        [data-bs-theme="light"] .job-meta span {
+            color: #64748b;
+        }
+
+
+        [data-bs-theme="light"] .job-summary {
+            border-top-color: #e2e8f0;
+            border-bottom-color: #e2e8f0;
+        }
+
+
+        [data-bs-theme="light"] .summary-item {
+            border-right-color: #e2e8f0;
+        }
+
+
+        [data-bs-theme="light"] .summary-item span {
+            color: #64748b;
+        }
+
+
+        [data-bs-theme="light"] .summary-item strong {
+            color: #d18f00;
+        }
+
+
+        [data-bs-theme="light"] .summary-item small {
+            color: #94a3b8;
+        }
+
+
+        [data-bs-theme="light"] .btn-job-apply {
+            background: #e8a401;
+            color: #111827;
+        }
+
+
+        [data-bs-theme="light"] .btn-job-apply:hover {
+            background: #f3b21a;
+        }
+
+
+        [data-bs-theme="light"] .btn-job-save {
+            border-color: #cbd5e1;
+            color: #64748b;
+        }
+
+
+        [data-bs-theme="light"] .btn-job-save:hover {
+            border-color: #e8a401;
+            color: #d18f00;
+        }
+
+
+        [data-bs-theme="light"] .detail-title {
+            color: #64748b;
+        }
+
+
+        [data-bs-theme="light"] .detail-text {
+            color: #475569;
+        }
+
+
+        [data-bs-theme="light"] .job-tag {
+            border-color: #dbe3ee;
+            background: #f8fafc;
+            color: #64748b;
+        }
+
+
+        [data-bs-theme="light"] .tag-primary,
+        [data-bs-theme="light"] .tag-certificate {
+            color: #c98d00;
+            border-color: #e8c96d;
+            background: #fffaf0;
+        }
+
+
+        [data-bs-theme="light"] .certificate-note {
+            color: #64748b;
+        }
+
+
+        [data-bs-theme="light"] .detail-list-item {
+            color: #475569;
+        }
+
+
+        [data-bs-theme="light"] .number-icon,
+        [data-bs-theme="light"] .facility-icon {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+
+        [data-bs-theme="light"] .requirement-grid small {
+            color: #64748b;
+        }
+
+
+        [data-bs-theme="light"] .requirement-grid strong {
+            color: #334155;
+        }
+
+
+        [data-bs-theme="light"] .requirement-divider {
+            background: #e2e8f0;
+        }
+
+
+        [data-bs-theme="light"] .job-statistics > div {
+            border-right-color: #e2e8f0;
+        }
+
+
+        [data-bs-theme="light"] .job-statistics strong {
+            color: #1e293b;
+        }
+
+
+        [data-bs-theme="light"] .job-statistics span {
+            color: #64748b;
+        }
+
+
+        [data-bs-theme="light"] .company-detail-icon {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+
+        [data-bs-theme="light"] .company-detail strong {
+            color: #334155;
+        }
+
+
+        [data-bs-theme="light"] .company-detail span {
+            color: #64748b;
+        }
+
+
+        [data-bs-theme="light"] .company-location {
+            color: #64748b;
+        }
+
+
+        [data-bs-theme="light"] .job-apply-footer strong {
+            color: #334155;
+        }
+
+
+        [data-bs-theme="light"] .job-apply-footer span {
+            color: #64748b;
+        }
+
+
+        [data-bs-theme="light"] .job-apply-footer b {
+            color: #c98d00;
+        }
+
+
+        /* Mobile divider */
+        @media (max-width: 768px) {
+
+            [data-bs-theme="light"] .summary-item:last-child {
+                border-top-color: #e2e8f0;
+            }
+
+        }
     </style>
+
 
     <style>
         .network-breadcrumb{
@@ -703,7 +916,29 @@
         .network-breadcrumb .text-muted{
             color:#5b6985 !important;
         }
+
+
+        /* ============================= */
+        /* LIGHT MODE */
+        /* ============================= */
+
+        [data-bs-theme="light"] .network-breadcrumb a {
+            color: #64748b;
+        }
+
+        [data-bs-theme="light"] .network-breadcrumb a:hover {
+            color: #e8a401;
+        }
+
+        [data-bs-theme="light"] .network-breadcrumb .active {
+            color: #1e293b;
+        }
+
+        [data-bs-theme="light"] .network-breadcrumb .text-muted {
+            color: #94a3b8 !important;
+        }
     </style>
+
 
     <style>
         .btn-job-save.saved {

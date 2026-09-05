@@ -154,6 +154,62 @@
         }
 
     }
+
+
+    /* ===============================
+       LIGHT MODE
+    =================================*/
+
+    [data-bs-theme="light"] .profile-complete-card{
+
+        background:#fffbf2;
+
+        border-color:rgba(246,176,0,.35);
+
+    }
+
+    [data-bs-theme="light"] .profile-complete-icon{
+
+        background:rgba(246,176,0,.10);
+
+        border-color:rgba(246,176,0,.30);
+
+        color:#d18f00;
+
+    }
+
+    [data-bs-theme="light"] .profile-complete-title{
+
+        color:#1e293b;
+
+    }
+
+    [data-bs-theme="light"] .profile-complete-subtitle{
+
+        color:#64748b;
+
+    }
+
+    [data-bs-theme="light"] .btn-profile-complete-now{
+
+        background:#f6b000;
+
+        color:#111827;
+
+    }
+
+    [data-bs-theme="light"] .btn-profile-complete-now:hover{
+
+        background:#ffc21a;
+
+    }
+
+    [data-bs-theme="light"] .btn-profile-complete-now i{
+
+        color:#111827;
+
+    }
+
 </style>
 
 <div class="profile-complete-card mb-5">

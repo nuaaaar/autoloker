@@ -3,7 +3,7 @@
         display:flex;
         align-items:center;
         gap:2px;
-        font-size: 11px;
+        font-size:11px;
         font-weight:500;
         margin-bottom:28px;
     }
@@ -22,7 +22,7 @@
     }
 
     .network-breadcrumb a i{
-        font-size: 11px;
+        font-size:11px;
     }
 
     .network-breadcrumb .active{
@@ -33,6 +33,29 @@
     .network-breadcrumb .text-muted{
         color:#5b6985 !important;
     }
+
+
+    /* =========================================================
+       LIGHT MODE
+       ========================================================= */
+
+    [data-bs-theme="light"] .network-breadcrumb a{
+        color:#6b7280 !important;
+    }
+
+    [data-bs-theme="light"] .network-breadcrumb a:hover{
+        color:#e8a401 !important;
+    }
+
+    [data-bs-theme="light"] .network-breadcrumb .active{
+        color:#111827 !important;
+        font-weight:600;
+    }
+
+    [data-bs-theme="light"] .network-breadcrumb .text-muted{
+        color:#9ca3af !important;
+    }
+
 </style>
 
 <!-- Breadcrumb -->

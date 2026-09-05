@@ -514,7 +514,7 @@
         </div>
 
         <!-- Satpam Tidak Aktif -->
-        <div class="col-6 col-md-4">
+        {{-- <div class="col-6 col-md-4">
             <div class="dashboard-card danger">
                 <div class="card-icon">
                     <i class="fas fa-user-slash"></i>
@@ -532,7 +532,7 @@
                     <small>Pengguna nonaktif</small>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
         <!-- Perusahaan Aktif -->
         <div class="col-6 col-md-4">
@@ -554,7 +554,7 @@
         </div>
 
         <!-- Perusahaan Tidak Aktif -->
-        <div class="col-6 col-md-4">
+        {{-- <div class="col-6 col-md-4">
             <div class="dashboard-card warning">
                 <div class="card-icon">
                     <i class="fas fa-building-circle-xmark"></i>
@@ -570,7 +570,7 @@
                     <small>Perusahaan Klien</small>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
         <!-- BUJP Aktif -->
         <div class="col-6 col-md-4">
@@ -592,7 +592,7 @@
         </div>
 
         <!-- BUJP Tidak Aktif -->
-        <div class="col-6 col-md-4">
+        {{-- <div class="col-6 col-md-4">
             <div class="dashboard-card secondary">
                 <div class="card-icon">
                     <i class="fas fa-ban"></i>
@@ -608,7 +608,7 @@
                     <small>Badan Usaha</small>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
     </div>
 
@@ -724,7 +724,7 @@
 
             $.each(provinces, function(index, province){
 
-                let popup = `
+                const popup = `
                     <div class="province-popup">
 
                         <div class="popup-header">
@@ -737,10 +737,10 @@
                             <div class="popup-row popup-head">
                                 <div>User</div>
                                 <div class="text-success">Aktif</div>
-                                <div class="text-danger">Non Aktif</div>
                             </div>
 
                             <div class="popup-row">
+
                                 <div class="user-name">
                                     <i class="fas fa-user-shield text-primary"></i>
                                     Satpam
@@ -752,14 +752,10 @@
                                     </span>
                                 </div>
 
-                                <div>
-                                    <span class="badge badge-danger">
-                                        0
-                                    </span>
-                                </div>
                             </div>
 
                             <div class="popup-row">
+
                                 <div class="user-name">
                                     <i class="fas fa-building text-warning"></i>
                                     Perusahaan
@@ -771,14 +767,10 @@
                                     </span>
                                 </div>
 
-                                <div>
-                                    <span class="badge badge-danger">
-                                        0
-                                    </span>
-                                </div>
                             </div>
 
                             <div class="popup-row">
+
                                 <div class="user-name">
                                     <i class="fas fa-shield-halved text-info"></i>
                                     BUJP
@@ -790,11 +782,6 @@
                                     </span>
                                 </div>
 
-                                <div>
-                                    <span class="badge badge-danger">
-                                        1
-                                    </span>
-                                </div>
                             </div>
 
                         </div>
@@ -807,16 +794,6 @@
 
                                 <strong class="text-success">
                                     9
-                                </strong>
-
-                            </div>
-
-                            <div class="footer-item">
-
-                                <small>Total Non Aktif</small>
-
-                                <strong class="text-danger">
-                                    1
                                 </strong>
 
                             </div>

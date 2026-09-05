@@ -74,6 +74,50 @@
         font-style:italic;
 
     }
+
+
+    /* ===============================
+    LIGHT MODE
+    =================================*/
+
+    [data-bs-theme="light"] .recommend-card{
+
+        background:#ffffff;
+
+        border-color:#e2e8f0;
+
+    }
+
+    [data-bs-theme="light"] .recommend-card:hover{
+
+        border-color:#f6b000;
+
+    }
+
+    [data-bs-theme="light"] .recommend-avatar{
+
+        border-color:#e2e8f0;
+
+    }
+
+    [data-bs-theme="light"] .recommend-name{
+
+        color:#1e293b;
+
+    }
+
+    [data-bs-theme="light"] .recommend-position{
+
+        color:#64748b;
+
+    }
+
+    [data-bs-theme="light"] .recommend-text{
+
+        color:#64748b;
+
+    }
+
 </style>
 
 <div id="tab-rekomendasi" class="profile-content">

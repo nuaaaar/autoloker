@@ -1151,6 +1151,301 @@
         line-height:1.8;
 
     }
+
+
+    /* =========================================
+       LIGHT MODE
+    ========================================== */
+
+    [data-bs-theme="light"] .profile-badge-card{
+        background:#ffffff;
+        border-color:#e2e8f0;
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .profile-badge-header{
+        border-bottom-color:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .badge-icon{
+        background:#fffbf2;
+        border-color:rgba(232,164,0,.35);
+    }
+
+    [data-bs-theme="light"] .badge-title{
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .badge-subtitle{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .badge-counter{
+        background:#f1f5f9;
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .profile-badge-body{
+        background:#f8fafc;
+        border-color:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .badge-label{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .profile-badge-item{
+        background:#ffffff;
+        border-color:rgba(232,164,0,.35);
+        color:#334155;
+    }
+
+    [data-bs-theme="light"] .btn-add-badge{
+        border-color:#dbe3ee;
+        color:#94a3b8;
+    }
+
+    [data-bs-theme="light"] .profile-badge-footer{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .profile-badge-footer b{
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .btn-add-certificate{
+        background:#e8a401;
+        color:#111827;
+    }
+
+    [data-bs-theme="light"] .btn-add-certificate:hover{
+        background:#f2b600;
+    }
+
+    [data-bs-theme="light"] .certificate-wrapper{
+        background:#ffffff;
+        border-color:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .certificate-header{
+        border-bottom-color:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .certificate-heading{
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .certificate-subtitle{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .certificate-card{
+        border-bottom-color:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .certificate-card:hover{
+        background:#f8fafc;
+    }
+
+    [data-bs-theme="light"] .certificate-icon{
+        background:rgba(232,164,0,.10);
+        border-color:rgba(232,164,0,.35);
+        color:#d18f00;
+    }
+
+    [data-bs-theme="light"] .certificate-icon.empty{
+        background:transparent;
+        border-color:transparent;
+        color:#94a3b8;
+    }
+
+    [data-bs-theme="light"] .certificate-title{
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .certificate-instansi{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .certificate-badge{
+        background:rgba(232,164,0,.10);
+        border-color:rgba(232,164,0,.35);
+        color:#c98d00;
+    }
+
+    [data-bs-theme="light"] .certificate-number{
+        background:#f1f5f9;
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .certificate-date{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .certificate-category{
+        background:#eef2ff;
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .certificate-menu{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .certificate-menu:hover{
+        background:#f1f5f9;
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .certificate-dropdown{
+        background:#ffffff;
+        border-color:#e2e8f0;
+        box-shadow:0 12px 30px rgba(15,23,42,.12);
+    }
+
+    [data-bs-theme="light"] .certificate-dropdown .dropdown-item{
+        color:#475569;
+    }
+
+    [data-bs-theme="light"] .certificate-dropdown .dropdown-item:hover{
+        background:#f8fafc;
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .certificate-dropdown .dropdown-divider{
+        border-color:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .certificate-modal{
+        background:#ffffff;
+        border-color:#e2e8f0;
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .certificate-modal-header{
+        border-bottom-color:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .certificate-modal-icon{
+        border-color:rgba(211,155,25,.35);
+    }
+
+    [data-bs-theme="light"] .certificate-close{
+        background:#f1f5f9;
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .form-label-dark{
+        color:#334155;
+    }
+
+    [data-bs-theme="light"] .input-dark{
+        background:#f8fafc;
+        border-color:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .input-dark i{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .input-dark input{
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .input-dark input::placeholder{
+        color:#94a3b8;
+    }
+
+    [data-bs-theme="light"] .input-select-dark,
+    [data-bs-theme="light"] .input-date-dark{
+        background:#f8fafc;
+        border-color:#e2e8f0;
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .certificate-upload{
+        border-color:#cbd5e1;
+    }
+
+    [data-bs-theme="light"] .certificate-upload:hover{
+        border-color:#d39b19;
+    }
+
+    [data-bs-theme="light"] .certificate-upload i{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .upload-title{
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .upload-subtitle{
+        color:#94a3b8;
+    }
+
+    [data-bs-theme="light"] .certificate-modal-footer{
+        border-top-color:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .btn-cancel-certificate{
+        border-color:#dbe3ee;
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .btn-cancel-certificate:hover{
+        background:#f8fafc;
+        color:#334155;
+    }
+
+    [data-bs-theme="light"] .btn-save-certificate{
+        background:#e8a401;
+        color:#fff;
+    }
+
+    [data-bs-theme="light"] .delete-modal{
+        background:#ffffff;
+        border-color:#e2e8f0;
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .delete-modal-body{
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .delete-title{
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .delete-description{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .delete-modal-footer{
+        border-top-color:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .btn-delete-cancel{
+        border-color:#dbe3ee;
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .btn-delete-cancel:hover{
+        background:#f1f5f9;
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .certificate-empty{
+        background:#ffffff;
+        border-color:rgba(247,176,3,.30);
+    }
+
+    [data-bs-theme="light"] .certificate-empty-title{
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .certificate-empty-text{
+        color:#64748b;
+    }
+
 </style>
 
 <div class="certificate-wrapper">

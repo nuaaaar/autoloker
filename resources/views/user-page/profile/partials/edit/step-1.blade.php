@@ -102,6 +102,48 @@
         border:1px solid #2c3b57;
 
     }
+
+
+    /* ===============================
+       LIGHT MODE
+    =================================*/
+
+    [data-bs-theme="light"] .upload-photo{
+
+        background:#ffffff;
+
+        border-color:#cbd5e1;
+
+    }
+
+    [data-bs-theme="light"] .upload-photo:hover{
+
+        border-color:#f6b000;
+
+    }
+
+    [data-bs-theme="light"] .upload-placeholder{
+
+        color:#64748b;
+
+    }
+
+    [data-bs-theme="light"] .preview-overlay{
+
+        background:rgba(0,0,0,.45);
+
+        color:#fff;
+
+    }
+
+    [data-bs-theme="light"] .upload-file-info{
+
+        background:#f8fafc;
+
+        border-color:#e2e8f0;
+
+    }
+
 </style>
 
 <div class="wizard-page active" id="step1">

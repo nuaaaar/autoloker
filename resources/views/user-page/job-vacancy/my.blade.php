@@ -38,9 +38,32 @@
         .network-breadcrumb .text-muted{
             color:#5b6985 !important;
         }
+
+
+        /* =========================================================
+        LIGHT MODE - BREADCRUMB
+        ========================================================= */
+
+        [data-bs-theme="light"] .network-breadcrumb a {
+            color:#64748b;
+        }
+
+        [data-bs-theme="light"] .network-breadcrumb a:hover {
+            color:#e8a401;
+        }
+
+        [data-bs-theme="light"] .network-breadcrumb .active {
+            color:#1e293b;
+        }
+
+        [data-bs-theme="light"] .network-breadcrumb .text-muted {
+            color:#94a3b8 !important;
+        }
     </style>
-    
+
+
     <style>
+
         /* =========================================================
         HASIL LAMARAN
         ========================================================= */
@@ -52,7 +75,11 @@
             padding-bottom: 60px;
         }
 
-        /* HEADER */
+
+        /* =========================================================
+        HEADER
+        ========================================================= */
+
         .application-header {
             display: flex;
             align-items: flex-start;
@@ -95,6 +122,7 @@
             background: #f3b21a;
             color: #111827;
         }
+
 
         /* =========================================================
         STATISTIC
@@ -147,6 +175,7 @@
             color: #ff626c;
         }
 
+
         /* =========================================================
         FILTER
         ========================================================= */
@@ -190,6 +219,7 @@
             background: rgba(232, 164, 1, .06);
         }
 
+
         /* =========================================================
         APPLICATION CARD
         ========================================================= */
@@ -229,7 +259,11 @@
             gap: 12px;
         }
 
-        /* Avatar */
+
+        /* =========================================================
+        AVATAR
+        ========================================================= */
+
         .company-avatar {
             width: 38px;
             height: 38px;
@@ -257,7 +291,11 @@
             font-size: 16px;
         }
 
-        /* Content */
+
+        /* =========================================================
+        CONTENT
+        ========================================================= */
+
         .application-content {
             flex: 1;
             min-width: 0;
@@ -267,7 +305,7 @@
             display: flex;
             align-items: flex-start;
             justify-content: space-between;
-            gap: 10px;
+            gap: 15px;
         }
 
         .application-title {
@@ -326,7 +364,11 @@
             font-size: 11px;
         }
 
-        /* Status */
+
+        /* =========================================================
+        STATUS
+        ========================================================= */
+
         .application-status {
             flex-shrink: 0;
 
@@ -380,7 +422,11 @@
             background: rgba(130, 145, 170, .05);
         }
 
-        /* Bottom */
+
+        /* =========================================================
+        BOTTOM
+        ========================================================= */
+
         .application-bottom {
             display: flex;
             align-items: center;
@@ -421,18 +467,10 @@
             border-color: #e8a401;
         }
 
-        .application-title-row {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 15px;
-        }
 
-
-        .application-status {
-            flex-shrink: 0;
-        }
-
+        /* =========================================================
+        STATUS BADGE
+        ========================================================= */
 
         .status-badge {
             display: inline-flex;
@@ -449,65 +487,248 @@
             white-space: nowrap;
         }
 
-
-        /* =====================================================
-        APPLIED
-        ===================================================== */
-
         .status-applied {
-
             color: #ffb400;
-
             background: rgba(255, 180, 0, .10);
-
             border: 1px solid rgba(255, 180, 0, .30);
-
         }
-
-
-        /* =====================================================
-        REVIEWED
-        ===================================================== */
 
         .status-reviewed {
-
             color: #5aa9ff;
-
             background: rgba(90, 169, 255, .10);
-
             border: 1px solid rgba(90, 169, 255, .30);
-
         }
-
-
-        /* =====================================================
-        SHORTLISTED
-        ===================================================== */
 
         .status-shortlisted {
-
             color: #35d39a;
-
             background: rgba(53, 211, 154, .10);
-
             border: 1px solid rgba(53, 211, 154, .30);
-
         }
-
-
-        /* =====================================================
-        REJECTED
-        ===================================================== */
 
         .status-rejected {
-
             color: #ff6565;
-
             background: rgba(255, 101, 101, .10);
-
             border: 1px solid rgba(255, 101, 101, .30);
-
         }
+
+
+        /* =========================================================
+        LIGHT MODE
+        ========================================================= */
+
+        [data-bs-theme="light"] .application-header-left h2 {
+            color: #1e293b;
+        }
+
+        [data-bs-theme="light"] .application-header-left p {
+            color: #64748b;
+        }
+
+
+        /* =========================================================
+        STATISTIC - LIGHT
+        ========================================================= */
+
+        [data-bs-theme="light"] .application-stat {
+            background: #ffffff;
+            border-color: #e2e8f0;
+        }
+
+        [data-bs-theme="light"] .application-stat-number {
+            color: #1e293b;
+        }
+
+        [data-bs-theme="light"] .application-stat-label {
+            color: #64748b;
+        }
+
+        /* warna statistic tetap dipertahankan */
+
+        [data-bs-theme="light"] .stat-active .application-stat-number {
+            color: #3b82f6;
+        }
+
+        [data-bs-theme="light"] .stat-accepted .application-stat-number {
+            color: #00a878;
+        }
+
+        [data-bs-theme="light"] .stat-rejected .application-stat-number {
+            color: #ef4444;
+        }
+
+
+        /* =========================================================
+        FILTER - LIGHT
+        ========================================================= */
+
+        [data-bs-theme="light"] .application-filter button {
+            border-color: #e2e8f0;
+            color: #64748b;
+        }
+
+        [data-bs-theme="light"] .application-filter button:hover {
+            border-color: #e8a401;
+            color: #e8a401;
+        }
+
+        [data-bs-theme="light"] .application-filter button.active {
+            color: #d18f00;
+            border-color: #e8a401;
+            background: rgba(232, 164, 1, .08);
+        }
+
+
+        /* =========================================================
+        APPLICATION CARD - LIGHT
+        ========================================================= */
+
+        [data-bs-theme="light"] .application-card {
+            background: #ffffff;
+            border-color: #e2e8f0;
+        }
+
+        [data-bs-theme="light"] .application-card:hover {
+            border-color: #cbd5e1;
+        }
+
+        [data-bs-theme="light"] .application-card.accepted {
+            border-color: rgba(0, 168, 120, .40);
+        }
+
+        [data-bs-theme="light"] .application-card.interview {
+            border-color: rgba(232, 164, 1, .45);
+        }
+
+        [data-bs-theme="light"] .application-card.rejected {
+            border-color: rgba(239, 68, 68, .35);
+        }
+
+
+        /* =========================================================
+        AVATAR - LIGHT
+        ========================================================= */
+
+        [data-bs-theme="light"] .company-avatar {
+            background: #f1f5f9;
+            border-color: #e2e8f0;
+        }
+
+        [data-bs-theme="light"] .company-avatar i {
+            color: #94a3b8;
+        }
+
+
+        /* =========================================================
+        CONTENT - LIGHT
+        ========================================================= */
+
+        [data-bs-theme="light"] .application-title {
+            color: #1e293b;
+        }
+
+        [data-bs-theme="light"] .application-company {
+            color: #64748b;
+        }
+
+        [data-bs-theme="light"] .application-salary {
+            color: #334155;
+        }
+
+        [data-bs-theme="light"] .application-badge {
+            border-color: #e2e8f0;
+            color: #64748b;
+            background: #f8fafc;
+        }
+
+        [data-bs-theme="light"] .application-location {
+            color: #64748b;
+        }
+
+
+        /* =========================================================
+        STATUS - LIGHT
+        ========================================================= */
+
+        [data-bs-theme="light"] .status-accepted {
+            color: #059669;
+            border-color: rgba(5, 150, 105, .30);
+            background: rgba(5, 150, 105, .07);
+        }
+
+        [data-bs-theme="light"] .status-interview {
+            color: #c98d00;
+            border-color: rgba(232, 164, 1, .35);
+            background: rgba(232, 164, 1, .07);
+        }
+
+        [data-bs-theme="light"] .status-process {
+            color: #2563eb;
+            border-color: rgba(37, 99, 235, .30);
+            background: rgba(37, 99, 235, .07);
+        }
+
+        [data-bs-theme="light"] .status-review,
+        [data-bs-theme="light"] .status-cancelled {
+            color: #64748b;
+            border-color: #e2e8f0;
+            background: #f8fafc;
+        }
+
+        [data-bs-theme="light"] .status-rejected {
+            color: #dc2626;
+            border-color: rgba(220, 38, 38, .30);
+            background: rgba(220, 38, 38, .06);
+        }
+
+
+        /* =========================================================
+        BOTTOM - LIGHT
+        ========================================================= */
+
+        [data-bs-theme="light"] .application-date {
+            color: #94a3b8;
+        }
+
+        [data-bs-theme="light"] .btn-detail {
+            border-color: #e2e8f0;
+            color: #64748b;
+            background: transparent;
+        }
+
+        [data-bs-theme="light"] .btn-detail:hover {
+            color: #d18f00;
+            border-color: #e8a401;
+        }
+
+
+        /* =========================================================
+        STATUS BADGE - LIGHT
+        ========================================================= */
+
+        [data-bs-theme="light"] .status-applied {
+            color: #c98d00;
+            background: rgba(255, 180, 0, .10);
+            border-color: rgba(255, 180, 0, .30);
+        }
+
+        [data-bs-theme="light"] .status-reviewed {
+            color: #2563eb;
+            background: rgba(90, 169, 255, .10);
+            border-color: rgba(90, 169, 255, .30);
+        }
+
+        [data-bs-theme="light"] .status-shortlisted {
+            color: #059669;
+            background: rgba(53, 211, 154, .10);
+            border-color: rgba(53, 211, 154, .30);
+        }
+
+        [data-bs-theme="light"] .status-rejected {
+            color: #dc2626;
+            background: rgba(255, 101, 101, .10);
+            border-color: rgba(220, 38, 38, .30);
+        }
+
 
         /* =========================================================
         RESPONSIVE
@@ -545,6 +766,7 @@
             }
         }
 
+
         @media (max-width: 480px) {
 
             .application-header {
@@ -567,9 +789,12 @@
                 gap: 10px;
             }
         }
+
     </style>
 
+
     <style>
+
         /*
         |--------------------------------------------------------------------------
         | FIX METRONIC SCROLL
@@ -621,6 +846,7 @@
         body {
             min-height: 100%;
         }
+
     </style>
 @endsection
 

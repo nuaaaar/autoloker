@@ -788,6 +788,198 @@
         text-align:left;
 
     }
+
+
+    /* ===========================================
+    LIGHT MODE
+    =========================================== */
+
+    [data-bs-theme="light"] .assignment-item:not(:last-child)::before{
+        background:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .assignment-icon{
+        background:#f8fafc;
+        border-color:rgba(232,164,1,.35);
+    }
+
+    [data-bs-theme="light"] .assignment-icon.inactive{
+        background:transparent;
+        border-color:#dbe3ee;
+    }
+
+    [data-bs-theme="light"] .assignment-icon.inactive i{
+        color:#94a3b8 !important;
+    }
+
+    [data-bs-theme="light"] .assignment-position{
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .assignment-company{
+        color:#d18f00;
+    }
+
+    [data-bs-theme="light"] .assignment-meta{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .assignment-description{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .history-wrapper{
+        background:#ffffff;
+        border-color:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .history-header{
+        border-bottom-color:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .history-heading{
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .history-subtitle{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .history-card{
+        border-bottom-color:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .btn-add-history{
+        background:#e8a400;
+        color:#111;
+    }
+
+    [data-bs-theme="light"] .btn-add-history:hover{
+        background:#f2b600;
+    }
+
+    [data-bs-theme="light"] .input-dark textarea{
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .btn-save-history{
+        background:#e8a401;
+        color:#fff;
+    }
+
+    [data-bs-theme="light"] .history-icon{
+        background:rgba(232,164,0,.10);
+        border-color:rgba(232,164,0,.35);
+        color:#d18f00;
+    }
+
+    [data-bs-theme="light"] .history-icon.empty{
+        background:transparent;
+        border-color:transparent;
+        color:#94a3b8;
+    }
+
+    [data-bs-theme="light"] .history-title{
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .history-instansi{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .history-badge{
+        background:rgba(232,164,0,.10);
+        border-color:rgba(232,164,0,.35);
+        color:#c98d00;
+    }
+
+    [data-bs-theme="light"] .history-number{
+        background:#f1f5f9;
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .history-date{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .history-category{
+        background:#eef2ff;
+        color:#6478b8;
+    }
+
+    [data-bs-theme="light"] .history-menu{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .history-menu:hover{
+        background:#f1f5f9;
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .history-dropdown{
+        background:#ffffff;
+        border-color:#e2e8f0;
+        box-shadow:0 12px 30px rgba(15,23,42,.12);
+    }
+
+    [data-bs-theme="light"] .history-dropdown .dropdown-item{
+        color:#475569;
+    }
+
+    [data-bs-theme="light"] .history-dropdown .dropdown-item:hover{
+        background:#f1f5f9;
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .history-dropdown .dropdown-divider{
+        border-color:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .history-modal{
+        background:#ffffff;
+        border-color:#e2e8f0;
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .history-modal-header{
+        border-bottom-color:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .history-modal-icon{
+        border-color:rgba(211,155,25,.35);
+    }
+
+    [data-bs-theme="light"] .history-close{
+        background:#f1f5f9;
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .history-modal-footer{
+        border-top-color:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .btn-cancel-history{
+        border-color:#dbe3ee;
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .history-empty-icon{
+        background:rgba(246,176,0,.10);
+        border-color:rgba(246,176,0,.25);
+    }
+
+    [data-bs-theme="light"] .history-empty-title{
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .history-empty-text{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .history-empty-benefit{
+        color:#475569;
+    }
+
 </style>
 
 <div class="history-wrapper">

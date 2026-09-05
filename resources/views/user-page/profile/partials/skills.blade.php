@@ -13,6 +13,8 @@
 
         overflow:visible;
 
+        padding: 10px;
+
     }
 
     .skills-header{
@@ -92,6 +94,8 @@
         transition:.25s;
 
         cursor:default;
+
+        margin-bottom: 10px;
 
     }
 
@@ -192,6 +196,62 @@
         font-size:11px;
 
     }
+
+
+    /* ===========================================
+       LIGHT MODE
+    =========================================== */
+
+    [data-bs-theme="light"] .skills-wrapper{
+        background:#ffffff;
+        border-color:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .skills-header{
+        border-bottom-color:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .skills-heading{
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .skills-subtitle{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .skill-badge{
+        background:#f8fafc;
+        border-color:#e2e8f0;
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .skill-badge:hover{
+        background:#fffbf2;
+        border-color:rgba(246,176,0,.35);
+        color:#d18f00;
+    }
+
+    [data-bs-theme="light"] .skills-empty-icon{
+        background:rgba(246,176,0,.10);
+        border-color:rgba(246,176,0,.25);
+    }
+
+    [data-bs-theme="light"] .skills-empty-title{
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .skills-empty-text{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .skills-empty-list span{
+        background:#f8fafc;
+        border-color:#e2e8f0;
+        color:#64748b;
+    }
+
+    
+
 </style>
 
 @php

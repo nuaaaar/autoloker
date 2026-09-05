@@ -140,6 +140,55 @@
         }
 
     }
+
+
+    /*==================================
+      LIGHT MODE
+    ==================================*/
+
+    [data-bs-theme="light"] .certificate-card{
+        background:#ffffff;
+        border-color:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .certificate-title{
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .certificate-item{
+        background:#f8fafc;
+        border-color:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .certificate-item:hover{
+        border-color:rgba(232,164,1,.45);
+    }
+
+    [data-bs-theme="light"] .certificate-icon{
+        border-color:rgba(246,176,0,.35);
+    }
+
+    [data-bs-theme="light"] .certificate-name{
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .certificate-info{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .certificate-date{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .certificate-date span{
+        color:#d18f00;
+    }
+
+    [data-bs-theme="light"] .certificate-status.active{
+        color:#0b9f6a;
+        background:rgba(16,231,166,.08);
+        border-color:rgba(16,231,166,.30);
+    }
 </style>
 
 <div class="card certificate-card">

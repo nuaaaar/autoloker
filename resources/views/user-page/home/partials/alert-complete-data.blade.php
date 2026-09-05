@@ -1,4 +1,5 @@
 <style>
+
     .profile-alert-card{
 
         position:relative;
@@ -7,18 +8,19 @@
 
         border:1px solid rgba(255,75,90,.55);
 
-        border-radius: 14px;
+        border-radius:14px;
 
-        padding: 14px;
+        padding:14px;
 
     }
+
 
     .profile-alert-close{
 
         position:absolute;
 
-        right: 10px;
-        top: 10px;
+        right:10px;
+        top:10px;
 
         background:none;
         border:none;
@@ -29,16 +31,18 @@
 
     }
 
+
     .profile-alert-close:hover{
 
         color:#ff6d78;
 
     }
 
+
     .profile-alert-icon{
 
-        width: 68px;
-        height: 68px;
+        width:68px;
+        height:68px;
 
         min-width:68px;
 
@@ -49,6 +53,7 @@
         border:1px solid rgba(255,70,85,.35);
 
         display:flex;
+
         align-items:center;
         justify-content:center;
 
@@ -56,19 +61,21 @@
 
     }
 
+
     .profile-alert-title{
 
         color:#ff737c;
 
-        font-size: 14px;
+        font-size:14px;
 
         font-weight:700;
 
     }
 
+
     .profile-alert-badge{
 
-        padding: 3px 8px;
+        padding:3px 8px;
 
         border-radius:999px;
 
@@ -80,29 +87,30 @@
 
         font-weight:700;
 
-        font-size: 10px;
+        font-size:10px;
 
     }
+
 
     .profile-alert-desc{
 
         color:#f0a1a7;
 
-        font-size: 8px;
-
-        /* line-height:1.8; */
+        font-size:8px;
 
     }
 
+
     .profile-alert-progress{
 
-        height: 6px;
+        height:6px;
 
         background:#58242d;
 
         border-radius:30px;
 
     }
+
 
     .profile-alert-progress .progress-bar{
 
@@ -111,6 +119,7 @@
         border-radius:30px;
 
     }
+
 
     .profile-alert-detail{
 
@@ -124,11 +133,12 @@
 
         text-decoration:none;
 
-        font-size: 10px;
+        font-size:10px;
 
         font-weight:700;
 
     }
+
 
     .profile-alert-detail:hover{
 
@@ -136,37 +146,40 @@
 
     }
 
+
     .profile-alert-list{
 
         display:none;
 
-        margin-top: 8px;
+        margin-top:8px;
 
     }
+
 
     .profile-alert-item{
 
         color:#efb1b5;
 
-        margin-bottom: 8px;
+        margin-bottom:8px;
 
-        font-size: 10px;
+        font-size:10px;
 
     }
 
+
     .btn-profile-complete{
 
-        height: 32px;
+        height:32px;
 
         border:none;
 
-        border-radius: 12px;
+        border-radius:12px;
 
         background:#ff2f41;
 
         color:#fff;
 
-        font-size: 11px;
+        font-size:11px;
 
         font-weight:700;
 
@@ -174,17 +187,19 @@
 
     }
 
+
     .btn-profile-complete:hover{
 
         background:#ff4455;
 
     }
 
+
     .btn-upload-cert{
 
-        height: 32px;
+        height:32px;
 
-        border-radius: 12px;
+        border-radius:12px;
 
         background:transparent;
 
@@ -200,6 +215,7 @@
 
     }
 
+
     .btn-upload-cert:hover{
 
         background:#ff2f41;
@@ -208,19 +224,192 @@
 
     }
 
+
+
+    /* =====================================================
+       LIGHT MODE
+    ===================================================== */
+
+    [data-bs-theme="light"] .profile-alert-card{
+
+        background:
+            linear-gradient(
+                145deg,
+                #fff7f8 0%,
+                #fff1f3 100%
+            );
+
+        border-color:rgba(220,38,55,.25);
+
+        box-shadow:
+            0 10px 30px rgba(220,38,55,.06);
+
+    }
+
+
+    /* Close */
+
+    [data-bs-theme="light"] .profile-alert-close{
+
+        color:#c2414d;
+
+    }
+
+
+    [data-bs-theme="light"] .profile-alert-close:hover{
+
+        color:#e11d2e;
+
+    }
+
+
+    /* Icon */
+
+    [data-bs-theme="light"] .profile-alert-icon{
+
+        background:rgba(255,70,85,.07);
+
+        border-color:rgba(220,38,55,.22);
+
+        color:#e54855;
+
+    }
+
+
+    /* Title */
+
+    [data-bs-theme="light"] .profile-alert-title{
+
+        color:#c92f3d;
+
+    }
+
+
+    /* Badge */
+
+    [data-bs-theme="light"] .profile-alert-badge{
+
+        border-color:rgba(220,38,55,.25);
+
+        background:rgba(220,38,55,.06);
+
+        color:#c92f3d;
+
+    }
+
+
+    /* Description */
+
+    [data-bs-theme="light"] .profile-alert-desc{
+
+        color:#8f4b53;
+
+    }
+
+
+    /* Progress */
+
+    [data-bs-theme="light"] .profile-alert-progress{
+
+        background:#f4d7da;
+
+    }
+
+
+    [data-bs-theme="light"] .profile-alert-progress .progress-bar{
+
+        background:#ef4b58;
+
+    }
+
+
+    /* Detail */
+
+    [data-bs-theme="light"] .profile-alert-detail{
+
+        color:#d33b48;
+
+    }
+
+
+    [data-bs-theme="light"] .profile-alert-detail:hover{
+
+        color:#e11d2e;
+
+    }
+
+
+    /* List */
+
+    [data-bs-theme="light"] .profile-alert-item{
+
+        color:#8f4b53;
+
+    }
+
+
+    /* Complete button */
+
+    [data-bs-theme="light"] .btn-profile-complete{
+
+        background:#e93647;
+
+        color:#fff;
+
+    }
+
+
+    [data-bs-theme="light"] .btn-profile-complete:hover{
+
+        background:#d92739;
+
+    }
+
+
+    /* Upload certificate */
+
+    [data-bs-theme="light"] .btn-upload-cert{
+
+        background:rgba(255,255,255,.5);
+
+        border-color:rgba(220,38,55,.25);
+
+        color:#d33b48;
+
+    }
+
+
+    [data-bs-theme="light"] .btn-upload-cert:hover{
+
+        background:#e93647;
+
+        border-color:#e93647;
+
+        color:#fff;
+
+    }
+
+
+
+    /* =====================================================
+       RESPONSIVE
+    ===================================================== */
+
     @media(max-width:768px){
 
         .profile-alert-card{
 
-            padding: 20px;
+            padding:20px;
 
         }
+
 
         .profile-alert-title{
 
-            font-size: 14px;
+            font-size:14px;
 
         }
+
 
         .profile-alert-desc{
 
@@ -228,24 +417,28 @@
 
         }
 
+
         .btn-profile-complete,
         .btn-upload-cert{
 
-            height: 42px;
+            height:42px;
 
-            font-size: 11px;
+            font-size:11px;
 
         }
 
+
         .profile-alert-icon{
 
-            width: 56px;
+            width:56px;
             height:56px;
+
             min-width:56px;
 
         }
 
     }
+
 </style>
 
 <div class="profile-alert-card mb-5">

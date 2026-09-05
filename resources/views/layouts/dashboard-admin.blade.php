@@ -424,6 +424,12 @@
                                                     </span>
                                                     <span class="menu-title">Bidang Usaha</span>
                                                 </a>
+                                                <a class="menu-link {{ Route::is('dashboard-admin.master.subscription.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.master.subscription.index') }}">
+                                                    <span class="menu-bullet">
+                                                        <span class="bullet bullet-dot"></span>
+                                                    </span>
+                                                    <span class="menu-title">Subscription</span>
+                                                </a>
                                                 <!--end:Menu link-->
                                             </div>
                                             <!--end:Menu item-->

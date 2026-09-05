@@ -518,6 +518,7 @@
         }
     </style>
 
+
     <style>
         /* Select */
 
@@ -580,6 +581,7 @@
 
         }
     </style>
+
 
     <style>
         /* TOP */
@@ -792,58 +794,75 @@
 
         @media(max-width:768px){
 
-        .skill-top{
+            .skill-top{
 
-        flex-direction:column;
+            flex-direction:column;
 
-        align-items:flex-start;
+            align-items:flex-start;
 
-        gap:10px;
+            gap:10px;
 
-        }
+            }
 
-        .skill-chip{
+            .skill-chip{
 
-        width:100%;
+            width:100%;
 
-        text-align:center;
+            text-align:center;
 
-        }
+            }
 
-        .btn-back-step{
+            .btn-back-step{
 
-        width:120px;
+            width:120px;
 
-        }
+            }
 
         }
     </style>
 
+
     <style>
         .selected-count{
+
             color:#95a2bf;
+
             font-size: 12px;
+
         }
 
         .selected-count span{
+
             color:#f6b000;
+
             font-weight:700;
+
         }
 
         .clear-placement{
+
             color:#ff6464;
+
             font-weight:600;
+
             text-decoration:none;
+
         }
 
         .clear-placement:hover{
+
             color:#ff8b8b;
+
         }
 
         .placement-list{
+
             display:flex;
+
             flex-wrap:wrap;
+
             gap:14px;
+
         }
 
         .placement-item{
@@ -865,6 +884,7 @@
             font-weight:600;
 
             font-size: 11px;
+
         }
 
         .placement-item:hover{
@@ -960,6 +980,7 @@
             font-weight:600;
 
             font-size: 11px;
+
         }
 
         .placement-site-item:hover{
@@ -977,7 +998,263 @@
             border-color:#f6b000;
 
         }
+
+
+        /* ===========================================
+        LIGHT MODE
+        =========================================== */
+
+        [data-bs-theme="light"] .header-icon{
+            background:#f8fafc;
+            border-color:#e2e8f0;
+        }
+
+        [data-bs-theme="light"] .header-icon i{
+            color:#d18f00;
+        }
+
+        [data-bs-theme="light"] .step-label{
+            color:#64748b;
+        }
+
+        [data-bs-theme="light"] .step-title{
+            color:#1e293b;
+        }
+
+        [data-bs-theme="light"] .step-description{
+            color:#64748b;
+        }
+
+        [data-bs-theme="light"] .upload-card{
+            background:#ffffff;
+            border-color:#e2e8f0;
+        }
+
+        [data-bs-theme="light"] .upload-photo{
+            border-color:#cbd5e1;
+            color:#64748b;
+        }
+
+        [data-bs-theme="light"] .upload-photo:hover{
+            border-color:#f6b000;
+            color:#d18f00;
+        }
+
+        [data-bs-theme="light"] .upload-info{
+            color:#64748b;
+        }
+
+        [data-bs-theme="light"] .auto-input{
+            background:#f8fafc;
+            border-color:#dbe3ee;
+            color:#1e293b;
+        }
+
+        [data-bs-theme="light"] .auto-input:focus{
+            background:#ffffff;
+            border-color:#f6b000;
+            color:#1e293b;
+        }
+
+        [data-bs-theme="light"] .auto-input::placeholder{
+            color:#94a3b8;
+        }
+
+        [data-bs-theme="light"] .input-icon i{
+            color:#64748b;
+        }
+
+        [data-bs-theme="light"] .gender-btn{
+            border-color:#dbe3ee;
+            color:#64748b;
+            background:transparent;
+        }
+
+        [data-bs-theme="light"] .gender-btn.active{
+            background:#f6b000;
+            color:#111;
+            border-color:#f6b000;
+        }
+
+        [data-bs-theme="light"] .btn-next-step{
+            background:#f6b000;
+            color:#111;
+        }
+
+        /* SELECT */
+
+        [data-bs-theme="light"] .auto-input.form-select{
+            background:#f8fafc;
+            border-color:#dbe3ee;
+            color:#1e293b;
+        }
+
+        [data-bs-theme="light"] .auto-input.form-select:focus{
+            background:#ffffff;
+            border-color:#f6b000;
+            color:#1e293b;
+        }
+
+        [data-bs-theme="light"] .auto-input option{
+            background:#ffffff;
+            color:#1e293b;
+        }
+
+        /* SKILL TOP */
+
+        [data-bs-theme="light"] .skill-top{
+            color:#64748b;
+        }
+
+        [data-bs-theme="light"] .skill-top span{
+            color:#d18f00;
+        }
+
+        [data-bs-theme="light"] .skill-top a{
+            color:#e0445d;
+        }
+
+        /* SKILL CHIP */
+
+        [data-bs-theme="light"] .skill-chip{
+            background:#f8fafc;
+            border-color:#e2e8f0;
+            color:#64748b;
+        }
+
+        [data-bs-theme="light"] .skill-chip:hover{
+            border-color:#f6b000;
+            background:#fffbf2;
+        }
+
+        [data-bs-theme="light"] .skill-chip.active{
+            background:#f6b000;
+            color:#111;
+            border-color:#f6b000;
+        }
+
+        /* SELECTED SKILL */
+
+        [data-bs-theme="light"] .selected-card{
+            background:#ffffff;
+            border-color:rgba(232,164,1,.45);
+        }
+
+        [data-bs-theme="light"] .selected-card h5{
+            color:#d18f00;
+        }
+
+        [data-bs-theme="light"] .selected-item{
+            background:#fffbf2;
+            color:#c98d00;
+            border:1px solid rgba(232,164,1,.30);
+        }
+
+        [data-bs-theme="light"] .selected-item:hover{
+            background:#fff4d6;
+        }
+
+        /* NOTE */
+
+        [data-bs-theme="light"] .skill-note{
+            background:#ffffff;
+            border-color:#e2e8f0;
+        }
+
+        [data-bs-theme="light"] .skill-note h5{
+            color:#1e293b;
+        }
+
+        [data-bs-theme="light"] .skill-note p{
+            color:#64748b;
+        }
+
+        /* FOOTER */
+
+        [data-bs-theme="light"] .btn-back-step{
+            border-color:#dbe3ee;
+            color:#64748b;
+        }
+
+        [data-bs-theme="light"] .btn-back-step:hover{
+            border-color:#f6b000;
+            color:#d18f00;
+        }
+
+        /* SELECTED COUNT */
+
+        [data-bs-theme="light"] .selected-count{
+            color:#64748b;
+        }
+
+        [data-bs-theme="light"] .selected-count span{
+            color:#d18f00;
+        }
+
+        [data-bs-theme="light"] .clear-placement{
+            color:#e0445d;
+        }
+
+        [data-bs-theme="light"] .clear-placement:hover{
+            color:#c92f48;
+        }
+
+        /* PLACEMENT */
+
+        [data-bs-theme="light"] .placement-item{
+            background:#f8fafc;
+            border-color:#e2e8f0;
+            color:#64748b;
+        }
+
+        [data-bs-theme="light"] .placement-item:hover{
+            background:#f1f5f9;
+        }
+
+        [data-bs-theme="light"] .placement-item.active{
+            background:#f6b000;
+            color:#111;
+            border-color:#f6b000;
+        }
+
+        [data-bs-theme="light"] .placement-selected-box{
+            background:#ffffff;
+            border-color:rgba(232,164,1,.45);
+        }
+
+        [data-bs-theme="light"] .placement-selected-box h5{
+            color:#d18f00;
+        }
+
+        [data-bs-theme="light"] .selected-placement{
+            background:#fffbf2;
+            color:#c98d00;
+            border:1px solid rgba(232,164,1,.30);
+        }
+
+        [data-bs-theme="light"] .placement-preview{
+            background:#ffffff;
+            border-color:#e2e8f0;
+        }
+
+        [data-bs-theme="light"] .placement-site-item{
+            background:#f8fafc;
+            border-color:#e2e8f0;
+            color:#64748b;
+        }
+
+        [data-bs-theme="light"] .placement-site-item:hover{
+            background:#f1f5f9;
+        }
+
+        [data-bs-theme="light"] .placement-site-item.active{
+            background:#f6b000;
+            color:#111;
+            border-color:#f6b000;
+        }
+
     </style>
+
     <div class="container-xxl">
 
         @include('user-page.profile.partials.edit.breadcrumb')

@@ -9,12 +9,286 @@ use Laravolt\Indonesia\Models\Village;
 use Laravolt\Indonesia\Models\City;
 use App\Http\Resources\MasterResource;
 use App\Http\Controllers\Controller;
+use App\Models\TrainingApplication;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\Training;
+use Carbon\Carbon;
 use Auth;
 
 class TrainingController extends Controller
 {
+    public function statistic()
+    {
+        /*
+        |--------------------------------------------------------------------------
+        | GET BUJP
+        |--------------------------------------------------------------------------
+        */
+
+        $user = Auth::user();
+
+        $bujp = $user->user_bujp->bujp;
+
+        $bujpId = $bujp->id;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | BASE QUERY TRAINING
+        |--------------------------------------------------------------------------
+        */
+
+        $trainingQuery = Training::query()
+            ->where('b_u_j_p_id', $bujpId);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | STATISTIK TRAINING
+        |--------------------------------------------------------------------------
+        */
+
+        $totalTrainings = (clone $trainingQuery)
+            ->count();
+
+        $totalPublished = (clone $trainingQuery)
+            ->where('status', 'published')
+            ->count();
+
+        $totalDraft = (clone $trainingQuery)
+            ->where('status', 'draft')
+            ->count();
+
+        $totalClosed = (clone $trainingQuery)
+            ->where('status', 'closed')
+            ->count();
+
+        $totalRejected = (clone $trainingQuery)
+            ->where('status', 'rejected')
+            ->count();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | ID TRAINING
+        |--------------------------------------------------------------------------
+        */
+
+        $trainingIds = (clone $trainingQuery)
+            ->pluck('id');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | BASE QUERY PENDAFTAR
+        |--------------------------------------------------------------------------
+        */
+
+        $registrationQuery = TrainingApplication::query()
+            ->whereIn('training_id', $trainingIds);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | TOTAL PENDAFTAR
+        |--------------------------------------------------------------------------
+        */
+
+        $totalRegistrations = (clone $registrationQuery)
+            ->count();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | PESERTA DITERIMA
+        |--------------------------------------------------------------------------
+        */
+
+        $totalAccepted = (clone $registrationQuery)
+            ->where('status', 'approved')
+            ->count();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | PESERTA DITOLAK
+        |--------------------------------------------------------------------------
+        */
+
+        $totalRejectedRegistrations = (clone $registrationQuery)
+            ->where('status', 'rejected')
+            ->count();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | STATUS PESERTA
+        |--------------------------------------------------------------------------
+        */
+
+        $pendingRegistrations = (clone $registrationQuery)
+            ->where('status', 'pending')
+            ->count();
+
+        $approvedRegistrations = (clone $registrationQuery)
+            ->where('status', 'approved')
+            ->count();
+
+        $rejectedRegistrations = (clone $registrationQuery)
+            ->where('status', 'rejected')
+            ->count();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | DATA DOUGHNUT CHART
+        |--------------------------------------------------------------------------
+        */
+
+        $statusChart = [
+            [
+                'label' => 'Pending',
+                'total' => $pendingRegistrations,
+            ],
+            [
+                'label' => 'Approved',
+                'total' => $approvedRegistrations,
+            ],
+            [
+                'label' => 'Rejected',
+                'total' => $rejectedRegistrations,
+            ],
+        ];
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | TREND 6 BULAN
+        |--------------------------------------------------------------------------
+        */
+
+        $months = [];
+
+        for ($i = 5; $i >= 0; $i--) {
+
+            $date = Carbon::now()
+                ->subMonths($i);
+
+            $months[] = [
+                'key' => $date->format('Y-m'),
+                'label' => $date->translatedFormat('M Y'),
+            ];
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | TREND TRAINING
+        |--------------------------------------------------------------------------
+        */
+
+        $trainingTrend = [];
+
+        foreach ($months as $month) {
+
+            $date = Carbon::createFromFormat(
+                'Y-m',
+                $month['key']
+            );
+
+            $trainingTrend[] = [
+                'label' => $month['label'],
+
+                'total' => (clone $trainingQuery)
+                    ->whereYear(
+                        'created_at',
+                        $date->year
+                    )
+                    ->whereMonth(
+                        'created_at',
+                        $date->month
+                    )
+                    ->count(),
+            ];
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | TREND PENDAFTAR
+        |--------------------------------------------------------------------------
+        */
+
+        $registrationTrend = [];
+
+        foreach ($months as $month) {
+
+            $date = Carbon::createFromFormat(
+                'Y-m',
+                $month['key']
+            );
+
+            $registrationTrend[] = [
+                'label' => $month['label'],
+
+                'total' => (clone $registrationQuery)
+                    ->whereYear(
+                        'created_at',
+                        $date->year
+                    )
+                    ->whereMonth(
+                        'created_at',
+                        $date->month
+                    )
+                    ->count(),
+            ];
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | TOP 5 TRAINING
+        |--------------------------------------------------------------------------
+        */
+
+        $topTrainings = (clone $trainingQuery)
+            ->withCount('applications')
+            ->orderByDesc('applications_count')
+            ->limit(5)
+            ->get([
+                'id',
+                'title',
+                'status',
+            ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | RETURN VIEW
+        |--------------------------------------------------------------------------
+        */
+
+        return view(
+            'dashboard-user.training.statistic',
+            compact(
+                'bujp',
+                'totalTrainings',
+                'totalPublished',
+                'totalDraft',
+                'totalClosed',
+                'totalRejected',
+                'totalRegistrations',
+                'totalAccepted',
+                'totalRejectedRegistrations',
+                'trainingTrend',
+                'registrationTrend',
+                'statusChart',
+                'topTrainings'
+            )
+        );
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -1065,6 +1339,159 @@ class TrainingController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Data berhasil dihapus.'
+        ]);
+    }
+
+    public function start($uuid)
+    {
+        $data = Training::where('uuid', $uuid)->firstOrFail();
+
+        /*
+        |--------------------------------------------------------------------------
+        | HANYA PUBLISHED YANG BISA START
+        |--------------------------------------------------------------------------
+        */
+
+        if ($data->status !== 'published') {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Pelatihan hanya dapat dimulai jika statusnya published.'
+            ], 422);
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CEK PESERTA APPROVED
+        |--------------------------------------------------------------------------
+        */
+
+        $totalApproved = TrainingApplication::where(
+            'training_id',
+            $data->id
+        )
+        ->where('status', 'approved')
+        ->count();
+
+
+        if ($totalApproved <= 0) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Pelatihan belum dapat dimulai karena belum ada peserta yang disetujui.'
+            ], 422);
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | START TRAINING
+        |--------------------------------------------------------------------------
+        */
+
+        $data->update([
+            'status' => 'running'
+        ]);
+
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pelatihan berhasil dimulai.'
+        ]);
+    }
+
+    public function cancel($uuid)
+    {
+        $data = Training::where('uuid', $uuid)->firstOrFail();
+
+        /*
+        |--------------------------------------------------------------------------
+        | HANYA PUBLISHED YANG BISA DI-CANCEL
+        |--------------------------------------------------------------------------
+        */
+
+        if ($data->status !== 'published') {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Pelatihan hanya dapat dibatalkan jika statusnya published.'
+            ], 422);
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CEK PESERTA
+        |--------------------------------------------------------------------------
+        |
+        | Jika masih ada pendaftar dengan status:
+        | - pending
+        | - approved
+        |
+        | maka pelatihan tidak boleh dibatalkan.
+        |
+        */
+
+        $hasApplication = TrainingApplication::where(
+            'training_id',
+            $data->id
+        )
+        ->whereIn('status', [
+            'pending',
+            'approved'
+        ])
+        ->exists();
+
+
+        if ($hasApplication) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Pelatihan tidak dapat dibatalkan karena sudah terdapat peserta yang mendaftar.'
+            ], 422);
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CANCEL TRAINING
+        |--------------------------------------------------------------------------
+        */
+
+        $data->update([
+            'status' => 'cancelled'
+        ]);
+
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pelatihan berhasil dibatalkan.'
+        ]);
+    }
+
+    public function close($uuid)
+    {
+        $data = Training::where('uuid', $uuid)->firstOrFail();
+
+        if ($data->status !== 'running') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pelatihan hanya dapat diselesaikan jika sedang berjalan.'
+            ], 422);
+        }
+
+        $data->update([
+            'status' => 'closed'
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pelatihan berhasil diselesaikan.'
         ]);
     }
 }

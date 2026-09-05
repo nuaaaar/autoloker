@@ -133,6 +133,40 @@
         }
 
     }
+
+
+    /* ===========================================
+    LIGHT MODE
+    =========================================== */
+
+    [data-bs-theme="light"] .assignment-item:not(:last-child)::before{
+        background:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .assignment-icon{
+        border-color:rgba(232,164,1,.35);
+        background:#f8fafc;
+    }
+
+    [data-bs-theme="light"] .assignment-position{
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .assignment-company{
+        color:#d18f00;
+    }
+
+    [data-bs-theme="light"] .assignment-meta{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .assignment-description{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .profile-section-title{
+        color:#1e293b;
+    }
 </style>
 
 <div class="card profile-section-card">

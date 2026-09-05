@@ -333,6 +333,7 @@
         }
     </style>
 
+
     <style>
         .network-breadcrumb{
             display:flex;
@@ -369,6 +370,7 @@
             color:#5b6985 !important;
         }
     </style>
+
 
     <style>
         /* =========================================================
@@ -523,6 +525,7 @@
         }
     </style>
 
+
     <style>
         /*
         |--------------------------------------------------------------------------
@@ -577,11 +580,213 @@
         }
     </style>
 
+
     <style>
         .bookmark-meta-break {
             flex-basis: 100%;
             height: 0;
         }
+    </style>
+
+
+    <style>
+        /* ===========================================
+        LIGHT MODE
+        =========================================== */
+
+        [data-bs-theme="light"] .bookmark-page{
+            color:#334155;
+        }
+
+        /* Breadcrumb */
+
+        [data-bs-theme="light"] .bookmark-breadcrumb{
+            color:#64748b;
+        }
+
+        [data-bs-theme="light"] .bookmark-breadcrumb .active{
+            color:#1e293b;
+        }
+
+        /* Header */
+
+        [data-bs-theme="light"] .bookmark-title{
+            color:#1e293b;
+        }
+
+        [data-bs-theme="light"] .bookmark-subtitle{
+            color:#64748b;
+        }
+
+        /* Search */
+
+        [data-bs-theme="light"] .bookmark-search{
+            border-color:#dbe3ee;
+            color:#64748b;
+            background:#ffffff;
+        }
+
+        [data-bs-theme="light"] .bookmark-search i{
+            color:#64748b;
+        }
+
+        /* Urgent */
+
+        [data-bs-theme="light"] .urgent-summary{
+            border-color:rgba(232,164,1,.40);
+            background:rgba(246,176,0,.10);
+            color:#c98d00;
+        }
+
+        /* Toolbar */
+
+        [data-bs-theme="light"] .bookmark-toolbar{
+            color:#64748b;
+        }
+
+        [data-bs-theme="light"] .bookmark-sort > span:first-child{
+            color:#64748b;
+        }
+
+        [data-bs-theme="light"] .bookmark-sort-item{
+            color:#64748b;
+        }
+
+        [data-bs-theme="light"] .bookmark-sort-item:hover{
+            color:#d18f00;
+            background:rgba(232,164,1,.06);
+            border-color:rgba(232,164,1,.18);
+        }
+
+        [data-bs-theme="light"] .bookmark-sort-item.active{
+            color:#d18f00;
+            background:rgba(232,164,1,.08);
+            border-color:rgba(232,164,1,.40);
+            box-shadow:0 0 0 1px rgba(232,164,1,.03);
+        }
+
+        [data-bs-theme="light"] .bookmark-sort-item.active:hover{
+            color:#b77900;
+            background:rgba(232,164,1,.12);
+            border-color:rgba(232,164,1,.50);
+        }
+
+        [data-bs-theme="light"] .bookmark-sort-item:focus-visible{
+            outline-color:rgba(232,164,1,.40);
+        }
+
+        /* Bookmark Card */
+
+        [data-bs-theme="light"] .bookmark-card{
+            background:#ffffff;
+            border-color:#e2e8f0;
+        }
+
+        [data-bs-theme="light"] .bookmark-card:hover{
+            border-color:#cbd5e1;
+        }
+
+        [data-bs-theme="light"] .bookmark-card.urgent{
+            border-color:rgba(232,164,1,.45);
+        }
+
+        /* Card Header */
+
+        [data-bs-theme="light"] .bookmark-urgent{
+            color:#d18f00;
+        }
+
+        [data-bs-theme="light"] .bookmark-job-title{
+            color:#1e293b;
+        }
+
+        [data-bs-theme="light"] .bookmark-company{
+            color:#64748b;
+        }
+
+        [data-bs-theme="light"] .bookmark-icon{
+            color:#d18f00;
+        }
+
+        /* Location */
+
+        [data-bs-theme="light"] .bookmark-info{
+            color:#64748b;
+        }
+
+        [data-bs-theme="light"] .bookmark-info i{
+            color:#64748b;
+        }
+
+        /* Salary */
+
+        [data-bs-theme="light"] .bookmark-salary{
+            color:#1e293b;
+        }
+
+        [data-bs-theme="light"] .bookmark-badge{
+            border-color:#e2e8f0;
+            color:#64748b;
+            background:#f8fafc;
+        }
+
+        [data-bs-theme="light"] .bookmark-applicants{
+            color:#64748b;
+        }
+
+        /* Bottom Info */
+
+        [data-bs-theme="light"] .bookmark-bottom-info{
+            color:#64748b;
+        }
+
+        [data-bs-theme="light"] .bookmark-deadline strong{
+            color:#d18f00;
+        }
+
+        /* Buttons */
+
+        [data-bs-theme="light"] .bookmark-btn-detail{
+            border-color:#dbe3ee;
+            color:#64748b;
+            background:transparent;
+        }
+
+        [data-bs-theme="light"] .bookmark-btn-detail:hover{
+            border-color:#cbd5e1;
+            color:#1e293b;
+            background:#f8fafc;
+        }
+
+        [data-bs-theme="light"] .bookmark-btn-apply{
+            background:#f6b000;
+            border-color:#f6b000;
+            color:#111827;
+        }
+
+        [data-bs-theme="light"] .bookmark-btn-apply:hover{
+            background:#ffc52c;
+            border-color:#ffc52c;
+        }
+
+        /* Network Breadcrumb */
+
+        [data-bs-theme="light"] .network-breadcrumb a{
+            color:#64748b;
+        }
+
+        [data-bs-theme="light"] .network-breadcrumb a:hover{
+            color:#e8a401;
+        }
+
+        [data-bs-theme="light"] .network-breadcrumb .active{
+            color:#1e293b;
+        }
+
+        [data-bs-theme="light"] .network-breadcrumb .text-muted{
+            color:#94a3b8 !important;
+        }
+
     </style>
 @endsection
 

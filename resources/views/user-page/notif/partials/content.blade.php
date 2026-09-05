@@ -1,14 +1,14 @@
 <style>
     .notification-title{
         color:#fff;
-        font-size: 16px;
+        font-size:16px;
         font-weight:700;
     }
 
     .read-all{
         color:#e8a401;
         text-decoration:none;
-        font-size: 12px;
+        font-size:12px;
         font-weight:600;
     }
 
@@ -28,7 +28,7 @@
     .notification-item{
 
         display:block;
-        padding: 12px 16px;
+        padding:12px 16px;
         color:#fff;
         text-decoration:none;
         border-bottom:1px solid #29344c;
@@ -48,8 +48,8 @@
 
     .notification-avatar{
 
-        width: 32px;
-        height: 32px;
+        width:32px;
+        height:32px;
         border-radius:50%;
         object-fit:cover;
 
@@ -57,8 +57,8 @@
 
     .notification-icon{
 
-        width: 32px;
-        height: 32px;
+        width:32px;
+        height:32px;
         border-radius:50%;
 
         display:flex;
@@ -93,7 +93,7 @@
     .notification-text{
 
         color:#dfe5ef;
-        font-size: 12px;
+        font-size:12px;
         font-weight:500;
         line-height:1.45;
 
@@ -103,7 +103,7 @@
 
         margin-top:1px;
 
-        font-size: 10px;
+        font-size:10px;
 
         color:#8b97b4;
 
@@ -127,11 +127,96 @@
 
     }
 
+
+    /*==================================
+    LIGHT MODE
+    ==================================*/
+
+    [data-bs-theme="light"] .notification-title{
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .read-all{
+        color:#d18f00;
+    }
+
+    [data-bs-theme="light"] .read-all:hover{
+        color:#b77900;
+    }
+
+    [data-bs-theme="light"] .notification-card{
+
+        background:#ffffff;
+        border-color:#e2e8f0;
+
+    }
+
+    [data-bs-theme="light"] .notification-item{
+
+        color:#334155;
+        border-bottom-color:#e2e8f0;
+
+    }
+
+    [data-bs-theme="light"] .notification-item:hover{
+
+        background:#f8fafc;
+
+    }
+
+    [data-bs-theme="light"] .notification-icon{
+
+        background:#eef2ff;
+        color:#5274d9;
+
+    }
+
+    [data-bs-theme="light"] .notification-icon.warning{
+
+        color:#d18f00;
+
+    }
+
+    [data-bs-theme="light"] .notification-icon.danger{
+
+        color:#e0445d;
+
+    }
+
+    [data-bs-theme="light"] .notification-icon.purple{
+
+        color:#8b5bd6;
+
+    }
+
+    [data-bs-theme="light"] .notification-text{
+
+        color:#475569;
+
+    }
+
+    [data-bs-theme="light"] .notification-time{
+
+        color:#94a3b8;
+
+    }
+
+    [data-bs-theme="light"] .unread{
+
+        background:#fffaf0;
+
+    }
+
+
+    /*==================================
+    RESPONSIVE
+    ==================================*/
+
     @media(max-width:991px){
 
         .notification-title{
 
-            font-size: 12px;
+            font-size:12px;
 
         }
 
@@ -143,21 +228,21 @@
 
         .notification-text{
 
-            font-size: 10px;
+            font-size:10px;
 
         }
 
         .notification-time{
 
-            font-size: 10px;
+            font-size:10px;
 
         }
 
         .notification-avatar,
         .notification-icon{
 
-            width: 32px;
-            height: 32px;
+            width:32px;
+            height:32px;
 
         }
 

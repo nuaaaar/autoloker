@@ -5,23 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
-class Training extends Model
+class TrainingApplication extends Model
 {
     protected $guarded = ['id'];
 
-    public function bujp()
+    public function security()
     {
-        return $this->belongsTo('App\Models\BUJP', 'b_u_j_p_id');
+        return $this->belongsTo('App\Models\Security');
     }
 
-    public function company()
+    public function training()
     {
-        return $this->belongsTo('App\Models\Company');
-    }
-
-    public function applications()
-    {
-        return $this->hasMany(TrainingApplication::class,'training_id');
+        return $this->belongsTo('App\Models\Training');
     }
 
     public static function boot() {

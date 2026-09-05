@@ -112,6 +112,56 @@
         line-height:1.8;
 
     }
+
+
+    /* ===============================
+       LIGHT MODE
+    =================================*/
+
+    [data-bs-theme="light"] .about-wrapper{
+
+        background:#ffffff;
+
+        border-color:#e2e8f0;
+
+    }
+
+    [data-bs-theme="light"] .about-header{
+
+        border-bottom-color:#e2e8f0;
+
+    }
+
+    [data-bs-theme="light"] .about-heading{
+
+        color:#1e293b;
+
+    }
+
+    [data-bs-theme="light"] .about-subtitle{
+
+        color:#64748b;
+
+    }
+
+    [data-bs-theme="light"] .about-card{
+
+        border-bottom-color:#e2e8f0;
+
+    }
+
+    [data-bs-theme="light"] .about-empty-title{
+
+        color:#1e293b;
+
+    }
+
+    [data-bs-theme="light"] .about-empty-text{
+
+        color:#64748b;
+
+    }
+
 </style>
 <!-- =========================
      ABOUT

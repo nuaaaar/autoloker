@@ -6,906 +6,1193 @@
 
 <style>
 
-/* =========================================================
-   TRAINING DETAIL
-========================================================= */
-
-.training-detail-wrapper {
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 25px 0 60px;
-}
-
-
-/* =========================================================
-   BACK
-========================================================= */
-
-.training-back {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-
-    color: #8c99b5;
-    font-size: 12px;
-    font-weight: 500;
-
-    text-decoration: none;
-
-    margin-bottom: 14px;
-}
-
-.training-back:hover {
-    color: #ffb000;
-}
-
-
-/* =========================================================
-   CARD
-========================================================= */
-
-.training-detail-card {
-    background: #101a32;
-    border: 1px solid #202d4a;
-
-    border-radius: 15px;
-
-    padding: 20px;
-
-    margin-bottom: 14px;
-}
-
-
-/* =========================================================
-   HEADER
-========================================================= */
-
-.training-header-card {
-    border-top: 4px solid #f5a900;
-}
-
-
-.training-header {
-    display: flex;
-    gap: 15px;
-}
-
-
-.training-poster {
-    width: 82px;
-    height: 82px;
-
-    flex-shrink: 0;
-
-    border-radius: 11px;
-
-    background: #162542;
-
-    border: 1px solid #263655;
-
-    overflow: hidden;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    color: #ffb000;
-
-    font-size: 26px;
-}
-
-
-.training-poster img {
-    width: 100%;
-    height: 100%;
-
-    object-fit: cover;
-}
-
-
-.training-header-content {
-    flex: 1;
-}
-
-
-.training-title-row {
-    display: flex;
-    align-items: center;
-
-    gap: 8px;
-
-    flex-wrap: wrap;
-}
-
-
-.training-title-row h1 {
-    margin: 0;
-
-    color: #f4f6fb;
-
-    font-size: 18px;
-    font-weight: 700;
-
-    line-height: 1.4;
-}
-
-
-.training-provider-name {
-    margin-top: 4px;
-
-    color: #7785a2;
-
-    font-size: 12px;
-}
-
-
-.training-meta {
-    display: flex;
-
-    flex-wrap: wrap;
-
-    gap: 12px;
-
-    margin-top: 8px;
-}
-
-
-.training-meta span {
-    display: inline-flex;
-
-    align-items: center;
-
-    gap: 5px;
-
-    color: #8290ac;
-
-    font-size: 11px;
-}
-
-
-.training-meta i {
-    color: #ffb000;
-
-    font-size: 12px;
-}
-
-
-/* =========================================================
-   BADGE
-========================================================= */
-
-.training-badges {
-    display: flex;
-
-    flex-wrap: wrap;
-
-    gap: 6px;
-
-    margin-top: 9px;
-}
-
-
-.training-badge {
-    display: inline-flex;
-
-    align-items: center;
-
-    gap: 4px;
-
-    padding: 4px 8px;
-
-    border-radius: 6px;
-
-    border: 1px solid #33415f;
-
-    background: #141f39;
-
-    color: #9ba7bd;
-
-    font-size: 9px;
-
-    font-weight: 600;
-}
-
-
-.training-badge.primary {
-    color: #ffb000;
-
-    border-color: #72551b;
-}
-
-
-.training-badge.success {
-    color: #19c997;
-
-    border-color: #146b58;
-
-    background: #12352f;
-}
-
-
-.training-badge.danger {
-    color: #ff6b6b;
-
-    border-color: #713535;
-
-    background: #351c24;
-}
-
-
-/* =========================================================
-   SUMMARY
-========================================================= */
-
-.training-summary {
-    display: grid;
-
-    grid-template-columns: repeat(3, 1fr);
-
-    border-top: 1px solid #202d4a;
-    border-bottom: 1px solid #202d4a;
-
-    margin-top: 18px;
-}
-
-
-.training-summary-item {
-    padding: 13px 12px;
-
-    border-right: 1px solid #202d4a;
-
-    text-align: center;
-}
-
-
-.training-summary-item:last-child {
-    border-right: 0;
-}
-
-
-.training-summary-item span {
-    display: block;
-
-    color: #71809c;
-
-    font-size: 10px;
-}
-
-
-.training-summary-item strong {
-    display: block;
-
-    margin-top: 4px;
-
-    color: #ffb000;
-
-    font-size: 13px;
-}
-
-
-.training-summary-item small {
-    color: #8996ad;
-
-    font-size: 9px;
-}
-
-
-/* =========================================================
-   QUOTA
-========================================================= */
-
-.training-quota {
-    margin-top: 15px;
-}
-
-
-.training-quota-header {
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    color: #71809c;
-
-    font-size: 10px;
-
-    margin-bottom: 6px;
-}
-
-
-.training-quota-header strong {
-    color: #dce2ed;
-}
-
-
-.training-progress {
-    width: 100%;
-
-    height: 6px;
-
-    border-radius: 10px;
-
-    overflow: hidden;
-
-    background: #1b2842;
-}
-
-
-.training-progress-bar {
-    height: 100%;
-
-    border-radius: 10px;
-
-    background: #ffb000;
-}
-
-
-/* =========================================================
-   ACTION
-========================================================= */
-
-.training-header-action {
-    display: flex;
-
-    gap: 10px;
-
-    margin-top: 15px;
-}
-
-
-.btn-training-register {
-    flex: 1;
-
-    border: 0;
-
-    border-radius: 9px;
-
-    background: #ffb000;
-
-    color: #101010;
-
-    font-size: 12px;
-
-    font-weight: 700;
-
-    padding: 11px 18px;
-
-    cursor: pointer;
-}
-
-
-.btn-training-register:hover {
-    background: #ffc333;
-}
-
-
-.btn-training-register:disabled {
-    opacity: .6;
-
-    cursor: not-allowed;
-}
-
-
-.btn-training-share {
-    min-width: 90px;
-
-    border: 1px solid #2d3a58;
-
-    border-radius: 9px;
-
-    background: transparent;
-
-    color: #8d99b2;
-
-    font-size: 12px;
-
-    cursor: pointer;
-}
-
-
-.btn-training-share:hover {
-    border-color: #ffb000;
-
-    color: #ffb000;
-}
-
-
-/* =========================================================
-   DETAIL TITLE
-========================================================= */
-
-.training-detail-title {
-    margin-bottom: 12px;
-
-    color: #8291ad;
-
-    font-size: 10px;
-
-    font-weight: 700;
-
-    letter-spacing: .6px;
-}
-
-
-.training-detail-text {
-    color: #8794ad;
-
-    font-size: 11px;
-
-    line-height: 1.7;
-}
-
-
-/* =========================================================
-   DETAIL LIST
-========================================================= */
-
-.training-detail-list {
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 9px;
-}
-
-
-.training-detail-list-item {
-    display: flex;
-
-    align-items: flex-start;
-
-    gap: 8px;
-
-    color: #a1acc0;
-
-    font-size: 11px;
-
-    line-height: 1.6;
-}
-
-
-.training-icon {
-    width: 17px;
-    height: 17px;
-
-    flex-shrink: 0;
-
-    border-radius: 50%;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    background: #17233c;
-
-    color: #ffb000;
-
-    font-size: 9px;
-}
-
-
-/* =========================================================
-   INFO GRID
-========================================================= */
-
-.training-info-grid {
-    display: grid;
-
-    grid-template-columns: repeat(2, 1fr);
-
-    gap: 14px 30px;
-}
-
-
-.training-info-item small {
-    display: block;
-
-    color: #64728d;
-
-    font-size: 9px;
-
-    margin-bottom: 3px;
-}
-
-
-.training-info-item strong {
-    display: block;
-
-    color: #d9deea;
-
-    font-size: 11px;
-}
-
-
-/* =========================================================
-   TAGS
-========================================================= */
-
-.training-tags {
-    display: flex;
-
-    flex-wrap: wrap;
-
-    gap: 7px;
-}
-
-
-.training-tag {
-    display: inline-flex;
-
-    align-items: center;
-
-    gap: 5px;
-
-    padding: 5px 9px;
-
-    border-radius: 6px;
-
-    border: 1px solid #33415f;
-
-    background: #141f39;
-
-    color: #9ba7bd;
-
-    font-size: 10px;
-}
-
-
-.training-tag.primary {
-    color: #ffb000;
-
-    border-color: #72551b;
-}
-
-
-/* =========================================================
-   CERTIFICATE
-========================================================= */
-
-.training-certificate-box {
-    display: flex;
-
-    align-items: center;
-
-    gap: 12px;
-
-    padding: 13px;
-
-    border: 1px solid #72551b;
-
-    border-radius: 10px;
-
-    background: #171a29;
-}
-
-
-.training-certificate-icon {
-    width: 40px;
-    height: 40px;
-
-    flex-shrink: 0;
-
-    border-radius: 9px;
-
-    background: #202033;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    color: #ffb000;
-
-    font-size: 18px;
-}
-
-
-.training-certificate-box strong {
-    display: block;
-
-    color: #e2e6ef;
-
-    font-size: 12px;
-}
-
-
-.training-certificate-box span {
-    display: block;
-
-    margin-top: 3px;
-
-    color: #71809a;
-
-    font-size: 10px;
-}
-
-
-/* =========================================================
-   INSTRUCTOR
-========================================================= */
-
-.training-instructor {
-    display: flex;
-
-    align-items: center;
-
-    gap: 12px;
-}
-
-
-.training-instructor-avatar {
-    width: 42px;
-    height: 42px;
-
-    flex-shrink: 0;
-
-    border-radius: 50%;
-
-    background: #16233d;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    color: #8190aa;
-
-    font-size: 18px;
-}
-
-
-.training-instructor strong {
-    display: block;
-
-    color: #dce2ed;
-
-    font-size: 12px;
-}
-
-
-.training-instructor span {
-    display: block;
-
-    margin-top: 3px;
-
-    color: #6f7d98;
-
-    font-size: 10px;
-}
-
-
-/* =========================================================
-   STATISTICS
-========================================================= */
-
-.training-statistics {
-    display: grid;
-
-    grid-template-columns: repeat(2, 1fr);
-}
-
-
-.training-statistics > div {
-    text-align: center;
-
-    border-right: 1px solid #202d4a;
-}
-
-
-.training-statistics > div:last-child {
-    border-right: 0;
-}
-
-
-.training-statistics strong {
-    display: block;
-
-    color: #e4e8f1;
-
-    font-size: 18px;
-}
-
-
-.training-statistics span {
-    display: block;
-
-    margin-top: 3px;
-
-    color: #71809a;
-
-    font-size: 9px;
-}
-
-
-/* =========================================================
-   PROVIDER
-========================================================= */
-
-.training-provider {
-    display: flex;
-
-    align-items: center;
-
-    gap: 12px;
-}
-
-
-.training-provider-icon {
-    width: 40px;
-    height: 40px;
-
-    border-radius: 9px;
-
-    background: #16233d;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    color: #7e8da8;
-
-    font-size: 18px;
-}
-
-
-.training-provider strong {
-    display: block;
-
-    color: #dce1eb;
-
-    font-size: 12px;
-}
-
-
-.training-provider span {
-    display: block;
-
-    margin-top: 2px;
-
-    color: #6f7d98;
-
-    font-size: 10px;
-}
-
-
-/* =========================================================
-   FOOTER CTA
-========================================================= */
-
-.training-footer {
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    gap: 20px;
-}
-
-
-.training-footer strong {
-    display: block;
-
-    color: #dce2ed;
-
-    font-size: 12px;
-}
-
-
-.training-footer span {
-    display: block;
-
-    margin-top: 4px;
-
-    color: #74819b;
-
-    font-size: 10px;
-}
-
-
-.training-footer b {
-    color: #ffb000;
-}
-
-
-/* =========================================================
-   RESPONSIVE
-========================================================= */
-
-@media (max-width: 768px) {
+    /* =========================================================
+    TRAINING DETAIL
+    ========================================================= */
 
     .training-detail-wrapper {
-        padding: 15px 12px 40px;
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 25px 0 60px;
     }
 
 
+    /* =========================================================
+    BACK
+    ========================================================= */
+
+    .training-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+
+        color: #8c99b5;
+        font-size: 12px;
+        font-weight: 500;
+
+        text-decoration: none;
+
+        margin-bottom: 14px;
+    }
+
+    .training-back:hover {
+        color: #ffb000;
+    }
+
+
+    /* =========================================================
+    CARD
+    ========================================================= */
+
     .training-detail-card {
-        padding: 16px;
+        background: #101a32;
+        border: 1px solid #202d4a;
+
+        border-radius: 15px;
+
+        padding: 20px;
+
+        margin-bottom: 14px;
+    }
+
+
+    /* =========================================================
+    HEADER
+    ========================================================= */
+
+    .training-header-card {
+        border-top: 4px solid #f5a900;
+    }
+
+
+    .training-header {
+        display: flex;
+        gap: 15px;
     }
 
 
     .training-poster {
-        width: 65px;
-        height: 65px;
+        width: 82px;
+        height: 82px;
+
+        flex-shrink: 0;
+
+        border-radius: 11px;
+
+        background: #162542;
+
+        border: 1px solid #263655;
+
+        overflow: hidden;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        color: #ffb000;
+
+        font-size: 26px;
+    }
+
+
+    .training-poster img {
+        width: 100%;
+        height: 100%;
+
+        object-fit: cover;
+    }
+
+
+    .training-header-content {
+        flex: 1;
+    }
+
+
+    .training-title-row {
+        display: flex;
+        align-items: center;
+
+        gap: 8px;
+
+        flex-wrap: wrap;
     }
 
 
     .training-title-row h1 {
-        font-size: 16px;
+        margin: 0;
+
+        color: #f4f6fb;
+
+        font-size: 18px;
+        font-weight: 700;
+
+        line-height: 1.4;
     }
 
 
-    .training-summary {
-        grid-template-columns: repeat(2, 1fr);
-    }
+    .training-provider-name {
+        margin-top: 4px;
 
+        color: #7785a2;
 
-    .training-summary-item:nth-child(2) {
-        border-right: 0;
-    }
-
-
-    .training-summary-item:last-child {
-        grid-column: 1 / -1;
-
-        border-top: 1px solid #202d4a;
-    }
-
-
-    .training-info-grid {
-        grid-template-columns: 1fr 1fr;
-    }
-
-
-    .training-footer {
-        flex-direction: column;
-
-        align-items: stretch;
-    }
-
-
-    .training-footer .btn-training-register {
-        width: 100%;
-    }
-
-}
-
-
-@media (max-width: 480px) {
-
-    .training-header {
-        align-items: flex-start;
-    }
-
-
-    .training-poster {
-        width: 55px;
-        height: 55px;
+        font-size: 12px;
     }
 
 
     .training-meta {
-        gap: 8px;
+        display: flex;
+
+        flex-wrap: wrap;
+
+        gap: 12px;
+
+        margin-top: 8px;
     }
 
 
+    .training-meta span {
+        display: inline-flex;
+
+        align-items: center;
+
+        gap: 5px;
+
+        color: #8290ac;
+
+        font-size: 11px;
+    }
+
+
+    .training-meta i {
+        color: #ffb000;
+
+        font-size: 12px;
+    }
+
+
+    /* =========================================================
+    BADGE
+    ========================================================= */
+
+    .training-badges {
+        display: flex;
+
+        flex-wrap: wrap;
+
+        gap: 6px;
+
+        margin-top: 9px;
+    }
+
+
+    .training-badge {
+        display: inline-flex;
+
+        align-items: center;
+
+        gap: 4px;
+
+        padding: 4px 8px;
+
+        border-radius: 6px;
+
+        border: 1px solid #33415f;
+
+        background: #141f39;
+
+        color: #9ba7bd;
+
+        font-size: 9px;
+
+        font-weight: 600;
+    }
+
+
+    .training-badge.primary {
+        color: #ffb000;
+
+        border-color: #72551b;
+    }
+
+
+    .training-badge.success {
+        color: #19c997;
+
+        border-color: #146b58;
+
+        background: #12352f;
+    }
+
+
+    .training-badge.danger {
+        color: #ff6b6b;
+
+        border-color: #713535;
+
+        background: #351c24;
+    }
+
+
+    /* =========================================================
+    SUMMARY
+    ========================================================= */
+
+    .training-summary {
+        display: grid;
+
+        grid-template-columns: repeat(3, 1fr);
+
+        border-top: 1px solid #202d4a;
+        border-bottom: 1px solid #202d4a;
+
+        margin-top: 18px;
+    }
+
+
+    .training-summary-item {
+        padding: 13px 12px;
+
+        border-right: 1px solid #202d4a;
+
+        text-align: center;
+    }
+
+
+    .training-summary-item:last-child {
+        border-right: 0;
+    }
+
+
+    .training-summary-item span {
+        display: block;
+
+        color: #71809c;
+
+        font-size: 10px;
+    }
+
+
+    .training-summary-item strong {
+        display: block;
+
+        margin-top: 4px;
+
+        color: #ffb000;
+
+        font-size: 13px;
+    }
+
+
+    .training-summary-item small {
+        color: #8996ad;
+
+        font-size: 9px;
+    }
+
+
+    /* =========================================================
+    QUOTA
+    ========================================================= */
+
+    .training-quota {
+        margin-top: 15px;
+    }
+
+
+    .training-quota-header {
+        display: flex;
+
+        align-items: center;
+
+        justify-content: space-between;
+
+        color: #71809c;
+
+        font-size: 10px;
+
+        margin-bottom: 6px;
+    }
+
+
+    .training-quota-header strong {
+        color: #dce2ed;
+    }
+
+
+    .training-progress {
+        width: 100%;
+
+        height: 6px;
+
+        border-radius: 10px;
+
+        overflow: hidden;
+
+        background: #1b2842;
+    }
+
+
+    .training-progress-bar {
+        height: 100%;
+
+        border-radius: 10px;
+
+        background: #ffb000;
+    }
+
+
+    /* =========================================================
+    ACTION
+    ========================================================= */
+
     .training-header-action {
-        flex-direction: column;
+        display: flex;
+
+        gap: 10px;
+
+        margin-top: 15px;
+    }
+
+
+    .btn-training-register {
+        flex: 1;
+
+        border: 0;
+
+        border-radius: 9px;
+
+        background: #ffb000;
+
+        color: #101010;
+
+        font-size: 12px;
+
+        font-weight: 700;
+
+        padding: 11px 18px;
+
+        cursor: pointer;
+    }
+
+
+    .btn-training-register:hover {
+        background: #ffc333;
+    }
+
+
+    .btn-training-register:disabled {
+        opacity: .6;
+
+        cursor: not-allowed;
     }
 
 
     .btn-training-share {
-        min-height: 38px;
+        min-width: 90px;
+
+        border: 1px solid #2d3a58;
+
+        border-radius: 9px;
+
+        background: transparent;
+
+        color: #8d99b2;
+
+        font-size: 12px;
+
+        cursor: pointer;
     }
 
-}
+
+    .btn-training-share:hover {
+        border-color: #ffb000;
+
+        color: #ffb000;
+    }
+
+
+    /* =========================================================
+    DETAIL TITLE
+    ========================================================= */
+
+    .training-detail-title {
+        margin-bottom: 12px;
+
+        color: #8291ad;
+
+        font-size: 10px;
+
+        font-weight: 700;
+
+        letter-spacing: .6px;
+    }
+
+
+    .training-detail-text {
+        color: #8794ad;
+
+        font-size: 11px;
+
+        line-height: 1.7;
+    }
+
+
+    /* =========================================================
+    DETAIL LIST
+    ========================================================= */
+
+    .training-detail-list {
+        display: flex;
+
+        flex-direction: column;
+
+        gap: 9px;
+    }
+
+
+    .training-detail-list-item {
+        display: flex;
+
+        align-items: flex-start;
+
+        gap: 8px;
+
+        color: #a1acc0;
+
+        font-size: 11px;
+
+        line-height: 1.6;
+    }
+
+
+    .training-icon {
+        width: 17px;
+        height: 17px;
+
+        flex-shrink: 0;
+
+        border-radius: 50%;
+
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        background: #17233c;
+
+        color: #ffb000;
+
+        font-size: 9px;
+    }
+
+
+    /* =========================================================
+    INFO GRID
+    ========================================================= */
+
+    .training-info-grid {
+        display: grid;
+
+        grid-template-columns: repeat(2, 1fr);
+
+        gap: 14px 30px;
+    }
+
+
+    .training-info-item small {
+        display: block;
+
+        color: #64728d;
+
+        font-size: 9px;
+
+        margin-bottom: 3px;
+    }
+
+
+    .training-info-item strong {
+        display: block;
+
+        color: #d9deea;
+
+        font-size: 11px;
+    }
+
+
+    /* =========================================================
+    TAGS
+    ========================================================= */
+
+    .training-tags {
+        display: flex;
+
+        flex-wrap: wrap;
+
+        gap: 7px;
+    }
+
+
+    .training-tag {
+        display: inline-flex;
+
+        align-items: center;
+
+        gap: 5px;
+
+        padding: 5px 9px;
+
+        border-radius: 6px;
+
+        border: 1px solid #33415f;
+
+        background: #141f39;
+
+        color: #9ba7bd;
+
+        font-size: 10px;
+    }
+
+
+    .training-tag.primary {
+        color: #ffb000;
+
+        border-color: #72551b;
+    }
+
+
+    /* =========================================================
+    CERTIFICATE
+    ========================================================= */
+
+    .training-certificate-box {
+        display: flex;
+
+        align-items: center;
+
+        gap: 12px;
+
+        padding: 13px;
+
+        border: 1px solid #72551b;
+
+        border-radius: 10px;
+
+        background: #171a29;
+    }
+
+
+    .training-certificate-icon {
+        width: 40px;
+        height: 40px;
+
+        flex-shrink: 0;
+
+        border-radius: 9px;
+
+        background: #202033;
+
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        color: #ffb000;
+
+        font-size: 18px;
+    }
+
+
+    .training-certificate-box strong {
+        display: block;
+
+        color: #e2e6ef;
+
+        font-size: 12px;
+    }
+
+
+    .training-certificate-box span {
+        display: block;
+
+        margin-top: 3px;
+
+        color: #71809a;
+
+        font-size: 10px;
+    }
+
+
+    /* =========================================================
+    INSTRUCTOR
+    ========================================================= */
+
+    .training-instructor {
+        display: flex;
+
+        align-items: center;
+
+        gap: 12px;
+    }
+
+
+    .training-instructor-avatar {
+        width: 42px;
+        height: 42px;
+
+        flex-shrink: 0;
+
+        border-radius: 50%;
+
+        background: #16233d;
+
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        color: #8190aa;
+
+        font-size: 18px;
+    }
+
+
+    .training-instructor strong {
+        display: block;
+
+        color: #dce2ed;
+
+        font-size: 12px;
+    }
+
+
+    .training-instructor span {
+        display: block;
+
+        margin-top: 3px;
+
+        color: #6f7d98;
+
+        font-size: 10px;
+    }
+
+
+    /* =========================================================
+    STATISTICS
+    ========================================================= */
+
+    .training-statistics {
+        display: grid;
+
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+
+    .training-statistics > div {
+        text-align: center;
+
+        border-right: 1px solid #202d4a;
+    }
+
+
+    .training-statistics > div:last-child {
+        border-right: 0;
+    }
+
+
+    .training-statistics strong {
+        display: block;
+
+        color: #e4e8f1;
+
+        font-size: 18px;
+    }
+
+
+    .training-statistics span {
+        display: block;
+
+        margin-top: 3px;
+
+        color: #71809a;
+
+        font-size: 9px;
+    }
+
+
+    /* =========================================================
+    PROVIDER
+    ========================================================= */
+
+    .training-provider {
+        display: flex;
+
+        align-items: center;
+
+        gap: 12px;
+    }
+
+
+    .training-provider-icon {
+        width: 40px;
+        height: 40px;
+
+        border-radius: 9px;
+
+        background: #16233d;
+
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        color: #7e8da8;
+
+        font-size: 18px;
+    }
+
+
+    .training-provider strong {
+        display: block;
+
+        color: #dce1eb;
+
+        font-size: 12px;
+    }
+
+
+    .training-provider span {
+        display: block;
+
+        margin-top: 2px;
+
+        color: #6f7d98;
+
+        font-size: 10px;
+    }
+
+
+    /* =========================================================
+    FOOTER CTA
+    ========================================================= */
+
+    .training-footer {
+        display: flex;
+
+        align-items: center;
+
+        justify-content: space-between;
+
+        gap: 20px;
+    }
+
+
+    .training-footer strong {
+        display: block;
+
+        color: #dce2ed;
+
+        font-size: 12px;
+    }
+
+
+    .training-footer span {
+        display: block;
+
+        margin-top: 4px;
+
+        color: #74819b;
+
+        font-size: 10px;
+    }
+
+
+    .training-footer b {
+        color: #ffb000;
+    }
+
+
+    /* =========================================================
+    RESPONSIVE
+    ========================================================= */
+
+    @media (max-width: 768px) {
+
+        .training-detail-wrapper {
+            padding: 15px 12px 40px;
+        }
+
+
+        .training-detail-card {
+            padding: 16px;
+        }
+
+
+        .training-poster {
+            width: 65px;
+            height: 65px;
+        }
+
+
+        .training-title-row h1 {
+            font-size: 16px;
+        }
+
+
+        .training-summary {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+
+        .training-summary-item:nth-child(2) {
+            border-right: 0;
+        }
+
+
+        .training-summary-item:last-child {
+            grid-column: 1 / -1;
+
+            border-top: 1px solid #202d4a;
+        }
+
+
+        .training-info-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+
+
+        .training-footer {
+            flex-direction: column;
+
+            align-items: stretch;
+        }
+
+
+        .training-footer .btn-training-register {
+            width: 100%;
+        }
+
+    }
+
+
+    @media (max-width: 480px) {
+
+        .training-header {
+            align-items: flex-start;
+        }
+
+
+        .training-poster {
+            width: 55px;
+            height: 55px;
+        }
+
+
+        .training-meta {
+            gap: 8px;
+        }
+
+
+        .training-header-action {
+            flex-direction: column;
+        }
+
+
+        .btn-training-share {
+            min-height: 38px;
+        }
+
+    }
+
+
+    /* =========================================================
+    LIGHT MODE
+    ========================================================= */
+
+    [data-bs-theme="light"] .training-back{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .training-back:hover{
+        color:#e8a401;
+    }
+
+
+    /* CARD */
+
+    [data-bs-theme="light"] .training-detail-card{
+        background:#ffffff;
+        border-color:#e2e8f0;
+    }
+
+
+    /* POSTER */
+
+    [data-bs-theme="light"] .training-poster{
+        background:#f8fafc;
+        border-color:#e2e8f0;
+        color:#d18f00;
+    }
+
+
+    /* HEADER */
+
+    [data-bs-theme="light"] .training-title-row h1{
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .training-provider-name{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .training-meta span{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .training-meta i{
+        color:#d18f00;
+    }
+
+
+    /* BADGES */
+
+    [data-bs-theme="light"] .training-badge{
+        border-color:#e2e8f0;
+        background:#f8fafc;
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .training-badge.primary{
+        color:#c98d00;
+        border-color:rgba(232,164,1,.35);
+        background:rgba(232,164,1,.08);
+    }
+
+    [data-bs-theme="light"] .training-badge.success{
+        color:#0b9f6a;
+        border-color:rgba(16,212,140,.30);
+        background:rgba(16,212,140,.08);
+    }
+
+    [data-bs-theme="light"] .training-badge.danger{
+        color:#e0445d;
+        border-color:rgba(224,68,93,.30);
+        background:rgba(224,68,93,.08);
+    }
+
+
+    /* SUMMARY */
+
+    [data-bs-theme="light"] .training-summary{
+        border-top-color:#e2e8f0;
+        border-bottom-color:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .training-summary-item{
+        border-right-color:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .training-summary-item span{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .training-summary-item strong{
+        color:#d18f00;
+    }
+
+    [data-bs-theme="light"] .training-summary-item small{
+        color:#94a3b8;
+    }
+
+
+    /* QUOTA */
+
+    [data-bs-theme="light"] .training-quota-header{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .training-quota-header strong{
+        color:#334155;
+    }
+
+    [data-bs-theme="light"] .training-progress{
+        background:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .training-progress-bar{
+        background:#f6b000;
+    }
+
+
+    /* ACTION */
+
+    [data-bs-theme="light"] .btn-training-register{
+        background:#f6b000;
+        color:#111827;
+    }
+
+    [data-bs-theme="light"] .btn-training-register:hover{
+        background:#ffc333;
+    }
+
+    [data-bs-theme="light"] .btn-training-share{
+        border-color:#dbe3ee;
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .btn-training-share:hover{
+        border-color:#f6b000;
+        color:#d18f00;
+    }
+
+
+    /* DETAIL */
+
+    [data-bs-theme="light"] .training-detail-title{
+        color:#475569;
+    }
+
+    [data-bs-theme="light"] .training-detail-text{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .training-detail-list-item{
+        color:#475569;
+    }
+
+    [data-bs-theme="light"] .training-icon{
+        background:#f8fafc;
+        color:#d18f00;
+    }
+
+
+    /* INFO GRID */
+
+    [data-bs-theme="light"] .training-info-item small{
+        color:#94a3b8;
+    }
+
+    [data-bs-theme="light"] .training-info-item strong{
+        color:#334155;
+    }
+
+
+    /* TAGS */
+
+    [data-bs-theme="light"] .training-tag{
+        border-color:#e2e8f0;
+        background:#f8fafc;
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .training-tag.primary{
+        color:#c98d00;
+        border-color:rgba(232,164,1,.35);
+        background:rgba(232,164,1,.08);
+    }
+
+
+    /* CERTIFICATE */
+
+    [data-bs-theme="light"] .training-certificate-box{
+        border-color:rgba(232,164,1,.40);
+        background:#fffbf2;
+    }
+
+    [data-bs-theme="light"] .training-certificate-icon{
+        background:#fff4d6;
+        color:#d18f00;
+    }
+
+    [data-bs-theme="light"] .training-certificate-box strong{
+        color:#334155;
+    }
+
+    [data-bs-theme="light"] .training-certificate-box span{
+        color:#64748b;
+    }
+
+
+    /* INSTRUCTOR */
+
+    [data-bs-theme="light"] .training-instructor-avatar{
+        background:#f8fafc;
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .training-instructor strong{
+        color:#334155;
+    }
+
+    [data-bs-theme="light"] .training-instructor span{
+        color:#64748b;
+    }
+
+
+    /* STATISTICS */
+
+    [data-bs-theme="light"] .training-statistics > div{
+        border-right-color:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .training-statistics strong{
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .training-statistics span{
+        color:#64748b;
+    }
+
+
+    /* PROVIDER */
+
+    [data-bs-theme="light"] .training-provider-icon{
+        background:#f8fafc;
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .training-provider strong{
+        color:#334155;
+    }
+
+    [data-bs-theme="light"] .training-provider span{
+        color:#64748b;
+    }
+
+
+    /* FOOTER */
+
+    [data-bs-theme="light"] .training-footer strong{
+        color:#334155;
+    }
+
+    [data-bs-theme="light"] .training-footer span{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .training-footer b{
+        color:#d18f00;
+    }
+
+
+    /* MOBILE SUMMARY */
+
+    @media (max-width: 768px) {
+
+        [data-bs-theme="light"] .training-summary-item:last-child{
+            border-top-color:#e2e8f0;
+        }
+
+    }
 
 </style>
 
+
 <style>
+
+    /* =========================================================
+    NETWORK BREADCRUMB
+    ========================================================= */
+
     .network-breadcrumb{
         display:flex;
         align-items:center;
@@ -940,6 +1227,28 @@
     .network-breadcrumb .text-muted{
         color:#5b6985 !important;
     }
+
+
+    /* =========================================================
+    LIGHT MODE
+    ========================================================= */
+
+    [data-bs-theme="light"] .network-breadcrumb a{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .network-breadcrumb a:hover{
+        color:#e8a401;
+    }
+
+    [data-bs-theme="light"] .network-breadcrumb .active{
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .network-breadcrumb .text-muted{
+        color:#94a3b8 !important;
+    }
+
 </style>
 
 @endsection
@@ -1266,7 +1575,7 @@
 
                         $quota = (int) ($data->quota ?? 0);
 
-                        $registered = (int) ($data->registered ?? 0);
+                        // $registered = (int) ($data->registered ?? 0);
 
                         $percentage = $quota > 0
                             ? min(100, round(($registered / $quota) * 100))
@@ -1321,14 +1630,40 @@
                     <div class="training-header-action">
 
 
-                        @if($quota > 0 && $registered >= $quota)
+                        @if($application && $application->status === 'approved')
 
                             <button
                                 type="button"
                                 class="btn-training-register"
                                 disabled>
 
-                                <i class="ki-duotone ki-people me-1"></i>
+                                <i class="ki-duotone ki-check-circle me-1"></i>
+
+                                Sudah Terdaftar
+
+                            </button>
+
+                        @elseif($application && $application->status === 'pending')
+
+                            <button
+                                type="button"
+                                class="btn-training-register btn-training-cancel"
+                                onclick="cancelTrainingApplication('{{ $data->uuid }}')">
+
+                                <i class="ki-duotone ki-cross-circle me-1"></i>
+
+                                Batalkan Pendaftaran
+
+                            </button>
+
+                        @elseif($quota > 0 && $registered >= $quota)
+
+                            <button
+                                type="button"
+                                class="btn-training-register"
+                                disabled>
+
+                                <i class="ki-duotone ki-information-2 me-1"></i>
 
                                 Kuota Penuh
 
@@ -2047,7 +2382,7 @@
                         <div>
 
                             <strong>
-                                {{ $data->registered ?? 0 }}
+                                {{ $registered ?? 0 }}
                             </strong>
 
                             <span>
@@ -2162,12 +2497,40 @@
                     </div>
 
 
-                    @if($quota > 0 && $registered >= $quota)
+                    @if($application && $application->status === 'approved')
 
                         <button
                             type="button"
                             class="btn-training-register"
                             disabled>
+
+                            <i class="ki-duotone ki-check-circle me-1"></i>
+
+                            Sudah Terdaftar
+
+                        </button>
+
+                    @elseif($application && $application->status === 'pending')
+
+                        <button
+                            type="button"
+                            class="btn-training-register btn-training-cancel"
+                            onclick="cancelTrainingApplication('{{ $data->uuid }}')">
+
+                            <i class="ki-duotone ki-cross-circle me-1"></i>
+
+                            Batalkan Pendaftaran
+
+                        </button>
+
+                    @elseif($quota > 0 && $registered >= $quota)
+
+                        <button
+                            type="button"
+                            class="btn-training-register"
+                            disabled>
+
+                            <i class="ki-duotone ki-information-2 me-1"></i>
 
                             Kuota Penuh
 
@@ -2246,7 +2609,6 @@ function shareTraining()
     }
 }
 
-
 function registerTraining(uuid)
 {
     Swal.fire({
@@ -2271,19 +2633,10 @@ function registerTraining(uuid)
             return;
         }
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Endpoint pendaftaran
-        |--------------------------------------------------------------------------
-        |
-        | Sesuaikan route ketika fitur registrasi training sudah dibuat.
-        |
-        */
-
         $.ajax({
 
-            url: `/user-page/training/${uuid}/register`,
+            url: "{{ route('user-page.training.apply', ':uuid') }}"
+                .replace(':uuid', uuid),
 
             type: 'POST',
 
@@ -2331,6 +2684,88 @@ function registerTraining(uuid)
                     text: xhr.responseJSON?.message
                         ?? 'Terjadi kesalahan saat mendaftar pelatihan.'
 
+                });
+
+            }
+
+        });
+
+    });
+}
+
+function cancelTrainingApplication(uuid)
+{
+    Swal.fire({
+        title: 'Batalkan Pendaftaran?',
+        text: 'Pendaftaran Anda akan dibatalkan dan Anda dapat mendaftar kembali.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Batalkan',
+        cancelButtonText: 'Tidak',
+        reverseButtons: true
+    }).then(function(result) {
+
+        if (!result.isConfirmed) {
+            return;
+        }
+
+        $.ajax({
+
+            url: "{{ route('user-page.training.apply.cancel', ':uuid') }}"
+                .replace(':uuid', uuid),
+
+            type: 'DELETE',
+
+            data: {
+                _token: "{{ csrf_token() }}"
+            },
+
+            beforeSend: function() {
+
+                Swal.fire({
+                    title: 'Memproses...',
+                    text: 'Mohon tunggu.',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    didOpen: function() {
+                        Swal.showLoading();
+                    }
+                });
+
+            },
+
+            success: function(response) {
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: response.message,
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(function() {
+
+                    location.reload();
+
+                });
+
+            },
+
+            error: function(xhr) {
+
+                let message = 'Terjadi kesalahan saat membatalkan pendaftaran.';
+
+                if (
+                    xhr.responseJSON &&
+                    xhr.responseJSON.message
+                ) {
+                    message = xhr.responseJSON.message;
+                }
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: message
                 });
 
             }

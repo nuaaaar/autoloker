@@ -7,7 +7,7 @@
         background:#121c32;
         border:1px solid #25324a;
         border-radius:18px;
-        padding: 14px 16px;
+        padding:14px 16px;
         margin-bottom:22px;
         transition:.25s;
     }
@@ -19,17 +19,39 @@
     .network-section-title{
         margin:0;
         color:#f3f5fa;
-        font-size: 14px;
+        font-size:14px;
         font-weight:700;
         /* line-height:1.2; */
     }
 
     .network-section-subtitle{
-        margin-top: 1px;
+        margin-top:1px;
         margin-bottom:0;
         color:#8d98b3;
-        font-size: 12px;
+        font-size:12px;
         font-weight:500;
+    }
+
+
+    /* ===========================
+    LIGHT MODE
+    =========================== */
+
+    [data-bs-theme="light"] .network-section-card{
+        background:#ffffff;
+        border-color:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .network-section-card:hover{
+        border-color:#cbd5e1;
+    }
+
+    [data-bs-theme="light"] .network-section-title{
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .network-section-subtitle{
+        color:#64748b;
     }
 </style>
 

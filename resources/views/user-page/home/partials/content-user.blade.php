@@ -1,4 +1,5 @@
 <style>
+
     .btn-save.saved {
         border-color: #198754;
         color: #198754;
@@ -8,6 +9,7 @@
         border-color: #198754;
         color: #198754;
     }
+
 
     /* =========================================================
     JOB FILTER CARD
@@ -149,7 +151,6 @@
     }
 
 
-    /* option */
     .job-filter-select option {
         background: #1d2338;
         color: #f5f7fa;
@@ -460,59 +461,8 @@
 
 
     /* =========================================================
-    MOBILE
+    ACTIVE FILTER
     ========================================================= */
-
-    @media (max-width: 767px) {
-
-        .job-filter-row {
-            display: grid;
-
-            grid-template-columns: 1fr 1fr;
-
-            gap: 8px;
-        }
-
-        .job-filter-dropdown {
-            width: 100%;
-        }
-
-        .job-filter-select {
-            font-size: 11px;
-
-            height: 37px;
-        }
-
-        .btn-more-filter {
-            width: 100%;
-
-            height: 37px;
-
-            font-size: 11px;
-        }
-
-    }
-
-
-    /* =========================================================
-    TABLET
-    ========================================================= */
-
-    @media (min-width: 768px) and (max-width: 991px) {
-
-        .job-filter-row {
-            flex-wrap: wrap;
-        }
-
-        .job-filter-dropdown {
-            flex: 1 1 calc(50% - 10px);
-        }
-
-        .btn-more-filter {
-            flex: 1 1 calc(50% - 10px);
-        }
-
-    }
 
     .job-filter-select.filter-active {
         border-color: #e8a401;
@@ -521,14 +471,344 @@
 
         color: #e8a401;
     }
-</style>
 
-<style>
-    /*
-    |--------------------------------------------------------------------------
-    | FIX METRONIC SCROLL
-    |--------------------------------------------------------------------------
-    */
+
+
+    /* =========================================================
+    LIGHT MODE
+    ========================================================= */
+
+    [data-bs-theme="light"] .job-filter-card {
+
+        border-color: #e2e6ee;
+
+        background: #ffffff;
+
+        color: #1f2937;
+
+        box-shadow:
+            0 8px 30px rgba(15, 23, 42, .05);
+
+    }
+
+
+    /* =========================================================
+    LIGHT - SEARCH
+    ========================================================= */
+
+    [data-bs-theme="light"] .job-search i {
+
+        color: #94a3b8;
+
+    }
+
+    [data-bs-theme="light"] .job-search input {
+
+        border-color: #dfe4ec;
+
+        background: #f8fafc;
+
+        color: #1e293b;
+
+    }
+
+    [data-bs-theme="light"] .job-search input::placeholder {
+
+        color: #94a3b8;
+
+    }
+
+    [data-bs-theme="light"] .job-search input:hover {
+
+        border-color: #cbd5e1;
+
+    }
+
+    [data-bs-theme="light"] .job-search input:focus {
+
+        border-color: #e8a401;
+
+        background: #ffffff;
+
+        box-shadow:
+            0 0 0 2px rgba(232, 164, 1, .10);
+
+    }
+
+
+    /* =========================================================
+    LIGHT - FILTER SELECT
+    ========================================================= */
+
+    [data-bs-theme="light"] .job-filter-select {
+
+        border-color: #dfe4ec;
+
+        background-color: #f8fafc;
+
+        color: #475569;
+
+    }
+
+    [data-bs-theme="light"] .job-filter-select:hover {
+
+        border-color: #cbd5e1;
+
+        color: #1e293b;
+
+    }
+
+    [data-bs-theme="light"] .job-filter-select:focus {
+
+        border-color: #e8a401;
+
+        box-shadow:
+            0 0 0 2px rgba(232, 164, 1, .10);
+
+    }
+
+    [data-bs-theme="light"] .job-filter-select option {
+
+        background: #ffffff;
+
+        color: #1e293b;
+
+    }
+
+
+    /* Active */
+
+    [data-bs-theme="light"] .job-filter-select.filter-active {
+
+        border-color: #e8a401;
+
+        background: rgba(232, 164, 1, .08);
+
+        color: #c47f00;
+
+    }
+
+
+    /* =========================================================
+    LIGHT - MORE FILTER
+    ========================================================= */
+
+    [data-bs-theme="light"] .btn-more-filter {
+
+        border-color: #dfe4ec;
+
+        background: #f8fafc;
+
+        color: #475569;
+
+    }
+
+    [data-bs-theme="light"] .btn-more-filter:hover {
+
+        background: #ffffff;
+
+        border-color: #e8a401;
+
+        color: #d89500;
+
+    }
+
+
+    /* =========================================================
+    LIGHT - MODAL
+    ========================================================= */
+
+    [data-bs-theme="light"] .job-filter-modal {
+
+        border-color: #e2e6ee;
+
+        background: #ffffff;
+
+        color: #1e293b;
+
+        box-shadow:
+            0 20px 60px rgba(15, 23, 42, .15);
+
+    }
+
+
+    /* =========================================================
+    LIGHT - MODAL HEADER
+    ========================================================= */
+
+    [data-bs-theme="light"] .job-filter-modal .modal-header {
+
+        border-bottom-color: #e5e7eb;
+
+        background: #ffffff;
+
+    }
+
+    [data-bs-theme="light"] .job-filter-modal-title {
+
+        color: #1e293b;
+
+    }
+
+    [data-bs-theme="light"] .job-filter-modal-subtitle {
+
+        color: #64748b;
+
+    }
+
+
+    /* close */
+
+    [data-bs-theme="light"] .job-filter-modal .btn-close {
+
+        filter: none;
+
+        opacity: .55;
+
+    }
+
+    [data-bs-theme="light"] .job-filter-modal .btn-close:hover {
+
+        opacity: 1;
+
+    }
+
+
+    /* =========================================================
+    LIGHT - MODAL BODY
+    ========================================================= */
+
+    [data-bs-theme="light"] .job-filter-modal .modal-body {
+
+        background: #ffffff;
+
+    }
+
+
+    [data-bs-theme="light"] .job-filter-modal .modal-body::-webkit-scrollbar-track {
+
+        background: #ffffff;
+
+    }
+
+    [data-bs-theme="light"] .job-filter-modal .modal-body::-webkit-scrollbar-thumb {
+
+        background: #cbd5e1;
+
+    }
+
+
+    /* =========================================================
+    LIGHT - FORM GROUP
+    ========================================================= */
+
+    [data-bs-theme="light"] .filter-form-group label {
+
+        color: #475569;
+
+    }
+
+
+    /* =========================================================
+    LIGHT - MODAL FORM CONTROL
+    ========================================================= */
+
+    [data-bs-theme="light"] .filter-form-control {
+
+        border-color: #dfe4ec;
+
+        background: #f8fafc;
+
+        color: #1e293b;
+
+    }
+
+    [data-bs-theme="light"] .filter-form-control:hover {
+
+        border-color: #cbd5e1;
+
+    }
+
+    [data-bs-theme="light"] .filter-form-control:focus {
+
+        border-color: #e8a401;
+
+        background: #ffffff;
+
+        box-shadow:
+            0 0 0 2px rgba(232, 164, 1, .10);
+
+    }
+
+    [data-bs-theme="light"] .filter-form-control option {
+
+        background: #ffffff;
+
+        color: #1e293b;
+
+    }
+
+
+    /* =========================================================
+    LIGHT - MODAL FOOTER
+    ========================================================= */
+
+    [data-bs-theme="light"] .job-filter-modal .modal-footer {
+
+        border-top-color: #e5e7eb;
+
+        background: #ffffff;
+
+    }
+
+
+    /* =========================================================
+    LIGHT - RESET
+    ========================================================= */
+
+    [data-bs-theme="light"] .btn-filter-reset {
+
+        color: #64748b;
+
+    }
+
+    [data-bs-theme="light"] .btn-filter-reset:hover {
+
+        background: #f1f5f9;
+
+        color: #1e293b;
+
+    }
+
+
+    /* =========================================================
+    LIGHT - APPLY
+    ========================================================= */
+
+    [data-bs-theme="light"] .btn-filter-apply {
+
+        border-color: #e8a401;
+
+        background: #e8a401;
+
+        color: #1f2937;
+
+    }
+
+    [data-bs-theme="light"] .btn-filter-apply:hover {
+
+        background: #f2b313;
+
+        border-color: #f2b313;
+
+    }
+
+
+
+    /* =========================================================
+    FIX METRONIC SCROLL
+    Tidak berhubungan dengan theme
+    ========================================================= */
 
     #kt_app_wrapper {
         min-height: 100vh;
@@ -542,39 +822,91 @@
         min-height: 0;
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | CONTENT BOLEH MEMANJANG
-    |--------------------------------------------------------------------------
-    */
-
     #kt_app_main .flex-column-fluid {
         min-height: 0;
     }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | JOB LIST
-    |--------------------------------------------------------------------------
-    */
 
     #jobList {
         width: 100%;
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | PASTIKAN CONTENT TIDAK TERKUNCI
-    |--------------------------------------------------------------------------
-    */
-
     html,
     body {
         min-height: 100%;
     }
+
+
+
+    /* =========================================================
+    MOBILE
+    ========================================================= */
+
+    @media (max-width: 767px) {
+
+        .job-filter-row {
+
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 8px;
+
+        }
+
+        .job-filter-dropdown {
+
+            width: 100%;
+
+        }
+
+        .job-filter-select {
+
+            font-size: 11px;
+
+            height: 37px;
+
+        }
+
+        .btn-more-filter {
+
+            width: 100%;
+
+            height: 37px;
+
+            font-size: 11px;
+
+        }
+
+    }
+
+
+
+    /* =========================================================
+    TABLET
+    ========================================================= */
+
+    @media (min-width: 768px) and (max-width: 991px) {
+
+        .job-filter-row {
+
+            flex-wrap: wrap;
+
+        }
+
+        .job-filter-dropdown {
+
+            flex: 1 1 calc(50% - 10px);
+
+        }
+
+        .btn-more-filter {
+
+            flex: 1 1 calc(50% - 10px);
+
+        }
+
+    }
+
 </style>
 
 <!-- Search -->

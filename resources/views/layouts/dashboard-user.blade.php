@@ -774,6 +774,24 @@
 
                                             </a>
 
+                                            <a href="{{ route('dashboard-user.training.index') }}?status=cancelled"
+                                            class="menu-link {{ Route::is('dashboard-user.training.*')
+                                            && request()->query('status') === 'cancelled'
+                                                ? 'active'
+                                                : '' }}">
+
+                                                <span class="menu-icon">
+
+                                                    <i class="ki-duotone ki-minus-circle fs-2"></i>
+
+                                                </span>
+
+                                                <span class="menu-title">
+                                                    Dibatalkan
+                                                </span>
+
+                                            </a>
+
                                         </div>
 
                                     @endif

@@ -9,7 +9,7 @@
         border:1px solid #26344c;
         border-radius:18px;
 
-        padding: 20px;
+        padding:20px;
 
         transition:.25s;
 
@@ -24,28 +24,28 @@
 
     .network-avatar{
 
-        width: 46px;
-        height: 46px;
+        width:46px;
+        height:46px;
 
-        border-radius: 50%;
-        object-fit: cover;
+        border-radius:50%;
+        object-fit:cover;
 
     }
 
     .network-name{
 
         color:#F4F7FB;
-        font-size: 14px;
-        font-weight: 700;
+        font-size:14px;
+        font-weight:700;
 
-        margin-bottom: 2px;
+        margin-bottom:2px;
 
     }
 
     .network-job{
 
         color:#a7b2cb;
-        font-size: 11px;
+        font-size:11px;
         line-height:1.2;
 
     }
@@ -60,8 +60,8 @@
     .network-mutual{
 
         color:#8894ad;
-        font-size: 11px;
-        margin-left: 5px;
+        font-size:11px;
+        margin-left:5px;
 
     }
 
@@ -74,11 +74,11 @@
         display:inline-flex;
         align-items:center;
 
-        padding: 2px 6px;
+        padding:2px 6px;
 
         border-radius:6px;
 
-        font-size: 9px;
+        font-size:9px;
         font-weight:600;
 
         border:1px solid;
@@ -115,17 +115,17 @@
 
     .btn-connect{
 
-        height: 32px;
+        height:32px;
 
         border-radius:30px;
 
         background:transparent;
-        border: 2px solid #e8a401;
+        border:2px solid #e8a401;
 
         color:#e8a401;
 
         font-weight:700;
-        font-size: 11px;
+        font-size:11px;
 
         transition:.25s;
 
@@ -140,8 +140,8 @@
 
     .btn-ignore{
 
-        width: 95px;
-        height: 32px;
+        width:95px;
+        height:32px;
 
         border-radius:30px;
 
@@ -152,7 +152,7 @@
         color:#8b97b1;
 
         font-weight:600;
-        font-size: 11px;
+        font-size:11px;
 
     }
 
@@ -162,6 +162,102 @@
         color:#fff;
 
     }
+
+
+    /*==========================
+    Light Mode
+    ===========================*/
+
+    [data-bs-theme="light"] .network-user-card{
+
+        background:#ffffff;
+        border-color:#e2e8f0;
+
+    }
+
+    [data-bs-theme="light"] .network-user-card:hover{
+
+        border-color:#e8a401;
+
+    }
+
+    [data-bs-theme="light"] .network-name{
+
+        color:#1e293b;
+
+    }
+
+    [data-bs-theme="light"] .network-job{
+
+        color:#64748b;
+
+    }
+
+    [data-bs-theme="light"] .network-company{
+
+        color:#64748b;
+
+    }
+
+    [data-bs-theme="light"] .network-mutual{
+
+        color:#94a3b8;
+
+    }
+
+    /* Badge tetap menggunakan warna identitas */
+    [data-bs-theme="light"] .badge-yellow{
+
+        color:#c98d00;
+        background:rgba(232,164,1,.10);
+        border-color:rgba(232,164,1,.35);
+
+    }
+
+    [data-bs-theme="light"] .badge-blue{
+
+        color:#2878c7;
+        background:rgba(42,134,255,.08);
+        border-color:rgba(42,134,255,.30);
+
+    }
+
+    [data-bs-theme="light"] .badge-green{
+
+        color:#0b9f6a;
+        background:rgba(16,212,140,.08);
+        border-color:rgba(16,212,140,.30);
+
+    }
+
+    [data-bs-theme="light"] .btn-connect{
+
+        color:#d18f00;
+        border-color:#e8a401;
+
+    }
+
+    [data-bs-theme="light"] .btn-connect:hover{
+
+        background:#e8a401;
+        color:#111827;
+
+    }
+
+    [data-bs-theme="light"] .btn-ignore{
+
+        border-color:#dbe3ee;
+        color:#64748b;
+
+    }
+
+    [data-bs-theme="light"] .btn-ignore:hover{
+
+        background:#f1f5f9;
+        color:#334155;
+
+    }
+
 
     /*==========================
     Responsive

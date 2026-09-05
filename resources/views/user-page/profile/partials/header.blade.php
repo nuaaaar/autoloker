@@ -286,6 +286,7 @@
         color:#f6b000;
 
     }
+
     /* ===========================================
     TAB
     =========================================== */
@@ -664,6 +665,159 @@
         color:#f7b003;
 
     }
+
+
+    /* ===========================================
+    LIGHT MODE
+    =========================================== */
+
+    [data-bs-theme="light"] .profile-header-card{
+        background:#ffffff;
+        border-color:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .profile-cover{
+        background:
+            repeating-linear-gradient(
+                45deg,
+                #e2e8f0,
+                #e2e8f0 2px,
+                #edf1f5 2px,
+                #edf1f5 20px
+            );
+    }
+
+    [data-bs-theme="light"] .profile-avatar{
+        border-color:#ffffff;
+    }
+
+    [data-bs-theme="light"] .profile-verified{
+        border-color:#ffffff;
+    }
+
+    [data-bs-theme="light"] .profile-name{
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .profile-position{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .profile-meta{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .profile-meta i{
+        color:#d18f00;
+    }
+
+    [data-bs-theme="light"] .badge-license{
+        border-color:rgba(232,164,1,.35);
+        background:rgba(232,164,1,.08);
+        color:#c98d00;
+    }
+
+    [data-bs-theme="light"] .profile-stat{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .profile-stat strong{
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .btn-edit-profile{
+        color:#d18f00;
+        border-color:#f6b000 !important;
+    }
+
+    [data-bs-theme="light"] .btn-edit-profile:hover{
+        background:#f6b000;
+        color:#111;
+    }
+
+    [data-bs-theme="light"] .btn-profile-primary{
+        background:#f6b000;
+        color:#111;
+    }
+
+    [data-bs-theme="light"] .btn-profile-primary:hover{
+        background:#ffc21a;
+        color:#111;
+    }
+
+    [data-bs-theme="light"] .btn-profile-secondary{
+        border-color:#dbe3ee !important;
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .btn-profile-secondary:hover{
+        border-color:#f6b000 !important;
+        color:#d18f00;
+    }
+
+    [data-bs-theme="light"] .profile-tab{
+        border-top-color:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .profile-tab a{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .profile-tab a:hover{
+        color:#d18f00;
+    }
+
+    [data-bs-theme="light"] .profile-tab a.active{
+        color:#d18f00;
+    }
+
+    [data-bs-theme="light"] .profile-tab a.active::after{
+        background:#f6b000;
+    }
+
+    [data-bs-theme="light"] .profile-menu{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .profile-menu:hover{
+        color:#d18f00;
+    }
+
+    [data-bs-theme="light"] .profile-menu.active{
+        color:#d18f00;
+    }
+
+    [data-bs-theme="light"] .profile-menu::after{
+        background:#f6b000;
+    }
+
+    [data-bs-theme="light"] .profile-section-card{
+        background:#ffffff;
+        border-color:#e2e8f0;
+    }
+
+    [data-bs-theme="light"] .section-title{
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .section-text{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .badge-license-empty{
+        background:#f8fafc;
+        border-color:#cbd5e1;
+        color:#94a3b8;
+    }
+
+    [data-bs-theme="light"] .profile-empty{
+        color:#94a3b8;
+    }
+
+    [data-bs-theme="light"] .profile-empty i{
+        color:#d18f00;
+    }
+
 </style>
 
 <div class="card profile-header-card mb-5">

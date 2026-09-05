@@ -3,7 +3,7 @@
         display:flex;
         align-items:center;
         gap:2px;
-        font-size: 11px;
+        font-size:11px;
         font-weight:500;
         margin-bottom:28px;
     }
@@ -22,7 +22,7 @@
     }
 
     .network-breadcrumb a i{
-        font-size: 11px;
+        font-size:11px;
     }
 
     .network-breadcrumb .active{
@@ -32,6 +32,27 @@
 
     .network-breadcrumb .text-muted{
         color:#5b6985 !important;
+    }
+
+
+    /*==================================
+    LIGHT MODE
+    ==================================*/
+
+    [data-bs-theme="light"] .network-breadcrumb a{
+        color:#64748b;
+    }
+
+    [data-bs-theme="light"] .network-breadcrumb a:hover{
+        color:#e8a401;
+    }
+
+    [data-bs-theme="light"] .network-breadcrumb .active{
+        color:#1e293b;
+    }
+
+    [data-bs-theme="light"] .network-breadcrumb .text-muted{
+        color:#94a3b8 !important;
     }
 </style>
 
