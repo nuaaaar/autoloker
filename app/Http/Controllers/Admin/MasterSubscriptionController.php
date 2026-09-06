@@ -176,7 +176,7 @@ class MasterSubscriptionController extends Controller
 
         if ($request->filled('features')) {
 
-            $features = json_decode(
+            $decodedFeatures = json_decode(
                 $request->features,
                 true
             );
@@ -190,6 +190,9 @@ class MasterSubscriptionController extends Controller
 
             }
 
+            $features = json_encode(
+                $decodedFeatures
+            );
         }
 
 
