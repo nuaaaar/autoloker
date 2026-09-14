@@ -2,9 +2,6 @@
 
 namespace App\Services\Api;
 
-use App\Models\BUJP;
-use App\Models\Company;
-use App\Models\Security;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
@@ -26,7 +23,7 @@ class AuthenticationService
                 ->orWhere('phone_number', $data['identifier']);
         })->first();
 
-        if (!$user || !Hash::check($data['password'], $user->password)) {
+        if (! $user || ! Hash::check($data['password'], $user->password)) {
             RateLimiter::hit($key, 60);
             throw ValidationException::withMessages(['identifier' => 'Invalid credentials.']);
         }
@@ -46,6 +43,20 @@ class AuthenticationService
             'tokens' => $this->tokens->issue($user),
             'user' => $this->userData($user),
         ];
+    }
+
+    public function changePassword(User $user, array $data): void
+    {
+        if ($user->has_local_password && ! Hash::check($data['current_password'], $user->password)) {
+            throw ValidationException::withMessages([
+                'current_password' => 'Current password is incorrect.',
+            ]);
+        }
+
+        $user->update([
+            'password' => Hash::make($data['password']),
+            'has_local_password' => true,
+        ]);
     }
 
     public function userData(User $user): array
@@ -82,6 +93,7 @@ class AuthenticationService
             'avatar' => $user->avatar,
             'status' => $user->status,
             'email_verified' => $user->email_verified_at !== null,
+            'has_local_password' => (bool) $user->has_local_password,
             'profile' => $profileData,
             'capabilities' => [
                 'profile_complete' => (bool) $complete,

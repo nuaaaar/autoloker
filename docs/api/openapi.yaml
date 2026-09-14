@@ -245,6 +245,50 @@ paths:
               schema:
                 $ref: '#/components/schemas/ValidationErrorResponse'
 
+  /api/password:
+    patch:
+      summary: Change or set the authenticated user's local password
+      description: |
+        Changes the local password for the authenticated user. `current_password`
+        is required when `has_local_password` is true and can be omitted when a
+        Google-only user is setting a local password for the first time.
+      operationId: changeAuthenticatedPassword
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+            examples:
+              existing-password:
+                summary: Change an existing local password
+                value:
+                  current_password: OldPass1
+                  password: NewPass2
+                  password_confirmation: NewPass2
+              google-account:
+                summary: Set a local password for a Google account
+                value:
+                  password: NewPass2
+                  password_confirmation: NewPass2
+      responses:
+        '200':
+          description: Password changed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '422':
+          description: Current password is incorrect or password validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
   /api/me:
     get:
       summary: Get the authenticated mobile user
@@ -601,6 +645,21 @@ components:
             security_history:
               $ref: '#/components/schemas/SecurityHistory'
 
+    ChangePasswordRequest:
+      type: object
+      required: [password, password_confirmation]
+      properties:
+        current_password:
+          type: string
+          format: password
+          description: Required when the authenticated user has a local password.
+        password:
+          $ref: '#/components/schemas/Password'
+        password_confirmation:
+          type: string
+          format: password
+          description: Must match password.
+
     LoginRequest:
       type: object
       required: [role, identifier, password]
@@ -684,7 +743,7 @@ components:
 
     AuthenticatedUser:
       type: object
-      required: [id, uuid, role, name, email, status, profile, capabilities]
+      required: [id, uuid, role, name, email, status, profile, capabilities, has_local_password]
       properties:
         id: {type: integer}
         uuid: {type: string, format: uuid}
@@ -699,6 +758,9 @@ components:
           type: string
           enum: [active, non-active]
         email_verified: {type: boolean}
+        has_local_password:
+          type: boolean
+          description: Whether the user has a usable local password. False for Google-only users before first-time password setup.
         profile:
           oneOf:
             - $ref: '#/components/schemas/SecurityProfileState'

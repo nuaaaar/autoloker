@@ -2,26 +2,26 @@
 
 namespace App\Http\Controllers;
 
-use Laravel\Socialite\Facades\Socialite;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
+use App\Models\BUJP;
+use App\Models\Company;
+use App\Models\Security;
+use App\Models\User;
+use App\Models\UserBUJP;
+use App\Models\UserCompany;
 use App\Models\UserSecurity;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use App\Models\UserCompany;
-use App\Models\UserBUJP;
-use App\Models\Security;
-use App\Models\Company;
-use App\Models\BUJP;
-use App\Models\User;
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
     public function login(Request $request)
     {
         $request->validate([
-            'role'     => 'required|in:satpam,company',
-            'email'    => 'required',
+            'role' => 'required|in:satpam,company',
+            'email' => 'required',
             'password' => 'required',
         ]);
 
@@ -29,13 +29,13 @@ class AuthController extends Controller
 
         // Cari berdasarkan email ATAU nomor HP
         $user = User::where('email', $login)
-                    ->orWhere('phone_number', $login)
-                    ->first();
+            ->orWhere('phone_number', $login)
+            ->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (! $user || ! Hash::check($request->password, $user->password)) {
 
             return response()->json([
-                'status'  => false,
+                'status' => false,
                 'message' => 'Email/No. WhatsApp atau password salah.',
             ], 422);
 
@@ -47,10 +47,10 @@ class AuthController extends Controller
             'company' => ['company', 'bujp'],
         ];
 
-        if (!in_array($user->role, $allowedRoles[$request->role])) {
+        if (! in_array($user->role, $allowedRoles[$request->role])) {
 
             return response()->json([
-                'status'  => false,
+                'status' => false,
                 'message' => 'Akun tidak sesuai dengan jenis login yang dipilih.',
             ], 422);
 
@@ -73,8 +73,8 @@ class AuthController extends Controller
         }
 
         return response()->json([
-            'status'   => true,
-            'message'  => 'Login berhasil.',
+            'status' => true,
+            'message' => 'Login berhasil.',
             'redirect' => $redirect,
         ]);
     }
@@ -93,7 +93,7 @@ class AuthController extends Controller
     {
         try {
 
-            $role   = session('google_login_role');
+            $role = session('google_login_role');
             $action = session('google_login_action');
 
             $googleUser = Socialite::driver('google')->user();
@@ -113,29 +113,30 @@ class AuthController extends Controller
 
                     session()->forget([
                         'google_login_role',
-                        'google_login_action'
+                        'google_login_action',
                     ]);
 
                     return redirect()
                         ->route('login')
                         ->with('swal', [
-                            'icon'  => 'warning',
+                            'icon' => 'warning',
                             'title' => 'Email Sudah Terdaftar',
-                            'text'  => 'Silakan login menggunakan akun tersebut.'
+                            'text' => 'Silakan login menggunakan akun tersebut.',
                         ]);
 
                 }
 
                 $user = User::create([
 
-                    'name'          => $googleUser->name,
-                    'email'         => $googleUser->email,
-                    'google_id'     => $googleUser->id,
-                    'avatar'        => $googleUser->avatar,
-                    'password'      => Hash::make(Str::random(20)),
-                    'role'          => $role,
-                    'status'        => 'active',
-                    'email_verified_at' => date('Y-m-d H:i:s')
+                    'name' => $googleUser->name,
+                    'email' => $googleUser->email,
+                    'google_id' => $googleUser->id,
+                    'avatar' => $googleUser->avatar,
+                    'password' => Hash::make(Str::random(20)),
+                    'has_local_password' => false,
+                    'role' => $role,
+                    'status' => 'active',
+                    'email_verified_at' => date('Y-m-d H:i:s'),
 
                 ]);
 
@@ -145,49 +146,48 @@ class AuthController extends Controller
 
                 session()->forget([
                     'google_login_role',
-                    'google_login_action'
+                    'google_login_action',
                 ]);
 
                 // Company diarahkan ke lengkapi profil
                 if ($role == 'company') {
 
                     $userCompany = UserCompany::create([
-                        'user_id' => $user->id
+                        'user_id' => $user->id,
                     ]);
 
                     Company::create([
-                        'user_company_id' => $userCompany->id
+                        'user_company_id' => $userCompany->id,
                     ]);
 
                     return redirect()->route('dashboard-user.index');
 
-                } elseif($role == 'satpam') {
+                } elseif ($role == 'satpam') {
 
                     $userSecurity = UserSecurity::create([
-                        'user_id' => $user->id
+                        'user_id' => $user->id,
                     ]);
 
                     Security::create([
-                        'user_security_id' => $userSecurity->id
+                        'user_security_id' => $userSecurity->id,
                     ]);
-                    
+
                     // Satpam diarahkan ke lengkapi profil
                     // return redirect()->route('security.complete-profile');
 
                     return redirect()->route('user-page.home');
-                } elseif($role == 'bujp') {
+                } elseif ($role == 'bujp') {
 
                     $userBUJP = UserBUJP::create([
-                        'user_id' => $user->id
+                        'user_id' => $user->id,
                     ]);
 
                     BUJP::create([
-                        'user_b_u_j_p_id' => $userBUJP->id
+                        'user_b_u_j_p_id' => $userBUJP->id,
                     ]);
 
                     return redirect()->route('dashboard-user.index');
                 }
-
 
             }
 
@@ -196,20 +196,19 @@ class AuthController extends Controller
              * LOGIN GOOGLE
              * =====================================
              */
-
-            if (!$user) {
+            if (! $user) {
 
                 session()->forget([
                     'google_login_role',
-                    'google_login_action'
+                    'google_login_action',
                 ]);
 
                 return redirect()
                     ->route('login')
                     ->with('swal', [
-                        'icon'  => 'warning',
+                        'icon' => 'warning',
                         'title' => 'Akun Belum Terdaftar',
-                        'text'  => 'Email Google Anda belum terdaftar.'
+                        'text' => 'Email Google Anda belum terdaftar.',
                     ]);
 
             }
@@ -219,21 +218,21 @@ class AuthController extends Controller
                 'company' => ['company', 'bujp'],
             ];
 
-            if (!in_array($user->role, $allowedRoles[$role])) {
+            if (! in_array($user->role, $allowedRoles[$role])) {
 
                 session()->forget([
                     'google_login_role',
-                    'google_login_action'
+                    'google_login_action',
                 ]);
 
                 return redirect()
                     ->route('login')
                     ->with('swal', [
-                        'icon'  => 'error',
+                        'icon' => 'error',
                         'title' => 'Role Tidak Sesuai',
-                        'text'  => $role === 'company'
+                        'text' => $role === 'company'
                             ? 'Akun Google ini bukan akun Perusahaan/BUJP.'
-                            : 'Akun Google ini bukan akun Satpam.'
+                            : 'Akun Google ini bukan akun Satpam.',
                     ]);
 
             }
@@ -242,7 +241,7 @@ class AuthController extends Controller
 
                 $user->update([
                     'google_id' => $googleUser->id,
-                    'avatar'    => $googleUser->avatar
+                    'avatar' => $googleUser->avatar,
                 ]);
 
             }
@@ -253,7 +252,7 @@ class AuthController extends Controller
 
             session()->forget([
                 'google_login_role',
-                'google_login_action'
+                'google_login_action',
             ]);
 
             if (Auth::user()->role == 'satpam') {
@@ -270,15 +269,15 @@ class AuthController extends Controller
 
             session()->forget([
                 'google_login_role',
-                'google_login_action'
+                'google_login_action',
             ]);
 
             return redirect()
                 ->route('login')
                 ->with('swal', [
-                    'icon'  => 'error',
+                    'icon' => 'error',
                     'title' => 'Google Gagal',
-                    'text'  => 'Terjadi kesalahan saat autentikasi Google.'
+                    'text' => 'Terjadi kesalahan saat autentikasi Google.',
                 ]);
 
         }
@@ -293,9 +292,9 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return response()->json([
-            'status'   => true,
-            'message'  => 'Berhasil logout.',
-            'redirect' => route('login')
+            'status' => true,
+            'message' => 'Berhasil logout.',
+            'redirect' => route('login'),
         ]);
     }
 }

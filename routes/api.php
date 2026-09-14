@@ -1,11 +1,12 @@
 <?php
 
+use App\Http\Controllers\Api\ChangePasswordController;
 use App\Http\Controllers\Api\LoginController;
+use App\Http\Controllers\Api\LogoutController;
 use App\Http\Controllers\Api\MeController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ReferenceDataController;
 use App\Http\Controllers\Api\RefreshTokenController;
-use App\Http\Controllers\Api\LogoutController;
 use App\Http\Controllers\Api\RegisterController;
 use App\Http\Controllers\Api\SecurityCertificateController;
 use App\Http\Controllers\Api\SecurityHistoryController;
@@ -16,6 +17,7 @@ Route::post('/refresh-token', RefreshTokenController::class)->name('api.refresh-
 Route::middleware('api.token')->group(function () {
     Route::get('/profile', [ProfileController::class, 'show'])->name('api.profile.show');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('api.profile.update');
+    Route::patch('/password', ChangePasswordController::class)->name('api.password.update');
     Route::get('/me', MeController::class)->name('api.me');
     Route::post('/logout', LogoutController::class)->name('api.logout');
     Route::apiResource('security-histories', SecurityHistoryController::class)
