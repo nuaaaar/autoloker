@@ -21,23 +21,26 @@ class ProfileService
         'satpam' => [
             'formal_photo', 'name', 'birth_place', 'birth_date', 'gender',
             'address', 'phone_number', 'email', 'ktp_number',
-            'registration_number', 'work_experience', 'province', 'city',
-            'district', 'village', 'height', 'width', 'is_out_of_town_agree',
+            'registration_number', 'work_experience', 'province',
+            'province_code', 'city', 'city_code', 'district', 'district_code',
+            'village', 'village_code', 'height', 'width', 'is_out_of_town_agree',
             'is_shift_agree', 'ability', 'placements', 'self_description',
             'additional_note', 'work_status', 'company_name', 'position', 'sim',
         ],
         'company' => [
             'company_name', 'industry', 'logo', 'description', 'npwp', 'nib',
-            'business_license', 'email', 'phone', 'website', 'province', 'city',
-            'district', 'village', 'postal_code', 'address', 'instagram',
+            'business_license', 'email', 'phone', 'website', 'province',
+            'province_code', 'city', 'city_code', 'district', 'district_code',
+            'village', 'village_code', 'postal_code', 'address', 'instagram',
             'facebook', 'linkedin', 'youtube',
         ],
         'bujp' => [
             'company_name', 'industry', 'logo', 'description', 'npwp', 'nib',
             'business_license', 'sio_number', 'sio_expired_date', 'sio_file',
-            'email', 'phone', 'website', 'province', 'city', 'district',
-            'village', 'postal_code', 'address', 'instagram', 'facebook',
-            'linkedin', 'youtube',
+            'email', 'phone', 'website', 'province', 'province_code', 'city',
+            'city_code', 'district', 'district_code', 'village', 'village_code',
+            'postal_code', 'address', 'instagram', 'facebook', 'linkedin',
+            'youtube',
         ],
     ];
 
@@ -48,8 +51,10 @@ class ProfileService
         if ($profile === null) {
             throw new NotFoundHttpException('Profile not found.');
         }
+        $this->populateMissingLocationCodes($profile);
 
         $profileValues = $profile->only(self::FIELDS[$user->role]);
+        $profileValues = $this->withResolvedLocationCodes($profileValues);
         foreach (['ability', 'placements'] as $field) {
             if (array_key_exists($field, $profileValues)) {
                 $profileValues[$field] = $profileValues[$field] === null || $profileValues[$field] === ''
@@ -116,10 +121,23 @@ class ProfileService
     }
     private function normalize(array $data): array
     {
-        foreach (['province' => Province::class, 'city' => City::class, 'district' => District::class, 'village' => Village::class] as $field => $model) {
-            if (array_key_exists($field, $data) && $data[$field] !== null) {
-                $data[$field] = $model::where('code', $data[$field])->value('name');
+        foreach ([
+            'province' => [Province::class, 'province_code'],
+            'city' => [City::class, 'city_code'],
+            'district' => [District::class, 'district_code'],
+            'village' => [Village::class, 'village_code'],
+        ] as $field => [$model, $codeField]) {
+            if (!array_key_exists($field, $data)) {
+                continue;
             }
+
+            if ($data[$field] === null) {
+                $data[$codeField] = null;
+                continue;
+            }
+
+            $data[$codeField] = $data[$field];
+            $data[$field] = $model::where('code', $data[$field])->value('name');
         }
 
         foreach (['ability', 'placements'] as $field) {
@@ -129,6 +147,91 @@ class ProfileService
         }
 
         return $data;
+    }
+
+    private function populateMissingLocationCodes(Security|Company|BUJP $profile): void
+    {
+        $values = $profile->only([
+            'province', 'province_code', 'city', 'city_code',
+            'district', 'district_code', 'village', 'village_code',
+        ]);
+        $resolved = $this->withResolvedLocationCodes($values);
+        $updates = [];
+
+        foreach (['province_code', 'city_code', 'district_code', 'village_code'] as $field) {
+            if ($profile->{$field} === null && ($resolved[$field] ?? null) !== null) {
+                $updates[$field] = $resolved[$field];
+            }
+        }
+
+        if ($updates !== []) {
+            $profile->update($updates);
+        }
+    }
+
+    private function withResolvedLocationCodes(array $values): array
+    {
+        $provinceCode = $this->resolveLocationCode(
+            Province::class,
+            $values['province'] ?? null
+        ) ?? ($values['province_code'] ?? null);
+
+        $cityCode = $this->resolveLocationCode(
+            City::class,
+            $values['city'] ?? null,
+            'province_code',
+            $provinceCode
+        ) ?? ($values['city_code'] ?? null);
+
+        $districtCode = $this->resolveLocationCode(
+            District::class,
+            $values['district'] ?? null,
+            'city_code',
+            $cityCode
+        ) ?? ($values['district_code'] ?? null);
+
+        $villageCode = $this->resolveLocationCode(
+            Village::class,
+            $values['village'] ?? null,
+            'district_code',
+            $districtCode
+        ) ?? ($values['village_code'] ?? null);
+
+        $values['province_code'] = $provinceCode;
+        $values['city_code'] = $cityCode;
+        $values['district_code'] = $districtCode;
+        $values['village_code'] = $villageCode;
+
+        return $values;
+    }
+
+    private function resolveLocationCode(
+        string $model,
+        mixed $value,
+        ?string $parentColumn = null,
+        ?string $parentCode = null
+    ): ?string {
+        if ($value === null || trim((string) $value) === '') {
+            return null;
+        }
+
+        if ($parentColumn !== null && $parentCode === null) {
+            return null;
+        }
+
+        $query = $model::query();
+
+        if ($parentColumn !== null) {
+            $query->where($parentColumn, $parentCode);
+        }
+
+        return $query
+            ->where(function ($query) use ($value): void {
+                $query
+                    ->where('code', (string) $value)
+                    ->orWhere('name', (string) $value);
+            })
+            ->value('code');
     }
 
 

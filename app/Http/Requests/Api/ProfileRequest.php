@@ -13,8 +13,29 @@ class ProfileRequest extends FormRequest
     }
     protected function prepareForValidation(): void
     {
+        $normalized = [];
+
         if ($this->has('additional_notes') && ! $this->has('additional_note')) {
-            $this->merge(['additional_note' => $this->input('additional_notes')]);
+            $normalized['additional_note'] = $this->input('additional_notes');
+        }
+
+        if (is_string($this->input('gender'))) {
+            $normalized['gender'] = strtolower(trim($this->input('gender')));
+        }
+
+        foreach (['ability', 'placements'] as $field) {
+            if (is_string($this->input($field))) {
+                $normalized[$field] = $this->input($field) === ''
+                    ? []
+                    : array_values(array_filter(
+                        array_map('trim', explode(',', $this->input($field))),
+                        static fn (string $value): bool => $value !== ''
+                    ));
+            }
+        }
+
+        if ($normalized !== []) {
+            $this->merge($normalized);
         }
     }
     public function rules(): array
@@ -41,6 +62,7 @@ class ProfileRequest extends FormRequest
                 'district' => ['sometimes', 'nullable', 'exists:indonesia_districts,code'],
                 'village' => ['sometimes', 'nullable', 'exists:indonesia_villages,code'],
                 'width' => ['sometimes', 'nullable', 'string', 'max:20'],
+                'height' => ['sometimes', 'nullable', 'string', 'max:20'],
                 'is_out_of_town_agree' => ['sometimes', 'boolean'],
                 'is_shift_agree' => ['sometimes', 'boolean'],
                 'ability' => ['sometimes', 'nullable', 'array'],
@@ -71,6 +93,7 @@ class ProfileRequest extends FormRequest
             'city' => ['sometimes', 'nullable', 'exists:indonesia_cities,code'],
             'district' => ['sometimes', 'nullable', 'exists:indonesia_districts,code'],
             'village' => ['sometimes', 'nullable', 'exists:indonesia_villages,code'],
+            'postal_code' => ['sometimes', 'nullable', 'string', 'max:10'],
             'address' => ['sometimes', 'nullable', 'string'],
         ];
 

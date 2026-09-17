@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Autoloker API
   version: 1.0.0
-  description: API documentation for mobile authentication and user registration.
+  description: API documentation for mobile authentication, profile editing, and hierarchical location references.
 
 servers:
   - url: http://localhost
@@ -830,23 +830,120 @@ components:
           required: [data]
           properties:
             data:
-              type: object
-              additionalProperties: true
+              $ref: '#/components/schemas/ProfileData'
+
+    ProfileData:
+      type: object
+      description: Role-specific profile data. Location values are returned as names together with their stable codes.
+      additionalProperties: true
+      properties:
+        province: {type: [string, 'null']}
+        province_code: {type: [string, 'null'], description: Province code}
+        city: {type: [string, 'null']}
+        city_code: {type: [string, 'null'], description: City code}
+        district: {type: [string, 'null']}
+        district_code: {type: [string, 'null'], description: District code}
+        village: {type: [string, 'null']}
+        village_code: {type: [string, 'null'], description: Village code}
+        ability:
+          type: array
+          items: {type: string}
+        placements:
+          type: array
+          items: {type: string}
 
     UpdateSecurityProfileRequest:
       type: object
-      description: Partial security profile fields. All properties are optional.
-      additionalProperties: true
+      description: Partial security profile update. Location fields use master location codes. `additional_notes` is accepted as a legacy alias for `additional_note`.
+      additionalProperties: false
+      properties:
+        name: {type: string, minLength: 3, maxLength: 150}
+        email: {type: string, format: email, maxLength: 100}
+        phone_number: {type: [string, 'null'], minLength: 10, maxLength: 15}
+        birth_place: {type: [string, 'null'], maxLength: 150}
+        birth_date: {type: [string, 'null'], format: date}
+        gender: {type: [string, 'null'], enum: [laki-laki, perempuan, null]}
+        address: {type: [string, 'null']}
+        ktp_number: {type: [string, 'null'], maxLength: 50}
+        registration_number: {type: [string, 'null'], maxLength: 100}
+        work_experience: {type: [string, 'null'], maxLength: 100}
+        province: {type: [string, 'null'], description: Province code}
+        city: {type: [string, 'null'], description: City code}
+        district: {type: [string, 'null'], description: District code}
+        village: {type: [string, 'null'], description: Village code}
+        width: {type: [string, 'null'], maxLength: 20}
+        height: {type: [string, 'null'], maxLength: 20}
+        is_out_of_town_agree: {type: [boolean, 'null']}
+        is_shift_agree: {type: [boolean, 'null']}
+        ability:
+          type: [array, 'null']
+          items: {type: string, maxLength: 255}
+        placements:
+          type: [array, 'null']
+          items: {type: string, maxLength: 255}
+        self_description: {type: [string, 'null']}
+        additional_note: {type: [string, 'null'], maxLength: 500}
+        additional_notes: {type: [string, 'null'], maxLength: 500, deprecated: true}
+        work_status: {type: [string, 'null'], maxLength: 100}
+        company_name: {type: [string, 'null'], maxLength: 255}
+        position: {type: [string, 'null'], maxLength: 150}
+        sim: {type: [string, 'null'], maxLength: 50}
+        formal_photo: {type: string, format: binary}
 
     UpdateCompanyProfileRequest:
       type: object
-      description: Partial company profile fields. All properties are optional.
-      additionalProperties: true
+      description: Partial company profile update. Location fields use master location codes.
+      additionalProperties: false
+      properties:
+        company_name: {type: [string, 'null'], maxLength: 255}
+        industry: {type: [string, 'null'], maxLength: 255}
+        logo: {type: string, format: binary}
+        description: {type: [string, 'null']}
+        npwp: {type: [string, 'null'], maxLength: 50}
+        nib: {type: [string, 'null'], maxLength: 50}
+        business_license: {type: [string, 'null'], maxLength: 100}
+        email: {type: [string, 'null'], format: email, maxLength: 100}
+        phone: {type: [string, 'null'], maxLength: 30}
+        website: {type: [string, 'null'], format: uri, maxLength: 255}
+        province: {type: [string, 'null'], description: Province code}
+        city: {type: [string, 'null'], description: City code}
+        district: {type: [string, 'null'], description: District code}
+        village: {type: [string, 'null'], description: Village code}
+        postal_code: {type: [string, 'null'], maxLength: 10}
+        address: {type: [string, 'null']}
+        instagram: {type: [string, 'null'], format: uri, maxLength: 255}
+        facebook: {type: [string, 'null'], format: uri, maxLength: 255}
+        linkedin: {type: [string, 'null'], format: uri, maxLength: 255}
+        youtube: {type: [string, 'null'], format: uri, maxLength: 255}
 
     UpdateBujpProfileRequest:
       type: object
-      description: Partial BUJP profile fields. All properties are optional.
-      additionalProperties: true
+      description: Partial BUJP profile update. Location fields use master location codes.
+      additionalProperties: false
+      properties:
+        company_name: {type: [string, 'null'], maxLength: 255}
+        industry: {type: [string, 'null'], maxLength: 255}
+        logo: {type: string, format: binary}
+        description: {type: [string, 'null']}
+        npwp: {type: [string, 'null'], maxLength: 50}
+        nib: {type: [string, 'null'], maxLength: 50}
+        business_license: {type: [string, 'null'], maxLength: 100}
+        sio_number: {type: [string, 'null'], maxLength: 100}
+        sio_expired_date: {type: [string, 'null'], format: date}
+        sio_file: {type: string, format: binary}
+        email: {type: [string, 'null'], format: email, maxLength: 100}
+        phone: {type: [string, 'null'], maxLength: 30}
+        website: {type: [string, 'null'], format: uri, maxLength: 255}
+        province: {type: [string, 'null'], description: Province code}
+        city: {type: [string, 'null'], description: City code}
+        district: {type: [string, 'null'], description: District code}
+        village: {type: [string, 'null'], description: Village code}
+        postal_code: {type: [string, 'null'], maxLength: 10}
+        address: {type: [string, 'null']}
+        instagram: {type: [string, 'null'], format: uri, maxLength: 255}
+        facebook: {type: [string, 'null'], format: uri, maxLength: 255}
+        linkedin: {type: [string, 'null'], format: uri, maxLength: 255}
+        youtube: {type: [string, 'null'], format: uri, maxLength: 255}
 
     SecurityProfileState:
       $ref: '#/components/schemas/ProfileState'
@@ -1162,8 +1259,8 @@ components:
         password_confirmation: Secret123
         agree: true
     UpdateSecurityProfileRequest:
-      summary: Complete security profile update
-      description: Send all fields to complete a security profile; omit fields for partial updates.
+      summary: Partial security profile update
+      description: Omit fields for partial updates. Location fields use master location codes. The response returns both location names and codes.
       value:
         name: Budi Santoso
         birth_place: Balikpapan
@@ -1175,16 +1272,20 @@ components:
         ktp_number: '6471011501950001'
         registration_number: SAT-2026-0001
         work_experience: 3-5 Tahun
-        province: Kalimantan Timur
-        city: Balikpapan
-        district: Balikpapan Selatan
-        village: Damai
+        province: '11'
+        city: '1101'
+        district: '110101'
+        village: '1101012001'
         height: '170'
         width: '65'
         is_out_of_town_agree: true
         is_shift_agree: true
-        ability: Pengamanan objek vital, patroli
-        placements: Perkantoran, pusat perbelanjaan
+        ability:
+          - Pengamanan objek vital
+          - patroli
+        placements:
+          - Perkantoran
+          - pusat perbelanjaan
         self_description: Berpengalaman sebagai petugas keamanan.
         additional_note: Bersedia ditempatkan sesuai kebutuhan.
         work_status: Aktif
@@ -1192,8 +1293,8 @@ components:
         position: Security Officer
         sim: SIM C
     UpdateCompanyProfileRequest:
-      summary: Complete company profile update
-      description: Send all fields to complete a company profile; omit fields for partial updates.
+      summary: Partial company profile update
+      description: Omit fields for partial updates. Location fields use master location codes. The response returns both location names and codes.
       value:
         company_name: PT Example Indonesia
         industry: Teknologi Informasi
@@ -1204,10 +1305,10 @@ components:
         email: company@example.com
         phone: '0215551234'
         website: https://example.com
-        province: DKI Jakarta
-        city: Jakarta Selatan
-        district: Kebayoran Baru
-        village: Senayan
+        province: '31'
+        city: '3174'
+        district: '317401'
+        village: '3174011001'
         postal_code: '12190'
         address: Jalan Asia Afrika No. 8
         instagram: https://instagram.com/example
@@ -1215,8 +1316,8 @@ components:
         linkedin: https://linkedin.com/company/example
         youtube: https://youtube.com/@example
     UpdateBujpProfileRequest:
-      summary: Complete BUJP profile update
-      description: Send all fields to complete a BUJP profile; omit fields for partial updates.
+      summary: Partial BUJP profile update
+      description: Omit fields for partial updates. Location fields use master location codes. The response returns both location names and codes.
       value:
         company_name: PT Security Services
         industry: Jasa Keamanan
@@ -1230,10 +1331,10 @@ components:
         email: admin@security.example
         phone: '0215551234'
         website: https://security.example
-        province: DKI Jakarta
-        city: Jakarta Selatan
-        district: Kebayoran Baru
-        village: Senayan
+        province: '31'
+        city: '3174'
+        district: '317401'
+        village: '3174011001'
         postal_code: '12190'
         address: Jalan Asia Afrika No. 8
         instagram: https://instagram.com/security
