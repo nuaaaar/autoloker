@@ -833,7 +833,7 @@ components:
         is_badge:
           type: integer
           enum: [0, 1]
-          description: 1 marks this certificate as the security's badge certificate. Only one certificate per security can be marked as a badge.
+          description: Setting this to 1 marks this as the security's badge and automatically releases any existing badge for the same security.
 
     CreateSecurityCertificateRequest:
       type: object
@@ -867,7 +867,7 @@ components:
         is_badge:
           type: integer
           enum: [0, 1]
-          default: 0
+          description: Set to 1 to replace the security's current badge; set to 0 to release this certificate as the badge.
 
     UpdateSecurityCertificateRequest:
       type: object
@@ -901,6 +901,7 @@ components:
         is_badge:
           type: integer
           enum: [0, 1]
+          description: Set to 1 to replace the security's current badge; set to 0 to release this certificate as the badge.
 
     SecurityCertificateListResponse:
       type: object
