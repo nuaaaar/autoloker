@@ -95,4 +95,27 @@ class SecurityHistoryTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.security_history.is_current', false);
     }
+    public function test_missing_history_returns_safe_not_found_response(): void
+    {
+        $user = User::create([
+            'name' => 'Not Found User',
+            'email' => 'not-found@example.com',
+            'phone_number' => '081234567892',
+            'google_id' => '',
+            'password' => 'password',
+            'role' => 'satpam',
+            'status' => 'active',
+        ]);
+        $relation = UserSecurity::create(['user_id' => $user->id]);
+        Security::create(['user_security_id' => $relation->id, 'name' => 'Not Found User']);
+        $token = app(TokenService::class)->issue($user)['access_token'];
+
+        $this->withToken($token)
+            ->getJson('/api/security-histories/00000000-0000-0000-0000-000000000000')
+            ->assertNotFound()
+            ->assertExactJson([
+                'status' => false,
+                'message' => 'Resource not found.',
+            ]);
+    }
 }
