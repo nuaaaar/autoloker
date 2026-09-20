@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Autoloker API
   version: 1.0.0
-  description: API documentation for mobile authentication, profile editing, security work history CRUD, and hierarchical location references.
+  description: API documentation for mobile authentication, profile editing, security work history CRUD, security certificate CRUD, and hierarchical location references.
 
 servers:
   - url: http://localhost
@@ -415,6 +415,192 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /api/security-certificates:
+    get:
+      summary: List the authenticated security user's certificates
+      description: Returns only certificates belonging to the authenticated satpam user's security profile, ordered by expiration date ascending.
+      operationId: listSecurityCertificates
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Security certificates
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityCertificateListResponse'
+              examples:
+                valid:
+                  $ref: '#/components/examples/SecurityCertificateListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      summary: Create a security certificate
+      description: Creates a certificate for the authenticated security profile. The category must be an active master_category_certificates.title. Send the request as multipart/form-data when uploading a file.
+      operationId: createSecurityCertificate
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateSecurityCertificateRequest'
+            examples:
+              valid:
+                $ref: '#/components/examples/SecurityCertificateRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSecurityCertificateRequest'
+            examples:
+              valid:
+                $ref: '#/components/examples/SecurityCertificateRequest'
+      responses:
+        '201':
+          description: Security certificate created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityCertificateResponse'
+              examples:
+                created:
+                  $ref: '#/components/examples/SecurityCertificateCreatedResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /api/security-certificates/{uuid}:
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the security certificate.
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: Get a security certificate
+      description: Returns a certificate only when it belongs to the authenticated security user's profile.
+      operationId: getSecurityCertificate
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Security certificate
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityCertificateResponse'
+              examples:
+                valid:
+                  $ref: '#/components/examples/SecurityCertificateShowResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      summary: Replace fields on a security certificate
+      description: Updates certificate fields for the authenticated security profile. Omitted fields retain their existing values. Send multipart/form-data when replacing the file.
+      operationId: updateSecurityCertificate
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UpdateSecurityCertificateRequest'
+            examples:
+              valid:
+                $ref: '#/components/examples/SecurityCertificateRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSecurityCertificateRequest'
+            examples:
+              valid:
+                $ref: '#/components/examples/SecurityCertificateRequest'
+      responses:
+        '200':
+          description: Security certificate updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityCertificateResponse'
+              examples:
+                updated:
+                  $ref: '#/components/examples/SecurityCertificateUpdatedResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    patch:
+      summary: Partially update a security certificate
+      description: Partially updates a certificate for the authenticated security profile. Omitted fields retain their existing values. Send multipart/form-data when replacing the file.
+      operationId: partiallyUpdateSecurityCertificate
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UpdateSecurityCertificateRequest'
+            examples:
+              valid:
+                $ref: '#/components/examples/SecurityCertificateRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSecurityCertificateRequest'
+            examples:
+              valid:
+                $ref: '#/components/examples/SecurityCertificateRequest'
+      responses:
+        '200':
+          description: Security certificate updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityCertificateResponse'
+              examples:
+                updated:
+                  $ref: '#/components/examples/SecurityCertificateUpdatedResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    delete:
+      summary: Delete a security certificate
+      description: Deletes a certificate only when it belongs to the authenticated security user's profile. Any stored certificate file is deleted as well.
+      operationId: deleteSecurityCertificate
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Security certificate deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
   /api/security-histories:
     get:
       summary: List the authenticated security user's work histories
@@ -594,6 +780,133 @@ paths:
 
 components:
   schemas:
+    SecurityCertificate:
+      type: object
+      required: [uuid, title, publisher, certificate_number, category, publish_date, expired_date, file, is_badge]
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: [string, 'null']
+        publisher:
+          type: [string, 'null']
+        certificate_number:
+          type: [string, 'null']
+        category:
+          type: [string, 'null']
+          description: Active master_category_certificates.title.
+        publish_date:
+          type: [string, 'null']
+          format: date
+        expired_date:
+          type: [string, 'null']
+          format: date
+          description: Must be on or after publish_date.
+        file:
+          type: [string, 'null']
+          description: Relative public storage path, for example certificate/example.pdf.
+        is_badge:
+          type: integer
+          enum: [0, 1]
+          description: 1 marks this certificate as the security's badge certificate. Only one certificate per security can be marked as a badge.
+
+    CreateSecurityCertificateRequest:
+      type: object
+      required: [title, publisher, certificate_number, category, publish_date, expired_date]
+      additionalProperties: false
+      properties:
+        title:
+          type: [string, 'null']
+          maxLength: 255
+        publisher:
+          type: [string, 'null']
+          maxLength: 255
+        certificate_number:
+          type: [string, 'null']
+          maxLength: 255
+        category:
+          type: [string, 'null']
+          maxLength: 255
+          description: Must match an active master_category_certificates.title.
+        publish_date:
+          type: [string, 'null']
+          format: date
+        expired_date:
+          type: [string, 'null']
+          format: date
+          description: Must be on or after publish_date.
+        file:
+          type: string
+          format: binary
+          description: Optional PDF, JPG, JPEG, or PNG file. Maximum size 10 MB.
+        is_badge:
+          type: integer
+          enum: [0, 1]
+          default: 0
+
+    UpdateSecurityCertificateRequest:
+      type: object
+      additionalProperties: false
+      description: All fields are optional. Omitted fields retain their existing values. Category must match an active master_category_certificates.title.
+      properties:
+        title:
+          type: [string, 'null']
+          maxLength: 255
+        publisher:
+          type: [string, 'null']
+          maxLength: 255
+        certificate_number:
+          type: [string, 'null']
+          maxLength: 255
+        category:
+          type: [string, 'null']
+          maxLength: 255
+          description: Must match an active master_category_certificates.title.
+        publish_date:
+          type: [string, 'null']
+          format: date
+        expired_date:
+          type: [string, 'null']
+          format: date
+          description: Must be on or after publish_date.
+        file:
+          type: string
+          format: binary
+          description: Optional replacement PDF, JPG, JPEG, or PNG file. Maximum size 10 MB.
+        is_badge:
+          type: integer
+          enum: [0, 1]
+
+    SecurityCertificateListResponse:
+      type: object
+      required: [status, data]
+      properties:
+        status: {type: boolean, example: true}
+        data:
+          type: object
+          required: [security_certificates]
+          properties:
+            security_certificates:
+              type: array
+              items:
+                $ref: '#/components/schemas/SecurityCertificate'
+
+    SecurityCertificateResponse:
+      type: object
+      required: [status, data]
+      properties:
+        status: {type: boolean, example: true}
+        message:
+          type: string
+        data:
+          type: object
+          required: [security_certificate]
+          properties:
+            security_certificate:
+              $ref: '#/components/schemas/SecurityCertificate'
+
     SecurityHistory:
       type: object
       required: [uuid, position, company_name, location, category, start_date, end_date, description, is_current]
@@ -1414,6 +1727,79 @@ components:
           role: bujp
           name: PT Security Services
           email: admin@security.example
+    SecurityCertificateRequest:
+      summary: Security certificate create request
+      description: Use multipart/form-data when sending the optional file.
+      value:
+        title: Satpam Garda Pratama
+        publisher: BNSP
+        certificate_number: BNSP-XXX-000
+        category: Teknis Operasional
+        publish_date: '2026-09-18'
+        expired_date: '2030-12-18'
+        is_badge: 1
+    SecurityCertificateListResponse:
+      summary: Security certificates ordered by expiration date
+      value:
+        status: true
+        data:
+          security_certificates:
+            - uuid: ecc78e02-7b37-4196-b0b0-6984b23c9bdc
+              title: Satpam Garda Pratama
+              publisher: BNSP
+              certificate_number: BNSP-XXX-000
+              category: Teknis Operasional
+              publish_date: '2026-09-18'
+              expired_date: '2030-12-18'
+              file: certificate/lgEHypXMEkNMZZ6rtCqNRen9T2jWlt8kElEnboiJ.pdf
+              is_badge: 1
+    SecurityCertificateShowResponse:
+      summary: Security certificate detail
+      value:
+        status: true
+        data:
+          security_certificate:
+            uuid: ecc78e02-7b37-4196-b0b0-6984b23c9bdc
+            title: Satpam Garda Pratama
+            publisher: BNSP
+            certificate_number: BNSP-XXX-000
+            category: Teknis Operasional
+            publish_date: '2026-09-18'
+            expired_date: '2030-12-18'
+            file: certificate/lgEHypXMEkNMZZ6rtCqNRen9T2jWlt8kElEnboiJ.pdf
+            is_badge: 1
+    SecurityCertificateCreatedResponse:
+      summary: Created security certificate response
+      value:
+        status: true
+        message: Security certificate created successfully.
+        data:
+          security_certificate:
+            uuid: ecc78e02-7b37-4196-b0b0-6984b23c9bdc
+            title: Satpam Garda Pratama
+            publisher: BNSP
+            certificate_number: BNSP-XXX-000
+            category: Teknis Operasional
+            publish_date: '2026-09-18'
+            expired_date: '2030-12-18'
+            file: certificate/lgEHypXMEkNMZZ6rtCqNRen9T2jWlt8kElEnboiJ.pdf
+            is_badge: 1
+    SecurityCertificateUpdatedResponse:
+      summary: Updated security certificate response
+      value:
+        status: true
+        message: Security certificate updated successfully.
+        data:
+          security_certificate:
+            uuid: ecc78e02-7b37-4196-b0b0-6984b23c9bdc
+            title: Satpam Garda Pratama
+            publisher: BNSP
+            certificate_number: BNSP-XXX-000
+            category: Teknis Operasional
+            publish_date: '2026-09-18'
+            expired_date: '2030-12-18'
+            file: certificate/lgEHypXMEkNMZZ6rtCqNRen9T2jWlt8kElEnboiJ.pdf
+            is_badge: 1
     SecurityHistoryCompletedRequest:
       summary: Completed security work history request
       value:
