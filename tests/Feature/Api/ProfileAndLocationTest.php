@@ -124,6 +124,37 @@ class ProfileAndLocationTest extends TestCase
         ]);
     }
 
+    public function test_profile_boolean_fields_are_returned_as_booleans(): void
+    {
+        $user = User::create([
+            'name' => 'Boolean Profile User',
+            'email' => 'boolean-profile@example.com',
+            'google_id' => '',
+            'password' => 'password',
+            'role' => 'satpam',
+            'status' => 'active',
+        ]);
+        $relation = UserSecurity::create(['user_id' => $user->id]);
+        Security::create([
+            'user_security_id' => $relation->id,
+            'is_out_of_town_agree' => true,
+            'is_shift_agree' => false,
+        ]);
+        $token = app(TokenService::class)->issue($user)['access_token'];
+
+        $this->withToken($token)->getJson('/api/profile')
+            ->assertOk()
+            ->assertJsonPath('data.profile.data.is_out_of_town_agree', true)
+            ->assertJsonPath('data.profile.data.is_shift_agree', false);
+
+        $this->withToken($token)->patchJson('/api/profile', [
+            'is_out_of_town_agree' => false,
+            'is_shift_agree' => true,
+        ])->assertOk()
+            ->assertJsonPath('data.profile.data.is_out_of_town_agree', false)
+            ->assertJsonPath('data.profile.data.is_shift_agree', true);
+    }
+
     public function test_location_master_endpoints_return_code_and_name(): void
     {
         $this->seedLocations();

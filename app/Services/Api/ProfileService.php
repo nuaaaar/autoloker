@@ -62,6 +62,11 @@ class ProfileService
                     : array_values(array_filter(array_map('trim', explode(',', $profileValues[$field]))));
             }
         }
+        foreach (['is_out_of_town_agree', 'is_shift_agree'] as $field) {
+            if (array_key_exists($field, $profileValues) && $profileValues[$field] !== null) {
+                $profileValues[$field] = filter_var($profileValues[$field], FILTER_VALIDATE_BOOLEAN);
+            }
+        }
 
         return [
             'type' => $this->apiRole($user),
