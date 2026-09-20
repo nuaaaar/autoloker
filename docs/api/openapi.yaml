@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Autoloker API
   version: 1.0.0
-  description: API documentation for mobile authentication, profile editing, and hierarchical location references.
+  description: API documentation for mobile authentication, profile editing, security work history CRUD, and hierarchical location references.
 
 servers:
   - url: http://localhost
@@ -429,6 +429,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SecurityHistoryListResponse'
+              examples:
+                valid:
+                  $ref: '#/components/examples/SecurityHistoryListResponse'
         '401':
           $ref: '#/components/responses/Unauthenticated'
         '403':
@@ -437,7 +440,7 @@ paths:
           $ref: '#/components/responses/NotFound'
     post:
       summary: Create a security work history
-      description: Creates a work history for the authenticated security profile. Category must be an active master placement title.
+      description: Creates a work history for the authenticated security profile. Category must be an active master placement title. `end_date` may be null only when `is_current` is true.
       operationId: createSecurityHistory
       security:
         - bearerAuth: []
@@ -447,15 +450,11 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/SecurityHistoryRequest'
-            example:
-              position: Security Officer
-              company_name: PT Aman Sentosa
-              location: Balikpapan
-              category: Perkantoran
-              start_date: '2022-01-01'
-              end_date: '2025-01-31'
-              description: Menjaga keamanan area perkantoran dan melakukan patroli.
-              is_current: false
+            examples:
+              completed:
+                $ref: '#/components/examples/SecurityHistoryCompletedRequest'
+              current:
+                $ref: '#/components/examples/SecurityHistoryCurrentRequest'
       responses:
         '201':
           description: Security history created successfully
@@ -463,6 +462,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SecurityHistoryResponse'
+              examples:
+                created:
+                  $ref: '#/components/examples/SecurityHistoryCurrentResponse'
         '401':
           $ref: '#/components/responses/Unauthenticated'
         '403':
@@ -494,6 +496,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SecurityHistoryResponse'
+              examples:
+                current:
+                  $ref: '#/components/examples/SecurityHistoryCurrentResponse'
         '401':
           $ref: '#/components/responses/Unauthenticated'
         '403':
@@ -501,7 +506,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
     put:
-      summary: Replace fields on a security work history
+      summary: Replace fields on a security work history. Omitted fields retain their existing values.
       operationId: updateSecurityHistory
       security:
         - bearerAuth: []
@@ -511,6 +516,11 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/SecurityHistoryRequest'
+            examples:
+              completed:
+                $ref: '#/components/examples/SecurityHistoryCompletedRequest'
+              current:
+                $ref: '#/components/examples/SecurityHistoryCurrentRequest'
       responses:
         '200':
           description: Security history updated successfully
@@ -518,6 +528,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SecurityHistoryResponse'
+              examples:
+                updated:
+                  $ref: '#/components/examples/SecurityHistoryCompletedResponse'
         '401':
           $ref: '#/components/responses/Unauthenticated'
         '403':
@@ -527,7 +540,7 @@ paths:
         '422':
           $ref: '#/components/responses/ValidationError'
     patch:
-      summary: Partially update a security work history
+      summary: Partially update a security work history. Omitted fields retain their existing values.
       operationId: partiallyUpdateSecurityHistory
       security:
         - bearerAuth: []
@@ -537,6 +550,11 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/SecurityHistoryRequest'
+            examples:
+              completed:
+                $ref: '#/components/examples/SecurityHistoryCompletedRequest'
+              current:
+                $ref: '#/components/examples/SecurityHistoryCurrentRequest'
       responses:
         '200':
           description: Security history updated successfully
@@ -544,6 +562,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SecurityHistoryResponse'
+              examples:
+                updated:
+                  $ref: '#/components/examples/SecurityHistoryCurrentResponse'
         '401':
           $ref: '#/components/responses/Unauthenticated'
         '403':
@@ -597,15 +618,17 @@ components:
         end_date:
           type: [string, 'null']
           format: date
+          description: Completion date. Null only when is_current is true.
         description:
           type: [string, 'null']
         is_current:
           type: boolean
+          description: True for the current work history. Returned as a JSON boolean.
 
     SecurityHistoryRequest:
       type: object
       additionalProperties: false
-      description: All fields are optional for partial updates. Category is submitted as the master placement title.
+      description: All fields are optional for create and partial updates. Category is submitted as the master placement title. `end_date` may be null only when `is_current` is true; omitted update fields retain their existing values. `is_current` is a JSON boolean.
       properties:
         position: {type: [string, 'null']}
         company_name: {type: [string, 'null']}
@@ -614,9 +637,14 @@ components:
           type: [string, 'null']
           description: Must match an active master_placements.title.
         start_date: {type: [string, 'null'], format: date}
-        end_date: {type: [string, 'null'], format: date}
+        end_date:
+          type: [string, 'null']
+          format: date
+          description: Completion date. May be null only when is_current is true.
         description: {type: [string, 'null']}
-        is_current: {type: boolean}
+        is_current:
+          type: boolean
+          description: True when this is the current work history. Responses always return a JSON boolean.
 
     SecurityHistoryListResponse:
       type: object
@@ -1386,3 +1414,79 @@ components:
           role: bujp
           name: PT Security Services
           email: admin@security.example
+    SecurityHistoryCompletedRequest:
+      summary: Completed security work history request
+      value:
+        position: Satpam Garda Pratama
+        company_name: PT Auto Talenta Nusantara
+        location: Balikpapan
+        category: ATM Center
+        start_date: '2024-01-20'
+        end_date: '2025-01-01'
+        description: Menjaga area ATM Center baik secara harian maupun ketika ada maintenance
+        is_current: false
+    SecurityHistoryCurrentRequest:
+      summary: Current security work history request
+      value:
+        position: Satpam Garda Pratama
+        company_name: PT Auto Talenta Nusantara
+        location: Jambi
+        category: Pertambangan
+        start_date: '2025-01-20'
+        end_date: null
+        description: Patroli area pertambangan sesuai dengan rute dan roster shift yang ditentukan
+        is_current: true
+    SecurityHistoryListResponse:
+      summary: Security work histories ordered by newest start date
+      value:
+        status: true
+        data:
+          security_histories:
+            - uuid: 1f544627-b26b-4116-aa16-d53762d0f3b2
+              position: Satpam Garda Pratama
+              company_name: PT Auto Talenta Nusantara
+              location: Jambi
+              category: Pertambangan
+              start_date: '2025-01-20'
+              end_date: null
+              description: Patroli area pertambangan sesuai dengan rute dan roster shift yang ditentukan
+              is_current: true
+            - uuid: 596194c7-dfcc-4856-a918-14ef9e0701fe
+              position: Satpam Garda Pratama
+              company_name: PT Auto Talenta Nusantara
+              location: Balikpapan
+              category: ATM Center
+              start_date: '2024-01-20'
+              end_date: '2025-01-01'
+              description: Menjaga area ATM Center baik secara harian maupun ketika ada maintenance
+              is_current: false
+    SecurityHistoryCurrentResponse:
+      summary: Current security work history response
+      value:
+        status: true
+        data:
+          security_history:
+            uuid: 1f544627-b26b-4116-aa16-d53762d0f3b2
+            position: Satpam Garda Pratama
+            company_name: PT Auto Talenta Nusantara
+            location: Jambi
+            category: Pertambangan
+            start_date: '2025-01-20'
+            end_date: null
+            description: Patroli area pertambangan sesuai dengan rute dan roster shift yang ditentukan
+            is_current: true
+    SecurityHistoryCompletedResponse:
+      summary: Completed security work history response
+      value:
+        status: true
+        data:
+          security_history:
+            uuid: 596194c7-dfcc-4856-a918-14ef9e0701fe
+            position: Satpam Garda Pratama
+            company_name: PT Auto Talenta Nusantara
+            location: Balikpapan
+            category: ATM Center
+            start_date: '2024-01-20'
+            end_date: '2025-01-01'
+            description: Menjaga area ATM Center baik secara harian maupun ketika ada maintenance
+            is_current: false
