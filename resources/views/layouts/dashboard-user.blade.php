@@ -220,6 +220,532 @@
 
         }
     </style>
+
+    <style>
+
+        /* =========================================================
+        NOTIFICATION BUTTON
+        ========================================================= */
+
+        .header-notification-btn{
+            position:relative;
+        }
+
+        .header-notification-badge{
+
+            position:absolute;
+
+            top:-2px;
+            right:-2px;
+
+            min-width:16px;
+            height:16px;
+
+            display:flex;
+            align-items:center;
+            justify-content:center;
+
+            padding:0 4px;
+
+            background:#f0445f;
+
+            border:2px solid #080d1c;
+
+            color:#fff;
+
+            border-radius:20px;
+
+            font-size:8px;
+            font-weight:700;
+
+            line-height:1;
+
+            z-index:2;
+        }
+
+
+        /* =========================================================
+        NOTIFICATION DROPDOWN
+        ========================================================= */
+
+        .notification-dropdown{
+
+            width:360px;
+
+            background:#11192d;
+
+            border:1px solid #27334d;
+
+            border-radius:15px;
+
+            overflow:hidden;
+
+            box-shadow:
+                0 15px 40px rgba(0,0,0,.35);
+
+        }
+
+
+        /* =========================================================
+        HEADER
+        ========================================================= */
+
+        .notification-dropdown-header{
+
+            display:flex;
+
+            align-items:center;
+
+            justify-content:space-between;
+
+            padding:15px 17px;
+
+            border-bottom:1px solid #27334d;
+        }
+
+        .notification-dropdown-title{
+
+            color:#f1f4fb;
+
+            font-size:13px;
+
+            font-weight:700;
+        }
+
+        .notification-dropdown-count{
+
+            margin-left:5px;
+
+            color:#8ea1bd;
+
+            font-size:10px;
+
+            font-weight:500;
+        }
+
+        .notification-mark-read{
+
+            color:#e8a401;
+
+            font-size:10px;
+
+            font-weight:600;
+
+            text-decoration:none;
+
+            transition:.2s;
+        }
+
+        .notification-mark-read:hover{
+
+            color:#ffc52e;
+
+        }
+
+
+        /* =========================================================
+        NOTIFICATION LIST
+        ========================================================= */
+
+        .notification-list{
+
+            max-height:360px;
+
+            overflow-y:auto;
+        }
+
+
+        .notification-list::-webkit-scrollbar{
+
+            width:4px;
+
+        }
+
+        .notification-list::-webkit-scrollbar-track{
+
+            background:transparent;
+
+        }
+
+        .notification-list::-webkit-scrollbar-thumb{
+
+            background:#35425e;
+
+            border-radius:10px;
+
+        }
+
+
+        /* =========================================================
+        NOTIFICATION ITEM
+        ========================================================= */
+
+        .notification-dropdown-item{
+
+            position:relative;
+
+            display:flex;
+
+            align-items:flex-start;
+
+            gap:11px;
+
+            padding:13px 15px;
+
+            color:inherit;
+
+            text-decoration:none;
+
+            border-bottom:1px solid #202b42;
+
+            transition:.2s;
+
+        }
+
+        .notification-dropdown-item:last-child{
+
+            border-bottom:none;
+
+        }
+
+        .notification-dropdown-item:hover{
+
+            background:#17233f;
+
+        }
+
+
+        /* UNREAD */
+
+        .notification-dropdown-item.unread{
+
+            background:#151f36;
+
+        }
+
+        .notification-dropdown-item.unread:hover{
+
+            background:#1a2946;
+
+        }
+
+
+        /* =========================================================
+        ICON
+        ========================================================= */
+
+        .notification-dropdown-icon{
+
+            width:34px;
+            height:34px;
+
+            flex:0 0 34px;
+
+            display:flex;
+
+            align-items:center;
+            justify-content:center;
+
+            background:#1b2950;
+
+            border-radius:50%;
+
+            color:#8da5ff;
+
+        }
+
+        .notification-dropdown-icon i{
+
+            font-size:16px;
+
+        }
+
+        .notification-dropdown-icon.warning{
+
+            color:#f3b012;
+
+        }
+
+        .notification-dropdown-icon.danger{
+
+            color:#ff5d73;
+
+        }
+
+        .notification-dropdown-icon.success{
+
+            color:#00d99b;
+
+        }
+
+        .notification-dropdown-icon.purple{
+
+            color:#a875ff;
+
+        }
+
+
+        /* =========================================================
+        AVATAR
+        ========================================================= */
+
+        .notification-dropdown-avatar{
+
+            width:34px;
+            height:34px;
+
+            flex:0 0 34px;
+
+            object-fit:cover;
+
+            border-radius:50%;
+        }
+
+
+        /* =========================================================
+        CONTENT
+        ========================================================= */
+
+        .notification-dropdown-content{
+
+            min-width:0;
+
+            flex:1;
+        }
+
+        .notification-dropdown-text{
+
+            color:#dfe5ef;
+
+            font-size:10px;
+
+            font-weight:500;
+
+            line-height:1.5;
+
+            margin:0;
+
+        }
+
+        .notification-dropdown-text strong{
+
+            color:#fff;
+
+            font-weight:700;
+
+        }
+
+        .notification-dropdown-time{
+
+            margin-top:3px;
+
+            color:#71819d;
+
+            font-size:9px;
+
+            font-family:monospace;
+
+        }
+
+
+        /* =========================================================
+        UNREAD DOT
+        ========================================================= */
+
+        .notification-unread-dot{
+
+            width:7px;
+            height:7px;
+
+            flex:0 0 7px;
+
+            margin-top:5px;
+
+            background:#e8a401;
+
+            border-radius:50%;
+
+        }
+
+
+        /* =========================================================
+        FOOTER
+        ========================================================= */
+
+        .notification-dropdown-footer{
+
+            display:flex;
+
+            align-items:center;
+
+            justify-content:center;
+
+            padding:12px;
+
+            border-top:1px solid #27334d;
+
+        }
+
+        .notification-view-all{
+
+            color:#e8a401;
+
+            font-size:11px;
+
+            font-weight:700;
+
+            text-decoration:none;
+
+        }
+
+        .notification-view-all:hover{
+
+            color:#ffc52e;
+
+        }
+
+
+        /* =========================================================
+        LIGHT MODE
+        ========================================================= */
+
+        [data-bs-theme="light"] .header-notification-badge{
+
+            border-color:#ffffff;
+
+        }
+
+
+        [data-bs-theme="light"] .notification-dropdown{
+
+            background:#ffffff;
+
+            border-color:#e2e8f0;
+
+            box-shadow:
+                0 15px 40px rgba(15,23,42,.15);
+
+        }
+
+
+        [data-bs-theme="light"] .notification-dropdown-header{
+
+            border-bottom-color:#e2e8f0;
+
+        }
+
+        [data-bs-theme="light"] .notification-dropdown-title{
+
+            color:#1e293b;
+
+        }
+
+        [data-bs-theme="light"] .notification-dropdown-count{
+
+            color:#64748b;
+
+        }
+
+        [data-bs-theme="light"] .notification-mark-read{
+
+            color:#c68a00;
+
+        }
+
+
+        [data-bs-theme="light"] .notification-dropdown-item{
+
+            border-bottom-color:#e2e8f0;
+
+        }
+
+        [data-bs-theme="light"] .notification-dropdown-item:hover{
+
+            background:#f8fafc;
+
+        }
+
+        [data-bs-theme="light"] .notification-dropdown-item.unread{
+
+            background:#fffaf0;
+
+        }
+
+        [data-bs-theme="light"] .notification-dropdown-item.unread:hover{
+
+            background:#fff7df;
+
+        }
+
+
+        [data-bs-theme="light"] .notification-dropdown-icon{
+
+            background:#eef2ff;
+
+        }
+
+
+        [data-bs-theme="light"] .notification-dropdown-text{
+
+            color:#475569;
+
+        }
+
+        [data-bs-theme="light"] .notification-dropdown-text strong{
+
+            color:#1e293b;
+
+        }
+
+        [data-bs-theme="light"] .notification-dropdown-time{
+
+            color:#94a3b8;
+
+        }
+
+
+        [data-bs-theme="light"] .notification-dropdown-footer{
+
+            border-top-color:#e2e8f0;
+
+        }
+
+        [data-bs-theme="light"] .notification-view-all{
+
+            color:#c68a00;
+
+        }
+
+
+        /* =========================================================
+        RESPONSIVE
+        ========================================================= */
+
+        @media(max-width:575px){
+
+            .notification-dropdown{
+
+                width:calc(100vw - 30px);
+
+                max-width:360px;
+
+            }
+
+            .notification-dropdown-item{
+
+                padding:12px 13px;
+
+            }
+
+            .notification-dropdown-text{
+
+                font-size:10px;
+
+            }
+
+        }
+
+    </style>
     @yield('css')
 </head>
 
@@ -343,6 +869,306 @@
                                 </div>
 
                             </div>
+
+                            <!--begin::Notification-->
+                                <div class="app-navbar-item ms-1 ms-md-4"
+                                    id="kt_header_notification_menu_toggle">
+
+                                    <!--begin::Notification wrapper-->
+                                    <div class="position-relative">
+
+                                        <a href="#"
+                                            class="btn btn-icon btn-custom btn-icon-muted btn-active-light btn-active-color-primary w-35px h-35px header-notification-btn"
+                                            data-kt-menu-trigger="{default:'click', lg:'hover'}"
+                                            data-kt-menu-attach="parent"
+                                            data-kt-menu-placement="bottom-end">
+
+                                            <i class="ki-duotone ki-notification fs-1">
+
+                                                <span class="path1"></span>
+                                                <span class="path2"></span>
+                                                <span class="path3"></span>
+
+                                            </i>
+
+
+                                            <!-- Notification Count -->
+                                            <span class="header-notification-badge">
+                                                3
+                                            </span>
+
+                                        </a>
+
+
+                                        <!--begin::Notification menu-->
+                                        <div
+                                            class="menu menu-sub menu-sub-dropdown menu-column notification-dropdown"
+                                            data-kt-menu="true">
+
+
+                                            <!-- HEADER -->
+                                            <div class="notification-dropdown-header">
+
+                                                <div>
+
+                                                    <span class="notification-dropdown-title">
+                                                        Notifikasi
+                                                    </span>
+
+                                                    <span class="notification-dropdown-count">
+                                                        3 belum dibaca
+                                                    </span>
+
+                                                </div>
+
+
+                                                <a href="javascript:;"
+                                                    class="notification-mark-read">
+
+                                                    Tandai semua dibaca
+
+                                                </a>
+
+                                            </div>
+
+
+                                            <!-- LIST -->
+                                            <div class="notification-list">
+
+
+                                                <!-- =========================================
+                                                    NOTIFICATION 1
+                                                ========================================== -->
+
+                                                <a href="{{ url('/user-page/notification/1') }}"
+                                                    class="notification-dropdown-item unread">
+
+
+                                                    <div class="notification-dropdown-icon warning">
+
+                                                        <i class="ki-duotone ki-briefcase">
+
+                                                            <span class="path1"></span>
+                                                            <span class="path2"></span>
+
+                                                        </i>
+
+                                                    </div>
+
+
+                                                    <div class="notification-dropdown-content">
+
+                                                        <p class="notification-dropdown-text">
+
+                                                            <strong>Lowongan baru tersedia</strong>
+
+                                                            yang sesuai dengan profil dan
+                                                            kualifikasi Anda.
+
+                                                        </p>
+
+                                                        <div class="notification-dropdown-time">
+
+                                                            5 menit lalu
+
+                                                        </div>
+
+                                                    </div>
+
+
+                                                    <span class="notification-unread-dot"></span>
+
+                                                </a>
+
+
+
+                                                <!-- =========================================
+                                                    NOTIFICATION 2
+                                                ========================================== -->
+
+                                                <a href="{{ url('/user-page/notification/2') }}"
+                                                    class="notification-dropdown-item unread">
+
+
+                                                    <div class="notification-dropdown-icon danger">
+
+                                                        <i class="ki-duotone ki-information-5">
+
+                                                            <span class="path1"></span>
+                                                            <span class="path2"></span>
+
+                                                        </i>
+
+                                                    </div>
+
+
+                                                    <div class="notification-dropdown-content">
+
+                                                        <p class="notification-dropdown-text">
+
+                                                            Sertifikat <strong>Gada Pratama</strong>
+                                                            Anda akan berakhir dalam 30 hari.
+
+                                                        </p>
+
+                                                        <div class="notification-dropdown-time">
+
+                                                            2 jam lalu
+
+                                                        </div>
+
+                                                    </div>
+
+
+                                                    <span class="notification-unread-dot"></span>
+
+                                                </a>
+
+
+
+                                                <!-- =========================================
+                                                    NOTIFICATION 3
+                                                ========================================== -->
+
+                                                <a href="{{ url('/user-page/notification/3') }}"
+                                                    class="notification-dropdown-item unread">
+
+
+                                                    <div class="notification-dropdown-icon purple">
+
+                                                        <i class="ki-duotone ki-book-open">
+
+                                                            <span class="path1"></span>
+                                                            <span class="path2"></span>
+
+                                                        </i>
+
+                                                    </div>
+
+
+                                                    <div class="notification-dropdown-content">
+
+                                                        <p class="notification-dropdown-text">
+
+                                                            Pelatihan <strong>K3 Dasar</strong>
+                                                            akan dimulai 3 hari lagi.
+
+                                                        </p>
+
+                                                        <div class="notification-dropdown-time">
+
+                                                            5 jam lalu
+
+                                                        </div>
+
+                                                    </div>
+
+
+                                                    <span class="notification-unread-dot"></span>
+
+                                                </a>
+
+
+
+                                                <!-- =========================================
+                                                    NOTIFICATION 4
+                                                ========================================== -->
+
+                                                <a href="{{ url('/user-page/notification/4') }}"
+                                                    class="notification-dropdown-item">
+
+
+                                                    <div class="notification-dropdown-icon success">
+
+                                                        <i class="ki-duotone ki-user-tick">
+
+                                                            <span class="path1"></span>
+                                                            <span class="path2"></span>
+
+                                                        </i>
+
+                                                    </div>
+
+
+                                                    <div class="notification-dropdown-content">
+
+                                                        <p class="notification-dropdown-text">
+
+                                                            <strong>Irwan Prasetyo</strong>
+                                                            menerima permintaan koneksi Anda.
+
+                                                        </p>
+
+                                                        <div class="notification-dropdown-time">
+
+                                                            1 hari lalu
+
+                                                        </div>
+
+                                                    </div>
+
+                                                </a>
+
+
+
+                                                <!-- =========================================
+                                                    NOTIFICATION 5
+                                                ========================================== -->
+
+                                                <a href="{{ url('/user-page/notification/5') }}"
+                                                    class="notification-dropdown-item">
+
+
+                                                    <img
+                                                        src="/assets/media/avatars/300-5.jpg"
+                                                        class="notification-dropdown-avatar"
+                                                        alt="User">
+
+
+                                                    <div class="notification-dropdown-content">
+
+                                                        <p class="notification-dropdown-text">
+
+                                                            <strong>Agus Priyatno</strong>
+                                                            ingin terhubung dengan Anda.
+
+                                                        </p>
+
+                                                        <div class="notification-dropdown-time">
+
+                                                            1 hari lalu
+
+                                                        </div>
+
+                                                    </div>
+
+                                                </a>
+
+
+                                            </div>
+
+
+                                            <!-- FOOTER -->
+                                            <div class="notification-dropdown-footer">
+
+                                                <a href="{{ url('/dashboard-user/notification') }}"
+                                                    class="notification-view-all">
+
+                                                    Lihat semua notifikasi
+
+                                                </a>
+
+                                            </div>
+
+
+                                        </div>
+                                        <!--end::Notification menu-->
+
+                                    </div>
+                                    <!--end::Notification wrapper-->
+
+                                </div>
+                                <!--end::Notification-->
                             <!--begin::User menu-->
                             <div class="app-navbar-item ms-1 ms-md-4" id="kt_header_user_menu_toggle">
                                 <!--begin::Menu wrapper-->

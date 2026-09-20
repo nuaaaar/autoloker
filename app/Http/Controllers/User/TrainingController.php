@@ -447,6 +447,65 @@ class TrainingController extends Controller
 
                 /*
                 |--------------------------------------------------------------------------
+                | JUMLAH PESERTA
+                |--------------------------------------------------------------------------
+                */
+
+                ->withCount([
+
+                    /*
+                    | Total seluruh pendaftar
+                    */
+
+                    'applications as total_applications',
+
+
+                    /*
+                    | Menunggu Persetujuan
+                    */
+
+                    'applications as total_pending' => function ($query) {
+
+                        $query->where(
+                            'status',
+                            'pending'
+                        );
+
+                    },
+
+
+                    /*
+                    | Sudah Disetujui
+                    */
+
+                    'applications as total_approved' => function ($query) {
+
+                        $query->where(
+                            'status',
+                            'approved'
+                        );
+
+                    },
+
+
+                    /*
+                    | Ditolak
+                    */
+
+                    'applications as total_rejected' => function ($query) {
+
+                        $query->where(
+                            'status',
+                            'rejected'
+                        );
+
+                    },
+
+                ])
+
+
+                /*
+                |--------------------------------------------------------------------------
                 | SORTING
                 |--------------------------------------------------------------------------
                 */
@@ -467,6 +526,12 @@ class TrainingController extends Controller
                     $request->length ?? 10
                 );
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | RESPONSE
+            |--------------------------------------------------------------------------
+            */
 
             return new MasterResource(
                 true,
@@ -1493,5 +1558,693 @@ class TrainingController extends Controller
             'success' => true,
             'message' => 'Pelatihan berhasil diselesaikan.'
         ]);
+    }
+
+    public function participants(Request $request, $uuid)
+    {
+        /*
+        |--------------------------------------------------------------------------
+        | TRAINING
+        |--------------------------------------------------------------------------
+        */
+
+        $training = Training::with([
+            'bujp',
+            'company',
+        ])
+        ->where('uuid', $uuid)
+        ->firstOrFail();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CEK OWNERSHIP
+        |--------------------------------------------------------------------------
+        */
+
+        $this->ensureTrainingOwner($training);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | STATISTIK
+        |--------------------------------------------------------------------------
+        */
+
+        $applicationQuery = TrainingApplication::query()
+            ->where('training_id', $training->id);
+
+        $totalParticipants = (clone $applicationQuery)
+            ->count();
+
+        $totalPending = (clone $applicationQuery)
+            ->where('status', 'pending')
+            ->count();
+
+        $totalApproved = (clone $applicationQuery)
+            ->where('status', 'approved')
+            ->count();
+
+        $totalRejected = (clone $applicationQuery)
+            ->where('status', 'rejected')
+            ->count();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SEARCH
+        |--------------------------------------------------------------------------
+        */
+
+        $search = $request->input('search');
+
+        $status = $request->input('status');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | LIST PESERTA
+        |--------------------------------------------------------------------------
+        */
+
+        $participants = TrainingApplication::query()
+            ->with([
+                'security'
+            ])
+            ->where('training_id', $training->id)
+
+            ->when(
+                $status && $status !== 'all',
+                function ($query) use ($status) {
+
+                    $query->where('status', $status);
+
+                }
+            )
+
+            ->when(
+                $search,
+                function ($query) use ($search) {
+
+                    $query->whereHas(
+                        'security',
+                        function ($securityQuery) use ($search) {
+
+                            $securityQuery
+                                ->where('name', 'like', "%{$search}%")
+                                ->orWhere('email', 'like', "%{$search}%")
+                                ->orWhere('phone_number', 'like', "%{$search}%")
+                                ->orWhere('ktp_number', 'like', "%{$search}%")
+                                ->orWhere('registration_number', 'like', "%{$search}%");
+
+                        }
+                    );
+
+                }
+            )
+
+            ->orderBy('created_at', 'desc')
+
+            ->paginate(10);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | AJAX
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->ajax()) {
+
+            return response()->json([
+
+                'success' => true,
+
+                'html' => view(
+                    'dashboard-user.training.partials.participant-list',
+                    compact('participants', 'training')
+                )->render(),
+
+                'pagination' => $participants
+                    ->appends([
+                        'search' => $search,
+                        'status' => $status,
+                    ])
+                    ->links()
+                    ->render(),
+
+            ]);
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | VIEW
+        |--------------------------------------------------------------------------
+        */
+
+        return view(
+            'dashboard-user.training.participants',
+            compact(
+                'training',
+                'participants',
+                'totalParticipants',
+                'totalPending',
+                'totalApproved',
+                'totalRejected'
+            )
+        );
+    }
+
+    public function participantDetail($uuid, $applicationUuid)
+    {
+        /*
+        |--------------------------------------------------------------------------
+        | TRAINING
+        |--------------------------------------------------------------------------
+        */
+
+        $training = Training::with([
+            'bujp',
+            'company',
+        ])
+        ->where('uuid', $uuid)
+        ->firstOrFail();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CEK OWNERSHIP
+        |--------------------------------------------------------------------------
+        */
+
+        $this->ensureTrainingOwner($training);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | APPLICATION
+        |--------------------------------------------------------------------------
+        */
+
+        $application = TrainingApplication::with([
+            'security',
+            'training',
+        ])
+        ->where('uuid', $applicationUuid)
+        ->where('training_id', $training->id)
+        ->firstOrFail();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | PROFILE PROGRESS
+        |--------------------------------------------------------------------------
+        */
+
+        $profileProgress = null;
+
+        if ($application->security) {
+
+            $profileProgress =
+                $application->security->profileProgress();
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | VIEW
+        |--------------------------------------------------------------------------
+        */
+
+        return view(
+            'dashboard-user.training.participant-detail',
+            compact(
+                'training',
+                'application',
+                'profileProgress'
+            )
+        );
+    }
+
+    public function approveParticipant($uuid, $applicationUuid)
+    {
+        DB::beginTransaction();
+
+        try {
+
+            /*
+            |--------------------------------------------------------------------------
+            | TRAINING
+            |--------------------------------------------------------------------------
+            */
+
+            $training = Training::where(
+                'uuid',
+                $uuid
+            )
+            ->lockForUpdate()
+            ->firstOrFail();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CEK OWNERSHIP
+            |--------------------------------------------------------------------------
+            */
+
+            $this->ensureTrainingOwner($training);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | APPLICATION
+            |--------------------------------------------------------------------------
+            */
+
+            $application = TrainingApplication::where(
+                'uuid',
+                $applicationUuid
+            )
+            ->where(
+                'training_id',
+                $training->id
+            )
+            ->lockForUpdate()
+            ->firstOrFail();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CEK STATUS
+            |--------------------------------------------------------------------------
+            */
+
+            if ($application->status === 'approved') {
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Peserta sudah disetujui.'
+                ], 422);
+
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CEK QUOTA
+            |--------------------------------------------------------------------------
+            */
+
+            $approvedCount = TrainingApplication::where(
+                'training_id',
+                $training->id
+            )
+            ->where(
+                'status',
+                'approved'
+            )
+            ->count();
+
+
+            $quota = (int) $training->quota;
+
+
+            if ($quota > 0 && $approvedCount >= $quota) {
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Kuota pelatihan sudah penuh.'
+                ], 422);
+
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | APPROVE
+            |--------------------------------------------------------------------------
+            */
+
+            $application->status = 'approved';
+            $application->save();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | UPDATE REGISTERED
+            |--------------------------------------------------------------------------
+            */
+
+            $approvedCount = TrainingApplication::where(
+                'training_id',
+                $training->id
+            )
+            ->where(
+                'status',
+                'approved'
+            )
+            ->count();
+
+            $training->registered = (string) $approvedCount;
+            $training->save();
+
+
+            DB::commit();
+
+
+            return response()->json([
+
+                'success' => true,
+
+                'message' => 'Peserta berhasil disetujui.'
+
+            ]);
+
+        } catch (\Throwable $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+
+                'success' => false,
+
+                'message' => 'Terjadi kesalahan saat menyetujui peserta.',
+                
+                'error' => $e->getMessage(),
+
+            ], 500);
+
+        }
+    }
+
+    public function rejectParticipant($uuid, $applicationUuid)
+    {
+        DB::beginTransaction();
+
+        try {
+
+            /*
+            |--------------------------------------------------------------------------
+            | TRAINING
+            |--------------------------------------------------------------------------
+            */
+
+            $training = Training::where(
+                'uuid',
+                $uuid
+            )
+            ->lockForUpdate()
+            ->firstOrFail();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CEK OWNERSHIP
+            |--------------------------------------------------------------------------
+            */
+
+            $this->ensureTrainingOwner($training);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | APPLICATION
+            |--------------------------------------------------------------------------
+            */
+
+            $application = TrainingApplication::where(
+                'uuid',
+                $applicationUuid
+            )
+            ->where(
+                'training_id',
+                $training->id
+            )
+            ->lockForUpdate()
+            ->firstOrFail();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | REJECT
+            |--------------------------------------------------------------------------
+            */
+
+            if ($application->status === 'rejected') {
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Peserta sudah ditolak.'
+                ], 422);
+
+            }
+
+
+            $application->status = 'rejected';
+            $application->save();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | UPDATE REGISTERED
+            |--------------------------------------------------------------------------
+            */
+
+            $approvedCount = TrainingApplication::where(
+                'training_id',
+                $training->id
+            )
+            ->where(
+                'status',
+                'approved'
+            )
+            ->count();
+
+            $training->registered = (string) $approvedCount;
+            $training->save();
+
+
+            DB::commit();
+
+
+            return response()->json([
+
+                'success' => true,
+
+                'message' => 'Peserta berhasil ditolak.'
+
+            ]);
+
+        } catch (\Throwable $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+
+                'success' => false,
+
+                'message' => 'Terjadi kesalahan saat menolak peserta.',
+
+                'error' => $e->getMessage(),
+
+            ], 500);
+
+        }
+    }
+
+    public function rollbackParticipant($uuid, $applicationUuid)
+    {
+        DB::beginTransaction();
+
+        try {
+
+            /*
+            |--------------------------------------------------------------------------
+            | TRAINING
+            |--------------------------------------------------------------------------
+            */
+
+            $training = Training::where(
+                'uuid',
+                $uuid
+            )
+            ->lockForUpdate()
+            ->firstOrFail();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CEK OWNERSHIP
+            |--------------------------------------------------------------------------
+            */
+
+            $this->ensureTrainingOwner($training);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | APPLICATION
+            |--------------------------------------------------------------------------
+            */
+
+            $application = TrainingApplication::where(
+                'uuid',
+                $applicationUuid
+            )
+            ->where(
+                'training_id',
+                $training->id
+            )
+            ->lockForUpdate()
+            ->firstOrFail();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CEK STATUS
+            |--------------------------------------------------------------------------
+            */
+
+            if ($application->status === 'pending') {
+
+                return response()->json([
+
+                    'success' => false,
+
+                    'message' => 'Peserta sudah dalam status menunggu persetujuan.'
+
+                ], 422);
+
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | ROLLBACK
+            |--------------------------------------------------------------------------
+            */
+
+            $application->status = 'pending';
+            $application->save();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | UPDATE REGISTERED
+            |--------------------------------------------------------------------------
+            */
+
+            $approvedCount = TrainingApplication::where(
+                'training_id',
+                $training->id
+            )
+            ->where(
+                'status',
+                'approved'
+            )
+            ->count();
+
+            $training->registered = (string) $approvedCount;
+            $training->save();
+
+
+            DB::commit();
+
+
+            return response()->json([
+
+                'success' => true,
+
+                'message' => 'Status peserta berhasil dikembalikan menjadi menunggu persetujuan.'
+
+            ]);
+
+        } catch (\Throwable $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+
+                'success' => false,
+
+                'message' => 'Terjadi kesalahan saat mengembalikan status peserta.',
+
+                'error' => $e->getMessage(),
+
+            ], 500);
+
+        }
+    }
+
+    private function ensureTrainingOwner($training)
+    {
+        $user = Auth::user();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | BUJP
+        |--------------------------------------------------------------------------
+        */
+
+        if ($user->role == 'bujp') {
+
+            $bujpId = optional(
+                optional($user->user_bujp)->bujp
+            )->id;
+
+
+            if (!$bujpId || $training->b_u_j_p_id != $bujpId) {
+
+                abort(
+                    403,
+                    'Anda tidak memiliki akses ke pelatihan ini.'
+                );
+
+            }
+
+            return true;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | COMPANY
+        |--------------------------------------------------------------------------
+        */
+
+        if ($user->role == 'company') {
+
+            $companyId = optional(
+                optional($user->user_company)->company
+            )->id;
+
+
+            if (!$companyId || $training->company_id != $companyId) {
+
+                abort(
+                    403,
+                    'Anda tidak memiliki akses ke pelatihan ini.'
+                );
+
+            }
+
+            return true;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | ROLE LAIN
+        |--------------------------------------------------------------------------
+        */
+
+        abort(
+            403,
+            'Anda tidak memiliki akses ke pelatihan ini.'
+        );
     }
 }

@@ -28,6 +28,7 @@ use App\Http\Controllers\Admin\TrainingClosedController as ADMTrainingClosed;
 use App\Http\Controllers\Admin\TrainingCancelledController as ADMTrainingCancelled;
 use App\Http\Controllers\Admin\TrainingRunningController as ADMTrainingRunning;
 use App\Http\Controllers\Admin\MasterSubscriptionController as ADMMasterSubscription;
+use App\Http\Controllers\Admin\MasterFAQController as ADMMasterFAQ;
 
 use App\Http\Controllers\UserPage\ProfileController as UPProfile;
 use App\Http\Controllers\UserPage\HomeController as UPHome;
@@ -38,12 +39,14 @@ use App\Http\Controllers\UserPage\JobBookmarkController as UPPJobBookmark;
 use App\Http\Controllers\UserPage\JobApplicationController as UPPJobApplication;
 use App\Http\Controllers\UserPage\TrainingController as UPPTraining;
 use App\Http\Controllers\UserPage\TrainingApplicationController as UPPTrainingApplication;
+use App\Http\Controllers\UserPage\SubscriptionController as USRSubscription;
 
 use App\Http\Controllers\User\DashboardUserController as USRDashboard;
 use App\Http\Controllers\User\ProfileController as USRProfile;
 use App\Http\Controllers\User\JobVacancyController as USRJobVacancy;
 use App\Http\Controllers\User\TrainingController as USRTraining;
 use App\Http\Controllers\User\JobApplicationController as USRJobApplication;
+use App\Http\Controllers\User\NotificationController as USRNotification;
 
 use App\Http\Controllers\RegisterSecurityController;
 use App\Http\Controllers\RegisterCompanyController;
@@ -103,7 +106,8 @@ Route::middleware(['auth'])->group(function () {
             Route::resource('certificate', ADMMasterCertificate::class); 
             Route::resource('position-security', ADMMasterPositionSecurity::class); 
             Route::resource('competency-scheme', ADMMasterCompetencyScheme::class); 
-            Route::resource('subscription', ADMMasterSubscription::class); 
+            Route::resource('subscription', ADMMasterSubscription::class);
+            Route::resource('faq', ADMMasterFAQ::class); 
         });
 
         Route::prefix('management-user')->name('management-user.')->group(function () {
@@ -173,6 +177,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [USRDashboard::class, 'index'])
             ->name('index');
 
+        Route::get('/notification', [USRNotification::class, 'index'])
+                ->name('index');
+
 
         /*
         |--------------------------------------------------------------------------
@@ -235,9 +242,15 @@ Route::middleware(['auth'])->group(function () {
             |--------------------------------------------------------------------------
             */
 
-            Route::get('training/statistic',[USRTraining::class, 'statistic'])->name('training.statistic');
+            Route::get(
+                'training/statistic',
+                [USRTraining::class, 'statistic']
+            )->name('training.statistic');
 
-            Route::resource('training', USRTraining::class);
+            Route::resource(
+                'training',
+                USRTraining::class
+            );
 
             Route::post(
                 '/training/{uuid}/start',
@@ -253,6 +266,38 @@ Route::middleware(['auth'])->group(function () {
                 '/training/{uuid}/close',
                 [USRTraining::class, 'close']
             )->name('training.close');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | TRAINING PARTICIPANTS
+            |--------------------------------------------------------------------------
+            */
+
+            Route::get(
+                '/training/{uuid}/participants',
+                [USRTraining::class, 'participants']
+            )->name('training.participants');
+
+            Route::get(
+                '/training/{uuid}/participants/{applicationUuid}',
+                [USRTraining::class, 'participantDetail']
+            )->name('training.participant.detail');
+
+            Route::post(
+                '/training/{uuid}/participants/{applicationUuid}/approve',
+                [USRTraining::class, 'approveParticipant']
+            )->name('training.participant.approve');
+
+            Route::post(
+                '/training/{uuid}/participants/{applicationUuid}/reject',
+                [USRTraining::class, 'rejectParticipant']
+            )->name('training.participant.reject');
+
+            Route::post(
+                '/training/{uuid}/participants/{applicationUuid}/rollback',
+                [USRTraining::class, 'rollbackParticipant']
+            )->name('training.participant.rollback');
 
             /*
             |--------------------------------------------------------------------------
@@ -363,6 +408,15 @@ Route::middleware(['auth'])->group(function () {
                 Route::put('{uuid}', [UPSecurityHistory::class,'update'])->name('update'); 
                 Route::delete('{uuid}', [UPSecurityHistory::class,'destroy'])->name('destroy');   
             });
+
+        });
+
+        Route::prefix('subscription')->name('subscription.')->group(function () {
+
+            Route::get(
+                '',
+                [USRSubscription::class, 'index']
+            )->name('index');
 
         });
     });

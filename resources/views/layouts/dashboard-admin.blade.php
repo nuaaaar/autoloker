@@ -430,6 +430,12 @@
                                                     </span>
                                                     <span class="menu-title">Subscription</span>
                                                 </a>
+                                                <a class="menu-link {{ Route::is('dashboard-admin.master.faq.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.master.faq.index') }}">
+                                                    <span class="menu-bullet">
+                                                        <span class="bullet bullet-dot"></span>
+                                                    </span>
+                                                    <span class="menu-title">FAQ</span>
+                                                </a>
                                                 <!--end:Menu link-->
                                             </div>
                                             <!--end:Menu item-->

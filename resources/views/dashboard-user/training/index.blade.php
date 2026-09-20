@@ -78,6 +78,8 @@
 
                                 <th>Kuota</th>
 
+                                <th>Peserta</th>
+
                                 <th>Biaya</th>
 
                                 <th>Sertifikat</th>
@@ -516,34 +518,79 @@
             });
 
         });
-        
+
         $(document).ready(function() {
+
             let currentDraw = 1;
 
-             if ($.fn.DataTable.isDataTable('#datatable')) {
+
+            /*
+            |--------------------------------------------------------------------------
+            | DESTROY DATATABLE JIKA SUDAH ADA
+            |--------------------------------------------------------------------------
+            */
+
+            if ($.fn.DataTable.isDataTable('#datatable')) {
+
                 $('#datatable').DataTable().destroy();
+
             }
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | DATATABLE
+            |--------------------------------------------------------------------------
+            */
+
             let table = $('#datatable').DataTable({
+
                 processing: true,
+
                 serverSide: true,
+
                 scrollX: true,
+
                 responsive: false,
-                "aLengthMenu": [[10, 25, 50, 75, 999999], [10, 25, 50, 75, "All"]],
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | LENGTH MENU
+                |--------------------------------------------------------------------------
+                */
+
+                "aLengthMenu": [
+                    [10, 25, 50, 75, 999999],
+                    [10, 25, 50, 75, "All"]
+                ],
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | AJAX
+                |--------------------------------------------------------------------------
+                */
+
                 ajax: {
 
                     url: '{{ route("dashboard-user.training.index") }}',
+
                     type: 'GET',
+
 
                     data: function (d) {
 
                         currentDraw = d.draw;
 
                         d.page = (d.start / d.length) + 1;
+
                         d.length = d.length;
+
                         d.status = "{{ request('status', 'all') }}";
 
                     },
+
 
                     dataFilter: function (response) {
 
@@ -564,109 +611,232 @@
                     }
 
                 },
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | COLUMNS
+                |--------------------------------------------------------------------------
+                */
+
                 columns: [
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | ID
+                    |--------------------------------------------------------------------------
+                    */
 
                     {
                         data: "id",
-                        render: function(data){
+
+                        render: function(data) {
+
                             return ("000000" + data).slice(-6);
+
                         }
                     },
 
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | PELATIHAN
+                    |--------------------------------------------------------------------------
+                    */
+
                     {
                         data: "title",
-                        render:function(data){
 
-                            if(!data){
+                        render: function(data) {
+
+                            if (!data) {
+
                                 return `
                                     <span class="badge badge-light-warning">
                                         Belum Diisi
                                     </span>
                                 `;
+
                             }
 
-                            return data;
+                            return `
+                                <div class="fw-bold">
+                                    ${data}
+                                </div>
+                            `;
 
                         }
                     },
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | PENYELENGGARA
+                    |--------------------------------------------------------------------------
+                    */
 
                     {
                         data: "provider",
-                        render:function(data){
 
-                            return data ?? "-";
+                        render: function(data) {
 
-                        }
-                    },
+                            if (!data) {
 
-                    {
-                        data:null,
-                        render:function(data){
-
-                            let lokasi=[];
-
-                            if(data.city) lokasi.push(data.city);
-
-                            if(data.province) lokasi.push(data.province);
-
-                            if(lokasi.length==0){
-
-                                return `
-                                    <span class="badge badge-light-warning">
-                                        Belum Diatur
-                                    </span>
-                                `;
+                                return "-";
 
                             }
-
-                            return lokasi.join(", ");
-
-                        }
-                    },
-
-                    {
-                        data:"training_mode",
-                        className:"text-center",
-                        render:function(data){
-
-                            switch(data){
-
-                                case "offline":
-                                    return `<span class="badge badge-light-danger">Offline</span>`;
-
-                                case "online":
-                                    return `<span class="badge badge-light-primary">Online</span>`;
-
-                                case "hybrid":
-                                    return `<span class="badge badge-light-success">Hybrid</span>`;
-
-                                default:
-                                    return "-";
-                            }
-
-                        }
-                    },
-
-                    {
-                        data:null,
-                        render:function(data){
-
-                            if(!data.start_date){
-
-                                return `
-                                    <span class="badge badge-light-warning">
-                                        Belum Diatur
-                                    </span>
-                                `;
-
-                            }
-
-                            let start = moment(data.start_date).format("DD-MM-YYYY");
-                            let end = moment(data.end_date).format("DD-MM-YYYY");
 
                             return `
+                                <i class="fas fa-building me-1 text-muted"></i>
+                                ${data}
+                            `;
+
+                        }
+                    },
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | LOKASI
+                    |--------------------------------------------------------------------------
+                    */
+
+                    {
+                        data: null,
+
+                        render: function(data) {
+
+                            let lokasi = [];
+
+
+                            if (data.city) {
+
+                                lokasi.push(data.city);
+
+                            }
+
+
+                            if (data.province) {
+
+                                lokasi.push(data.province);
+
+                            }
+
+
+                            if (lokasi.length == 0) {
+
+                                return `
+                                    <span class="badge badge-light-warning">
+                                        Belum Diatur
+                                    </span>
+                                `;
+
+                            }
+
+
+                            return `
+                                <i class="fas fa-map-marker-alt me-1 text-muted"></i>
+                                ${lokasi.join(", ")}
+                            `;
+
+                        }
+                    },
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | MODE
+                    |--------------------------------------------------------------------------
+                    */
+
+                    {
+                        data: "training_mode",
+
+                        className: "text-center",
+
+                        render: function(data) {
+
+                            switch(data) {
+
+                                case "offline":
+
+                                    return `
+                                        <span class="badge badge-light-danger">
+                                            <i class="fas fa-map-marker-alt me-1"></i>
+                                            Offline
+                                        </span>
+                                    `;
+
+
+                                case "online":
+
+                                    return `
+                                        <span class="badge badge-light-primary">
+                                            <i class="fas fa-globe me-1"></i>
+                                            Online
+                                        </span>
+                                    `;
+
+
+                                case "hybrid":
+
+                                    return `
+                                        <span class="badge badge-light-success">
+                                            <i class="fas fa-random me-1"></i>
+                                            Hybrid
+                                        </span>
+                                    `;
+
+
+                                default:
+
+                                    return "-";
+
+                            }
+
+                        }
+                    },
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | JADWAL
+                    |--------------------------------------------------------------------------
+                    */
+
+                    {
+                        data: null,
+
+                        render: function(data) {
+
+                            if (!data.start_date) {
+
+                                return `
+                                    <span class="badge badge-light-warning">
+                                        Belum Diatur
+                                    </span>
+                                `;
+
+                            }
+
+
+                            let start = moment(
+                                data.start_date
+                            ).format("DD-MM-YYYY");
+
+
+                            let end = moment(
+                                data.end_date
+                            ).format("DD-MM-YYYY");
+
+
+                            return `
+                                <i class="fas fa-calendar-alt me-1 text-muted"></i>
                                 ${start}
+
                                 <br>
+
                                 <small class="text-muted">
                                     s/d ${end}
                                 </small>
@@ -675,34 +845,171 @@
                         }
                     },
 
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | KUOTA
+                    |--------------------------------------------------------------------------
+                    */
+
                     {
-                        data:null,
-                        className:"text-center",
-                        render:function(data){
+                        data: null,
 
-                            let reg=data.registered ?? 0;
-                            let quota=data.quota ?? 0;
+                        className: "text-center",
 
-                            return `${reg}/${quota}`;
+                        render: function(data) {
+
+                            let quota = data.quota ?? 0;
+
+                            return `
+                                <span class="badge badge-light-primary">
+                                    <i class="fas fa-users me-1"></i>
+                                    ${quota} Orang
+                                </span>
+                            `;
 
                         }
                     },
 
-                    {
-                        data:null,
-                        render:function(data){
 
-                            if(data.is_free==1){
+                    /*
+                    |--------------------------------------------------------------------------
+                    | PESERTA
+                    |--------------------------------------------------------------------------
+                    */
+
+                    {
+                        data: null,
+
+                        className: "text-center",
+
+                        render: function(data) {
+
+                            let total = data.total_applications ?? 0;
+
+                            let pending = data.total_pending ?? 0;
+
+                            let approved = data.total_approved ?? 0;
+
+                            let rejected = data.total_rejected ?? 0;
+
+
+                            return `
+
+                                <div class="d-flex flex-column align-items-center">
+
+                                    <!-- TOTAL -->
+
+                                    <span
+                                        class="badge badge-light-primary mb-1"
+                                        data-bs-toggle="tooltip"
+                                        title="Total Pendaftar"
+                                    >
+
+                                        <i class="fas fa-users me-1"></i>
+
+                                        ${total}
+
+                                    </span>
+
+
+                                    <!-- DETAIL STATUS -->
+
+                                    <div
+                                        class="small text-nowrap"
+                                        style="font-size:10px;"
+                                    >
+
+                                        <!-- PENDING -->
+
+                                        <span
+                                            class="text-warning"
+                                            data-bs-toggle="tooltip"
+                                            title="Menunggu Persetujuan"
+                                        >
+
+                                            <i class="fas fa-clock"></i>
+
+                                            ${pending}
+
+                                        </span>
+
+
+                                        <span class="mx-1 text-muted">
+                                            •
+                                        </span>
+
+
+                                        <!-- APPROVED -->
+
+                                        <span
+                                            class="text-success"
+                                            data-bs-toggle="tooltip"
+                                            title="Disetujui"
+                                        >
+
+                                            <i class="fas fa-check"></i>
+
+                                            ${approved}
+
+                                        </span>
+
+
+                                        <span class="mx-1 text-muted">
+                                            •
+                                        </span>
+
+
+                                        <!-- REJECTED -->
+
+                                        <span
+                                            class="text-danger"
+                                            data-bs-toggle="tooltip"
+                                            title="Ditolak"
+                                        >
+
+                                            <i class="fas fa-times"></i>
+
+                                            ${rejected}
+
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            `;
+
+                        }
+                    },
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | BIAYA
+                    |--------------------------------------------------------------------------
+                    */
+
+                    {
+                        data: null,
+
+                        render: function(data) {
+
+                            if (data.is_free == 1) {
 
                                 return `
                                     <span class="badge badge-light-success">
+                                        <i class="fas fa-gift me-1"></i>
                                         Gratis
                                     </span>
                                 `;
 
                             }
 
-                            let formatter=new Intl.NumberFormat("id-ID");
+
+                            let formatter =
+                                new Intl.NumberFormat("id-ID");
+
 
                             return `
                                 Rp ${formatter.format(data.price ?? 0)}
@@ -711,23 +1018,35 @@
                         }
                     },
 
-                    {
-                        data:"is_certificate",
-                        className:"text-center",
-                        render:function(data){
 
-                            if(data==1){
+                    /*
+                    |--------------------------------------------------------------------------
+                    | SERTIFIKAT
+                    |--------------------------------------------------------------------------
+                    */
+
+                    {
+                        data: "is_certificate",
+
+                        className: "text-center",
+
+                        render: function(data) {
+
+                            if (data == 1) {
 
                                 return `
                                     <span class="badge badge-light-success">
+                                        <i class="fas fa-certificate me-1"></i>
                                         Ya
                                     </span>
                                 `;
 
                             }
 
+
                             return `
                                 <span class="badge badge-light-secondary">
+                                    <i class="fas fa-times me-1"></i>
                                     Tidak
                                 </span>
                             `;
@@ -735,68 +1054,154 @@
                         }
                     },
 
-                    {
-                        data:"status",
-                        className:"text-center",
-                        render:function(data){
 
-                            switch(data){
+                    /*
+                    |--------------------------------------------------------------------------
+                    | STATUS
+                    |--------------------------------------------------------------------------
+                    */
+
+                    {
+                        data: "status",
+
+                        className: "text-center",
+
+                        render: function(data) {
+
+                            switch(data) {
 
                                 case "draft":
-                                    return `<span class="badge badge-light-secondary">Draft</span>`;
+
+                                    return `
+                                        <span class="badge badge-light-secondary">
+                                            Draft
+                                        </span>
+                                    `;
+
 
                                 case "submitted":
-                                    return `<span class="badge badge-light-warning">Submitted</span>`;
+
+                                    return `
+                                        <span class="badge badge-light-warning">
+                                            Submitted
+                                        </span>
+                                    `;
+
 
                                 case "published":
-                                    return `<span class="badge badge-light-success">Published</span>`;
+
+                                    return `
+                                        <span class="badge badge-light-success">
+                                            Published
+                                        </span>
+                                    `;
+
 
                                 case "running":
-                                    return `<span class="badge badge-light-primary">Running</span>`;
+
+                                    return `
+                                        <span class="badge badge-light-primary">
+                                            Running
+                                        </span>
+                                    `;
+
 
                                 case "closed":
-                                    return `<span class="badge badge-light-danger">Closed</span>`;
+
+                                    return `
+                                        <span class="badge badge-light-danger">
+                                            Closed
+                                        </span>
+                                    `;
+
 
                                 case "cancelled":
-                                    return `<span class="badge badge-light-dark">Cancelled</span>`;
+
+                                    return `
+                                        <span class="badge badge-light-dark">
+                                            Cancelled
+                                        </span>
+                                    `;
+
 
                                 case "rejected":
-                                    return `<span class="badge badge-light-danger">Rejected</span>`;
+
+                                    return `
+                                        <span class="badge badge-light-danger">
+                                            Rejected
+                                        </span>
+                                    `;
+
 
                                 default:
+
                                     return "-";
+
                             }
 
                         }
                     },
 
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | DILIHAT
+                    |--------------------------------------------------------------------------
+                    */
+
                     {
-                        data:"total_clicked",
-                        className:"text-center",
-                        render:function(data){
+                        data: "total_clicked",
+
+                        className: "text-center",
+
+                        render: function(data) {
 
                             return `
-                                <span class="badge badge-light-info">
+                                <span
+                                    class="badge badge-light-info"
+                                    data-bs-toggle="tooltip"
+                                    title="Total Dilihat"
+                                >
+
+                                    <i class="fas fa-eye me-1"></i>
+
                                     ${data ?? 0}x
+
                                 </span>
                             `;
 
                         }
                     },
 
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | AKSI
+                    |--------------------------------------------------------------------------
+                    */
+
                     {
-                        data:null,
-                        orderable:false,
-                        searchable:false,
-                        className:"text-end",
-                        render:function(data){
+                        data: null,
+
+                        orderable: false,
+
+                        searchable: false,
+
+                        className: "text-end",
+
+                        render: function(data) {
+
 
                             let action = `
 
                                 <!-- Detail -->
-                                <a href="/dashboard-user/training/${data.uuid}"
+
+                                <a
+                                    href="/dashboard-user/training/${data.uuid}"
                                     class="btn btn-outline-info btn-sm me-1"
-                                    title="Detail">
+                                    title="Detail"
+                                    data-bs-toggle="tooltip"
+                                >
 
                                     <i class="fas fa-eye"></i>
 
@@ -805,7 +1210,8 @@
                             `;
 
 
-                            switch(data.status){
+                            switch(data.status) {
+
 
                                 /*=========================================
                                 =                 DRAFT                   =
@@ -816,9 +1222,13 @@
                                     action += `
 
                                         <!-- Edit -->
-                                        <a href="/dashboard-user/training/${data.uuid}/edit"
+
+                                        <a
+                                            href="/dashboard-user/training/${data.uuid}/edit"
                                             class="btn btn-outline-primary btn-sm me-1"
-                                            title="Edit">
+                                            title="Edit"
+                                            data-bs-toggle="tooltip"
+                                        >
 
                                             <i class="fas fa-pencil-alt"></i>
 
@@ -826,10 +1236,13 @@
 
 
                                         <!-- Hapus -->
+
                                         <button
                                             class="btn btn-outline-danger btn-sm"
                                             onclick="deleteData('${data.uuid}')"
-                                            title="Hapus">
+                                            title="Hapus"
+                                            data-bs-toggle="tooltip"
+                                        >
 
                                             <i class="fas fa-trash-alt"></i>
 
@@ -849,10 +1262,13 @@
                                     action += `
 
                                         <!-- Tarik Pengajuan -->
+
                                         <button
                                             class="btn btn-outline-warning btn-sm"
                                             onclick="withdrawTraining('${data.uuid}')"
-                                            title="Tarik Pengajuan">
+                                            title="Tarik Pengajuan"
+                                            data-bs-toggle="tooltip"
+                                        >
 
                                             <i class="fas fa-undo"></i>
 
@@ -872,9 +1288,13 @@
                                     action += `
 
                                         <!-- Peserta -->
-                                        <a href="/dashboard-user/training/${data.uuid}/participants"
+
+                                        <a
+                                            href="/dashboard-user/training/${data.uuid}/participants"
                                             class="btn btn-outline-success btn-sm me-1"
-                                            title="Peserta">
+                                            title="Peserta"
+                                            data-bs-toggle="tooltip"
+                                        >
 
                                             <i class="fas fa-users"></i>
 
@@ -882,10 +1302,13 @@
 
 
                                         <!-- Mulai -->
+
                                         <button
                                             class="btn btn-outline-primary btn-sm me-1"
                                             onclick="startTraining('${data.uuid}')"
-                                            title="Mulai Pelatihan">
+                                            title="Mulai Pelatihan"
+                                            data-bs-toggle="tooltip"
+                                        >
 
                                             <i class="fas fa-play"></i>
 
@@ -893,10 +1316,13 @@
 
 
                                         <!-- Batalkan -->
+
                                         <button
                                             class="btn btn-outline-danger btn-sm"
                                             onclick="cancelTraining('${data.uuid}')"
-                                            title="Batalkan Pelatihan">
+                                            title="Batalkan Pelatihan"
+                                            data-bs-toggle="tooltip"
+                                        >
 
                                             <i class="fas fa-times"></i>
 
@@ -916,9 +1342,13 @@
                                     action += `
 
                                         <!-- Peserta -->
-                                        <a href="/dashboard-user/training/${data.uuid}/participants"
+
+                                        <a
+                                            href="/dashboard-user/training/${data.uuid}/participants"
                                             class="btn btn-outline-success btn-sm me-1"
-                                            title="Peserta">
+                                            title="Peserta"
+                                            data-bs-toggle="tooltip"
+                                        >
 
                                             <i class="fas fa-users"></i>
 
@@ -926,10 +1356,13 @@
 
 
                                         <!-- Selesaikan -->
+
                                         <button
                                             class="btn btn-outline-primary btn-sm"
                                             onclick="completeTraining('${data.uuid}')"
-                                            title="Selesaikan Pelatihan">
+                                            title="Selesaikan Pelatihan"
+                                            data-bs-toggle="tooltip"
+                                        >
 
                                             <i class="fas fa-check"></i>
 
@@ -949,6 +1382,7 @@
                                     // action += `
 
                                     //     <!-- Buka Kembali -->
+
                                     //     <button
                                     //         class="btn btn-outline-success btn-sm"
                                     //         onclick="reopenTraining('${data.uuid}')"
@@ -972,9 +1406,13 @@
                                     action += `
 
                                         <!-- Perbaiki -->
-                                        <a href="/dashboard-user/training/${data.uuid}/edit"
+
+                                        <a
+                                            href="/dashboard-user/training/${data.uuid}/edit"
                                             class="btn btn-outline-primary btn-sm me-1"
-                                            title="Perbaiki Pelatihan">
+                                            title="Perbaiki Pelatihan"
+                                            data-bs-toggle="tooltip"
+                                        >
 
                                             <i class="fas fa-pencil-alt"></i>
 
@@ -982,10 +1420,13 @@
 
 
                                         <!-- Hapus -->
+
                                         <button
                                             class="btn btn-outline-danger btn-sm"
                                             onclick="deleteData('${data.uuid}')"
-                                            title="Hapus">
+                                            title="Hapus"
+                                            data-bs-toggle="tooltip"
+                                        >
 
                                             <i class="fas fa-trash-alt"></i>
 
@@ -1005,10 +1446,13 @@
                                     action += `
 
                                         <!-- Hapus -->
+
                                         <button
                                             class="btn btn-outline-danger btn-sm"
                                             onclick="deleteData('${data.uuid}')"
-                                            title="Hapus">
+                                            title="Hapus"
+                                            data-bs-toggle="tooltip"
+                                        >
 
                                             <i class="fas fa-trash-alt"></i>
 
@@ -1024,33 +1468,82 @@
                             return action;
 
                         }
+
                     }
 
                 ],
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | BUTTON
+                |--------------------------------------------------------------------------
+                */
+
                 dom: 'Blfrtip',
+
                 buttons: [
+
                     {
+
                         extend: 'colvis',
+
                         text: '<i class="fas fa-eye me-1"></i>Kolom',
+
                         className: 'btn btn-light-primary'
+
                     },
+
+
                     {
+
                         extend: 'copy',
+
                         text: '<i class="fas fa-copy me-1"></i>Copy',
+
                         className: 'btn btn-light-danger'
+
                     },
+
+
                     {
+
                         extend: 'excel',
+
                         text: '<i class="fas fa-file-excel me-1"></i>Excel',
+
                         className: 'btn btn-light-success'
+
                     }
+
                 ],
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | DRAW CALLBACK
+                |--------------------------------------------------------------------------
+                */
+
                 drawCallback: function() {
-                    // Inisialisasi tooltip setelah DataTables selesai merender data
+
                     $('[data-bs-toggle="tooltip"]').tooltip();
+
                 }
+
             });
-            table.buttons().container().appendTo('.card-button');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | BUTTON CONTAINER
+            |--------------------------------------------------------------------------
+            */
+
+            table.buttons()
+                .container()
+                .appendTo('.card-button');
+
         });
 
         function startTraining(uuid)

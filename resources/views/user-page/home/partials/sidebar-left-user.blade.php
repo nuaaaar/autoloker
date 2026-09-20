@@ -70,6 +70,14 @@
 
         </div>
 
+        <a href="{{ route('user-page.subscription.index') }}" class="quick-item">
+
+            <i class="ki-duotone ki-star fs-2"></i>
+
+            <span>Paket Berlangganan</span>
+
+        </a>
+
         <a href="{{ route('user-page.job-vacancy.my') }}" class="quick-item">
 
             <i class="ki-duotone ki-briefcase fs-2"></i>
