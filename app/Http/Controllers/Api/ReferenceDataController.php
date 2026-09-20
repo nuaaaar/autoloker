@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\MasterAbility;
+use App\Models\MasterCategoryCertificate;
 use App\Models\MasterIndustry;
 use App\Models\MasterPlacement;
 use App\Models\MasterPosition;
@@ -24,6 +25,11 @@ class ReferenceDataController extends Controller
     public function abilities(): JsonResponse
     {
         return $this->master(MasterAbility::query());
+    }
+
+    public function categoryCertificates(): JsonResponse
+    {
+        return $this->master(MasterCategoryCertificate::query());
     }
 
     public function placements(): JsonResponse

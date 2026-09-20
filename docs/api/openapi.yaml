@@ -53,6 +53,29 @@ paths:
                 $ref: '#/components/schemas/ReferenceListResponse'
         '401':
           $ref: '#/components/responses/Unauthenticated'
+  /api/masters/category-certificates:
+    get:
+      summary: List certificate categories
+      description: Returns active master certificate categories ordered by title. Each item contains only the category title.
+      operationId: listCertificateCategories
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Active certificate categories
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReferenceListResponse'
+              examples:
+                valid:
+                  summary: Certificate categories
+                  value:
+                    status: true
+                    data:
+                      - title: K3 / Keselamatan Kerja
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
   /api/masters/abilities:
     get:
       summary: List security abilities
@@ -1734,7 +1757,7 @@ components:
         title: Satpam Garda Pratama
         publisher: BNSP
         certificate_number: BNSP-XXX-000
-        category: Teknis Operasional
+        category: K3 / Keselamatan Kerja
         publish_date: '2026-09-18'
         expired_date: '2030-12-18'
         is_badge: 1
@@ -1748,7 +1771,7 @@ components:
               title: Satpam Garda Pratama
               publisher: BNSP
               certificate_number: BNSP-XXX-000
-              category: Teknis Operasional
+              category: K3 / Keselamatan Kerja
               publish_date: '2026-09-18'
               expired_date: '2030-12-18'
               file: certificate/lgEHypXMEkNMZZ6rtCqNRen9T2jWlt8kElEnboiJ.pdf
@@ -1763,7 +1786,7 @@ components:
             title: Satpam Garda Pratama
             publisher: BNSP
             certificate_number: BNSP-XXX-000
-            category: Teknis Operasional
+            category: K3 / Keselamatan Kerja
             publish_date: '2026-09-18'
             expired_date: '2030-12-18'
             file: certificate/lgEHypXMEkNMZZ6rtCqNRen9T2jWlt8kElEnboiJ.pdf
@@ -1779,7 +1802,7 @@ components:
             title: Satpam Garda Pratama
             publisher: BNSP
             certificate_number: BNSP-XXX-000
-            category: Teknis Operasional
+            category: K3 / Keselamatan Kerja
             publish_date: '2026-09-18'
             expired_date: '2030-12-18'
             file: certificate/lgEHypXMEkNMZZ6rtCqNRen9T2jWlt8kElEnboiJ.pdf
@@ -1795,7 +1818,7 @@ components:
             title: Satpam Garda Pratama
             publisher: BNSP
             certificate_number: BNSP-XXX-000
-            category: Teknis Operasional
+            category: K3 / Keselamatan Kerja
             publish_date: '2026-09-18'
             expired_date: '2030-12-18'
             file: certificate/lgEHypXMEkNMZZ6rtCqNRen9T2jWlt8kElEnboiJ.pdf
