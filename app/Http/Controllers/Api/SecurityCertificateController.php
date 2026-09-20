@@ -21,9 +21,15 @@ class SecurityCertificateController extends Controller
     {
         $security = $this->security($request);
 
+        $certificates = $security->certificates()
+            ->orderBy('expired_date', 'asc')
+            ->get(self::FIELDS)
+            ->values()
+            ->all();
+
         return response()->json([
             'status' => true,
-            'data' => ['security_certificates' => $security->certificates()->latest()->get(self::FIELDS)],
+            'data' => ['security_certificates' => $certificates],
         ]);
     }
 
