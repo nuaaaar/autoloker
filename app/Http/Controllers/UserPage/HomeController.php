@@ -308,10 +308,10 @@ class HomeController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $securityCertificates = $security->badgeCertificate
-                ->pluck('title')
-                ->map(fn ($item) => strtolower(trim($item)))
-                ->toArray();
+            $securityCertificates = collect($security->badgeCertificate)
+            ->pluck('title')
+            ->map(fn ($item) => strtolower(trim($item)))
+            ->toArray();
 
 
             $jobCertificates = [];
