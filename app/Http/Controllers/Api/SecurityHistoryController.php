@@ -22,7 +22,7 @@ class SecurityHistoryController extends Controller
 
         return response()->json([
             'status' => true,
-            'data' => ['security_histories' => $security->histories()->latest()->get(self::FIELDS)],
+            'data' => ['security_histories' => $security->histories()->orderByDesc('start_date')->get(self::FIELDS)],
         ]);
     }
 
