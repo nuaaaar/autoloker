@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\ChangePasswordController;
+use App\Http\Controllers\Api\JobVacancyController;
 use App\Http\Controllers\Api\LoginController;
 use App\Http\Controllers\Api\LogoutController;
 use App\Http\Controllers\Api\MeController;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('/login', LoginController::class)->name('api.login');
 Route::post('/refresh-token', RefreshTokenController::class)->name('api.refresh-token');
 Route::middleware('api.token')->group(function () {
+    Route::get('/job-vacancies', [JobVacancyController::class, 'index'])->name('api.job-vacancies.index');
     Route::get('/profile', [ProfileController::class, 'show'])->name('api.profile.show');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('api.profile.update');
     Route::patch('/password', ChangePasswordController::class)->name('api.password.update');
