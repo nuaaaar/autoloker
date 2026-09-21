@@ -46,8 +46,10 @@ class JobVacancyListingTest extends TestCase
             'gender' => 'laki-laki',
         ]);
 
-        $this->withToken($token)
-            ->getJson("/api/job-vacancies?{$filters}")
+        $response = $this->withToken($token)
+            ->getJson("/api/job-vacancies?{$filters}");
+
+        $response
             ->assertOk()
             ->assertJsonPath('status', true)
             ->assertJsonPath('data.pagination.current_page', 1)
@@ -56,6 +58,23 @@ class JobVacancyListingTest extends TestCase
             ->assertJsonPath('data.pagination.has_more', true)
             ->assertJsonCount(5, 'data.job_vacancies')
             ->assertJsonPath('data.job_vacancies.0.position', 'Security 6');
+
+        $this->assertSame(
+            ['Site security'],
+            $response->json('data.job_vacancies.0.responsibility')
+        );
+        $this->assertSame(
+            ['Health insurance'],
+            $response->json('data.job_vacancies.0.facility')
+        );
+        $this->assertSame(
+            ['Gada Pratama'],
+            $response->json('data.job_vacancies.0.certificate')
+        );
+        $this->assertSame(
+            ['Gada Pratama'],
+            $response->json('data.job_vacancies.0.competency_scheme')
+        );
 
         $this->withToken($token)
             ->getJson("/api/job-vacancies?{$filters}&page=2")
@@ -89,7 +108,10 @@ class JobVacancyListingTest extends TestCase
             'province' => 'Jawa Barat',
             'working_type' => 'contract',
             'working_system' => 'shift',
+            'responsibility' => json_encode(['Site security']),
+            'facility' => json_encode(['Health insurance']),
             'certificate' => json_encode(['Gada Pratama']),
+            'competency_scheme' => json_encode(['Gada Pratama']),
             'min_price' => '5000000',
             'is_urgent' => true,
             'min_experience' => '2',

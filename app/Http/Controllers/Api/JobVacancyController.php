@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\JobVacancyIndexRequest;
+use App\Http\Resources\Api\JobVacancyResource;
 use App\Models\JobVacancy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -73,7 +74,7 @@ class JobVacancyController extends Controller
         return response()->json([
             'status' => true,
             'data' => [
-                'job_vacancies' => $vacancies->items(),
+                'job_vacancies' => JobVacancyResource::collection($vacancies->items())->resolve(),
                 'pagination' => [
                     'current_page' => $vacancies->currentPage(),
                     'last_page' => $vacancies->lastPage(),
