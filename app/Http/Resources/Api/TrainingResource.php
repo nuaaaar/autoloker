@@ -21,6 +21,23 @@ class TrainingResource extends JsonResource
             $data[$field] = $this->normalizeArray($data[$field] ?? null);
         }
 
+        $quota = $this->numericValue($data['quota'] ?? null);
+        $registered = $this->numericValue(
+            $data['registered'] ?? $data['approved_applications_count'] ?? null
+        );
+        $price = $this->numericValue($data['price'] ?? null);
+        $progress = $quota > 0
+            ? min(100, (int) round(($registered / $quota) * 100))
+            : 0;
+
+        $data['registered_count'] = $registered;
+        $data['progress_percentage'] = $progress;
+        $data['price_display'] = $price > 0
+            ? 'Rp '.number_format($price, 0, ',', '.')
+            : 'Gratis';
+
+        unset($data['approved_applications_count']);
+
         return $data;
     }
 
@@ -37,5 +54,10 @@ class TrainingResource extends JsonResource
         $decoded = json_decode($value, true);
 
         return is_array($decoded) ? $decoded : [];
+    }
+
+    private function numericValue(mixed $value): int
+    {
+        return is_numeric($value) ? max(0, (int) $value) : 0;
     }
 }

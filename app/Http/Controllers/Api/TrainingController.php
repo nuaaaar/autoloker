@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Http\Controllers\Api;
@@ -30,6 +29,11 @@ class TrainingController extends Controller
             ->with([
                 'bujp:id,company_name',
                 'company:id,company_name',
+            ])
+            ->withCount([
+                'applications as approved_applications_count' => function (Builder $query): void {
+                    $query->where('status', 'approved');
+                },
             ])
             ->where('status', 'published');
 
