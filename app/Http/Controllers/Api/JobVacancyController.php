@@ -20,10 +20,19 @@ class JobVacancyController extends Controller
     {
         $filters = $request->validated();
 
+        $securityId = $request->user()?->user_security?->security?->id;
+
         $query = JobVacancy::query()
             ->with([
                 'bujp:id,company_name',
                 'company:id,company_name',
+            ])
+            ->withCount('applications as total_applications')
+            ->withExists([
+                'applications as is_appled' => function (Builder $query) use ($securityId): void {
+                    $query->whereNotNull('security_id')
+                        ->where('security_id', $securityId);
+                },
             ])
             ->where('status', 'published')
             ->where(function (Builder $query): void {

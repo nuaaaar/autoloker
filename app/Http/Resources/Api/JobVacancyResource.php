@@ -21,6 +21,13 @@ class JobVacancyResource extends JsonResource
         foreach (self::ARRAY_FIELDS as $field) {
             $data[$field] = $this->normalizeArray($data[$field] ?? null);
         }
+        if (array_key_exists('total_applications', $data)) {
+            $data['total_applications'] = (int) $data['total_applications'];
+        }
+
+        if (array_key_exists('is_appled', $data)) {
+            $data['is_appled'] = (bool) $data['is_appled'];
+        }
 
         return $data;
     }

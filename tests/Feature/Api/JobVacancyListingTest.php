@@ -2,8 +2,11 @@
 
 namespace Tests\Feature\Api;
 
+use App\Models\JobApplication;
 use App\Models\JobVacancy;
+use App\Models\Security;
 use App\Models\User;
+use App\Models\UserSecurity;
 use App\Services\Api\TokenService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -83,6 +86,66 @@ class JobVacancyListingTest extends TestCase
             ->assertJsonPath('data.pagination.has_more', false)
             ->assertJsonCount(1, 'data.job_vacancies')
             ->assertJsonPath('data.job_vacancies.0.position', 'Security 1');
+    }
+
+    public function test_list_includes_total_applications_and_authenticated_security_application_state(): void
+    {
+        [$user, $security] = $this->securityAccount('vacancy-state@example.com');
+        [, $otherSecurity] = $this->securityAccount('other-vacancy-state@example.com');
+
+        $notAppliedVacancy = JobVacancy::create($this->vacancyAttributes([
+            'position' => 'Not Applied Security',
+        ]));
+        JobApplication::create([
+            'security_id' => $otherSecurity->id,
+            'job_vacancy_id' => $notAppliedVacancy->id,
+        ]);
+
+        $appliedVacancy = JobVacancy::create($this->vacancyAttributes([
+            'position' => 'Applied Security',
+        ]));
+        JobApplication::create([
+            'security_id' => $security->id,
+            'job_vacancy_id' => $appliedVacancy->id,
+        ]);
+        JobApplication::create([
+            'security_id' => $otherSecurity->id,
+            'job_vacancy_id' => $appliedVacancy->id,
+        ]);
+
+        $token = app(TokenService::class)->issue($user)['access_token'];
+
+        $response = $this->withToken($token)
+            ->getJson('/api/job-vacancies');
+
+        $response
+            ->assertOk()
+            ->assertJsonPath('data.job_vacancies.0.position', 'Applied Security')
+            ->assertJsonPath('data.job_vacancies.0.total_applications', 2)
+            ->assertJsonPath('data.job_vacancies.0.is_appled', true)
+            ->assertJsonPath('data.job_vacancies.1.position', 'Not Applied Security')
+            ->assertJsonPath('data.job_vacancies.1.total_applications', 1)
+            ->assertJsonPath('data.job_vacancies.1.is_appled', false);
+    }
+
+    /** @return array{0: User, 1: Security} */
+    private function securityAccount(string $email): array
+    {
+        $user = User::create([
+            'name' => 'API Security',
+            'email' => $email,
+            'google_id' => null,
+            'password' => 'password',
+            'role' => 'satpam',
+            'status' => 'active',
+        ]);
+        $userSecurity = UserSecurity::create(['user_id' => $user->id]);
+        $security = Security::create([
+            'user_security_id' => $userSecurity->id,
+            'name' => 'API Security',
+        ]);
+
+        return [$user, $security];
     }
 
     private function token(): string
