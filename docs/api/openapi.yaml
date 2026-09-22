@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Autoloker API
   version: 1.0.0
-  description: API documentation for mobile authentication, profile editing, security work history CRUD, security certificate CRUD, job vacancy applications, paginated vacancy and training listings, and hierarchical location references.
+  description: API documentation for mobile authentication, profile editing, security work history CRUD, security certificate CRUD, job vacancy and training applications, paginated vacancy and training listings, and hierarchical location references.
 
 servers:
   - url: http://localhost
@@ -194,6 +194,57 @@ paths:
           $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/ValidationError'
+
+  /api/trainings/{uuid}/apply:
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the published training.
+        schema:
+          type: string
+          format: uuid
+    post:
+      summary: Apply for a training
+      description: |
+        Creates one application for the authenticated security user's profile.
+        The training must be published, its start date must not have passed,
+        and its approved application count must be below its quota. Repeated
+        applications while pending or approved are rejected.
+      operationId: applyForTraining
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Training application submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrainingApplicationResponse'
+              examples:
+                created:
+                  $ref: '#/components/examples/TrainingApplicationResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: The training registration is closed, already submitted, or has reached its approved quota
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                pending:
+                  summary: Application is awaiting approval
+                  value:
+                    status: false
+                    message: Your training application is awaiting approval.
+                full_quota:
+                  summary: Approved quota is full
+                  value:
+                    status: false
+                    message: The training quota is full.
 
   /api/job-vacancies/{uuid}/apply:
     parameters:
@@ -1245,6 +1296,7 @@ components:
         - total
         - from
         - to
+
         - has_more
         - next_page_url
         - previous_page_url
@@ -1296,6 +1348,46 @@ components:
                 $ref: '#/components/schemas/Training'
             pagination:
               $ref: '#/components/schemas/TrainingPagination'
+    TrainingApplication:
+      type: object
+      required: [id, uuid, training_id, status, created_at]
+      properties:
+        id:
+          type: integer
+          example: 12
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+          example: 3f6f6e2c-55ec-4da5-9e35-5d0d33b7f4b0
+        training_id:
+          type: integer
+          example: 12
+        status:
+          type: string
+          enum: [pending, approved, rejected]
+          example: pending
+        created_at:
+          type: [string, 'null']
+          format: date-time
+          example: '2026-09-22T08:30:11.000000Z'
+
+    TrainingApplicationResponse:
+      type: object
+      required: [status, message, data]
+      properties:
+        status:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Training application submitted successfully.
+        data:
+          type: object
+          required: [training_application]
+          properties:
+            training_application:
+              $ref: '#/components/schemas/TrainingApplication'
 
     JobVacancy:
       type: object
@@ -2426,7 +2518,7 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
     NotFound:
-      description: The requested vacancy or security profile was not found.
+      description: The requested resource or security profile was not found.
       content:
         application/json:
           schema:
@@ -2572,6 +2664,19 @@ components:
             has_more: false
             next_page_url: null
             previous_page_url: null
+
+    TrainingApplicationResponse:
+      summary: Created training application
+      value:
+        status: true
+        message: Training application submitted successfully.
+        data:
+          training_application:
+            id: 12
+            uuid: 3f6f6e2c-55ec-4da5-9e35-5d0d33b7f4b0
+            training_id: 12
+            status: pending
+            created_at: '2026-09-22T08:30:11.000000Z'
 
     JobApplicationResponse:
       summary: Created job application

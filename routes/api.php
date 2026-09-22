@@ -20,6 +20,7 @@ Route::post('/refresh-token', RefreshTokenController::class)->name('api.refresh-
 Route::middleware('api.token')->group(function () {
     Route::get('/job-vacancies', [JobVacancyController::class, 'index'])->name('api.job-vacancies.index');
     Route::get('/trainings', [TrainingController::class, 'index'])->name('api.trainings.index');
+    Route::post('/trainings/{uuid}/apply', [TrainingController::class, 'store'])->name('api.trainings.apply');
     Route::post('/job-vacancies/{uuid}/apply', [JobApplicationController::class, 'store'])->name('api.job-vacancies.apply');
     Route::get('/job-applications', [JobApplicationController::class, 'index'])->name('api.job-applications.index');
     Route::get('/profile', [ProfileController::class, 'show'])->name('api.profile.show');
