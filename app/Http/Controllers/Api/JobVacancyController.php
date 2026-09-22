@@ -30,6 +30,19 @@ class JobVacancyController extends Controller
                 $query->whereNull('end_date')
                     ->orWhereDate('end_date', '>=', now()->toDateString());
             });
+        if (filled($filters['search'] ?? null)) {
+            $search = $filters['search'];
+
+            $query->where(function (Builder $query) use ($search): void {
+                $query->where('position', 'like', "%{$search}%")
+                    ->orWhereHas('company', function (Builder $query) use ($search): void {
+                        $query->where('company_name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('bujp', function (Builder $query) use ($search): void {
+                        $query->where('company_name', 'like', "%{$search}%");
+                    });
+            });
+        }
 
         if (filled($filters['province_name'] ?? null)) {
             $query->where('province', $filters['province_name']);

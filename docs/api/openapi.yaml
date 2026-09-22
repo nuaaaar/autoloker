@@ -42,11 +42,20 @@ paths:
   /api/job-vacancies:
     get:
       summary: List published job vacancies
-      description: Returns published vacancies that have not expired. Results are ordered by newest vacancy ID and paginated with five vacancies per page.
+      description: Returns published vacancies that have not expired. The search parameter matches the position, company name, or BUJP name. Results are ordered by newest vacancy ID and paginated with five vacancies per page.
       operationId: listJobVacancies
       security:
         - bearerAuth: []
       parameters:
+        - name: search
+          in: query
+          required: false
+          description: Partial search across the vacancy position, company name, and BUJP name.
+          schema:
+            type: string
+            maxLength: 255
+            example: security
+          example: security
         - name: province_name
           in: query
           required: false
