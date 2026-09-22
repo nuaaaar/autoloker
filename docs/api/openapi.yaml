@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Autoloker API
   version: 1.0.0
-  description: API documentation for mobile authentication, profile editing, security work history CRUD, security certificate CRUD, job vacancy applications, paginated vacancy lists, and hierarchical location references.
+  description: API documentation for mobile authentication, profile editing, security work history CRUD, security certificate CRUD, job vacancy applications, paginated vacancy and training listings, and hierarchical location references.
 
 servers:
   - url: http://localhost
@@ -140,6 +140,67 @@ paths:
                   $ref: '#/components/examples/JobVacancyListResponse'
         '401':
           $ref: '#/components/responses/Unauthenticated'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /api/trainings:
+    get:
+      summary: List published trainings for security users
+      description: Returns published trainings for authenticated security users, ordered by newest training ID and paginated with five trainings per page. The search parameter matches the title or provider.
+      operationId: listTrainings
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: search
+          in: query
+          required: false
+          description: Partial search across the training title and provider.
+          schema:
+            type: string
+            maxLength: 255
+            example: security
+          example: security
+        - name: title
+          in: query
+          required: false
+          description: Filter by a partial training title.
+          schema:
+            type: string
+            maxLength: 255
+            example: security awareness
+          example: security awareness
+        - name: provider
+          in: query
+          required: false
+          description: Filter by a partial provider name.
+          schema:
+            type: string
+            maxLength: 255
+            example: PT Example Training
+          example: PT Example Training
+        - name: page
+          in: query
+          required: false
+          description: One-based pagination page number.
+          schema:
+            type: integer
+            minimum: 1
+            example: 1
+          example: 1
+      responses:
+        '200':
+          description: Published trainings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrainingListResponse'
+              examples:
+                valid:
+                  $ref: '#/components/examples/TrainingListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/ValidationError'
 
@@ -985,6 +1046,266 @@ paths:
 
 components:
   schemas:
+    Training:
+      type: object
+      required:
+        - id
+        - uuid
+        - b_u_j_p_id
+        - company_id
+        - title
+        - provider
+        - instructor
+        - category
+        - level
+        - price
+        - is_free
+        - description
+        - quota
+        - registered
+        - tags
+        - training_mode
+        - province
+        - city
+        - district
+        - village
+        - address
+        - google_map
+        - meeting_url
+        - start_date
+        - end_date
+        - duration_day
+        - total_jp
+        - is_certificate
+        - certificate_name
+        - certificate_validity
+        - syllabus
+        - requirements
+        - status
+        - reason_rejected
+        - total_clicked
+        - poster
+        - created_at
+        - updated_at
+        - bujp
+        - company
+      properties:
+        id:
+          type: integer
+          example: 12
+        uuid:
+          type: [string, 'null']
+          format: uuid
+          example: 3f6f6e2c-55ec-4da5-9e35-5d0d33b7f4b0
+        b_u_j_p_id:
+          type: [integer, 'null']
+          example: 3
+        company_id:
+          type: [integer, 'null']
+          example: null
+        title:
+          type: [string, 'null']
+          example: Security Awareness Training
+        provider:
+          type: [string, 'null']
+          example: PT Example Training
+        instructor:
+          type: [string, 'null']
+          example: Budi Santoso
+        category:
+          type: [string, 'null']
+          example: Security
+        level:
+          type: [string, 'null']
+          example: Basic
+        price:
+          type: [string, 'null']
+          example: '750000'
+        is_free:
+          type: [string, 'null']
+          example: '0'
+        description:
+          type: [string, 'null']
+          example: Pelatihan dasar untuk meningkatkan kompetensi petugas keamanan.
+        quota:
+          type: [string, 'null']
+          example: '20'
+        registered:
+          type: [string, 'null']
+          example: '10'
+        tags:
+          type: array
+          items:
+            type: string
+          example:
+            - security
+            - awareness
+        training_mode:
+          type: [string, 'null']
+          example: offline
+        province:
+          type: [string, 'null']
+          example: JAWA BARAT
+        city:
+          type: [string, 'null']
+          example: KOTA BANDUNG
+        district:
+          type: [string, 'null']
+          example: Coblong
+        village:
+          type: [string, 'null']
+          example: Dago
+        address:
+          type: [string, 'null']
+          example: Jl. Ir. H. Djuanda No. 10
+        google_map:
+          type: [string, 'null']
+          format: uri
+          example: 'https://maps.example.com/?q=training'
+        meeting_url:
+          type: [string, 'null']
+          format: uri
+          example: 'https://meeting.example.com/security-training'
+        start_date:
+          type: [string, 'null']
+          format: date
+          example: '2026-10-01'
+        end_date:
+          type: [string, 'null']
+          format: date
+          example: '2026-10-03'
+        duration_day:
+          type: [string, 'null']
+          example: '3'
+        total_jp:
+          type: [string, 'null']
+          example: '24'
+        is_certificate:
+          type: integer
+          enum: [0, 1]
+          example: 1
+        certificate_name:
+          type: [string, 'null']
+          example: Sertifikat Kompetensi Security
+        certificate_validity:
+          type: [string, 'null']
+          example: '2 tahun'
+        syllabus:
+          type: array
+          items:
+            type: string
+          example:
+            - Dasar-dasar pengamanan
+            - Penanganan keadaan darurat
+        requirements:
+          type: array
+          items:
+            type: string
+          example:
+            - Kartu identitas
+            - Surat keterangan sehat
+        status:
+          type: string
+          enum: [draft, rejected, submitted, published, closed, running, cancelled]
+          example: published
+        reason_rejected:
+          type: [string, 'null']
+          example: null
+        total_clicked:
+          type: [string, 'null']
+          example: null
+        poster:
+          type: [string, 'null']
+          example: trainings/security-awareness.jpg
+        created_at:
+          type: [string, 'null']
+          format: date-time
+          example: '2026-09-22T04:36:36.000000Z'
+        updated_at:
+          type: [string, 'null']
+          format: date-time
+          example: '2026-09-22T08:30:11.000000Z'
+        bujp:
+          oneOf:
+            - $ref: '#/components/schemas/TrainingOrganization'
+            - type: 'null'
+        company:
+          oneOf:
+            - $ref: '#/components/schemas/TrainingOrganization'
+            - type: 'null'
+
+    TrainingOrganization:
+      type: object
+      required: [id, company_name]
+      properties:
+        id:
+          type: integer
+          example: 3
+        company_name:
+          type: [string, 'null']
+          example: PT Example Training
+
+    TrainingPagination:
+      type: object
+      required:
+        - current_page
+        - last_page
+        - per_page
+        - total
+        - from
+        - to
+        - has_more
+        - next_page_url
+        - previous_page_url
+      properties:
+        current_page:
+          type: integer
+          example: 1
+        last_page:
+          type: integer
+          example: 1
+        per_page:
+          type: integer
+          example: 5
+        total:
+          type: integer
+          example: 1
+        from:
+          type: [integer, 'null']
+          example: 1
+        to:
+          type: [integer, 'null']
+          example: 1
+        has_more:
+          type: boolean
+          example: false
+        next_page_url:
+          type: [string, 'null']
+          format: uri
+          example: null
+        previous_page_url:
+          type: [string, 'null']
+          format: uri
+          example: null
+
+    TrainingListResponse:
+      type: object
+      required: [status, data]
+      properties:
+        status:
+          type: boolean
+          example: true
+        data:
+          type: object
+          required: [trainings, pagination]
+          properties:
+            trainings:
+              type: array
+              items:
+                $ref: '#/components/schemas/Training'
+            pagination:
+              $ref: '#/components/schemas/TrainingPagination'
+
     JobVacancy:
       type: object
       required:
@@ -2184,6 +2505,71 @@ components:
               bujp:
                 id: 3
                 company_name: Digital Partner Autotalenta
+              company: null
+          pagination:
+            current_page: 1
+            last_page: 1
+            per_page: 5
+            total: 1
+            from: 1
+            to: 1
+            has_more: false
+            next_page_url: null
+            previous_page_url: null
+
+    TrainingListResponse:
+      summary: Published trainings with pagination
+      value:
+        status: true
+        data:
+          trainings:
+            - id: 12
+              uuid: 3f6f6e2c-55ec-4da5-9e35-5d0d33b7f4b0
+              b_u_j_p_id: 3
+              company_id: null
+              title: Security Awareness Training
+              provider: PT Example Training
+              instructor: Budi Santoso
+              category: Security
+              level: Basic
+              price: '750000'
+              is_free: '0'
+              description: Pelatihan dasar untuk meningkatkan kompetensi petugas keamanan.
+              quota: '20'
+              registered: '10'
+              tags:
+                - security
+                - awareness
+              training_mode: offline
+              province: JAWA BARAT
+              city: KOTA BANDUNG
+              district: Coblong
+              village: Dago
+              address: Jl. Ir. H. Djuanda No. 10
+              google_map: 'https://maps.example.com/?q=training'
+              meeting_url: 'https://meeting.example.com/security-training'
+              start_date: '2026-10-01'
+              end_date: '2026-10-03'
+              duration_day: '3'
+              total_jp: '24'
+              is_certificate: 1
+              certificate_name: Sertifikat Kompetensi Security
+              certificate_validity: '2 tahun'
+              syllabus:
+                - Dasar-dasar pengamanan
+                - Penanganan keadaan darurat
+              requirements:
+                - Kartu identitas
+                - Surat keterangan sehat
+              status: published
+              reason_rejected: null
+              total_clicked: null
+              poster: trainings/security-awareness.jpg
+              created_at: '2026-09-22T04:36:36.000000Z'
+              updated_at: '2026-09-22T08:30:11.000000Z'
+              bujp:
+                id: 3
+                company_name: PT Example Training
               company: null
           pagination:
             current_page: 1
