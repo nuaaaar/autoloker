@@ -1,3 +1,4 @@
+
 <?php
 
 namespace App\Http\Controllers\Api;
@@ -41,13 +42,6 @@ class TrainingController extends Controller
             });
         }
 
-        if (filled($filters['title'] ?? null)) {
-            $query->where('title', 'like', "%{$filters['title']}%");
-        }
-
-        if (filled($filters['provider'] ?? null)) {
-            $query->where('provider', 'like', "%{$filters['provider']}%");
-        }
 
         $trainings = $query
             ->latest('id')

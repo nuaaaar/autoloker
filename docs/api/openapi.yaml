@@ -169,24 +169,6 @@ paths:
             maxLength: 255
             example: security
           example: security
-        - name: title
-          in: query
-          required: false
-          description: Filter by a partial training title.
-          schema:
-            type: string
-            maxLength: 255
-            example: security awareness
-          example: security awareness
-        - name: provider
-          in: query
-          required: false
-          description: Filter by a partial provider name.
-          schema:
-            type: string
-            maxLength: 255
-            example: PT Example Training
-          example: PT Example Training
         - name: page
           in: query
           required: false
