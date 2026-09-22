@@ -44,8 +44,8 @@ class JobVacancyController extends Controller
             });
         }
 
-        if (filled($filters['province'] ?? null)) {
-            $query->where('province', $filters['province']);
+        if (filled($filters['province_name'] ?? null)) {
+            $query->where('province', $filters['province_name']);
         }
 
         if (filled($filters['working_type'] ?? null)) {
