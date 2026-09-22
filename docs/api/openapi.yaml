@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Autoloker API
   version: 1.0.0
-  description: API documentation for mobile authentication, profile editing, security work history CRUD, security certificate CRUD, and hierarchical location references.
+  description: API documentation for mobile authentication, profile editing, security work history CRUD, security certificate CRUD, job vacancy applications, paginated vacancy lists, and hierarchical location references.
 
 servers:
   - url: http://localhost
@@ -38,6 +38,188 @@ paths:
               schema:
                 $ref: '#/components/schemas/ValidationErrorResponse'
       security: []
+
+  /api/job-vacancies:
+    get:
+      summary: List published job vacancies
+      description: Returns published vacancies that have not expired. Results are ordered by newest vacancy ID and paginated with five vacancies per page.
+      operationId: listJobVacancies
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: province_name
+          in: query
+          required: false
+          description: Filter by the exact province name.
+          schema:
+            type: string
+            maxLength: 255
+            example: KALIMANTAN TIMUR
+          example: KALIMANTAN TIMUR
+        - name: working_type
+          in: query
+          required: false
+          description: Filter by employment type.
+          schema:
+            type: string
+            enum: [permanent, contract, intenrship, freelance]
+            example: permanent
+          example: permanent
+        - name: working_system
+          in: query
+          required: false
+          description: Filter by work system.
+          schema:
+            type: string
+            enum: [shift, non-shift]
+            example: shift
+          example: shift
+        - name: certificate
+          in: query
+          required: false
+          description: Filter vacancies requiring this certificate.
+          schema:
+            type: string
+            maxLength: 255
+            example: GADA PRATAMA
+          example: GADA PRATAMA
+        - name: min_price
+          in: query
+          required: false
+          description: Return vacancies whose minimum fee is at least this amount.
+          schema:
+            type: number
+            minimum: 0
+            example: 8000000
+          example: 8000000
+        - name: is_urgent
+          in: query
+          required: false
+          description: Filter urgent vacancies. Send 1 for urgent or 0 for non-urgent.
+          schema:
+            type: integer
+            enum: [0, 1]
+            example: 1
+          example: 1
+        - name: min_experience
+          in: query
+          required: false
+          description: Return vacancies requiring no more than this many years of experience, including vacancies without an experience requirement.
+          schema:
+            type: integer
+            minimum: 0
+            example: 2
+          example: 2
+        - name: gender
+          in: query
+          required: false
+          description: Filter by the vacancy gender requirement. Vacancies without a gender requirement are also included.
+          schema:
+            type: string
+            enum: [laki-laki, perempuan]
+            example: laki-laki
+          example: laki-laki
+        - name: page
+          in: query
+          required: false
+          description: One-based pagination page number.
+          schema:
+            type: integer
+            minimum: 1
+            example: 1
+          example: 1
+      responses:
+        '200':
+          description: Published job vacancies
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobVacancyListResponse'
+              examples:
+                valid:
+                  $ref: '#/components/examples/JobVacancyListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /api/job-vacancies/{uuid}/apply:
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the published job vacancy.
+        schema:
+          type: string
+          format: uuid
+    post:
+      summary: Apply for a job vacancy
+      description: |
+        Creates one application for the authenticated security user's profile.
+        The vacancy must be published, its application deadline must not have
+        passed, and its applicant quota must not be full. Repeated applications
+        for the same vacancy are rejected.
+      operationId: applyForJobVacancy
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Job application submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobApplicationResponse'
+              examples:
+                created:
+                  $ref: '#/components/examples/JobApplicationResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: The vacancy is expired, already applied for, or has reached its quota
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                duplicate:
+                  summary: Duplicate application
+                  value:
+                    status: false
+                    message: You have already applied for this job vacancy.
+
+  /api/job-applications:
+    get:
+      summary: List the authenticated security user's applications
+      description: Returns job vacancies applied for by the authenticated security user, ordered by newest application first and paginated with five vacancies per page.
+      operationId: listMyJobApplications
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          required: false
+          description: One-based pagination page number.
+          schema:
+            type: integer
+            minimum: 1
+            example: 1
+          example: 1
+      responses:
+        '200':
+          description: Applied job vacancies
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyJobApplicationListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
 
   /api/masters/positions:
     get:
@@ -803,6 +985,359 @@ paths:
 
 components:
   schemas:
+    JobVacancy:
+      type: object
+      required:
+        - id
+        - uuid
+        - b_u_j_p_id
+        - company_id
+        - position
+        - description_work
+        - responsibility
+        - facility
+        - kuota
+        - status
+        - reason_rejected
+        - start_date
+        - end_date
+        - province
+        - city
+        - district
+        - village
+        - address
+        - working_type
+        - working_system
+        - is_show_fee
+        - fee_type
+        - min_price
+        - max_price
+        - gender
+        - min_age
+        - max_age
+        - min_height
+        - max_height
+        - min_weight
+        - max_weight
+        - last_education
+        - min_experience
+        - certificate
+        - competency_scheme
+        - is_urgent
+        - total_clicked
+        - created_at
+        - updated_at
+        - bujp
+        - company
+      properties:
+        id:
+          type: integer
+          example: 2
+        uuid:
+          type: [string, 'null']
+          format: uuid
+          example: ffa4dca1-0ae2-412a-80ff-f7c8a2a4adae
+        b_u_j_p_id:
+          type: [integer, 'null']
+          example: 3
+        company_id:
+          type: [integer, 'null']
+          example: null
+        position:
+          type: [string, 'null']
+          example: Satpam Objek Vital (Obvit)
+        description_work:
+          type: [string, 'null']
+          example: Pengamanan pada objek vital seperti pembangkit listrik, pelabuhan, bandara dan kilang minyak.
+        responsibility:
+          type: array
+          items:
+            type: string
+          example:
+            - Pengamanan aset strategis negara maupun swasta nasional
+            - Pengawasan akses keluar masuk area objek vital
+            - Penerapan standar protokol pengamanan yang ketat
+            - Patroli dan pengawasan area strategis
+            - Penanganan kondisi darurat dan potensi ancaman keamanan
+        facility:
+          type: array
+          items:
+            type: string
+          example:
+            - Asuransi Kesehatan Premium
+            - Tempat Tinggal
+            - Relokasi Keluarga
+            - Penyesuaian Gaji Tahunan
+        kuota:
+          type: [integer, 'null']
+          example: 2
+        status:
+          type: string
+          description: Current vacancy state. General vacancy listings return published vacancies; application history may include later states.
+          enum: [draft, rejected, submitted, published, closed]
+          example: published
+        reason_rejected:
+          type: [string, 'null']
+          example: null
+        start_date:
+          type: [string, 'null']
+          format: date
+          example: '2026-09-20'
+        end_date:
+          type: [string, 'null']
+          format: date
+          example: '2026-12-31'
+        province:
+          type: [string, 'null']
+          example: KALIMANTAN TIMUR
+        city:
+          type: [string, 'null']
+          example: KOTA BALIKPAPAN
+        district:
+          type: [string, 'null']
+          example: null
+        village:
+          type: [string, 'null']
+          example: null
+        address:
+          type: [string, 'null']
+          example: Jl. Jend Sudirman
+        working_type:
+          type: string
+          enum: [permanent, contract, intenrship, freelance]
+          example: permanent
+        working_system:
+          type: string
+          enum: [shift, non-shift]
+          example: shift
+        is_show_fee:
+          type: integer
+          enum: [0, 1]
+          example: 1
+        fee_type:
+          type: string
+          enum: [daily, monthly]
+          example: monthly
+        min_price:
+          type: [string, 'null']
+          example: '8000000'
+        max_price:
+          type: [string, 'null']
+          example: '12000000'
+        gender:
+          type: [string, 'null']
+          enum: [laki-laki, perempuan, null]
+          example: null
+        min_age:
+          type: [string, 'null']
+          example: '20'
+        max_age:
+          type: [string, 'null']
+          example: '45'
+        min_height:
+          type: [number, 'null']
+          example: 165
+        max_height:
+          type: [number, 'null']
+          example: 190
+        min_weight:
+          type: [number, 'null']
+          example: 60
+        max_weight:
+          type: [number, 'null']
+          example: 80
+        last_education:
+          type: [string, 'null']
+          example: D3
+        min_experience:
+          type: [string, 'null']
+          example: '2'
+        certificate:
+          type: array
+          items:
+            type: string
+          example:
+            - GADA PRATAMA
+        competency_scheme:
+          type: array
+          items:
+            type: string
+          example:
+            - Kompetensi Gada Pratama
+        is_urgent:
+          type: integer
+          enum: [0, 1]
+          example: 1
+        total_clicked:
+          type: [string, 'null']
+          example: null
+        created_at:
+          type: [string, 'null']
+          format: date-time
+          example: '2026-09-20T04:36:36.000000Z'
+        updated_at:
+          type: [string, 'null']
+          format: date-time
+          example: '2026-09-20T08:30:11.000000Z'
+        bujp:
+          oneOf:
+            - $ref: '#/components/schemas/JobVacancyOrganization'
+            - type: 'null'
+        company:
+          oneOf:
+            - $ref: '#/components/schemas/JobVacancyOrganization'
+            - type: 'null'
+
+    JobVacancyOrganization:
+      type: object
+      required: [id, company_name]
+      properties:
+        id:
+          type: integer
+          example: 3
+        company_name:
+          type: [string, 'null']
+          example: Digital Partner Autotalenta
+
+    JobVacancyPagination:
+      type: object
+      required:
+        - current_page
+        - last_page
+        - per_page
+        - total
+        - from
+        - to
+        - has_more
+        - next_page_url
+        - previous_page_url
+      properties:
+        current_page:
+          type: integer
+          example: 1
+        last_page:
+          type: integer
+          example: 1
+        per_page:
+          type: integer
+          example: 5
+        total:
+          type: integer
+          example: 1
+        from:
+          type: [integer, 'null']
+          example: 1
+        to:
+          type: [integer, 'null']
+          example: 1
+        has_more:
+          type: boolean
+          example: false
+        next_page_url:
+          type: [string, 'null']
+          format: uri
+          example: null
+        previous_page_url:
+          type: [string, 'null']
+          format: uri
+          example: null
+
+    JobVacancyListResponse:
+      type: object
+      required: [status, data]
+      properties:
+        status:
+          type: boolean
+          example: true
+        data:
+          type: object
+          required: [job_vacancies, pagination]
+          properties:
+            job_vacancies:
+              type: array
+              items:
+                $ref: '#/components/schemas/JobVacancy'
+            pagination:
+              $ref: '#/components/schemas/JobVacancyPagination'
+
+    AppliedJobVacancy:
+      description: Job vacancy returned in the authenticated security user's application history.
+      allOf:
+        - $ref: '#/components/schemas/JobVacancy'
+        - type: object
+          required: [application_uuid, application_status, applied_at]
+          properties:
+            application_uuid:
+              type: [string, 'null']
+              format: uuid
+              description: UUID of the job application.
+            application_status:
+              type: string
+              enum: [applied, reviewed, shortlisted, rejected]
+            applied_at:
+              type: [string, 'null']
+              format: date-time
+              description: Timestamp when the application was created.
+
+    JobApplication:
+      type: object
+      required: [id, uuid, job_vacancy_id, status, created_at]
+      properties:
+        id:
+          type: integer
+          example: 12
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+          example: 3f6f6e2c-55ec-4da5-9e35-5d0d33b7f4b0
+        job_vacancy_id:
+          type: integer
+          example: 2
+        status:
+          type: string
+          enum: [applied, reviewed, shortlisted, rejected]
+          example: applied
+        created_at:
+          type: [string, 'null']
+          format: date-time
+          example: '2026-09-22T08:30:11.000000Z'
+
+    JobApplicationResponse:
+      type: object
+      required: [status, message, data]
+      properties:
+        status:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Job application submitted successfully.
+        data:
+          type: object
+          required: [job_application]
+          properties:
+            job_application:
+              $ref: '#/components/schemas/JobApplication'
+
+    MyJobApplicationListResponse:
+      type: object
+      required: [status, data]
+      properties:
+        status:
+          type: boolean
+          example: true
+        data:
+          type: object
+          required: [job_vacancies, pagination]
+          properties:
+            job_vacancies:
+              type: array
+              items:
+                $ref: '#/components/schemas/AppliedJobVacancy'
+            pagination:
+              $ref: '#/components/schemas/JobVacancyPagination'
+
     SecurityCertificate:
       type: object
       required: [uuid, title, publisher, certificate_number, category, publish_date, expired_date, file, is_badge]
@@ -1579,7 +2114,7 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
     NotFound:
-      description: Security profile or history was not found.
+      description: The requested vacancy or security profile was not found.
       content:
         application/json:
           schema:
@@ -1590,6 +2125,90 @@ components:
       scheme: bearer
       bearerFormat: opaque token
   examples:
+    JobVacancyListResponse:
+      summary: Published job vacancies with pagination
+      value:
+        status: true
+        data:
+          job_vacancies:
+            - id: 2
+              uuid: ffa4dca1-0ae2-412a-80ff-f7c8a2a4adae
+              b_u_j_p_id: 3
+              company_id: null
+              position: Satpam Objek Vital (Obvit)
+              description_work: Pengamanan pada objek vital seperti pembangkit listrik, pelabuhan, bandara dan kilang minyak.
+              responsibility:
+                - Pengamanan aset strategis negara maupun swasta nasional
+                - Pengawasan akses keluar masuk area objek vital
+                - Penerapan standar protokol pengamanan yang ketat
+                - Patroli dan pengawasan area strategis
+                - Penanganan kondisi darurat dan potensi ancaman keamanan
+              facility:
+                - Asuransi Kesehatan Premium
+                - Tempat Tinggal
+                - Relokasi Keluarga
+                - Penyesuaian Gaji Tahunan
+              kuota: 2
+              status: published
+              reason_rejected: null
+              start_date: '2026-09-20'
+              end_date: '2026-12-31'
+              province: KALIMANTAN TIMUR
+              city: KOTA BALIKPAPAN
+              district: null
+              village: null
+              address: Jl. Jend Sudirman
+              working_type: permanent
+              working_system: shift
+              is_show_fee: 1
+              fee_type: monthly
+              min_price: '8000000'
+              max_price: '12000000'
+              gender: null
+              min_age: '20'
+              max_age: '45'
+              min_height: 165
+              max_height: 190
+              min_weight: 60
+              max_weight: 80
+              last_education: D3
+              min_experience: '2'
+              certificate:
+                - GADA PRATAMA
+              competency_scheme:
+                - Kompetensi Gada Pratama
+              is_urgent: 1
+              total_clicked: null
+              created_at: '2026-09-20T04:36:36.000000Z'
+              updated_at: '2026-09-20T08:30:11.000000Z'
+              bujp:
+                id: 3
+                company_name: Digital Partner Autotalenta
+              company: null
+          pagination:
+            current_page: 1
+            last_page: 1
+            per_page: 5
+            total: 1
+            from: 1
+            to: 1
+            has_more: false
+            next_page_url: null
+            previous_page_url: null
+
+    JobApplicationResponse:
+      summary: Created job application
+      value:
+        status: true
+        message: Job application submitted successfully.
+        data:
+          job_application:
+            id: 12
+            uuid: 3f6f6e2c-55ec-4da5-9e35-5d0d33b7f4b0
+            job_vacancy_id: 2
+            status: applied
+            created_at: '2026-09-22T08:30:11.000000Z'
+
     SecurityRequest:
       summary: Security registration request
       value:
