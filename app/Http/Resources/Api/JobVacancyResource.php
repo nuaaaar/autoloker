@@ -25,8 +25,12 @@ class JobVacancyResource extends JsonResource
             $data['total_applications'] = (int) $data['total_applications'];
         }
 
-        if (array_key_exists('is_appled', $data)) {
+        if (array_key_exists('is_applied', $data)) {
+            $data['is_applied'] = (bool) $data['is_applied'];
+            $data['is_appled'] = $data['is_applied'];
+        } elseif (array_key_exists('is_appled', $data)) {
             $data['is_appled'] = (bool) $data['is_appled'];
+            $data['is_applied'] = $data['is_appled'];
         }
 
         return $data;

@@ -21,6 +21,10 @@ class TrainingResource extends JsonResource
             $data[$field] = $this->normalizeArray($data[$field] ?? null);
         }
 
+        if (array_key_exists('is_applied', $data)) {
+            $data['is_applied'] = (bool) $data['is_applied'];
+        }
+
         $quota = $this->numericValue($data['quota'] ?? null);
         $registered = $this->numericValue(
             $data['registered'] ?? $data['approved_applications_count'] ?? null

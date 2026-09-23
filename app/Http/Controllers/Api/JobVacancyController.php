@@ -29,7 +29,7 @@ class JobVacancyController extends Controller
             ])
             ->withCount('applications as total_applications')
             ->withExists([
-                'applications as is_appled' => function (Builder $query) use ($securityId): void {
+                'applications as is_applied' => function (Builder $query) use ($securityId): void {
                     $query->whereNotNull('security_id')
                         ->where('security_id', $securityId);
                 },

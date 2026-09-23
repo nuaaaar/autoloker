@@ -27,6 +27,7 @@ class TrainingController extends Controller
         }
 
         $filters = $request->validated();
+        $securityId = $request->user()?->user_security?->security?->id;
 
         $query = Training::query()
             ->with([
@@ -36,6 +37,12 @@ class TrainingController extends Controller
             ->withCount([
                 'applications as approved_applications_count' => function (Builder $query): void {
                     $query->where('status', 'approved');
+                },
+            ])
+            ->withExists([
+                'applications as is_applied' => function (Builder $query) use ($securityId): void {
+                    $query->whereNotNull('security_id')
+                        ->where('security_id', $securityId);
                 },
             ])
             ->where('status', 'published');

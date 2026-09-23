@@ -2,7 +2,9 @@ openapi: 3.1.0
 info:
   title: Autoloker API
   version: 1.0.0
-description: API documentation for mobile authentication, profile editing, security work history CRUD, security certificate CRUD, job vacancy and training applications, paginated vacancy, published training, and registered training listings, plus hierarchical location references.
+  description: API documentation for mobile authentication, profile editing, security work history CRUD, security certificate CRUD, job vacancy and training applications, paginated vacancy, published training, and registered training listings, plus hierarchical location references.
+  license:
+    name: Proprietary
 
 servers:
   - url: http://localhost
@@ -42,7 +44,7 @@ paths:
   /api/job-vacancies:
     get:
       summary: List published job vacancies
-      description: Returns published vacancies that have not expired. The search parameter matches the position, company name, or BUJP name. Results are ordered by newest vacancy ID and paginated with five vacancies per page.
+      description: Returns published vacancies that have not expired. The search parameter matches the position, company name, or BUJP name. Each vacancy includes `is_applied`, which is true when the authenticated security user has an application for that vacancy. Results are ordered by newest vacancy ID and paginated with five vacancies per page.
       operationId: listJobVacancies
       security:
         - bearerAuth: []
@@ -155,7 +157,7 @@ paths:
   /api/trainings:
     get:
       summary: List published trainings for security users
-      description: Returns published trainings for authenticated security users, ordered by newest training ID and paginated with five trainings per page. The search parameter matches the title or provider.
+      description: Returns published trainings for authenticated security users, ordered by newest training ID and paginated with five trainings per page. Each training includes `is_applied`, which is true when the authenticated security user has an application for that training. The search parameter matches the title or provider.
       operationId: listTrainings
       security:
         - bearerAuth: []
@@ -415,6 +417,7 @@ paths:
   /api/masters/positions:
     get:
       summary: List security positions
+      operationId: listMasterPositions
       security:
         - bearerAuth: []
       responses:
@@ -452,6 +455,7 @@ paths:
   /api/masters/abilities:
     get:
       summary: List security abilities
+      operationId: listMasterAbilities
       security:
         - bearerAuth: []
       responses:
@@ -466,6 +470,7 @@ paths:
   /api/masters/placements:
     get:
       summary: List security placements
+      operationId: listMasterPlacements
       security:
         - bearerAuth: []
       responses:
@@ -480,6 +485,7 @@ paths:
   /api/masters/industries:
     get:
       summary: List business industries
+      operationId: listMasterIndustries
       security:
         - bearerAuth: []
       responses:
@@ -494,6 +500,7 @@ paths:
   /api/locations/provinces:
     get:
       summary: List provinces
+      operationId: listProvinces
       security:
         - bearerAuth: []
       responses:
@@ -508,6 +515,7 @@ paths:
   /api/locations/cities:
     get:
       summary: List cities for a province
+      operationId: listCities
       security:
         - bearerAuth: []
       parameters:
@@ -529,6 +537,7 @@ paths:
   /api/locations/districts:
     get:
       summary: List districts for a city
+      operationId: listDistricts
       security:
         - bearerAuth: []
       parameters:
@@ -550,6 +559,7 @@ paths:
   /api/locations/villages:
     get:
       summary: List villages for a district
+      operationId: listVillages
       security:
         - bearerAuth: []
       parameters:
@@ -597,7 +607,7 @@ paths:
         content:
           multipart/form-data:
             schema:
-              oneOf:
+              anyOf:
                 - $ref: '#/components/schemas/UpdateSecurityProfileRequest'
                 - $ref: '#/components/schemas/UpdateCompanyProfileRequest'
                 - $ref: '#/components/schemas/UpdateBujpProfileRequest'
@@ -610,7 +620,7 @@ paths:
                 $ref: '#/components/examples/UpdateBujpProfileRequest'
           application/json:
             schema:
-              oneOf:
+              anyOf:
                 - $ref: '#/components/schemas/UpdateSecurityProfileRequest'
                 - $ref: '#/components/schemas/UpdateCompanyProfileRequest'
                 - $ref: '#/components/schemas/UpdateBujpProfileRequest'
@@ -758,6 +768,7 @@ paths:
         Registers a security, company, or BUJP account using the existing
         users, user_*, and role-specific profile models.
       operationId: registerUser
+      security: []
       requestBody:
         required: true
         content:
@@ -1355,6 +1366,10 @@ components:
           type: [string, 'null']
           format: date-time
           example: '2026-09-22T08:30:11.000000Z'
+        is_applied:
+          type: boolean
+          description: Whether the authenticated security user has applied for this training.
+          example: false
         bujp:
           oneOf:
             - $ref: '#/components/schemas/TrainingOrganization'
@@ -1708,6 +1723,10 @@ components:
           type: [string, 'null']
           format: date-time
           example: '2026-09-20T08:30:11.000000Z'
+        is_applied:
+          type: boolean
+          description: Whether the authenticated security user has applied for this vacancy.
+          example: false
         bujp:
           oneOf:
             - $ref: '#/components/schemas/JobVacancyOrganization'
@@ -2191,10 +2210,10 @@ components:
           type: boolean
           description: Whether the user has a usable local password. False for Google-only users before first-time password setup.
         profile:
-          oneOf:
+          anyOf:
             - $ref: '#/components/schemas/SecurityProfileState'
             - $ref: '#/components/schemas/BusinessProfileState'
-          nullable: true
+            - type: 'null'
         capabilities:
           $ref: '#/components/schemas/Capabilities'
 
@@ -2708,6 +2727,7 @@ components:
                 - Kompetensi Gada Pratama
               is_urgent: 1
               total_clicked: null
+              is_applied: false
               created_at: '2026-09-20T04:36:36.000000Z'
               updated_at: '2026-09-20T08:30:11.000000Z'
               bujp:
@@ -2775,6 +2795,7 @@ components:
               poster: trainings/security-awareness.jpg
               created_at: '2026-09-22T04:36:36.000000Z'
               updated_at: '2026-09-22T08:30:11.000000Z'
+              is_applied: false
               bujp:
                 id: 3
                 company_name: PT Example Training
@@ -3000,18 +3021,6 @@ components:
         facebook: https://facebook.com/security
         linkedin: https://linkedin.com/company/security
         youtube: https://youtube.com/@security
-    UpdateSecurityProfileRequestJson:
-      summary: Complete security profile JSON update
-      value:
-        $ref: '#/components/examples/UpdateSecurityProfileRequest/value'
-    UpdateCompanyProfileRequestJson:
-      summary: Complete company profile JSON update
-      value:
-        $ref: '#/components/examples/UpdateCompanyProfileRequest/value'
-    UpdateBujpProfileRequestJson:
-      summary: Complete BUJP profile JSON update
-      value:
-        $ref: '#/components/examples/UpdateBujpProfileRequest/value'
     SecurityResponse:
       summary: Security registration response
       value:
