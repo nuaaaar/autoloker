@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\MasterAbility;
+use App\Models\MasterBank;
 use App\Models\MasterCategoryCertificate;
 use App\Models\MasterIndustry;
 use App\Models\MasterSubscription;
@@ -37,6 +38,17 @@ class ReferenceDataController extends Controller
     public function abilities(): JsonResponse
     {
         return $this->master(MasterAbility::query());
+    }
+
+    public function banks(): JsonResponse
+    {
+        return response()->json([
+            'status' => true,
+            'data' => MasterBank::query()
+                ->orderBy('bank_name')
+                ->orderBy('id')
+                ->get(['id', 'uuid', 'account_name', 'bank_number', 'bank_name']),
+        ]);
     }
 
     public function categoryCertificates(): JsonResponse

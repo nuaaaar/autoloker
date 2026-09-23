@@ -1334,6 +1334,33 @@ paths:
                 $ref: '#/components/schemas/ReferenceListResponse'
         '401':
           $ref: '#/components/responses/Unauthenticated'
+  /api/masters/banks:
+    get:
+      summary: List master bank accounts
+      description: Returns non-deleted master bank accounts ordered by bank name and ID without pagination.
+      operationId: listMasterBanks
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Master bank accounts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MasterBankListResponse'
+              examples:
+                valid:
+                  summary: Master bank accounts
+                  value:
+                    status: true
+                    data:
+                      - id: 1
+                        uuid: 8b1f4f8a-5d6f-4a4d-a43d-5f3c9f8c2a11
+                        account_name: PT Example Indonesia
+                        bank_number: '1234567890'
+                        bank_name: BCA
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
   /api/masters/position-securities:
     get:
       summary: List security job positions
@@ -2496,6 +2523,7 @@ components:
         - bujp
         - company
         - status
+        - reason_rejected
         - poster
         - category
         - level
@@ -2545,6 +2573,11 @@ components:
           enum: [draft, rejected, submitted, published, closed, running, cancelled]
           readOnly: true
           example: draft
+        reason_rejected:
+          type: [string, 'null']
+          readOnly: true
+          description: Reason provided when the training is rejected.
+          example: Data peserta belum lengkap.
         poster:
           type: [string, 'null']
           description: Public storage key/path, never an internal filesystem path.
@@ -4196,6 +4229,39 @@ components:
             properties:
               title: {type: string}
 
+
+    MasterBankListResponse:
+      type: object
+      required: [status, data]
+      properties:
+        status:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/MasterBank'
+
+    MasterBank:
+      type: object
+      required: [id, uuid, account_name, bank_number, bank_name]
+      properties:
+        id:
+          type: integer
+          example: 1
+        uuid:
+          type: string
+          format: uuid
+          example: 8b1f4f8a-5d6f-4a4d-a43d-5f3c9f8c2a11
+        account_name:
+          type: string
+          example: PT Example Indonesia
+        bank_number:
+          type: string
+          example: '1234567890'
+        bank_name:
+          type: string
+          example: BCA
     MasterSubscriptionListResponse:
       type: object
       required: [status, data]

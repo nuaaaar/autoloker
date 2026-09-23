@@ -36,6 +36,7 @@ class OwnedTrainingResource extends JsonResource
                 'company_name' => $company->company_name,
             ] : null,
             'status' => $this->status,
+            'reason_rejected' => $this->reason_rejected,
             'poster' => $this->poster,
             'category' => $this->category,
             'level' => $this->level,
