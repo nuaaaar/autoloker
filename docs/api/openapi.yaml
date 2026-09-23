@@ -204,6 +204,122 @@ paths:
         '422':
           $ref: '#/components/responses/ValidationError'
 
+  /api/company/job-vacancies/{uuid}/applicants:
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of a job vacancy owned by the authenticated company or BUJP.
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: List applicants for an owned job vacancy
+      description: Returns applicants for the selected job vacancy when it is owned by the authenticated company or BUJP. Results are ordered by newest application first and paginated with five applicants per page. The optional search parameter matches the applicant name, email, phone number, KTP number, or registration number. The status parameter filters the application status.
+      operationId: listOwnedJobApplicants
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: search
+          in: query
+          required: false
+          description: Partial search across applicant profile contact and identification fields.
+          schema:
+            type: string
+            maxLength: 255
+            example: Budi
+          example: Budi
+        - name: status
+          in: query
+          required: false
+          description: Filter by application status. Omit the parameter or send all to include every status.
+          schema:
+            type: string
+            enum: [all, applied, reviewed, shortlisted, rejected]
+            default: all
+            example: reviewed
+          example: reviewed
+        - name: page
+          in: query
+          required: false
+          description: One-based pagination page number.
+          schema:
+            type: integer
+            minimum: 1
+            example: 1
+          example: 1
+      responses:
+        '200':
+          description: Applicants for the owned job vacancy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnedJobApplicantListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /api/company/trainings/{uuid}/participants:
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of a training owned by the authenticated BUJP.
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: List participants for an owned training
+      description: Returns registrants for the selected training when it is owned by the authenticated BUJP. Companies cannot use this endpoint because only BUJPs can post trainings. Results are ordered by newest registration first and paginated with five participants per page. The optional search parameter matches the participant name, email, phone number, KTP number, or registration number. The status parameter filters the registration status.
+      operationId: listOwnedTrainingParticipants
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: search
+          in: query
+          required: false
+          description: Partial search across participant profile contact and identification fields.
+          schema:
+            type: string
+            maxLength: 255
+            example: Budi
+          example: Budi
+        - name: status
+          in: query
+          required: false
+          description: Filter by registration status. Omit the parameter or send all to include every status.
+          schema:
+            type: string
+            enum: [all, pending, approved, rejected]
+            default: all
+            example: pending
+          example: pending
+        - name: page
+          in: query
+          required: false
+          description: One-based pagination page number.
+          schema:
+            type: integer
+            minimum: 1
+            example: 1
+          example: 1
+      responses:
+        '200':
+          description: Participants for the owned training
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnedTrainingParticipantListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
   /api/company/trainings:
     get:
       summary: List the authenticated company's or BUJP's trainings
@@ -1566,6 +1682,165 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/Training'
+            pagination:
+              $ref: '#/components/schemas/TrainingPagination'
+
+    ApplicantSecurity:
+      type: object
+      description: Security profile belonging to an applicant or training participant.
+      required: [id, uuid, name, email, phone_number]
+      properties:
+        id:
+          type: integer
+          example: 42
+        uuid:
+          type: [string, 'null']
+          format: uuid
+        formal_photo:
+          type: [string, 'null']
+        name:
+          type: [string, 'null']
+          example: Budi Santoso
+        email:
+          type: [string, 'null']
+          format: email
+        phone_number:
+          type: [string, 'null']
+          example: '081234567890'
+        birth_place:
+          type: [string, 'null']
+        birth_date:
+          type: [string, 'null']
+          format: date
+        gender:
+          type: [string, 'null']
+          enum: [laki-laki, perempuan]
+        address:
+          type: [string, 'null']
+        ktp_number:
+          type: [string, 'null']
+        registration_number:
+          type: [string, 'null']
+        work_experience:
+          type: [string, 'null']
+        province:
+          type: [string, 'null']
+        city:
+          type: [string, 'null']
+        district:
+          type: [string, 'null']
+        village:
+          type: [string, 'null']
+        height:
+          type: [string, 'null']
+        width:
+          type: [string, 'null']
+        ability:
+          type: [string, 'null']
+        placements:
+          type: [string, 'null']
+        self_description:
+          type: [string, 'null']
+        additional_note:
+          type: [string, 'null']
+        work_status:
+          type: [string, 'null']
+        company_name:
+          type: [string, 'null']
+        position:
+          type: [string, 'null']
+        sim:
+          type: [string, 'null']
+
+    JobApplicant:
+      type: object
+      required: [id, uuid, job_vacancy_id, status, created_at, updated_at, security]
+      properties:
+        id:
+          type: integer
+          example: 12
+        uuid:
+          type: [string, 'null']
+          format: uuid
+        job_vacancy_id:
+          type: integer
+          example: 2
+        status:
+          type: string
+          enum: [applied, reviewed, shortlisted, rejected]
+          example: applied
+        created_at:
+          type: [string, 'null']
+          format: date-time
+        updated_at:
+          type: [string, 'null']
+          format: date-time
+        security:
+          oneOf:
+            - $ref: '#/components/schemas/ApplicantSecurity'
+            - type: 'null'
+
+    OwnedJobApplicantListResponse:
+      type: object
+      required: [status, data]
+      properties:
+        status:
+          type: boolean
+          example: true
+        data:
+          type: object
+          required: [applicants, pagination]
+          properties:
+            applicants:
+              type: array
+              items:
+                $ref: '#/components/schemas/JobApplicant'
+            pagination:
+              $ref: '#/components/schemas/JobVacancyPagination'
+
+    TrainingParticipant:
+      type: object
+      required: [id, uuid, training_id, status, created_at, updated_at, security]
+      properties:
+        id:
+          type: integer
+          example: 12
+        uuid:
+          type: [string, 'null']
+          format: uuid
+        training_id:
+          type: integer
+          example: 12
+        status:
+          type: string
+          enum: [pending, approved, rejected]
+          example: pending
+        created_at:
+          type: [string, 'null']
+          format: date-time
+        updated_at:
+          type: [string, 'null']
+          format: date-time
+        security:
+          oneOf:
+            - $ref: '#/components/schemas/ApplicantSecurity'
+            - type: 'null'
+
+    OwnedTrainingParticipantListResponse:
+      type: object
+      required: [status, data]
+      properties:
+        status:
+          type: boolean
+          example: true
+        data:
+          type: object
+          required: [participants, pagination]
+          properties:
+            participants:
+              type: array
+              items:
+                $ref: '#/components/schemas/TrainingParticipant'
             pagination:
               $ref: '#/components/schemas/TrainingPagination'
     RegisteredTraining:
