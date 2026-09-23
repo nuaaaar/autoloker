@@ -24,6 +24,10 @@ Route::post('/login', LoginController::class)->name('api.login');
 Route::post('/refresh-token', RefreshTokenController::class)->name('api.refresh-token');
 Route::middleware('api.token')->group(function () {
     Route::get('/company/job-vacancies', [OwnedJobVacancyController::class, 'index'])->name('api.company.job-vacancies.index');
+    Route::post('/company/job-vacancies', [OwnedJobVacancyController::class, 'store'])->name('api.company.job-vacancies.store');
+    Route::get('/company/job-vacancies/{uuid}', [OwnedJobVacancyController::class, 'show'])->name('api.company.job-vacancies.show');
+    Route::patch('/company/job-vacancies/{uuid}', [OwnedJobVacancyController::class, 'update'])->name('api.company.job-vacancies.update');
+    Route::post('/company/job-vacancies/{uuid}/submit', [OwnedJobVacancyController::class, 'submit'])->name('api.company.job-vacancies.submit');
     Route::get('/company/job-vacancies/{uuid}/applicants', [OwnedJobApplicantController::class, 'index'])->name('api.company.job-vacancies.applicants.index');
     Route::get('/company/trainings', [OwnedTrainingController::class, 'index'])->name('api.company.trainings.index');
     Route::get('/company/trainings/{uuid}/participants', [OwnedTrainingParticipantController::class, 'index'])->name('api.company.trainings.participants.index');
