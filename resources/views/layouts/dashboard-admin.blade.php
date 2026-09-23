@@ -698,7 +698,7 @@
                                         <!--begin:Menu link-->
                                         <span class="menu-link">
                                             <span class="menu-icon">
-                                                <i class="ki-duotone ki-users fs-2">
+                                                <i class="ki-duotone ki-cheque fs-2">
                                                 </i>
                                             </span>
                                             <span class="menu-title">Payment</span>
