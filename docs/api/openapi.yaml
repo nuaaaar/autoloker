@@ -215,6 +215,79 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateOwnedJobVacancyRequest'
+            examples:
+              draft:
+                summary: Save a complete vacancy as draft
+                value:
+                  position: Satpam Objek Vital (Obvit)
+                  description_work: Pengamanan pada objek vital seperti pembangkit listrik, pelabuhan, bandara, dan kilang minyak.
+                  province: KALIMANTAN TIMUR
+                  city: KOTA BALIKPAPAN
+                  address: Jl. Jend Sudirman
+                  working_type: permanent
+                  working_system: shift
+                  responsibilities:
+                    - Pengamanan aset strategis negara maupun swasta nasional
+                    - Pengawasan akses keluar masuk area objek vital
+                    - Patroli dan pengawasan area strategis
+                  min_age: 20
+                  max_age: 45
+                  min_height: 165
+                  max_height: 190
+                  min_weight: 60
+                  max_weight: 80
+                  last_education: D3
+                  min_experience: 2
+                  certificate:
+                    - GADA PRATAMA
+                  competency_scheme:
+                    - Kompetensi Gada Pratama
+                  facility:
+                    - Asuransi Kesehatan
+                    - Tempat Tinggal
+                  min_price: 8000000
+                  max_price: 12000000
+                  is_show_fee: true
+                  is_urgent: false
+                  quota: 2
+                  end_date: '2026-12-31'
+                  workflow_action: save_draft
+              submit:
+                summary: Create and submit a complete vacancy
+                value:
+                  position: Satpam Objek Vital (Obvit)
+                  description_work: Pengamanan pada objek vital seperti pembangkit listrik, pelabuhan, bandara, dan kilang minyak.
+                  province: KALIMANTAN TIMUR
+                  city: KOTA BALIKPAPAN
+                  address: Jl. Jend Sudirman
+                  working_type: permanent
+                  working_system: shift
+                  responsibilities:
+                    - Pengamanan aset strategis negara maupun swasta nasional
+                    - Pengawasan akses keluar masuk area objek vital
+                    - Patroli dan pengawasan area strategis
+                  min_age: 20
+                  max_age: 45
+                  min_height: 165
+                  max_height: 190
+                  min_weight: 60
+                  max_weight: 80
+                  last_education: D3
+                  min_experience: 2
+                  certificate:
+                    - GADA PRATAMA
+                  competency_scheme:
+                    - Kompetensi Gada Pratama
+                  facility:
+                    - Asuransi Kesehatan
+                    - Tempat Tinggal
+                  min_price: 8000000
+                  max_price: 12000000
+                  is_show_fee: true
+                  is_urgent: false
+                  quota: 2
+                  end_date: '2026-12-31'
+                  workflow_action: submit
       responses:
         '201':
           description: Job vacancy created successfully
@@ -267,6 +340,16 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UpdateOwnedJobVacancyRequest'
+            examples:
+              update:
+                summary: Update vacancy fields
+                value:
+                  position: Satpam Objek Vital Senior
+                  description_work: Pengamanan objek vital dengan tanggung jawab supervisi.
+                  working_system: non-shift
+                  is_urgent: true
+                  max_price: 14000000
+                  end_date: '2027-01-31'
       responses:
         '200':
           description: Job vacancy updated successfully
@@ -638,7 +721,7 @@ paths:
           $ref: '#/components/responses/ValidationError'
     post:
       summary: Create an owned training
-      description: Creates a BUJP-owned training as a draft by default. Set workflow_action to submit to validate and submit the new training directly for review. Provider and ownership are derived from the authenticated BUJP and must not be sent by the client.
+      description: Creates a BUJP-owned training as a draft by default. Set workflow_action to submit to validate and submit the new training directly for review. Provider and ownership are derived from the authenticated BUJP and must not be sent by the client. Send multipart/form-data with a poster file to upload a new poster; poster files must be JPG, JPEG, PNG, or WEBP and no larger than 5 MB. JSON requests may send an existing public poster storage path.
       operationId: createOwnedTraining
       security:
         - bearerAuth: []
@@ -648,9 +731,33 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateOwnedTrainingRequest'
+            examples:
+              draft:
+                summary: Create a draft with an existing public poster path
+                value:
+                  title: Pelatihan Dasar Satpam
+                  category: Keamanan
+                  level: Dasar
+                  description: Pelatihan dasar untuk calon petugas keamanan.
+                  poster: training/posters/security-basics.jpg
+                  workflow_action: save_draft
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/CreateOwnedTrainingRequest'
+            encoding:
+              poster:
+                contentType: image/jpeg, image/png, image/webp
+            examples:
+              draft:
+                summary: Create a draft with a poster file
+                description: Send the poster field as a JPG, JPEG, PNG, or WEBP file.
+                value:
+                  title: Pelatihan Dasar Satpam
+                  category: Keamanan
+                  level: Dasar
+                  description: Pelatihan dasar untuk calon petugas keamanan.
+                  poster: poster.jpg
+                  workflow_action: save_draft
       responses:
         '201':
           description: Training created successfully
