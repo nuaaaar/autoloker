@@ -113,6 +113,34 @@ class TrainingApplicationTest extends TestCase
             ->assertJsonPath('data.trainings.0.application_status', 'pending');
     }
 
+    public function test_security_can_cancel_only_its_own_training_registration(): void
+    {
+        [$user, $security] = $this->securityAccount('cancel-training-applicant@example.com');
+        [$otherUser] = $this->securityAccount('other-cancel-training-applicant@example.com');
+        $training = Training::create($this->trainingAttributes());
+        $application = TrainingApplication::create([
+            'security_id' => $security->id,
+            'training_id' => $training->id,
+            'status' => 'approved',
+        ]);
+        $applicationUuid = $application->uuid;
+
+        $otherToken = app(TokenService::class)->issue($otherUser)['access_token'];
+        $this->withToken($otherToken)
+            ->deleteJson("/api/training-applications/{$applicationUuid}")
+            ->assertNotFound();
+        $this->assertDatabaseHas('training_applications', ['id' => $application->id]);
+
+        $token = app(TokenService::class)->issue($user)['access_token'];
+        $this->withToken($token)
+            ->deleteJson("/api/training-applications/{$applicationUuid}")
+            ->assertOk()
+            ->assertJsonPath('status', true)
+            ->assertJsonPath('message', 'Training registration cancelled successfully.');
+
+        $this->assertDatabaseMissing('training_applications', ['id' => $application->id]);
+    }
+
     /** @return array{0: User, 1: Security} */
     private function securityAccount(string $email): array
     {

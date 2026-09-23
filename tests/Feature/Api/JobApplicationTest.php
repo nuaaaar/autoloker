@@ -90,6 +90,34 @@ class JobApplicationTest extends TestCase
             ->assertJsonPath('data.job_vacancies.0.position', 'Security 1');
     }
 
+    public function test_security_can_cancel_only_its_own_job_application(): void
+    {
+        [$user, $security] = $this->securityAccount('cancel-job-applicant@example.com');
+        [$otherUser] = $this->securityAccount('other-cancel-job-applicant@example.com');
+        $vacancy = JobVacancy::create($this->vacancyAttributes());
+        $application = JobApplication::create([
+            'security_id' => $security->id,
+            'job_vacancy_id' => $vacancy->id,
+            'status' => 'reviewed',
+        ]);
+        $applicationUuid = $application->uuid;
+
+        $otherToken = app(TokenService::class)->issue($otherUser)['access_token'];
+        $this->withToken($otherToken)
+            ->deleteJson("/api/job-applications/{$applicationUuid}")
+            ->assertNotFound();
+        $this->assertDatabaseHas('job_applications', ['id' => $application->id]);
+
+        $token = app(TokenService::class)->issue($user)['access_token'];
+        $this->withToken($token)
+            ->deleteJson("/api/job-applications/{$applicationUuid}")
+            ->assertOk()
+            ->assertJsonPath('status', true)
+            ->assertJsonPath('message', 'Job application cancelled successfully.');
+
+        $this->assertDatabaseMissing('job_applications', ['id' => $application->id]);
+    }
+
     /** @return array{0: User, 1: Security} */
     private function securityAccount(string $email): array
     {

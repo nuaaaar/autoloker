@@ -280,6 +280,60 @@ paths:
         '422':
           $ref: '#/components/responses/ValidationError'
 
+  /api/training-applications/{uuid}:
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the training application to cancel.
+        schema:
+          type: string
+          format: uuid
+    delete:
+      summary: Cancel a training registration
+      description: Permanently deletes the authenticated security user's training registration. This removes the application data instead of changing its status.
+      operationId: cancelTrainingRegistration
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Training registration cancelled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/job-applications/{uuid}:
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the job application to cancel.
+        schema:
+          type: string
+          format: uuid
+    delete:
+      summary: Cancel a job application
+      description: Permanently deletes the authenticated security user's job application. This removes the application data instead of changing its status.
+      operationId: cancelJobApplication
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Job application cancelled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
   /api/job-vacancies/{uuid}/apply:
     parameters:
       - name: uuid

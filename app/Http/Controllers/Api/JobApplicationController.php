@@ -147,6 +147,21 @@ class JobApplicationController extends Controller
         ], 201);
     }
 
+    public function destroy(Request $request, string $uuid): JsonResponse
+    {
+        $application = JobApplication::query()
+            ->where('uuid', $uuid)
+            ->where('security_id', $this->security($request)->id)
+            ->firstOrFail();
+
+        $application->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Job application cancelled successfully.',
+        ]);
+    }
+
     private function security(Request $request)
     {
         if ($request->user()?->role !== 'satpam') {

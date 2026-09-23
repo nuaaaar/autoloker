@@ -24,7 +24,9 @@ Route::middleware('api.token')->group(function () {
     Route::post('/trainings/{uuid}/apply', [TrainingController::class, 'store'])->name('api.trainings.apply');
     Route::post('/job-vacancies/{uuid}/apply', [JobApplicationController::class, 'store'])->name('api.job-vacancies.apply');
     Route::get('/job-applications', [JobApplicationController::class, 'index'])->name('api.job-applications.index');
+    Route::delete('/job-applications/{uuid}', [JobApplicationController::class, 'destroy'])->name('api.job-applications.destroy');
     Route::get('/training-applications', [TrainingApplicationController::class, 'index'])->name('api.training-applications.index');
+    Route::delete('/training-applications/{uuid}', [TrainingApplicationController::class, 'destroy'])->name('api.training-applications.destroy');
     Route::get('/profile', [ProfileController::class, 'show'])->name('api.profile.show');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('api.profile.update');
     Route::patch('/password', ChangePasswordController::class)->name('api.password.update');

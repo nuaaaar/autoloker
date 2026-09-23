@@ -68,6 +68,21 @@ class TrainingApplicationController extends Controller
         ]);
     }
 
+    public function destroy(Request $request, string $uuid): JsonResponse
+    {
+        $application = TrainingApplication::query()
+            ->where('uuid', $uuid)
+            ->where('security_id', $this->security($request)->id)
+            ->firstOrFail();
+
+        $application->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Training registration cancelled successfully.',
+        ]);
+    }
+
     private function security(Request $request)
     {
         if ($request->user()?->role !== 'satpam') {
