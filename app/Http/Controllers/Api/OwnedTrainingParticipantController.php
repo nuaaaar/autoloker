@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Requests\Api\OwnedTrainingParticipantIndexRequest;
+use App\Http\Requests\Api\OwnedTrainingParticipantStatusRequest;
 use App\Http\Resources\Api\TrainingParticipantResource;
 use App\Models\Training;
 use App\Models\TrainingApplication;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class OwnedTrainingParticipantController extends OwnedOrganizationController
@@ -62,6 +64,79 @@ class OwnedTrainingParticipantController extends OwnedOrganizationController
             'data' => [
                 'participants' => TrainingParticipantResource::collection($applications->items())->resolve(),
                 'pagination' => $this->pagination($applications),
+            ],
+        ]);
+    }
+
+    public function updateStatus(
+        OwnedTrainingParticipantStatusRequest $request,
+        string $uuid,
+        string $applicationUuid,
+    ): JsonResponse {
+        if ($request->user()?->role !== 'bujp') {
+            throw new NotFoundHttpException('BUJP profile not found.');
+        }
+
+        $owner = $this->owner($request);
+        $training = Training::query()
+            ->where('uuid', $uuid)
+            ->where('b_u_j_p_id', $owner['id'])
+            ->firstOrFail();
+        $status = $request->validated('status');
+
+        $result = DB::transaction(function () use ($applicationUuid, $status, $training): array {
+            $training = Training::query()
+                ->lockForUpdate()
+                ->findOrFail($training->id);
+
+            $application = TrainingApplication::query()
+                ->where('uuid', $applicationUuid)
+                ->where('training_id', $training->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ($status === 'approved' && $application->status !== 'approved') {
+                $quota = is_numeric($training->quota) ? (int) $training->quota : 0;
+                $approvedCount = TrainingApplication::query()
+                    ->where('training_id', $training->id)
+                    ->where('status', 'approved')
+                    ->count();
+
+                if ($quota > 0 && $approvedCount >= $quota) {
+                    return [
+                        'error' => 'The training quota is full.',
+                        'status' => 422,
+                    ];
+                }
+            }
+
+            $application->update(['status' => $status]);
+
+            $approvedCount = TrainingApplication::query()
+                ->where('training_id', $training->id)
+                ->where('status', 'approved')
+                ->count();
+            $training->update(['registered' => (string) $approvedCount]);
+            $application->load('security');
+
+            return ['application' => $application];
+        });
+
+        if (isset($result['error'])) {
+            return response()->json([
+                'status' => false,
+                'message' => $result['error'],
+            ], $result['status']);
+        }
+
+        /** @var TrainingApplication $application */
+        $application = $result['application'];
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Training participant status updated successfully.',
+            'data' => [
+                'training_participant' => (new TrainingParticipantResource($application))->resolve(),
             ],
         ]);
     }

@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Autoloker API
   version: 1.0.0
-  description: API documentation for mobile authentication, profile editing, security work history CRUD, security certificate CRUD, public job vacancy and training listings, BUJP-owned job vacancy and training management, company-owned training listings, job vacancy and training applications, paginated vacancy, published training, and registered training listings, plus hierarchical location references.
+  description: API documentation for mobile authentication, profile editing, security work history CRUD, security certificate CRUD, public job vacancy and training listings, BUJP-owned job vacancy and training management, company-owned training listings, job vacancy and training applications, paginated vacancy, published training, registered training listings, and owned application status follow-up, plus hierarchical location references.
   license:
     name: Proprietary
 
@@ -262,6 +262,48 @@ paths:
         '422':
           $ref: '#/components/responses/ValidationError'
 
+  /api/company/job-vacancies/{uuid}/applicants/{applicationUuid}/status:
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of a job vacancy owned by the authenticated company or BUJP.
+        schema:
+          type: string
+          format: uuid
+      - name: applicationUuid
+        in: path
+        required: true
+        description: UUID of an application belonging to the selected job vacancy.
+        schema:
+          type: string
+          format: uuid
+    patch:
+      summary: Update an owned job applicant status
+      description: Updates the application status for an applicant belonging to a job vacancy owned by the authenticated company or BUJP.
+      operationId: updateOwnedJobApplicantStatus
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateJobApplicantStatusRequest'
+      responses:
+        '200':
+          description: Job applicant status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobApplicantStatusResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
   /api/company/trainings/{uuid}:
     parameters:
       - name: uuid
@@ -389,6 +431,48 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OwnedTrainingParticipantListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /api/company/trainings/{uuid}/participants/{applicationUuid}/status:
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of a training owned by the authenticated BUJP.
+        schema:
+          type: string
+          format: uuid
+      - name: applicationUuid
+        in: path
+        required: true
+        description: UUID of a registration belonging to the selected training.
+        schema:
+          type: string
+          format: uuid
+    patch:
+      summary: Update an owned training participant status
+      description: Updates the registration status for a participant belonging to a training owned by the authenticated BUJP. Approving a participant is rejected when the training quota is full.
+      operationId: updateOwnedTrainingParticipantStatus
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTrainingParticipantStatusRequest'
+      responses:
+        '200':
+          description: Training participant status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrainingParticipantStatusResponse'
         '401':
           $ref: '#/components/responses/Unauthenticated'
         '404':
@@ -2139,6 +2223,26 @@ components:
             - type: 'null'
 
 
+    UpdateJobApplicantStatusRequest:
+      type: object
+      required: [status]
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum: [applied, reviewed, shortlisted, rejected]
+          example: reviewed
+
+    UpdateTrainingParticipantStatusRequest:
+      type: object
+      required: [status]
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum: [pending, approved, rejected]
+          example: approved
+
     ApplicantSecurity:
       type: object
       description: Security profile belonging to an applicant or training participant.
@@ -2297,6 +2401,41 @@ components:
                 $ref: '#/components/schemas/TrainingParticipant'
             pagination:
               $ref: '#/components/schemas/TrainingPagination'
+
+    JobApplicantStatusResponse:
+      type: object
+      required: [status, message, data]
+      properties:
+        status:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Job applicant status updated successfully.
+        data:
+          type: object
+          required: [job_applicant]
+          properties:
+            job_applicant:
+              $ref: '#/components/schemas/JobApplicant'
+
+    TrainingParticipantStatusResponse:
+      type: object
+      required: [status, message, data]
+      properties:
+        status:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Training participant status updated successfully.
+        data:
+          type: object
+          required: [training_participant]
+          properties:
+            training_participant:
+              $ref: '#/components/schemas/TrainingParticipant'
+
     RegisteredTraining:
       allOf:
         - $ref: '#/components/schemas/Training'

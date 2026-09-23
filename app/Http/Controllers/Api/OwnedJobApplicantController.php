@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Requests\Api\OwnedJobApplicantIndexRequest;
+use App\Http\Requests\Api\OwnedJobApplicantStatusRequest;
 use App\Http\Resources\Api\JobApplicantResource;
 use App\Models\JobApplication;
 use App\Models\JobVacancy;
@@ -57,6 +58,36 @@ class OwnedJobApplicantController extends OwnedOrganizationController
             'data' => [
                 'applicants' => JobApplicantResource::collection($applications->items())->resolve(),
                 'pagination' => $this->pagination($applications),
+            ],
+        ]);
+    }
+
+    public function updateStatus(
+        OwnedJobApplicantStatusRequest $request,
+        string $uuid,
+        string $applicationUuid,
+    ): JsonResponse {
+        $owner = $this->owner($request);
+        $vacancy = JobVacancy::query()
+            ->where('uuid', $uuid)
+            ->where($owner['column'], $owner['id'])
+            ->firstOrFail();
+
+        $application = JobApplication::query()
+            ->with('security')
+            ->where('uuid', $applicationUuid)
+            ->where('job_vacancy_id', $vacancy->id)
+            ->firstOrFail();
+
+        $application->update([
+            'status' => $request->validated('status'),
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Job applicant status updated successfully.',
+            'data' => [
+                'job_applicant' => (new JobApplicantResource($application))->resolve(),
             ],
         ]);
     }
