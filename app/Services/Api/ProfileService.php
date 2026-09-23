@@ -51,6 +51,11 @@ class ProfileService
         if ($profile === null) {
             throw new NotFoundHttpException('Profile not found.');
         }
+
+        if ($user->role === 'satpam') {
+            return $this->securityProfile($profile, $user);
+        }
+
         $this->populateMissingLocationCodes($profile);
 
         $profileValues = $profile->only(self::FIELDS[$user->role]);
@@ -74,8 +79,48 @@ class ProfileService
             'uuid' => $profile->uuid,
             'data' => $profileValues,
             'profile_completion' => $profile->profileProgress(),
-            'is_verified' => $user->role === 'satpam' ? null : (bool) $profile->is_verified,
-            'is_active' => $user->role === 'satpam' ? $user->status === 'active' : (bool) $profile->is_active,
+            'is_verified' => (bool) $profile->is_verified,
+            'is_active' => (bool) $profile->is_active,
+        ];
+    }
+
+    public function showSecurity(Security $security): array
+    {
+        $security->loadMissing('user_security.user');
+
+        return $this->securityProfile(
+            $security,
+            $security->user_security?->user,
+        );
+    }
+
+    private function securityProfile(Security $profile, ?User $user): array
+    {
+        $this->populateMissingLocationCodes($profile);
+
+        $profileValues = $profile->only(self::FIELDS['satpam']);
+        $profileValues = $this->withResolvedLocationCodes($profileValues);
+        foreach (['ability', 'placements'] as $field) {
+            if (array_key_exists($field, $profileValues)) {
+                $profileValues[$field] = $profileValues[$field] === null || $profileValues[$field] === ''
+                    ? []
+                    : array_values(array_filter(array_map('trim', explode(',', $profileValues[$field]))));
+            }
+        }
+        foreach (['is_out_of_town_agree', 'is_shift_agree'] as $field) {
+            if (array_key_exists($field, $profileValues) && $profileValues[$field] !== null) {
+                $profileValues[$field] = filter_var($profileValues[$field], FILTER_VALIDATE_BOOLEAN);
+            }
+        }
+
+        return [
+            'type' => 'security',
+            'id' => $profile->id,
+            'uuid' => $profile->uuid,
+            'data' => $profileValues,
+            'profile_completion' => $profile->profileProgress(),
+            'is_verified' => null,
+            'is_active' => $user?->status === 'active',
         ];
     }
 

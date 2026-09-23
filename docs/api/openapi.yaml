@@ -2244,71 +2244,9 @@ components:
           example: approved
 
     ApplicantSecurity:
-      type: object
-      description: Security profile belonging to an applicant or training participant.
-      required: [id, uuid, name, email, phone_number]
-      properties:
-        id:
-          type: integer
-          example: 42
-        uuid:
-          type: [string, 'null']
-          format: uuid
-        formal_photo:
-          type: [string, 'null']
-        name:
-          type: [string, 'null']
-          example: Budi Santoso
-        email:
-          type: [string, 'null']
-          format: email
-        phone_number:
-          type: [string, 'null']
-          example: '081234567890'
-        birth_place:
-          type: [string, 'null']
-        birth_date:
-          type: [string, 'null']
-          format: date
-        gender:
-          type: [string, 'null']
-          enum: [laki-laki, perempuan]
-        address:
-          type: [string, 'null']
-        ktp_number:
-          type: [string, 'null']
-        registration_number:
-          type: [string, 'null']
-        work_experience:
-          type: [string, 'null']
-        province:
-          type: [string, 'null']
-        city:
-          type: [string, 'null']
-        district:
-          type: [string, 'null']
-        village:
-          type: [string, 'null']
-        height:
-          type: [string, 'null']
-        width:
-          type: [string, 'null']
-        ability:
-          type: [string, 'null']
-        placements:
-          type: [string, 'null']
-        self_description:
-          type: [string, 'null']
-        additional_note:
-          type: [string, 'null']
-        work_status:
-          type: [string, 'null']
-        company_name:
-          type: [string, 'null']
-        position:
-          type: [string, 'null']
-        sim:
-          type: [string, 'null']
+      description: Security profile formatted consistently with the `/api/profile` response.
+      allOf:
+        - $ref: '#/components/schemas/FullProfile'
 
     JobApplicant:
       type: object

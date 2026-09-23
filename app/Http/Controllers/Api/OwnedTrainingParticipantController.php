@@ -33,7 +33,7 @@ class OwnedTrainingParticipantController extends OwnedOrganizationController
 
         $filters = $request->validated();
         $query = TrainingApplication::query()
-            ->with('security')
+            ->with('security.user_security.user')
             ->where('training_id', $training->id);
 
         if (($status = $filters['status'] ?? null) && $status !== 'all') {
@@ -117,7 +117,7 @@ class OwnedTrainingParticipantController extends OwnedOrganizationController
                 ->where('status', 'approved')
                 ->count();
             $training->update(['registered' => (string) $approvedCount]);
-            $application->load('security');
+            $application->load('security.user_security.user');
 
             return ['application' => $application];
         });

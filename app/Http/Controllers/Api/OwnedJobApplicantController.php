@@ -27,7 +27,7 @@ class OwnedJobApplicantController extends OwnedOrganizationController
 
         $filters = $request->validated();
         $query = JobApplication::query()
-            ->with('security')
+            ->with('security.user_security.user')
             ->where('job_vacancy_id', $vacancy->id);
 
         if (($status = $filters['status'] ?? null) && $status !== 'all') {
@@ -74,7 +74,7 @@ class OwnedJobApplicantController extends OwnedOrganizationController
             ->firstOrFail();
 
         $application = JobApplication::query()
-            ->with('security')
+            ->with('security.user_security.user')
             ->where('uuid', $applicationUuid)
             ->where('job_vacancy_id', $vacancy->id)
             ->firstOrFail();

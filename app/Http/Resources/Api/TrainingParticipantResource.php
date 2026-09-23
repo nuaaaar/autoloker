@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Api;
 
+use App\Http\Resources\Api\SecurityProfileResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -16,7 +17,13 @@ class TrainingParticipantResource extends JsonResource
             'status' => $this->status,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-            'security' => $this->whenLoaded('security'),
+            'security' => $this->whenLoaded('security', function (): ?array {
+                $security = $this->getRelation('security');
+
+                return $security
+                    ? (new SecurityProfileResource($security))->resolve()
+                    : null;
+            }),
         ];
     }
 }
