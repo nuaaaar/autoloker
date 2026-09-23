@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Autoloker API
   version: 1.0.0
-  description: API documentation for mobile authentication, profile editing, security work history CRUD, security certificate CRUD, job vacancy and training applications, paginated vacancy and training listings, and hierarchical location references.
+description: API documentation for mobile authentication, profile editing, security work history CRUD, security certificate CRUD, job vacancy and training applications, paginated vacancy, published training, and registered training listings, plus hierarchical location references.
 
 servers:
   - url: http://localhost
@@ -245,6 +245,40 @@ paths:
                   value:
                     status: false
                     message: The training quota is full.
+
+  /api/training-applications:
+    get:
+      summary: List the authenticated security user's registered trainings
+      description: Returns trainings registered by the authenticated security user, ordered by newest application first and paginated with five trainings per page. Each training includes the application UUID, application status, and registration timestamp.
+      operationId: listMyTrainingApplications
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          required: false
+          description: One-based pagination page number.
+          schema:
+            type: integer
+            minimum: 1
+            example: 1
+          example: 1
+      responses:
+        '200':
+          description: Registered trainings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisteredTrainingListResponse'
+              examples:
+                valid:
+                  $ref: '#/components/examples/RegisteredTrainingListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
 
   /api/job-vacancies/{uuid}/apply:
     parameters:
@@ -1348,6 +1382,43 @@ components:
                 $ref: '#/components/schemas/Training'
             pagination:
               $ref: '#/components/schemas/TrainingPagination'
+    RegisteredTraining:
+      allOf:
+        - $ref: '#/components/schemas/Training'
+        - type: object
+          required: [application_uuid, application_status, applied_at]
+          properties:
+            application_uuid:
+              type: [string, 'null']
+              format: uuid
+              example: 7b7f4f69-9f7a-4ae6-a474-f0d4b5c6d7e8
+            application_status:
+              type: string
+              enum: [pending, approved, rejected]
+              example: approved
+            applied_at:
+              type: [string, 'null']
+              format: date-time
+              example: '2026-09-22T08:30:11.000000Z'
+
+    RegisteredTrainingListResponse:
+      type: object
+      required: [status, data]
+      properties:
+        status:
+          type: boolean
+          example: true
+        data:
+          type: object
+          required: [trainings, pagination]
+          properties:
+            trainings:
+              type: array
+              items:
+                $ref: '#/components/schemas/RegisteredTraining'
+            pagination:
+              $ref: '#/components/schemas/TrainingPagination'
+
     TrainingApplication:
       type: object
       required: [id, uuid, training_id, status, created_at]
@@ -2650,6 +2721,74 @@ components:
               poster: trainings/security-awareness.jpg
               created_at: '2026-09-22T04:36:36.000000Z'
               updated_at: '2026-09-22T08:30:11.000000Z'
+              bujp:
+                id: 3
+                company_name: PT Example Training
+              company: null
+          pagination:
+            current_page: 1
+            last_page: 1
+            per_page: 5
+            total: 1
+            from: 1
+            to: 1
+            has_more: false
+            next_page_url: null
+            previous_page_url: null
+
+    RegisteredTrainingListResponse:
+      summary: Registered trainings with application state and pagination
+      value:
+        status: true
+        data:
+          trainings:
+            - id: 12
+              uuid: 3f6f6e2c-55ec-4da5-9e35-5d0d33b7f4b0
+              b_u_j_p_id: 3
+              company_id: null
+              title: Security Awareness Training
+              provider: PT Example Training
+              instructor: Budi Santoso
+              category: Security
+              level: Basic
+              price: '750000'
+              is_free: '0'
+              description: Pelatihan dasar untuk meningkatkan kompetensi petugas keamanan.
+              quota: '20'
+              registered: '10'
+              tags:
+                - security
+                - awareness
+              training_mode: offline
+              province: JAWA BARAT
+              city: KOTA BANDUNG
+              district: Coblong
+              village: Dago
+              address: Jl. Ir. H. Djuanda No. 10
+              google_map: 'https://maps.example.com/?q=training'
+              meeting_url: 'https://meeting.example.com/security-training'
+              start_date: '2026-10-01'
+              end_date: '2026-10-03'
+              duration_day: '3'
+              total_jp: '24'
+              is_certificate: 1
+              certificate_name: Sertifikat Kompetensi Security
+              certificate_validity: '2 tahun'
+              syllabus:
+                - Dasar-dasar pengamanan
+                - Penanganan keadaan darurat
+              requirements:
+                - Kartu identitas
+                - Surat keterangan sehat
+              status: published
+              reason_rejected: null
+              total_clicked: null
+              poster: trainings/security-awareness.jpg
+              created_at: '2026-09-22T04:36:36.000000Z'
+              updated_at: '2026-09-22T08:30:11.000000Z'
+              application_uuid: 7b7f4f69-9f7a-4ae6-a474-f0d4b5c6d7e8
+              application_status: approved
+              applied_at: '2026-09-22T08:30:11.000000Z'
               bujp:
                 id: 3
                 company_name: PT Example Training
