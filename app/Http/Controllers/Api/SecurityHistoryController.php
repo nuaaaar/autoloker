@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\SecurityHistoryRequest;
+use App\Models\Security;
 use App\Models\SecurityHistory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,6 +21,23 @@ class SecurityHistoryController extends Controller
     public function index(Request $request): JsonResponse
     {
         $security = $this->security($request);
+
+        $histories = $security->histories()
+            ->orderByDesc('start_date')
+            ->get(self::FIELDS)
+            ->map(fn (SecurityHistory $history) => $this->historyData($history))
+            ->values()
+            ->all();
+
+        return response()->json([
+            'status' => true,
+            'data' => ['security_histories' => $histories],
+        ]);
+    }
+
+    public function indexBySecurity(string $uuid): JsonResponse
+    {
+        $security = Security::query()->where('uuid', $uuid)->firstOrFail();
 
         $histories = $security->histories()
             ->orderByDesc('start_date')

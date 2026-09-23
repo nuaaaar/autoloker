@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\SecurityCertificateRequest;
+use App\Models\Security;
 use App\Models\SecurityCertificate;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,6 +21,22 @@ class SecurityCertificateController extends Controller
     public function index(Request $request): JsonResponse
     {
         $security = $this->security($request);
+
+        $certificates = $security->certificates()
+            ->orderBy('expired_date', 'asc')
+            ->get(self::FIELDS)
+            ->values()
+            ->all();
+
+        return response()->json([
+            'status' => true,
+            'data' => ['security_certificates' => $certificates],
+        ]);
+    }
+
+    public function indexBySecurity(string $uuid): JsonResponse
+    {
+        $security = Security::query()->where('uuid', $uuid)->firstOrFail();
 
         $certificates = $security->certificates()
             ->orderBy('expired_date', 'asc')

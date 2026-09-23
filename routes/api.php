@@ -55,6 +55,8 @@ Route::middleware('api.token')->group(function () {
     Route::apiResource('security-certificates', SecurityCertificateController::class)
         ->parameters(['security-certificates' => 'uuid'])
         ->except(['create', 'edit']);
+    Route::get('/security/{uuid}/histories', [SecurityHistoryController::class, 'indexBySecurity'])->name('api.security.histories.index');
+    Route::get('/security/{uuid}/certificates', [SecurityCertificateController::class, 'indexBySecurity'])->name('api.security.certificates.index');
 
     Route::prefix('masters')->group(function () {
         Route::get('/positions', [ReferenceDataController::class, 'positions'])->name('api.masters.positions');
