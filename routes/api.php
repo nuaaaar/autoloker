@@ -63,6 +63,7 @@ Route::middleware('api.token')->group(function () {
         Route::get('/category-certificates', [ReferenceDataController::class, 'categoryCertificates'])->name('api.masters.category-certificates');
         Route::get('/placements', [ReferenceDataController::class, 'placements'])->name('api.masters.placements');
         Route::get('/industries', [ReferenceDataController::class, 'industries'])->name('api.masters.industries');
+        Route::get('/subscriptions', [ReferenceDataController::class, 'subscriptions'])->name('api.masters.subscriptions');
     });
 
     Route::prefix('locations')->group(function () {

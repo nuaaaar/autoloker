@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\MasterAbility;
 use App\Models\MasterCategoryCertificate;
 use App\Models\MasterIndustry;
+use App\Models\MasterSubscription;
 use App\Models\MasterPlacement;
 use App\Models\MasterPosition;
 use App\Models\MasterPositionSecurity;
@@ -51,6 +52,61 @@ class ReferenceDataController extends Controller
     public function industries(): JsonResponse
     {
         return $this->master(MasterIndustry::query());
+    }
+
+    public function subscriptions(): JsonResponse
+    {
+        $subscriptions = MasterSubscription::query()
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get([
+                'id',
+                'uuid',
+                'name',
+                'slug',
+                'role',
+                'price',
+                'duration',
+                'duration_type',
+                'description',
+                'features',
+                'is_active',
+                'sort_order',
+            ])
+            ->map(function (MasterSubscription $subscription): array {
+                return [
+                    'id' => $subscription->id,
+                    'uuid' => $subscription->uuid,
+                    'name' => $subscription->name,
+                    'slug' => $subscription->slug,
+                    'role' => $subscription->role,
+                    'price' => $subscription->price,
+                    'duration' => $subscription->duration,
+                    'duration_type' => $subscription->duration_type,
+                    'description' => $subscription->description,
+                    'features' => $this->decodeFeatures($subscription->features),
+                    'is_active' => (bool) $subscription->is_active,
+                    'sort_order' => $subscription->sort_order,
+                ];
+            })
+            ->values();
+
+        return response()->json([
+            'status' => true,
+            'data' => $subscriptions,
+        ]);
+    }
+
+    private function decodeFeatures(mixed $features): ?object
+    {
+        if ($features === null || ! is_string($features) || trim($features) === '') {
+            return $features === null ? null : (object) [];
+        }
+
+        $decoded = json_decode($features);
+
+        return is_object($decoded) ? $decoded : (object) [];
     }
 
     public function provinces(): JsonResponse

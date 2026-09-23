@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Autoloker API
   version: 1.0.0
-  description: API documentation for mobile authentication, profile editing, security work history CRUD, security certificate CRUD, public job vacancy and training listings, BUJP-owned job vacancy and training management, company-owned training listings, job vacancy and training applications, paginated vacancy, published training, registered training listings, and owned application status follow-up, plus hierarchical location references.
+  description: API documentation for mobile authentication, profile editing, security work history CRUD, security certificate CRUD, public job vacancy and training listings, BUJP-owned job vacancy and training management, company-owned training listings, job vacancy and training applications, paginated vacancy, published training, registered training listings, owned application status follow-up, active subscription plans, and hierarchical location references.
   license:
     name: Proprietary
 
@@ -916,6 +916,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReferenceListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+  /api/masters/subscriptions:
+    get:
+      summary: List active subscription plans
+      description: Returns active master_subscriptions ordered by sort_order and id. The features field is returned as a decoded JSON object containing feature limits.
+      operationId: listMasterSubscriptions
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Active subscription plans
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MasterSubscriptionListResponse'
+              examples:
+                valid:
+                  summary: Active subscription plans
+                  value:
+                    status: true
+                    data:
+                      - id: 1
+                        uuid: 8b1f4f8a-5d6f-4a4d-a43d-5f3c9f8c2a11
+                        name: Profesional
+                        slug: profesional
+                        role: security
+                        price: '49000.00'
+                        duration: 1
+                        duration_type: month
+                        description: Untuk satpam aktif yang ingin melamar lebih banyak.
+                        features:
+                          active_applications:
+                            enabled: true
+                            limit: 5
+                        is_active: true
+                        sort_order: 1
         '401':
           $ref: '#/components/responses/Unauthenticated'
   /api/locations/provinces:
@@ -3178,6 +3215,71 @@ components:
             required: [title]
             properties:
               title: {type: string}
+
+    MasterSubscriptionListResponse:
+      type: object
+      required: [status, data]
+      properties:
+        status:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/MasterSubscription'
+
+    MasterSubscription:
+      type: object
+      required: [id, uuid, name, slug, role, price, duration, duration_type, description, features, is_active, sort_order]
+      properties:
+        id:
+          type: integer
+          example: 1
+        uuid:
+          type: [string, 'null']
+          format: uuid
+        name:
+          type: [string, 'null']
+          example: Profesional
+        slug:
+          type: [string, 'null']
+          example: profesional
+        role:
+          type: [string, 'null']
+          enum: [security, bujp, client, null]
+        price:
+          type: string
+          description: Subscription price as a decimal string with two fractional digits.
+          example: '49000.00'
+        duration:
+          type: integer
+          example: 1
+        duration_type:
+          type: string
+          enum: [day, month, year]
+          example: month
+        description:
+          type: [string, 'null']
+        features:
+          type: [object, 'null']
+          description: Feature definitions keyed by feature name.
+          additionalProperties:
+            type: object
+            required: [enabled, limit]
+            properties:
+              enabled:
+                type: boolean
+              limit:
+                type: integer
+                minimum: 0
+            additionalProperties: false
+        is_active:
+          type: boolean
+          example: true
+        sort_order:
+          type: integer
+          minimum: 0
+          example: 1
 
     PositionSecurity:
       type: object
