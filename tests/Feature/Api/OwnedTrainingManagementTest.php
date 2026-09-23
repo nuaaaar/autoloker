@@ -41,7 +41,9 @@ class OwnedTrainingManagementTest extends TestCase
                     'training' => [
                         'uuid',
                         'title',
-                        'provider' => ['uuid', 'name'],
+                        'provider',
+                        'bujp' => ['id', 'company_name'],
+                        'company',
                         'status',
                         'poster',
                         'category',
@@ -54,8 +56,8 @@ class OwnedTrainingManagementTest extends TestCase
                         'duration_day',
                         'total_jp',
                         'training_mode',
-                        'province' => ['name'],
-                        'city' => ['name'],
+                        'province',
+                        'city',
                         'address',
                         'syllabus',
                         'requirements',
@@ -71,11 +73,13 @@ class OwnedTrainingManagementTest extends TestCase
                 ],
             ])
             ->assertJsonPath('data.training.title', 'Pelatihan Dasar Satpam')
-            ->assertJsonPath('data.training.provider.uuid', (string) $bujp->uuid)
-            ->assertJsonPath('data.training.provider.name', 'Aman Training')
+            ->assertJsonPath('data.training.provider', 'Aman Training')
+            ->assertJsonPath('data.training.bujp.id', $bujp->id)
+            ->assertJsonPath('data.training.bujp.company_name', 'Aman Training')
+            ->assertJsonPath('data.training.company', null)
             ->assertJsonPath('data.training.status', 'draft')
-            ->assertJsonPath('data.training.province.name', 'KALIMANTAN TIMUR')
-            ->assertJsonPath('data.training.city.name', 'BALIKPAPAN')
+            ->assertJsonPath('data.training.province', 'KALIMANTAN TIMUR')
+            ->assertJsonPath('data.training.city', 'BALIKPAPAN')
             ->assertJsonPath('data.training.duration_day', 3)
             ->assertJsonPath('data.training.progress', 0);
 

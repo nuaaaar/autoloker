@@ -2493,6 +2493,8 @@ components:
         - uuid
         - title
         - provider
+        - bujp
+        - company
         - status
         - poster
         - category
@@ -2527,7 +2529,17 @@ components:
           type: [string, 'null']
           example: Pelatihan Dasar Satpam
         provider:
-          $ref: '#/components/schemas/OwnedTrainingProvider'
+          type: [string, 'null']
+          description: Provider value from the training provider database column.
+          example: Digital Partner Autotalenta
+        bujp:
+          oneOf:
+            - $ref: '#/components/schemas/TrainingOrganization'
+            - type: 'null'
+        company:
+          oneOf:
+            - $ref: '#/components/schemas/TrainingOrganization'
+            - type: 'null'
         status:
           type: string
           enum: [draft, rejected, submitted, published, closed, running, cancelled]
@@ -2576,9 +2588,13 @@ components:
           enum: [online, offline, hybrid, null]
           example: online
         province:
-          $ref: '#/components/schemas/OwnedTrainingLocation'
+          type: [string, 'null']
+          description: Province name returned directly as a string.
+          example: KALIMANTAN TIMUR
         city:
-          $ref: '#/components/schemas/OwnedTrainingLocation'
+          type: [string, 'null']
+          description: City name returned directly as a string, not a nested object.
+          example: KOTA BALIKPAPAN
         address:
           type: [string, 'null']
           example: Platform pembelajaran BUJP Aman
@@ -2631,25 +2647,6 @@ components:
           format: date-time
           readOnly: true
 
-    OwnedTrainingProvider:
-      type: object
-      required: [uuid, name]
-      properties:
-        uuid:
-          type: string
-          format: uuid
-          example: 550e8400-e29b-41d4-a716-446655440002
-        name:
-          type: [string, 'null']
-          example: BUJP Aman
-
-    OwnedTrainingLocation:
-      type: object
-      required: [name]
-      properties:
-        name:
-          type: [string, 'null']
-          example: KALIMANTAN TIMUR
 
     OwnedTrainingResponse:
       type: object
@@ -3260,9 +3257,11 @@ components:
           example: '2026-12-31'
         province:
           type: [string, 'null']
+          description: Province name returned directly as a string.
           example: KALIMANTAN TIMUR
         city:
           type: [string, 'null']
+          description: City name returned directly as a string, not a nested object.
           example: KOTA BALIKPAPAN
         district:
           type: [string, 'null']

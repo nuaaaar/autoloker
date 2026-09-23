@@ -39,8 +39,8 @@ class JobVacancyManagementTest extends TestCase
                         'position',
                         'status',
                         'bujp' => ['uuid', 'name'],
-                        'province' => ['name'],
-                        'city' => ['name'],
+                        'province',
+                        'city',
                         'address',
                         'working_type',
                         'working_system',
@@ -72,8 +72,8 @@ class JobVacancyManagementTest extends TestCase
             ->assertJsonPath('data.job_vacancy.status', 'draft')
             ->assertJsonPath('data.job_vacancy.bujp.uuid', (string) $bujp->uuid)
             ->assertJsonPath('data.job_vacancy.bujp.name', 'Create BUJP')
-            ->assertJsonPath('data.job_vacancy.province.name', 'KALIMANTAN TIMUR')
-            ->assertJsonPath('data.job_vacancy.city.name', 'BALIKPAPAN');
+            ->assertJsonPath('data.job_vacancy.province', 'KALIMANTAN TIMUR')
+            ->assertJsonPath('data.job_vacancy.city', 'BALIKPAPAN');
 
         $uuid = $response->json('data.job_vacancy.uuid');
         $response->assertHeader('Location', route('api.company.job-vacancies.show', ['uuid' => $uuid]));

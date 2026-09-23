@@ -12,6 +12,9 @@ class OwnedTrainingResource extends JsonResource
         $bujp = $this->resource->relationLoaded('bujp')
             ? $this->resource->getRelation('bujp')
             : $this->resource->bujp;
+        $company = $this->resource->relationLoaded('company')
+            ? $this->resource->getRelation('company')
+            : $this->resource->company;
 
         $quota = $this->integerValue($this->quota);
         $registered = $this->integerValue($this->resource->getAttribute('registered_count'));
@@ -23,9 +26,14 @@ class OwnedTrainingResource extends JsonResource
         return [
             'uuid' => (string) $this->uuid,
             'title' => $this->title,
-            'provider' => $bujp ? [
-                'uuid' => (string) $bujp->uuid,
-                'name' => $bujp->company_name,
+            'provider' => $this->provider,
+            'bujp' => $bujp ? [
+                'id' => (int) $bujp->id,
+                'company_name' => $bujp->company_name,
+            ] : null,
+            'company' => $company ? [
+                'id' => (int) $company->id,
+                'company_name' => $company->company_name,
             ] : null,
             'status' => $this->status,
             'poster' => $this->poster,
@@ -39,8 +47,8 @@ class OwnedTrainingResource extends JsonResource
             'duration_day' => $this->nullableInteger($this->duration_day),
             'total_jp' => $this->nullableInteger($this->total_jp),
             'training_mode' => $this->training_mode,
-            'province' => ['name' => $this->province],
-            'city' => ['name' => $this->city],
+            'province' => $this->province,
+            'city' => $this->city,
             'address' => $this->address,
             'syllabus' => $this->arrayValue($this->syllabus),
             'requirements' => $this->arrayValue($this->requirements),

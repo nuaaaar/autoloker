@@ -173,7 +173,10 @@ class OwnedTrainingController extends OwnedOrganizationController
 
     private function resourceData(Training $training): array
     {
-        $training->load('bujp:id,uuid,company_name')
+        $training->load([
+            'bujp:id,uuid,company_name',
+            'company:id,company_name',
+        ])
             ->loadCount([
                 'applications as registered_count' => function (Builder $query): void {
                     $query->whereIn('status', ['pending', 'approved']);
