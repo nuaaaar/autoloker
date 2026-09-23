@@ -205,7 +205,14 @@ paths:
           $ref: '#/components/responses/ValidationError'
     post:
       summary: Create a job vacancy for the authenticated BUJP
-      description: Creates a job vacancy owned by the authenticated BUJP. It is saved as draft by default. Set `workflow_action` to `submit` to validate and submit the vacancy immediately for review.
+      description: >-
+        Creates a BUJP-owned job vacancy as a draft by default. For save_draft, only position is
+        required. Set workflow_action to submit to validate and submit the vacancy directly for
+        review; submit requires every field listed in the complete request example. Ownership,
+        status, timestamps, provider, and application counters are server-managed. The request uses
+        responsibilities and quota; these map to responsibility and kuota in storage and response
+        data. The response-only fields start_date, fee_type, gender, district, and village are not
+        accepted in this request.
       operationId: createOwnedJobVacancy
       security:
         - bearerAuth: []
@@ -217,10 +224,10 @@ paths:
               $ref: '#/components/schemas/CreateOwnedJobVacancyRequest'
             examples:
               draft:
-                summary: Save a complete vacancy as draft
+                summary: Create a complete draft from a real vacancy
                 value:
-                  position: Satpam Objek Vital (Obvit)
-                  description_work: Pengamanan pada objek vital seperti pembangkit listrik, pelabuhan, bandara, dan kilang minyak.
+                  position: Satpam Objek Vital (Obvit) - Test 10
+                  description_work: Pengamanan pada objek vital seperti pembangkit listrik, pelabuhan, bandara dan kilang minyak.
                   province: KALIMANTAN TIMUR
                   city: KOTA BALIKPAPAN
                   address: Jl. Jend Sudirman
@@ -229,7 +236,9 @@ paths:
                   responsibilities:
                     - Pengamanan aset strategis negara maupun swasta nasional
                     - Pengawasan akses keluar masuk area objek vital
+                    - Penerapan standar protokol pengamanan yang ketat
                     - Patroli dan pengawasan area strategis
+                    - Penanganan kondisi darurat dan potensi ancaman keamanan
                   min_age: 20
                   max_age: 45
                   min_height: 165
@@ -240,23 +249,27 @@ paths:
                   min_experience: 2
                   certificate:
                     - GADA PRATAMA
+                    - GADA UTAMA
                   competency_scheme:
                     - Kompetensi Gada Pratama
+                    - Kompetensi Gada Utama
                   facility:
-                    - Asuransi Kesehatan
+                    - Asuransi Kesehatan Premium
                     - Tempat Tinggal
+                    - Relokasi Keluarga
+                    - Penyesuaian Gaji Tahunan
                   min_price: 8000000
                   max_price: 12000000
                   is_show_fee: true
-                  is_urgent: false
+                  is_urgent: true
                   quota: 2
                   end_date: '2026-12-31'
                   workflow_action: save_draft
               submit:
                 summary: Create and submit a complete vacancy
                 value:
-                  position: Satpam Objek Vital (Obvit)
-                  description_work: Pengamanan pada objek vital seperti pembangkit listrik, pelabuhan, bandara, dan kilang minyak.
+                  position: Satpam Objek Vital (Obvit) - Test 10
+                  description_work: Pengamanan pada objek vital seperti pembangkit listrik, pelabuhan, bandara dan kilang minyak.
                   province: KALIMANTAN TIMUR
                   city: KOTA BALIKPAPAN
                   address: Jl. Jend Sudirman
@@ -265,7 +278,9 @@ paths:
                   responsibilities:
                     - Pengamanan aset strategis negara maupun swasta nasional
                     - Pengawasan akses keluar masuk area objek vital
+                    - Penerapan standar protokol pengamanan yang ketat
                     - Patroli dan pengawasan area strategis
+                    - Penanganan kondisi darurat dan potensi ancaman keamanan
                   min_age: 20
                   max_age: 45
                   min_height: 165
@@ -276,15 +291,19 @@ paths:
                   min_experience: 2
                   certificate:
                     - GADA PRATAMA
+                    - GADA UTAMA
                   competency_scheme:
                     - Kompetensi Gada Pratama
+                    - Kompetensi Gada Utama
                   facility:
-                    - Asuransi Kesehatan
+                    - Asuransi Kesehatan Premium
                     - Tempat Tinggal
+                    - Relokasi Keluarga
+                    - Penyesuaian Gaji Tahunan
                   min_price: 8000000
                   max_price: 12000000
                   is_show_fee: true
-                  is_urgent: false
+                  is_urgent: true
                   quota: 2
                   end_date: '2026-12-31'
                   workflow_action: submit
@@ -330,7 +349,14 @@ paths:
           $ref: '#/components/responses/NotFound'
     patch:
       summary: Update an owned job vacancy
-      description: Partially updates a job vacancy owned by the authenticated BUJP. Ownership and workflow fields are immutable; submit the vacancy separately using the submit endpoint.
+      description: >-
+        Partially updates a job vacancy owned by the authenticated BUJP. Omitted fields remain
+        unchanged and null clears nullable fields. responsibilities, certificate, competency_scheme,
+        and facility replace their complete existing arrays. For every minimum/maximum pair, the
+        minimum must be less than or equal to the maximum. Province and city must identify a valid
+        location pair when supplied. workflow_action, start_date, fee_type, gender, ownership,
+        status, timestamps, and application counters are not accepted; submit the vacancy
+        separately using the submit endpoint.
       operationId: updateOwnedJobVacancy
       security:
         - bearerAuth: []
@@ -342,14 +368,46 @@ paths:
               $ref: '#/components/schemas/UpdateOwnedJobVacancyRequest'
             examples:
               update:
-                summary: Update vacancy fields
+                summary: Update every mutable vacancy field
                 value:
-                  position: Satpam Objek Vital Senior
-                  description_work: Pengamanan objek vital dengan tanggung jawab supervisi.
-                  working_system: non-shift
+                  position: Satpam Objek Vital (Obvit) - Test 10
+                  description_work: Pengamanan pada objek vital seperti pembangkit listrik, pelabuhan, bandara dan kilang minyak.
+                  province: KALIMANTAN TIMUR
+                  city: KOTA BALIKPAPAN
+                  address: Jl. Jend Sudirman
+                  working_type: permanent
+                  working_system: shift
+                  responsibilities:
+                    - Pengamanan aset strategis negara maupun swasta nasional
+                    - Pengawasan akses keluar masuk area objek vital
+                    - Penerapan standar protokol pengamanan yang ketat
+                    - Patroli dan pengawasan area strategis
+                    - Penanganan kondisi darurat dan potensi ancaman keamanan
+                  min_age: 20
+                  max_age: 45
+                  min_height: 165
+                  max_height: 190
+                  min_weight: 60
+                  max_weight: 80
+                  last_education: D3
+                  min_experience: 2
+                  certificate:
+                    - GADA PRATAMA
+                    - GADA UTAMA
+                  competency_scheme:
+                    - Kompetensi Gada Pratama
+                    - Kompetensi Gada Utama
+                  facility:
+                    - Asuransi Kesehatan Premium
+                    - Tempat Tinggal
+                    - Relokasi Keluarga
+                    - Penyesuaian Gaji Tahunan
+                  min_price: 8000000
+                  max_price: 12000000
+                  is_show_fee: true
                   is_urgent: true
-                  max_price: 14000000
-                  end_date: '2027-01-31'
+                  quota: 2
+                  end_date: '2026-12-31'
       responses:
         '200':
           description: Job vacancy updated successfully
@@ -522,7 +580,12 @@ paths:
           $ref: '#/components/responses/NotFound'
     patch:
       summary: Partially update an owned training
-      description: Updates only submitted fields. Arrays replace their complete existing value, null clears nullable fields, and duration_day is recalculated from start_date and end_date. UUID, ownership, provider, status, timestamps, and counters are immutable.
+      description: >-
+        Updates only submitted fields. Omitted fields remain unchanged, null clears nullable fields,
+        and tags, syllabus, or requirements replace their complete existing array. The start and end
+        dates must use YYYY-MM-DD, and duration_day is recalculated from them. UUID, ownership,
+        provider, workflow_action, status, timestamps, counters, and duration_day are immutable.
+        For multipart/form-data, arrays may be sent as JSON-encoded array strings.
       operationId: updateOwnedTraining
       security:
         - bearerAuth: []
@@ -532,9 +595,88 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UpdateOwnedTrainingRequest'
+            examples:
+              update:
+                summary: Update every mutable training field
+                value:
+                  title: Pelatihan Gada Pratama Angkatan 12 - Test 10
+                  category: Keamanan / Satpam
+                  level: Lanjutan
+                  is_certificate: true
+                  tags:
+                    - Satpam
+                    - GadaPratama
+                    - AutoTalenta
+                  description: >-
+                    Persiapkan diri menjadi tenaga pengamanan yang disiplin, terampil, dan profesional
+                    melalui Pelatihan Gada Pratama Angkatan 12. Program ini membekali peserta dengan
+                    pengetahuan dasar pengamanan, etika profesi, dan keterampilan menjaga keamanan.
+                  start_date: '2026-09-26'
+                  end_date: '2026-09-29'
+                  total_jp: 40
+                  training_mode: offline
+                  province: KALIMANTAN TIMUR
+                  city: KOTA BALIKPAPAN
+                  address: Jl. Jend Sudirman
+                  syllabus:
+                    - Dasar Profesi & Etika
+                    - Disiplin & Kesiapan Diri
+                    - Pengamanan Lingkungan
+                    - Komunikasi & Pelaporan
+                    - Keselamatan & Keadaan Darurat
+                    - Simulasi & Evaluasi
+                  requirements:
+                    - Formulir Pendaftaran dan Kontak Aktif
+                    - Salinan KTP
+                    - Surat Keterangan Sehat
+                  instructor: AKBP Budi Santoso
+                  quota: 30
+                  price: 0
+                  poster: training/posters/ZMA1dfKYh1TSmNyMGoTPwzqR4tqwzqLsKtPFtnB8.png
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/UpdateOwnedTrainingRequest'
+            encoding:
+              poster:
+                contentType: image/jpeg, image/png, image/webp
+            examples:
+              update:
+                summary: Update training fields and upload a poster
+                description: Send poster as a JPG, JPEG, PNG, or WEBP file; send array fields as JSON-encoded arrays when required by the multipart client.
+                value:
+                  title: Pelatihan Gada Pratama Angkatan 12 - Test 10
+                  category: Keamanan / Satpam
+                  level: Lanjutan
+                  is_certificate: true
+                  tags:
+                    - Satpam
+                    - GadaPratama
+                    - AutoTalenta
+                  description: >-
+                    Persiapkan diri menjadi tenaga pengamanan yang disiplin, terampil, dan profesional
+                    melalui Pelatihan Gada Pratama Angkatan 12.
+                  start_date: '2026-09-26'
+                  end_date: '2026-09-29'
+                  total_jp: 40
+                  training_mode: offline
+                  province: KALIMANTAN TIMUR
+                  city: KOTA BALIKPAPAN
+                  address: Jl. Jend Sudirman
+                  syllabus:
+                    - Dasar Profesi & Etika
+                    - Disiplin & Kesiapan Diri
+                    - Pengamanan Lingkungan
+                    - Komunikasi & Pelaporan
+                    - Keselamatan & Keadaan Darurat
+                    - Simulasi & Evaluasi
+                  requirements:
+                    - Formulir Pendaftaran dan Kontak Aktif
+                    - Salinan KTP
+                    - Surat Keterangan Sehat
+                  instructor: AKBP Budi Santoso
+                  quota: 30
+                  price: 0
+                  poster: poster.png
       responses:
         '200':
           description: Training updated successfully
@@ -721,7 +863,16 @@ paths:
           $ref: '#/components/responses/ValidationError'
     post:
       summary: Create an owned training
-      description: Creates a BUJP-owned training as a draft by default. Set workflow_action to submit to validate and submit the new training directly for review. Provider and ownership are derived from the authenticated BUJP and must not be sent by the client. Send multipart/form-data with a poster file to upload a new poster; poster files must be JPG, JPEG, PNG, or WEBP and no larger than 5 MB. JSON requests may send an existing public poster storage path.
+      description: >-
+        Creates a BUJP-owned training as a draft by default. For save_draft, only title is required.
+        Set workflow_action to submit to validate and submit the new training directly for review;
+        submit requires category, level, description, start_date, end_date, total_jp, training_mode,
+        province, city, address, at least one syllabus item, at least one requirement, and quota.
+        is_certificate, tags, instructor, price, and poster are optional. Provider and ownership are
+        derived from the authenticated BUJP and must not be sent. Send multipart/form-data with a
+        poster file to upload a new poster; poster files must be JPG, JPEG, PNG, or WEBP and no
+        larger than 5 MB. JSON requests may send an existing public poster storage path. For
+        multipart/form-data, arrays may be sent as JSON-encoded array strings.
       operationId: createOwnedTraining
       security:
         - bearerAuth: []
@@ -733,14 +884,83 @@ paths:
               $ref: '#/components/schemas/CreateOwnedTrainingRequest'
             examples:
               draft:
-                summary: Create a draft with an existing public poster path
+                summary: Create a complete draft with an existing public poster path
                 value:
-                  title: Pelatihan Dasar Satpam
-                  category: Keamanan
-                  level: Dasar
-                  description: Pelatihan dasar untuk calon petugas keamanan.
-                  poster: training/posters/security-basics.jpg
+                  title: Pelatihan Gada Pratama Angkatan 12 - Test 10
+                  category: Keamanan / Satpam
+                  level: Lanjutan
+                  is_certificate: true
+                  tags:
+                    - Satpam
+                    - GadaPratama
+                    - AutoTalenta
+                  description: >-
+                    Persiapkan diri menjadi tenaga pengamanan yang disiplin, terampil, dan profesional
+                    melalui Pelatihan Gada Pratama Angkatan 12. Program ini dirancang untuk membekali
+                    calon anggota satpam dengan pengetahuan dasar pengamanan, etika profesi, serta
+                    keterampilan dalam menjaga keamanan dan ketertiban di lingkungan kerja.
+                  start_date: '2026-09-26'
+                  end_date: '2026-09-29'
+                  total_jp: 40
+                  training_mode: offline
+                  province: KALIMANTAN TIMUR
+                  city: KOTA BALIKPAPAN
+                  address: Jl. Jend Sudirman
+                  syllabus:
+                    - Dasar Profesi & Etika
+                    - Disiplin & Kesiapan Diri
+                    - Pengamanan Lingkungan
+                    - Komunikasi & Pelaporan
+                    - Keselamatan & Keadaan Darurat
+                    - Simulasi & Evaluasi
+                  requirements:
+                    - Formulir Pendaftaran dan Kontak Aktif
+                    - Salinan KTP
+                    - Surat Keterangan Sehat
+                  instructor: AKBP Budi Santoso
+                  quota: 30
+                  price: 0
+                  poster: training/posters/ZMA1dfKYh1TSmNyMGoTPwzqR4tqwzqLsKtPFtnB8.png
                   workflow_action: save_draft
+              submit:
+                summary: Create and submit a complete training
+                value:
+                  title: Pelatihan Gada Pratama Angkatan 12 - Test 10
+                  category: Keamanan / Satpam
+                  level: Lanjutan
+                  is_certificate: true
+                  tags:
+                    - Satpam
+                    - GadaPratama
+                    - AutoTalenta
+                  description: >-
+                    Persiapkan diri menjadi tenaga pengamanan yang disiplin, terampil, dan profesional
+                    melalui Pelatihan Gada Pratama Angkatan 12. Program ini dirancang untuk membekali
+                    calon anggota satpam dengan pengetahuan dasar pengamanan, etika profesi, serta
+                    keterampilan dalam menjaga keamanan dan ketertiban di lingkungan kerja.
+                  start_date: '2026-09-26'
+                  end_date: '2026-09-29'
+                  total_jp: 40
+                  training_mode: offline
+                  province: KALIMANTAN TIMUR
+                  city: KOTA BALIKPAPAN
+                  address: Jl. Jend Sudirman
+                  syllabus:
+                    - Dasar Profesi & Etika
+                    - Disiplin & Kesiapan Diri
+                    - Pengamanan Lingkungan
+                    - Komunikasi & Pelaporan
+                    - Keselamatan & Keadaan Darurat
+                    - Simulasi & Evaluasi
+                  requirements:
+                    - Formulir Pendaftaran dan Kontak Aktif
+                    - Salinan KTP
+                    - Surat Keterangan Sehat
+                  instructor: AKBP Budi Santoso
+                  quota: 30
+                  price: 0
+                  poster: training/posters/ZMA1dfKYh1TSmNyMGoTPwzqR4tqwzqLsKtPFtnB8.png
+                  workflow_action: submit
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/CreateOwnedTrainingRequest'
@@ -749,15 +969,81 @@ paths:
                 contentType: image/jpeg, image/png, image/webp
             examples:
               draft:
-                summary: Create a draft with a poster file
-                description: Send the poster field as a JPG, JPEG, PNG, or WEBP file.
+                summary: Create a complete draft with a poster file
+                description: Send poster as a JPG, JPEG, PNG, or WEBP file; send array fields as JSON-encoded arrays when required by the multipart client.
                 value:
-                  title: Pelatihan Dasar Satpam
-                  category: Keamanan
-                  level: Dasar
-                  description: Pelatihan dasar untuk calon petugas keamanan.
-                  poster: poster.jpg
+                  title: Pelatihan Gada Pratama Angkatan 12 - Test 10
+                  category: Keamanan / Satpam
+                  level: Lanjutan
+                  is_certificate: true
+                  tags:
+                    - Satpam
+                    - GadaPratama
+                    - AutoTalenta
+                  description: >-
+                    Persiapkan diri menjadi tenaga pengamanan yang disiplin, terampil, dan profesional
+                    melalui Pelatihan Gada Pratama Angkatan 12.
+                  start_date: '2026-09-26'
+                  end_date: '2026-09-29'
+                  total_jp: 40
+                  training_mode: offline
+                  province: KALIMANTAN TIMUR
+                  city: KOTA BALIKPAPAN
+                  address: Jl. Jend Sudirman
+                  syllabus:
+                    - Dasar Profesi & Etika
+                    - Disiplin & Kesiapan Diri
+                    - Pengamanan Lingkungan
+                    - Komunikasi & Pelaporan
+                    - Keselamatan & Keadaan Darurat
+                    - Simulasi & Evaluasi
+                  requirements:
+                    - Formulir Pendaftaran dan Kontak Aktif
+                    - Salinan KTP
+                    - Surat Keterangan Sehat
+                  instructor: AKBP Budi Santoso
+                  quota: 30
+                  price: 0
+                  poster: poster.png
                   workflow_action: save_draft
+              submit:
+                summary: Create and submit a complete training with a poster file
+                description: Use workflow_action submit only when all submit-required fields are present.
+                value:
+                  title: Pelatihan Gada Pratama Angkatan 12 - Test 10
+                  category: Keamanan / Satpam
+                  level: Lanjutan
+                  is_certificate: true
+                  tags:
+                    - Satpam
+                    - GadaPratama
+                    - AutoTalenta
+                  description: >-
+                    Persiapkan diri menjadi tenaga pengamanan yang disiplin, terampil, dan profesional
+                    melalui Pelatihan Gada Pratama Angkatan 12.
+                  start_date: '2026-09-26'
+                  end_date: '2026-09-29'
+                  total_jp: 40
+                  training_mode: offline
+                  province: KALIMANTAN TIMUR
+                  city: KOTA BALIKPAPAN
+                  address: Jl. Jend Sudirman
+                  syllabus:
+                    - Dasar Profesi & Etika
+                    - Disiplin & Kesiapan Diri
+                    - Pengamanan Lingkungan
+                    - Komunikasi & Pelaporan
+                    - Keselamatan & Keadaan Darurat
+                    - Simulasi & Evaluasi
+                  requirements:
+                    - Formulir Pendaftaran dan Kontak Aktif
+                    - Salinan KTP
+                    - Surat Keterangan Sehat
+                  instructor: AKBP Budi Santoso
+                  quota: 30
+                  price: 0
+                  poster: poster.png
+                  workflow_action: submit
       responses:
         '201':
           description: Training created successfully
@@ -2384,7 +2670,11 @@ components:
 
     CreateOwnedTrainingRequest:
       type: object
-      description: Create a BUJP training. Drafts require title; submit action requires the complete training payload. Do not send provider or ownership fields.
+      description: >-
+        Accepted request fields for a BUJP-owned training. Drafts require title; using
+        workflow_action submit additionally requires category, level, description, start_date,
+        end_date, total_jp, training_mode, province, city, address, at least one syllabus item,
+        at least one requirement, and quota. Do not send provider or ownership fields.
       additionalProperties: false
       required: [title]
       properties:
@@ -2392,145 +2682,243 @@ components:
           type: string
           minLength: 3
           maxLength: 200
-          example: Pelatihan Dasar Satpam
+          description: Training title.
+          example: Pelatihan Gada Pratama Angkatan 12 - Test 10
         category:
           type: [string, 'null']
-          example: Keamanan
+          maxLength: 255
+          description: Training category. Required when workflow_action is submit.
+          example: Keamanan / Satpam
         level:
           type: [string, 'null']
-          example: Dasar
+          maxLength: 255
+          description: Training level. Required when workflow_action is submit.
+          example: Lanjutan
         is_certificate:
           type: boolean
+          description: Whether the training provides a certificate.
           example: true
         tags:
           type: [array, 'null']
+          description: Tags for the training. Tag values must be unique, case-insensitively.
           items:
             type: string
-          example: [K3, Patroli]
+            minLength: 1
+            maxLength: 255
+          example: [Satpam, GadaPratama, AutoTalenta]
         description:
           type: [string, 'null']
-          example: Pelatihan dasar untuk calon petugas keamanan.
+          description: Training description. Required when workflow_action is submit.
+          example: Pelatihan untuk membekali calon anggota satpam dengan pengetahuan dasar pengamanan.
         start_date:
           type: [string, 'null']
           format: date
-          example: '2026-10-01'
+          description: Training start date in YYYY-MM-DD format. Required when workflow_action is submit.
+          example: '2026-09-26'
         end_date:
           type: [string, 'null']
           format: date
-          example: '2026-10-03'
+          description: Training end date in YYYY-MM-DD format; must be on or after start_date.
+          example: '2026-09-29'
         total_jp:
           type: [integer, 'null']
           minimum: 1
-          example: 24
+          description: Total learning hours. Required when workflow_action is submit.
+          example: 40
         training_mode:
           type: [string, 'null']
           enum: [online, offline, hybrid, null]
-          example: online
+          description: Delivery mode. Required when workflow_action is submit.
+          example: offline
         province:
           type: [string, 'null']
+          maxLength: 255
+          description: Province name. Must be provided together with a valid city when workflow_action is submit.
           example: KALIMANTAN TIMUR
         city:
           type: [string, 'null']
-          example: BALIKPAPAN
+          maxLength: 255
+          description: City name in the selected province. Required when workflow_action is submit.
+          example: KOTA BALIKPAPAN
         address:
           type: [string, 'null']
-          example: Platform pembelajaran BUJP Aman
+          description: Training address. Required when workflow_action is submit.
+          example: Jl. Jend Sudirman
         syllabus:
           type: [array, 'null']
+          description: Ordered syllabus items; at least one item is required when workflow_action is submit.
           items:
             type: string
-          example: [Pengenalan keamanan, Teknik patroli]
+            minLength: 1
+            maxLength: 255
+          example:
+            - Dasar Profesi & Etika
+            - Disiplin & Kesiapan Diri
+            - Pengamanan Lingkungan
         requirements:
           type: [array, 'null']
+          description: Participant requirements; at least one item is required when workflow_action is submit.
           items:
             type: string
-          example: [Memiliki KTP, Sehat jasmani]
+            minLength: 1
+            maxLength: 255
+          example:
+            - Formulir Pendaftaran dan Kontak Aktif
+            - Salinan KTP
+            - Surat Keterangan Sehat
         instructor:
           type: [string, 'null']
-          example: Budi Santoso
+          maxLength: 255
+          description: Instructor name.
+          example: AKBP Budi Santoso
         quota:
           type: [integer, 'null']
           minimum: 1
-          example: 20
+          description: Maximum number of approved participants. Required when workflow_action is submit.
+          example: 30
         price:
           type: [integer, 'null']
           minimum: 0
+          description: Training price; use 0 for a free training.
           example: 0
         poster:
-          oneOf:
+          anyOf:
             - type: string
-              description: Public storage key/path for JSON requests.
-              example: training/posters/security-basics.jpg
+              maxLength: 2048
+              description: Public storage key/path for JSON requests; internal filesystem paths are rejected.
+              example: training/posters/ZMA1dfKYh1TSmNyMGoTPwzqR4tqwzqLsKtPFtnB8.png
             - type: string
               format: binary
-              description: Image file for multipart/form-data requests.
+              description: JPG, JPEG, PNG, or WEBP image file for multipart/form-data, up to 5 MB.
             - type: 'null'
         workflow_action:
           type: string
+          description: Save as draft by default, or validate and submit immediately.
           enum: [save_draft, submit]
           default: save_draft
+          example: save_draft
 
     UpdateOwnedTrainingRequest:
       type: object
-      description: Partial update. Omitted fields remain unchanged, null clears nullable fields, and arrays replace their complete values. Immutable, ownership, status, timestamp, counter, and duration_day fields are not accepted.
+      description: >-
+        Partial update of accepted mutable training fields. Omitted fields remain unchanged,
+        null clears nullable fields, and tags, syllabus, or requirements replace their complete
+        existing array. workflow_action, ownership, provider, status, timestamps, counters, and
+        duration_day are not accepted.
       additionalProperties: false
       properties:
         title:
           type: string
           minLength: 3
           maxLength: 200
+          description: Training title.
+          example: Pelatihan Gada Pratama Angkatan 12 - Test 10
         category:
           type: [string, 'null']
+          maxLength: 255
+          description: Training category.
+          example: Keamanan / Satpam
         level:
           type: [string, 'null']
+          maxLength: 255
+          description: Training level.
+          example: Lanjutan
         is_certificate:
           type: boolean
+          description: Whether the training provides a certificate.
+          example: true
         tags:
           type: [array, 'null']
+          description: Tags for the training. Tag values must be unique, case-insensitively.
           items:
             type: string
+            minLength: 1
+            maxLength: 255
+          example: [Satpam, GadaPratama, AutoTalenta]
         description:
           type: [string, 'null']
+          description: Training description.
+          example: Pelatihan untuk membekali calon anggota satpam dengan pengetahuan dasar pengamanan.
         start_date:
           type: [string, 'null']
           format: date
+          description: Training start date in YYYY-MM-DD format.
+          example: '2026-09-26'
         end_date:
           type: [string, 'null']
           format: date
+          description: Training end date in YYYY-MM-DD format; must be on or after start_date.
+          example: '2026-09-29'
         total_jp:
           type: [integer, 'null']
           minimum: 1
+          description: Total learning hours.
+          example: 40
         training_mode:
           type: [string, 'null']
           enum: [online, offline, hybrid, null]
+          description: Delivery mode.
+          example: offline
         province:
           type: [string, 'null']
+          maxLength: 255
+          description: Province name; must be provided together with a valid city when set.
+          example: KALIMANTAN TIMUR
         city:
           type: [string, 'null']
+          maxLength: 255
+          description: City name in the selected province.
+          example: KOTA BALIKPAPAN
         address:
           type: [string, 'null']
+          description: Training address.
+          example: Jl. Jend Sudirman
         syllabus:
           type: [array, 'null']
+          description: Complete replacement syllabus array.
           items:
             type: string
+            minLength: 1
+            maxLength: 255
+          example:
+            - Dasar Profesi & Etika
+            - Disiplin & Kesiapan Diri
+            - Pengamanan Lingkungan
         requirements:
           type: [array, 'null']
+          description: Complete replacement requirements array.
           items:
             type: string
+            minLength: 1
+            maxLength: 255
+          example:
+            - Formulir Pendaftaran dan Kontak Aktif
+            - Salinan KTP
+            - Surat Keterangan Sehat
         instructor:
           type: [string, 'null']
+          maxLength: 255
+          description: Instructor name.
+          example: AKBP Budi Santoso
         quota:
           type: [integer, 'null']
           minimum: 1
+          description: Maximum number of approved participants.
+          example: 30
         price:
           type: [integer, 'null']
           minimum: 0
+          description: Training price; use 0 for a free training.
+          example: 0
         poster:
-          oneOf:
+          anyOf:
             - type: string
-              description: Public storage key/path for JSON requests.
+              maxLength: 2048
+              description: Public storage key/path for JSON requests; internal filesystem paths are rejected.
+              example: training/posters/ZMA1dfKYh1TSmNyMGoTPwzqR4tqwzqLsKtPFtnB8.png
             - type: string
               format: binary
+              description: JPG, JPEG, PNG, or WEBP image file for multipart/form-data, up to 5 MB.
             - type: 'null'
 
 
@@ -2996,181 +3384,303 @@ components:
       type: object
       required: [position]
       additionalProperties: false
-      description: Creates a BUJP-owned vacancy as a draft by default. Set workflow_action to submit to validate and submit it immediately. Ownership, status, and timestamps are server-managed.
+      description: >-
+        Accepted request fields for a BUJP-owned vacancy. Drafts require position; using
+        workflow_action submit additionally requires description_work, province, city, address,
+        working_type, working_system, at least one responsibility, all age/height/weight ranges,
+        last_education, min_experience, at least one certificate, competency scheme, facility,
+        min_price, max_price, is_show_fee, is_urgent, quota, and end_date. Do not send ownership,
+        status, provider, counters, start_date, fee_type, or other response-only fields.
       properties:
         position:
           type: string
           minLength: 3
           maxLength: 150
+          description: Vacancy position title.
+          example: Satpam Objek Vital (Obvit) - Test 10
         description_work:
           type: [string, 'null']
+          description: Work description. Required when workflow_action is submit.
+          example: Pengamanan pada objek vital seperti pembangkit listrik, pelabuhan, bandara dan kilang minyak.
         province:
           type: [string, 'null']
           maxLength: 255
+          description: Province name. Required with city when workflow_action is submit.
+          example: KALIMANTAN TIMUR
         city:
           type: [string, 'null']
           maxLength: 255
+          description: City name in the selected province. Required when workflow_action is submit.
+          example: KOTA BALIKPAPAN
         address:
           type: [string, 'null']
+          description: Work location address. Required when workflow_action is submit.
+          example: Jl. Jend Sudirman
         working_type:
           type: string
+          description: Employment type.
           enum: [permanent, contract, intenrship, freelance]
+          example: permanent
         working_system:
           type: string
+          description: Work schedule.
           enum: [shift, non-shift]
+          example: shift
         responsibilities:
           type: [array, 'null']
+          description: Responsibilities. At least one item is required when workflow_action is submit.
           items:
             type: string
             maxLength: 255
+          example:
+            - Pengamanan aset strategis negara maupun swasta nasional
+            - Pengawasan akses keluar masuk area objek vital
+            - Penerapan standar protokol pengamanan yang ketat
+            - Patroli dan pengawasan area strategis
+            - Penanganan kondisi darurat dan potensi ancaman keamanan
         min_age:
           type: [integer, 'null']
           minimum: 18
           maximum: 100
+          description: Minimum applicant age.
+          example: 20
         max_age:
           type: [integer, 'null']
           minimum: 18
           maximum: 100
+          description: Maximum applicant age; must be greater than or equal to min_age.
+          example: 45
         min_height:
           type: [number, 'null']
           minimum: 0
+          description: Minimum applicant height.
+          example: 165
         max_height:
           type: [number, 'null']
           minimum: 0
+          description: Maximum applicant height; must be greater than or equal to min_height.
+          example: 190
         min_weight:
           type: [number, 'null']
           minimum: 0
+          description: Minimum applicant weight.
+          example: 60
         max_weight:
           type: [number, 'null']
           minimum: 0
+          description: Maximum applicant weight; must be greater than or equal to min_weight.
+          example: 80
         last_education:
           type: [string, 'null']
+          description: Minimum education level.
+          example: D3
         min_experience:
           type: [integer, 'null']
           minimum: 0
+          description: Minimum experience in years.
+          example: 2
         certificate:
           type: [array, 'null']
+          description: Required certificates. At least one item is required when workflow_action is submit.
           items:
             type: string
             maxLength: 255
+          example: [GADA PRATAMA, GADA UTAMA]
         competency_scheme:
           type: [array, 'null']
+          description: Required competency schemes. At least one item is required when workflow_action is submit.
           items:
             type: string
             maxLength: 255
+          example: [Kompetensi Gada Pratama, Kompetensi Gada Utama]
         facility:
           type: [array, 'null']
+          description: Benefits or facilities. At least one item is required when workflow_action is submit.
           items:
             type: string
             maxLength: 255
+          example: [Asuransi Kesehatan Premium, Tempat Tinggal, Relokasi Keluarga, Penyesuaian Gaji Tahunan]
         min_price:
           type: [number, 'null']
           minimum: 0
+          description: Minimum salary or fee.
+          example: 8000000
         max_price:
           type: [number, 'null']
           minimum: 0
+          description: Maximum salary or fee; must be greater than or equal to min_price.
+          example: 12000000
         is_show_fee:
           type: boolean
+          description: Whether the salary or fee is shown to applicants.
+          example: true
         is_urgent:
           type: boolean
+          description: Whether the vacancy is urgent.
+          example: true
         quota:
           type: [integer, 'null']
           minimum: 1
+          description: Maximum number of applicants. Required when workflow_action is submit.
+          example: 2
         end_date:
           type: [string, 'null']
           format: date
+          description: Vacancy closing date in YYYY-MM-DD format. Required when workflow_action is submit.
+          example: '2026-12-31'
         workflow_action:
           type: string
+          description: Save as draft by default, or validate and submit immediately.
           enum: [save_draft, submit]
           default: save_draft
+          example: save_draft
 
     UpdateOwnedJobVacancyRequest:
       type: object
       additionalProperties: false
-      description: All fields are optional. Ownership, workflow_action, status, and timestamps cannot be changed through this endpoint.
+      description: >-
+        Partial update of accepted mutable vacancy fields. Omitted fields remain unchanged and
+        null clears nullable fields. responsibilities, certificate, competency_scheme, and facility
+        replace their complete existing arrays. Minimum/maximum pairs must remain ordered, and a
+        supplied province and city must identify a valid location pair. workflow_action, ownership,
+        status, timestamps, counters, start_date, fee_type, and gender are not accepted.
       properties:
         position:
           type: string
           minLength: 3
           maxLength: 150
+          description: Vacancy position title.
+          example: Satpam Objek Vital (Obvit) - Test 10
         description_work:
           type: [string, 'null']
+          description: Work description.
+          example: Pengamanan pada objek vital seperti pembangkit listrik, pelabuhan, bandara dan kilang minyak.
         province:
           type: [string, 'null']
           maxLength: 255
+          description: Province name; must be supplied with city when changing the location.
+          example: KALIMANTAN TIMUR
         city:
           type: [string, 'null']
           maxLength: 255
+          description: City name in the selected province.
+          example: KOTA BALIKPAPAN
         address:
           type: [string, 'null']
+          description: Work location address.
+          example: Jl. Jend Sudirman
         working_type:
           type: string
+          description: Employment type.
           enum: [permanent, contract, intenrship, freelance]
+          example: permanent
         working_system:
           type: string
+          description: Work schedule.
           enum: [shift, non-shift]
+          example: shift
         responsibilities:
           type: [array, 'null']
+          description: Complete replacement responsibilities array.
           items:
             type: string
             maxLength: 255
+          example:
+            - Pengamanan aset strategis negara maupun swasta nasional
+            - Pengawasan akses keluar masuk area objek vital
+            - Penerapan standar protokol pengamanan yang ketat
+            - Patroli dan pengawasan area strategis
+            - Penanganan kondisi darurat dan potensi ancaman keamanan
         min_age:
           type: [integer, 'null']
           minimum: 18
           maximum: 100
+          description: Minimum applicant age.
+          example: 20
         max_age:
           type: [integer, 'null']
           minimum: 18
           maximum: 100
+          description: Maximum applicant age; must be greater than or equal to min_age.
+          example: 45
         min_height:
           type: [number, 'null']
           minimum: 0
+          description: Minimum applicant height.
+          example: 165
         max_height:
           type: [number, 'null']
           minimum: 0
+          description: Maximum applicant height; must be greater than or equal to min_height.
+          example: 190
         min_weight:
           type: [number, 'null']
           minimum: 0
+          description: Minimum applicant weight.
+          example: 60
         max_weight:
           type: [number, 'null']
           minimum: 0
+          description: Maximum applicant weight; must be greater than or equal to min_weight.
+          example: 80
         last_education:
           type: [string, 'null']
+          description: Minimum education level.
+          example: D3
         min_experience:
           type: [integer, 'null']
           minimum: 0
+          description: Minimum experience in years.
+          example: 2
         certificate:
           type: [array, 'null']
+          description: Complete replacement certificate array.
           items:
             type: string
             maxLength: 255
+          example: [GADA PRATAMA, GADA UTAMA]
         competency_scheme:
           type: [array, 'null']
+          description: Complete replacement competency scheme array.
           items:
             type: string
             maxLength: 255
+          example: [Kompetensi Gada Pratama, Kompetensi Gada Utama]
         facility:
           type: [array, 'null']
+          description: Complete replacement facility array.
           items:
             type: string
             maxLength: 255
+          example: [Asuransi Kesehatan Premium, Tempat Tinggal, Relokasi Keluarga, Penyesuaian Gaji Tahunan]
         min_price:
           type: [number, 'null']
           minimum: 0
+          description: Minimum salary or fee.
+          example: 8000000
         max_price:
           type: [number, 'null']
           minimum: 0
+          description: Maximum salary or fee; must be greater than or equal to min_price.
+          example: 12000000
         is_show_fee:
           type: boolean
+          description: Whether the salary or fee is shown to applicants.
+          example: true
         is_urgent:
           type: boolean
+          description: Whether the vacancy is urgent.
+          example: true
         quota:
           type: [integer, 'null']
           minimum: 1
+          description: Maximum number of applicants.
+          example: 2
         end_date:
           type: [string, 'null']
           format: date
-
+          description: Vacancy closing date in YYYY-MM-DD format.
+          example: '2026-12-31'
 
     JobVacancyOrganization:
       type: object
