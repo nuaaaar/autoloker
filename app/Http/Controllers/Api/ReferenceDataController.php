@@ -8,6 +8,7 @@ use App\Models\MasterCategoryCertificate;
 use App\Models\MasterIndustry;
 use App\Models\MasterPlacement;
 use App\Models\MasterPosition;
+use App\Models\MasterPositionSecurity;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Laravolt\Indonesia\Models\City;
@@ -20,6 +21,16 @@ class ReferenceDataController extends Controller
     public function positions(): JsonResponse
     {
         return $this->master(MasterPosition::query());
+    }
+
+    public function positionSecurities(): JsonResponse
+    {
+        return response()->json([
+            'status' => true,
+            'data' => MasterPositionSecurity::query()
+                ->orderBy('title')
+                ->get(['id', 'uuid', 'title', 'description', 'responsibility']),
+        ]);
     }
 
     public function abilities(): JsonResponse

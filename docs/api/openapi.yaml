@@ -645,6 +645,22 @@ paths:
                 $ref: '#/components/schemas/ReferenceListResponse'
         '401':
           $ref: '#/components/responses/Unauthenticated'
+  /api/masters/position-securities:
+    get:
+      summary: List security job positions
+      description: Returns all non-deleted master security positions ordered by title without pagination. Each item includes its identifier, title, description, and responsibilities.
+      operationId: listMasterPositionSecurities
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Security job positions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PositionSecurityListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
   /api/masters/category-certificates:
     get:
       summary: List certificate categories
@@ -2647,6 +2663,42 @@ components:
             required: [title]
             properties:
               title: {type: string}
+
+    PositionSecurity:
+      type: object
+      required: [id, uuid, title, description, responsibility]
+      properties:
+        id:
+          type: integer
+          example: 1
+        uuid:
+          type: string
+          format: uuid
+        title:
+          type: string
+          example: Satpam Objek Vital
+        description:
+          type: string
+          example: Pengamanan pada objek vital.
+        responsibility:
+          type: array
+          items:
+            type: string
+          example:
+            - Pengawasan akses keluar masuk area
+            - Patroli area kerja
+
+    PositionSecurityListResponse:
+      type: object
+      required: [status, data]
+      properties:
+        status:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PositionSecurity'
 
     LocationListResponse:
       type: object
