@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Autoloker API
   version: 1.0.0
-  description: API documentation for mobile authentication, profile editing, security work history CRUD, security certificate CRUD, public job vacancy and training listings, company and BUJP-owned job vacancy and training listings, job vacancy and training applications, paginated vacancy, published training, and registered training listings, plus hierarchical location references.
+  description: API documentation for mobile authentication, profile editing, security work history CRUD, security certificate CRUD, public job vacancy and training listings, BUJP-owned job vacancy and training management, company-owned training listings, job vacancy and training applications, paginated vacancy, published training, and registered training listings, plus hierarchical location references.
   license:
     name: Proprietary
 
@@ -262,6 +262,82 @@ paths:
         '422':
           $ref: '#/components/responses/ValidationError'
 
+  /api/company/trainings/{uuid}:
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of a training owned by the authenticated BUJP.
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: Retrieve an owned training
+      description: Returns the complete canonical training resource when it belongs to the authenticated BUJP. Trainings owned by another BUJP are returned as not found.
+      operationId: getOwnedTraining
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Owned training
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnedTrainingResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      summary: Partially update an owned training
+      description: Updates only submitted fields. Arrays replace their complete existing value, null clears nullable fields, and duration_day is recalculated from start_date and end_date. UUID, ownership, provider, status, timestamps, and counters are immutable.
+      operationId: updateOwnedTraining
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOwnedTrainingRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UpdateOwnedTrainingRequest'
+      responses:
+        '200':
+          description: Training updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnedTrainingResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    post:
+      summary: Submit an owned training for review
+      description: Submits a draft or rejected training after complete validation. Validation failure leaves the draft unchanged.
+      operationId: submitOwnedTraining
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Training submitted for review successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnedTrainingResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
   /api/company/trainings/{uuid}/participants:
     parameters:
       - name: uuid
@@ -369,6 +445,35 @@ paths:
           $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/ValidationError'
+    post:
+      summary: Create an owned training
+      description: Creates a BUJP-owned training as a draft by default. Set workflow_action to submit to validate and submit the new training directly for review. Provider and ownership are derived from the authenticated BUJP and must not be sent by the client.
+      operationId: createOwnedTraining
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOwnedTrainingRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateOwnedTrainingRequest'
+      responses:
+        '201':
+          description: Training created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnedTrainingResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
 
   /api/trainings:
     get:
@@ -1700,6 +1805,339 @@ components:
                 $ref: '#/components/schemas/Training'
             pagination:
               $ref: '#/components/schemas/TrainingPagination'
+    OwnedTraining:
+      type: object
+      description: Canonical BUJP-owned training resource returned by create, update, submit, and show operations.
+      required:
+        - uuid
+        - title
+        - provider
+        - status
+        - poster
+        - category
+        - level
+        - is_certificate
+        - tags
+        - description
+        - start_date
+        - end_date
+        - duration_day
+        - total_jp
+        - training_mode
+        - province
+        - city
+        - address
+        - syllabus
+        - requirements
+        - instructor
+        - quota
+        - price
+        - registered_count
+        - approved_count
+        - progress
+        - created_at
+        - updated_at
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: [string, 'null']
+          example: Pelatihan Dasar Satpam
+        provider:
+          $ref: '#/components/schemas/OwnedTrainingProvider'
+        status:
+          type: string
+          enum: [draft, rejected, submitted, published, closed, running, cancelled]
+          readOnly: true
+          example: draft
+        poster:
+          type: [string, 'null']
+          description: Public storage key/path, never an internal filesystem path.
+          example: training/posters/security-basics.jpg
+        category:
+          type: [string, 'null']
+          example: Keamanan
+        level:
+          type: [string, 'null']
+          example: Dasar
+        is_certificate:
+          type: boolean
+          example: true
+        tags:
+          type: [array, 'null']
+          items:
+            type: string
+          example: [K3, Patroli]
+        description:
+          type: [string, 'null']
+          example: Pelatihan dasar untuk calon petugas keamanan.
+        start_date:
+          type: [string, 'null']
+          format: date
+          example: '2026-10-01'
+        end_date:
+          type: [string, 'null']
+          format: date
+          example: '2026-10-03'
+        duration_day:
+          type: [integer, 'null']
+          description: Inclusive duration calculated by the server from start_date and end_date.
+          readOnly: true
+          example: 3
+        total_jp:
+          type: [integer, 'null']
+          minimum: 1
+          example: 24
+        training_mode:
+          type: [string, 'null']
+          enum: [online, offline, hybrid, null]
+          example: online
+        province:
+          $ref: '#/components/schemas/OwnedTrainingLocation'
+        city:
+          $ref: '#/components/schemas/OwnedTrainingLocation'
+        address:
+          type: [string, 'null']
+          example: Platform pembelajaran BUJP Aman
+        syllabus:
+          type: [array, 'null']
+          items:
+            type: string
+          example: [Pengenalan keamanan, Teknik patroli]
+        requirements:
+          type: [array, 'null']
+          items:
+            type: string
+          example: [Memiliki KTP, Sehat jasmani]
+        instructor:
+          type: [string, 'null']
+          example: Budi Santoso
+        quota:
+          type: [integer, 'null']
+          minimum: 1
+          example: 20
+        price:
+          type: [integer, 'null']
+          minimum: 0
+          description: Integer price in Indonesian Rupiah.
+          example: 0
+        registered_count:
+          type: integer
+          minimum: 0
+          readOnly: true
+          description: Count of active pending and approved participants.
+          example: 0
+        approved_count:
+          type: integer
+          minimum: 0
+          readOnly: true
+          example: 0
+        progress:
+          type: number
+          minimum: 0
+          maximum: 1
+          readOnly: true
+          description: Approved participant progress relative to quota.
+          example: 0
+        created_at:
+          type: [string, 'null']
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: [string, 'null']
+          format: date-time
+          readOnly: true
+
+    OwnedTrainingProvider:
+      type: object
+      required: [uuid, name]
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440002
+        name:
+          type: [string, 'null']
+          example: BUJP Aman
+
+    OwnedTrainingLocation:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: [string, 'null']
+          example: KALIMANTAN TIMUR
+
+    OwnedTrainingResponse:
+      type: object
+      required: [status, message, data]
+      properties:
+        status:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Training created successfully.
+        data:
+          type: object
+          required: [training]
+          properties:
+            training:
+              $ref: '#/components/schemas/OwnedTraining'
+
+    CreateOwnedTrainingRequest:
+      type: object
+      description: Create a BUJP training. Drafts require title; submit action requires the complete training payload. Do not send provider or ownership fields.
+      additionalProperties: false
+      required: [title]
+      properties:
+        title:
+          type: string
+          minLength: 3
+          maxLength: 200
+          example: Pelatihan Dasar Satpam
+        category:
+          type: [string, 'null']
+          example: Keamanan
+        level:
+          type: [string, 'null']
+          example: Dasar
+        is_certificate:
+          type: boolean
+          example: true
+        tags:
+          type: [array, 'null']
+          items:
+            type: string
+          example: [K3, Patroli]
+        description:
+          type: [string, 'null']
+          example: Pelatihan dasar untuk calon petugas keamanan.
+        start_date:
+          type: [string, 'null']
+          format: date
+          example: '2026-10-01'
+        end_date:
+          type: [string, 'null']
+          format: date
+          example: '2026-10-03'
+        total_jp:
+          type: [integer, 'null']
+          minimum: 1
+          example: 24
+        training_mode:
+          type: [string, 'null']
+          enum: [online, offline, hybrid, null]
+          example: online
+        province:
+          type: [string, 'null']
+          example: KALIMANTAN TIMUR
+        city:
+          type: [string, 'null']
+          example: BALIKPAPAN
+        address:
+          type: [string, 'null']
+          example: Platform pembelajaran BUJP Aman
+        syllabus:
+          type: [array, 'null']
+          items:
+            type: string
+          example: [Pengenalan keamanan, Teknik patroli]
+        requirements:
+          type: [array, 'null']
+          items:
+            type: string
+          example: [Memiliki KTP, Sehat jasmani]
+        instructor:
+          type: [string, 'null']
+          example: Budi Santoso
+        quota:
+          type: [integer, 'null']
+          minimum: 1
+          example: 20
+        price:
+          type: [integer, 'null']
+          minimum: 0
+          example: 0
+        poster:
+          oneOf:
+            - type: string
+              description: Public storage key/path for JSON requests.
+              example: training/posters/security-basics.jpg
+            - type: string
+              format: binary
+              description: Image file for multipart/form-data requests.
+            - type: 'null'
+        workflow_action:
+          type: string
+          enum: [save_draft, submit]
+          default: save_draft
+
+    UpdateOwnedTrainingRequest:
+      type: object
+      description: Partial update. Omitted fields remain unchanged, null clears nullable fields, and arrays replace their complete values. Immutable, ownership, status, timestamp, counter, and duration_day fields are not accepted.
+      additionalProperties: false
+      properties:
+        title:
+          type: string
+          minLength: 3
+          maxLength: 200
+        category:
+          type: [string, 'null']
+        level:
+          type: [string, 'null']
+        is_certificate:
+          type: boolean
+        tags:
+          type: [array, 'null']
+          items:
+            type: string
+        description:
+          type: [string, 'null']
+        start_date:
+          type: [string, 'null']
+          format: date
+        end_date:
+          type: [string, 'null']
+          format: date
+        total_jp:
+          type: [integer, 'null']
+          minimum: 1
+        training_mode:
+          type: [string, 'null']
+          enum: [online, offline, hybrid, null]
+        province:
+          type: [string, 'null']
+        city:
+          type: [string, 'null']
+        address:
+          type: [string, 'null']
+        syllabus:
+          type: [array, 'null']
+          items:
+            type: string
+        requirements:
+          type: [array, 'null']
+          items:
+            type: string
+        instructor:
+          type: [string, 'null']
+        quota:
+          type: [integer, 'null']
+          minimum: 1
+        price:
+          type: [integer, 'null']
+          minimum: 0
+        poster:
+          oneOf:
+            - type: string
+              description: Public storage key/path for JSON requests.
+            - type: string
+              format: binary
+            - type: 'null'
+
 
     ApplicantSecurity:
       type: object
@@ -3137,6 +3575,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
+    Conflict:
+      description: The request conflicts with active training participants, such as reducing quota below the active participant count.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationErrorResponse'
   securitySchemes:
     bearerAuth:
       type: http
