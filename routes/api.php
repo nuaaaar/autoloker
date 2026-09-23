@@ -3,22 +3,26 @@
 use App\Http\Controllers\Api\ChangePasswordController;
 use App\Http\Controllers\Api\JobApplicationController;
 use App\Http\Controllers\Api\JobVacancyController;
-use App\Http\Controllers\Api\TrainingController;
-use App\Http\Controllers\Api\TrainingApplicationController;
 use App\Http\Controllers\Api\LoginController;
 use App\Http\Controllers\Api\LogoutController;
 use App\Http\Controllers\Api\MeController;
+use App\Http\Controllers\Api\OwnedJobVacancyController;
+use App\Http\Controllers\Api\OwnedTrainingController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ReferenceDataController;
 use App\Http\Controllers\Api\RefreshTokenController;
 use App\Http\Controllers\Api\RegisterController;
 use App\Http\Controllers\Api\SecurityCertificateController;
 use App\Http\Controllers\Api\SecurityHistoryController;
+use App\Http\Controllers\Api\TrainingApplicationController;
+use App\Http\Controllers\Api\TrainingController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', LoginController::class)->name('api.login');
 Route::post('/refresh-token', RefreshTokenController::class)->name('api.refresh-token');
 Route::middleware('api.token')->group(function () {
+    Route::get('/company/job-vacancies', [OwnedJobVacancyController::class, 'index'])->name('api.company.job-vacancies.index');
+    Route::get('/company/trainings', [OwnedTrainingController::class, 'index'])->name('api.company.trainings.index');
     Route::get('/job-vacancies', [JobVacancyController::class, 'index'])->name('api.job-vacancies.index');
     Route::get('/trainings', [TrainingController::class, 'index'])->name('api.trainings.index');
     Route::post('/trainings/{uuid}/apply', [TrainingController::class, 'store'])->name('api.trainings.apply');

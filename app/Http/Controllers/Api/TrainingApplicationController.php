@@ -22,7 +22,7 @@ class TrainingApplicationController extends Controller
 
         $applications = TrainingApplication::query()
             ->with([
-                'training' => function (Builder $query): void {
+                'training' => function ($query): void {
                     $query
                         ->with([
                             'bujp:id,company_name',
@@ -52,6 +52,7 @@ class TrainingApplicationController extends Controller
                 $training->setAttribute('application_uuid', $application->uuid);
                 $training->setAttribute('application_status', $application->status);
                 $training->setAttribute('applied_at', $application->created_at);
+                $training->setAttribute('application_updated_at', $application->updated_at);
 
                 return $training;
             })

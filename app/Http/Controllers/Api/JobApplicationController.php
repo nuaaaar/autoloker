@@ -46,6 +46,7 @@ class JobApplicationController extends Controller
                 $vacancy->setAttribute('application_uuid', $application->uuid);
                 $vacancy->setAttribute('application_status', $application->status);
                 $vacancy->setAttribute('applied_at', $application->created_at);
+                $vacancy->setAttribute('application_updated_at', $application->updated_at);
 
                 return $vacancy;
             })

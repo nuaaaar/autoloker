@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Autoloker API
   version: 1.0.0
-  description: API documentation for mobile authentication, profile editing, security work history CRUD, security certificate CRUD, job vacancy and training applications, paginated vacancy, published training, and registered training listings, plus hierarchical location references.
+  description: API documentation for mobile authentication, profile editing, security work history CRUD, security certificate CRUD, public job vacancy and training listings, company and BUJP-owned job vacancy and training listings, job vacancy and training applications, paginated vacancy, published training, and registered training listings, plus hierarchical location references.
   license:
     name: Proprietary
 
@@ -151,6 +151,106 @@ paths:
                   $ref: '#/components/examples/JobVacancyListResponse'
         '401':
           $ref: '#/components/responses/Unauthenticated'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /api/company/job-vacancies:
+    get:
+      summary: List the authenticated company's or BUJP's job vacancies
+      description: Returns only job vacancies owned by the authenticated company or BUJP account. Results include every vacancy status, are ordered by newest vacancy ID, and are paginated with five vacancies per page. The optional search parameter matches the position or location fields.
+      operationId: listOwnedJobVacancies
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: search
+          in: query
+          required: false
+          description: Partial search across the vacancy position and location.
+          schema:
+            type: string
+            maxLength: 255
+            example: security
+          example: security
+        - name: status
+          in: query
+          required: false
+          description: Filter by vacancy status. Omit the parameter or send all to include every status.
+          schema:
+            type: string
+            enum: [all, draft, rejected, submitted, published, closed]
+            default: all
+            example: published
+          example: published
+        - name: page
+          in: query
+          required: false
+          description: One-based pagination page number.
+          schema:
+            type: integer
+            minimum: 1
+            example: 1
+          example: 1
+      responses:
+        '200':
+          description: Owned job vacancies
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnedJobVacancyListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /api/company/trainings:
+    get:
+      summary: List the authenticated company's or BUJP's trainings
+      description: Returns only trainings owned by the authenticated company or BUJP account. Results include every training status, are ordered by newest training ID, and are paginated with five trainings per page. The optional search parameter matches the title, provider, category, level, or location.
+      operationId: listOwnedTrainings
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: search
+          in: query
+          required: false
+          description: Partial search across training details and location.
+          schema:
+            type: string
+            maxLength: 255
+            example: security
+          example: security
+        - name: status
+          in: query
+          required: false
+          description: Filter by training status. Omit the parameter or send all to include every status.
+          schema:
+            type: string
+            enum: [all, draft, rejected, submitted, published, closed, running, cancelled]
+            default: all
+            example: published
+          example: published
+        - name: page
+          in: query
+          required: false
+          description: One-based pagination page number.
+          schema:
+            type: integer
+            minimum: 1
+            example: 1
+          example: 1
+      responses:
+        '200':
+          description: Owned trainings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnedTrainingListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/ValidationError'
 
@@ -1451,11 +1551,28 @@ components:
                 $ref: '#/components/schemas/Training'
             pagination:
               $ref: '#/components/schemas/TrainingPagination'
+    OwnedTrainingListResponse:
+      type: object
+      required: [status, data]
+      properties:
+        status:
+          type: boolean
+          example: true
+        data:
+          type: object
+          required: [trainings, pagination]
+          properties:
+            trainings:
+              type: array
+              items:
+                $ref: '#/components/schemas/Training'
+            pagination:
+              $ref: '#/components/schemas/TrainingPagination'
     RegisteredTraining:
       allOf:
         - $ref: '#/components/schemas/Training'
         - type: object
-          required: [application_uuid, application_status, applied_at]
+          required: [application_uuid, application_status, applied_at, application_updated_at]
           properties:
             application_uuid:
               type: [string, 'null']
@@ -1469,6 +1586,11 @@ components:
               type: [string, 'null']
               format: date-time
               example: '2026-09-22T08:30:11.000000Z'
+            application_updated_at:
+              type: [string, 'null']
+              format: date-time
+              description: Timestamp when the application was last updated, including the latest status update.
+              example: '2026-09-23T08:30:11.000000Z'
 
     RegisteredTrainingListResponse:
       type: object
@@ -1807,13 +1929,30 @@ components:
                 $ref: '#/components/schemas/JobVacancy'
             pagination:
               $ref: '#/components/schemas/JobVacancyPagination'
+    OwnedJobVacancyListResponse:
+      type: object
+      required: [status, data]
+      properties:
+        status:
+          type: boolean
+          example: true
+        data:
+          type: object
+          required: [job_vacancies, pagination]
+          properties:
+            job_vacancies:
+              type: array
+              items:
+                $ref: '#/components/schemas/JobVacancy'
+            pagination:
+              $ref: '#/components/schemas/JobVacancyPagination'
 
     AppliedJobVacancy:
       description: Job vacancy returned in the authenticated security user's application history.
       allOf:
         - $ref: '#/components/schemas/JobVacancy'
         - type: object
-          required: [application_uuid, application_status, applied_at]
+          required: [application_uuid, application_status, applied_at, application_updated_at]
           properties:
             application_uuid:
               type: [string, 'null']
@@ -1826,6 +1965,10 @@ components:
               type: [string, 'null']
               format: date-time
               description: Timestamp when the application was created.
+            application_updated_at:
+              type: [string, 'null']
+              format: date-time
+              description: Timestamp when the application was last updated, including the latest status update.
 
     JobApplication:
       type: object
@@ -2864,6 +3007,7 @@ components:
               application_uuid: 7b7f4f69-9f7a-4ae6-a474-f0d4b5c6d7e8
               application_status: approved
               applied_at: '2026-09-22T08:30:11.000000Z'
+              application_updated_at: '2026-09-23T08:30:11.000000Z'
               bujp:
                 id: 3
                 company_name: PT Example Training
