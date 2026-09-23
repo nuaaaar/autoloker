@@ -203,6 +203,113 @@ paths:
           $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/ValidationError'
+    post:
+      summary: Create a job vacancy for the authenticated BUJP
+      description: Creates a job vacancy owned by the authenticated BUJP. It is saved as draft by default. Set `workflow_action` to `submit` to validate and submit the vacancy immediately for review.
+      operationId: createOwnedJobVacancy
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOwnedJobVacancyRequest'
+      responses:
+        '201':
+          description: Job vacancy created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnedJobVacancyResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /api/company/job-vacancies/{uuid}:
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of a job vacancy owned by the authenticated BUJP.
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: Get an owned job vacancy
+      description: Returns a job vacancy only when it belongs to the authenticated BUJP.
+      operationId: getOwnedJobVacancy
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Owned job vacancy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnedJobVacancyResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      summary: Update an owned job vacancy
+      description: Partially updates a job vacancy owned by the authenticated BUJP. Ownership and workflow fields are immutable; submit the vacancy separately using the submit endpoint.
+      operationId: updateOwnedJobVacancy
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOwnedJobVacancyRequest'
+      responses:
+        '200':
+          description: Job vacancy updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnedJobVacancyResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /api/company/job-vacancies/{uuid}/submit:
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of a draft or rejected job vacancy owned by the authenticated BUJP.
+        schema:
+          type: string
+          format: uuid
+    post:
+      summary: Submit an owned job vacancy for review
+      description: Submits a draft or rejected job vacancy owned by the authenticated BUJP for review. The complete vacancy payload is validated before the status changes to `submitted`.
+      operationId: submitOwnedJobVacancy
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Job vacancy submitted for review successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnedJobVacancyResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
 
   /api/company/job-vacancies/{uuid}/applicants:
     parameters:
@@ -2760,6 +2867,203 @@ components:
           oneOf:
             - $ref: '#/components/schemas/JobVacancyOrganization'
             - type: 'null'
+
+    OwnedJobVacancyResponse:
+      type: object
+      required: [status, message, data]
+      properties:
+        status:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Job vacancy updated successfully.
+        data:
+          type: object
+          required: [job_vacancy]
+          properties:
+            job_vacancy:
+              $ref: '#/components/schemas/JobVacancy'
+
+    CreateOwnedJobVacancyRequest:
+      type: object
+      required: [position]
+      additionalProperties: false
+      description: Creates a BUJP-owned vacancy as a draft by default. Set workflow_action to submit to validate and submit it immediately. Ownership, status, and timestamps are server-managed.
+      properties:
+        position:
+          type: string
+          minLength: 3
+          maxLength: 150
+        description_work:
+          type: [string, 'null']
+        province:
+          type: [string, 'null']
+          maxLength: 255
+        city:
+          type: [string, 'null']
+          maxLength: 255
+        address:
+          type: [string, 'null']
+        working_type:
+          type: string
+          enum: [permanent, contract, intenrship, freelance]
+        working_system:
+          type: string
+          enum: [shift, non-shift]
+        responsibilities:
+          type: [array, 'null']
+          items:
+            type: string
+            maxLength: 255
+        min_age:
+          type: [integer, 'null']
+          minimum: 18
+          maximum: 100
+        max_age:
+          type: [integer, 'null']
+          minimum: 18
+          maximum: 100
+        min_height:
+          type: [number, 'null']
+          minimum: 0
+        max_height:
+          type: [number, 'null']
+          minimum: 0
+        min_weight:
+          type: [number, 'null']
+          minimum: 0
+        max_weight:
+          type: [number, 'null']
+          minimum: 0
+        last_education:
+          type: [string, 'null']
+        min_experience:
+          type: [integer, 'null']
+          minimum: 0
+        certificate:
+          type: [array, 'null']
+          items:
+            type: string
+            maxLength: 255
+        competency_scheme:
+          type: [array, 'null']
+          items:
+            type: string
+            maxLength: 255
+        facility:
+          type: [array, 'null']
+          items:
+            type: string
+            maxLength: 255
+        min_price:
+          type: [number, 'null']
+          minimum: 0
+        max_price:
+          type: [number, 'null']
+          minimum: 0
+        is_show_fee:
+          type: boolean
+        is_urgent:
+          type: boolean
+        quota:
+          type: [integer, 'null']
+          minimum: 1
+        end_date:
+          type: [string, 'null']
+          format: date
+        workflow_action:
+          type: string
+          enum: [save_draft, submit]
+          default: save_draft
+
+    UpdateOwnedJobVacancyRequest:
+      type: object
+      additionalProperties: false
+      description: All fields are optional. Ownership, workflow_action, status, and timestamps cannot be changed through this endpoint.
+      properties:
+        position:
+          type: string
+          minLength: 3
+          maxLength: 150
+        description_work:
+          type: [string, 'null']
+        province:
+          type: [string, 'null']
+          maxLength: 255
+        city:
+          type: [string, 'null']
+          maxLength: 255
+        address:
+          type: [string, 'null']
+        working_type:
+          type: string
+          enum: [permanent, contract, intenrship, freelance]
+        working_system:
+          type: string
+          enum: [shift, non-shift]
+        responsibilities:
+          type: [array, 'null']
+          items:
+            type: string
+            maxLength: 255
+        min_age:
+          type: [integer, 'null']
+          minimum: 18
+          maximum: 100
+        max_age:
+          type: [integer, 'null']
+          minimum: 18
+          maximum: 100
+        min_height:
+          type: [number, 'null']
+          minimum: 0
+        max_height:
+          type: [number, 'null']
+          minimum: 0
+        min_weight:
+          type: [number, 'null']
+          minimum: 0
+        max_weight:
+          type: [number, 'null']
+          minimum: 0
+        last_education:
+          type: [string, 'null']
+        min_experience:
+          type: [integer, 'null']
+          minimum: 0
+        certificate:
+          type: [array, 'null']
+          items:
+            type: string
+            maxLength: 255
+        competency_scheme:
+          type: [array, 'null']
+          items:
+            type: string
+            maxLength: 255
+        facility:
+          type: [array, 'null']
+          items:
+            type: string
+            maxLength: 255
+        min_price:
+          type: [number, 'null']
+          minimum: 0
+        max_price:
+          type: [number, 'null']
+          minimum: 0
+        is_show_fee:
+          type: boolean
+        is_urgent:
+          type: boolean
+        quota:
+          type: [integer, 'null']
+          minimum: 1
+        end_date:
+          type: [string, 'null']
+          format: date
+
 
     JobVacancyOrganization:
       type: object
