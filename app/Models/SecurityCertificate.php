@@ -12,6 +12,30 @@ class SecurityCertificate extends Model
 
     protected $guarded = ['id'];
 
+    public function certificates()
+    {
+        return $this->hasMany(
+            SecurityCertificate::class,
+            'security_id'
+        );
+    }
+
+    public function badgeCertificate()
+    {
+        return $this->hasMany(
+            SecurityCertificate::class,
+            'security_id'
+        )->where('is_badge', 1);
+    }
+
+    public function histories()
+    {
+        return $this->hasMany(
+            SecurityHistory::class,
+            'security_id'
+        );
+    }
+
     public static function boot() {
         parent::boot();
     

@@ -436,6 +436,18 @@
                                                     </span>
                                                     <span class="menu-title">FAQ</span>
                                                 </a>
+                                                <a class="menu-link {{ Route::is('dashboard-admin.master.notification.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.master.notification.index') }}">
+                                                    <span class="menu-bullet">
+                                                        <span class="bullet bullet-dot"></span>
+                                                    </span>
+                                                    <span class="menu-title">Notifikasi</span>
+                                                </a>
+                                                <a class="menu-link {{ Route::is('dashboard-admin.master.bank.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.master.bank.index') }}">
+                                                    <span class="menu-bullet">
+                                                        <span class="bullet bullet-dot"></span>
+                                                    </span>
+                                                    <span class="menu-title">Bank</span>
+                                                </a>
                                                 <!--end:Menu link-->
                                             </div>
                                             <!--end:Menu item-->
@@ -482,6 +494,12 @@
                                                         <span class="bullet bullet-dot"></span>
                                                     </span>
                                                     <span class="menu-title">Perusahaan Klien</span>
+                                                </a>
+                                                <a class="menu-link {{ Route::is('dashboard-admin.management-user.partner.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.management-user.partner.index') }}">
+                                                    <span class="menu-bullet">
+                                                        <span class="bullet bullet-dot"></span>
+                                                    </span>
+                                                    <span class="menu-title">Mitra</span>
                                                 </a>
                                                 <!--end:Menu link-->
                                             </div>
@@ -670,6 +688,34 @@
                                                     <span class="menu-title">Ditutup</span>
                                                 </a>
                                                 <!--end:Menu link-->
+                                            </div>
+                                            <!--end:Menu item-->
+                                        </div>
+                                        <!--end:Menu sub-->
+                                    </div>
+
+                                    <div data-kt-menu-trigger="click" class="menu-item {{ Route::is('dashboard-admin.payment.*') ? 'here show' : '' }} menu-accordion">
+                                        <!--begin:Menu link-->
+                                        <span class="menu-link">
+                                            <span class="menu-icon">
+                                                <i class="ki-duotone ki-users fs-2">
+                                                </i>
+                                            </span>
+                                            <span class="menu-title">Payment</span>
+                                            <span class="menu-arrow"></span>
+                                        </span>
+                                        <!--end:Menu link-->
+                                        <!--begin:Menu sub-->
+                                        <div class="menu-sub menu-sub-accordion">
+                                            <!--begin:Menu item-->
+                                            <div class="menu-item">
+                                                <!--begin:Menu link-->
+                                                <a class="menu-link {{ Route::is('dashboard-admin.payment.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.payment.index') }}">
+                                                    <span class="menu-bullet">
+                                                        <span class="bullet bullet-dot"></span>
+                                                    </span>
+                                                    <span class="menu-title">Pembayaran Manual</span>
+                                                </a>
                                             </div>
                                             <!--end:Menu item-->
                                         </div>
