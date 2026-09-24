@@ -13,7 +13,6 @@ use App\Services\Api\JobVacancyService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class OwnedJobVacancyController extends OwnedOrganizationController
 {
@@ -70,8 +69,7 @@ class OwnedJobVacancyController extends OwnedOrganizationController
         JobVacancyService $service,
     ): JsonResponse {
         $owner = $this->owner($request);
-        $this->ensureBujp($request);
-        $vacancy = $service->create($owner['id'], $request->validated());
+        $vacancy = $service->create($owner, $request->validated());
 
         return $this->mutationResponse(
             $vacancy,
@@ -83,7 +81,7 @@ class OwnedJobVacancyController extends OwnedOrganizationController
 
     public function show(Request $request, string $uuid): JsonResponse
     {
-        $vacancy = $this->ownedBujpVacancy($request, $uuid);
+        $vacancy = $this->ownedVacancy($request, $uuid);
 
         return response()->json([
             'status' => true,
@@ -99,7 +97,7 @@ class OwnedJobVacancyController extends OwnedOrganizationController
         JobVacancyService $service,
         string $uuid,
     ): JsonResponse {
-        $vacancy = $this->ownedBujpVacancy($request, $uuid);
+        $vacancy = $this->ownedVacancy($request, $uuid);
         $vacancy = $service->update($vacancy, $request->validated());
 
         return $this->mutationResponse(
@@ -113,7 +111,7 @@ class OwnedJobVacancyController extends OwnedOrganizationController
         JobVacancyService $service,
         string $uuid,
     ): JsonResponse {
-        $vacancy = $this->ownedBujpVacancy($request, $uuid);
+        $vacancy = $this->ownedVacancy($request, $uuid);
         $vacancy = $service->submit($vacancy);
 
         return $this->mutationResponse(
@@ -122,23 +120,16 @@ class OwnedJobVacancyController extends OwnedOrganizationController
         );
     }
 
-    private function ownedBujpVacancy(Request $request, string $uuid): JobVacancy
+    private function ownedVacancy(Request $request, string $uuid): JobVacancy
     {
         $owner = $this->owner($request);
-        $this->ensureBujp($request);
 
         return JobVacancy::query()
             ->where('uuid', $uuid)
-            ->where('b_u_j_p_id', $owner['id'])
+            ->where($owner['column'], $owner['id'])
             ->firstOrFail();
     }
 
-    private function ensureBujp(Request $request): void
-    {
-        if ($request->user()?->role !== 'bujp') {
-            throw new NotFoundHttpException('BUJP profile not found.');
-        }
-    }
 
     private function mutationResponse(
         JobVacancy $vacancy,
@@ -166,8 +157,10 @@ class OwnedJobVacancyController extends OwnedOrganizationController
 
     private function resourceData(JobVacancy $vacancy): array
     {
-        $vacancy->load('bujp:id,uuid,company_name')
-            ->loadCount('applications as total_applications');
+        $vacancy->load([
+            'bujp:id,uuid,company_name',
+            'company:id,uuid,company_name',
+        ])->loadCount('applications as total_applications');
 
         return (new OwnedJobVacancyResource($vacancy))->resolve();
     }

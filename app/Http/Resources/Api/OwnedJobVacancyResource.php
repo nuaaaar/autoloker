@@ -12,6 +12,9 @@ class OwnedJobVacancyResource extends JsonResource
         $bujp = $this->resource->relationLoaded('bujp')
             ? $this->resource->getRelation('bujp')
             : $this->resource->bujp;
+        $company = $this->resource->relationLoaded('company')
+            ? $this->resource->getRelation('company')
+            : $this->resource->company;
 
         $data = [
             'uuid' => $this->uuid,
@@ -20,6 +23,10 @@ class OwnedJobVacancyResource extends JsonResource
             'bujp' => $bujp ? [
                 'uuid' => $bujp->uuid,
                 'name' => $bujp->company_name,
+            ] : null,
+            'company' => $company ? [
+                'uuid' => $company->uuid,
+                'name' => $company->company_name,
             ] : null,
             'province' => $this->province,
             'city' => $this->city,

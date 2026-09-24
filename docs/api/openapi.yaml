@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Autoloker API
   version: 1.0.0
-  description: API documentation for mobile authentication, profile editing, security work history CRUD, security certificate CRUD, public job vacancy and training listings, BUJP-owned job vacancy and training management, company-owned training listings, job vacancy and training applications, paginated vacancy, published training, registered training listings, owned application status follow-up, active subscription plans, and hierarchical location references.
+  description: API documentation for mobile authentication, profile editing, security work history CRUD, security certificate CRUD, public job vacancy and training listings, company- and BUJP-owned job vacancy and training management, job vacancy and training applications, paginated vacancy, published training, registered training listings, owned application status follow-up, active subscription plans, and hierarchical location references.
   license:
     name: Proprietary
 
@@ -204,11 +204,11 @@ paths:
         '422':
           $ref: '#/components/responses/ValidationError'
     post:
-      summary: Create a job vacancy for the authenticated BUJP
+      summary: Create a job vacancy for the authenticated company or BUJP
       description: >-
-        Creates a BUJP-owned job vacancy as a draft by default. For save_draft, only position is
-        required. Set workflow_action to submit to validate and submit the vacancy directly for
-        review; submit requires every field listed in the complete request example. Ownership,
+        Creates a company- or BUJP-owned job vacancy as a draft by default. For save_draft, only
+        position is required. Set workflow_action to submit to validate and submit the vacancy directly
+        for review; submit requires every field listed in the complete request example. Ownership,
         status, timestamps, provider, and application counters are server-managed. The request uses
         responsibilities and quota; these map to responsibility and kuota in storage and response
         data. The response-only fields start_date, fee_type, gender, district, and village are not
@@ -326,13 +326,13 @@ paths:
       - name: uuid
         in: path
         required: true
-        description: UUID of a job vacancy owned by the authenticated BUJP.
+        description: UUID of a job vacancy owned by the authenticated company or BUJP.
         schema:
           type: string
           format: uuid
     get:
       summary: Get an owned job vacancy
-      description: Returns a job vacancy only when it belongs to the authenticated BUJP.
+      description: Returns a job vacancy only when it belongs to the authenticated company or BUJP.
       operationId: getOwnedJobVacancy
       security:
         - bearerAuth: []
@@ -350,13 +350,13 @@ paths:
     patch:
       summary: Update an owned job vacancy
       description: >-
-        Partially updates a job vacancy owned by the authenticated BUJP. Omitted fields remain
-        unchanged and null clears nullable fields. responsibilities, certificate, competency_scheme,
-        and facility replace their complete existing arrays. For every minimum/maximum pair, the
-        minimum must be less than or equal to the maximum. Province and city must identify a valid
-        location pair when supplied. workflow_action, start_date, fee_type, gender, ownership,
-        status, timestamps, and application counters are not accepted; submit the vacancy
-        separately using the submit endpoint.
+        Partially updates a job vacancy owned by the authenticated company or BUJP. Omitted fields
+        remain unchanged and null clears nullable fields. responsibilities, certificate,
+        competency_scheme, and facility replace their complete existing arrays. For every
+        minimum/maximum pair, the minimum must be less than or equal to the maximum. Province and
+        city must identify a valid location pair when supplied. workflow_action, start_date, fee_type,
+        gender, ownership, status, timestamps, and application counters are not accepted; submit the
+        vacancy separately using the submit endpoint.
       operationId: updateOwnedJobVacancy
       security:
         - bearerAuth: []
@@ -427,13 +427,13 @@ paths:
       - name: uuid
         in: path
         required: true
-        description: UUID of a draft or rejected job vacancy owned by the authenticated BUJP.
+        description: UUID of a draft or rejected job vacancy owned by the authenticated company or BUJP.
         schema:
           type: string
           format: uuid
     post:
       summary: Submit an owned job vacancy for review
-      description: Submits a draft or rejected job vacancy owned by the authenticated BUJP for review. The complete vacancy payload is validated before the status changes to `submitted`.
+      description: Submits a draft or rejected job vacancy owned by the authenticated company or BUJP for review. The complete vacancy payload is validated before the status changes to `submitted`.
       operationId: submitOwnedJobVacancy
       security:
         - bearerAuth: []
@@ -3508,7 +3508,7 @@ components:
       required: [position]
       additionalProperties: false
       description: >-
-        Accepted request fields for a BUJP-owned vacancy. Drafts require position; using
+        Accepted request fields for a company- or BUJP-owned vacancy. Drafts require position; using
         workflow_action submit additionally requires description_work, province, city, address,
         working_type, working_system, at least one responsibility, all age/height/weight ranges,
         last_education, min_experience, at least one certificate, competency scheme, facility,

@@ -11,7 +11,7 @@ use Laravolt\Indonesia\Models\Province;
 
 class JobVacancyService
 {
-    public function create(int $ownerId, array $data): JobVacancy
+    public function create(array $owner, array $data): JobVacancy
     {
         $action = $data['workflow_action'] ?? 'save_draft';
         unset($data['workflow_action']);
@@ -19,8 +19,9 @@ class JobVacancyService
         $data = $this->validatePayload($data, $action === 'submit', true);
 
         $attributes = $this->attributes($data);
-        $attributes['b_u_j_p_id'] = $ownerId;
+        $attributes['b_u_j_p_id'] = null;
         $attributes['company_id'] = null;
+        $attributes[$owner['column']] = $owner['id'];
         $attributes['status'] = $action === 'submit' ? 'submitted' : 'draft';
         $attributes['reason_rejected'] = null;
 
