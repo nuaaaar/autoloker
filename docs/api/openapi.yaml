@@ -692,6 +692,16 @@ paths:
           $ref: '#/components/responses/Conflict'
         '422':
           $ref: '#/components/responses/ValidationError'
+
+  /api/company/trainings/{uuid}/submit:
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of a training owned by the authenticated BUJP.
+        schema:
+          type: string
+          format: uuid
     post:
       summary: Submit an owned training for review
       description: Submits a draft or rejected training after complete validation. Validation failure leaves the draft unchanged.
@@ -1699,6 +1709,87 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
+  /api/user-subscriptions/active:
+    get:
+      summary: Get the authenticated user's active subscription
+      description: >-
+        Returns the single active user subscription for the authenticated user. An expired, cancelled,
+        or missing subscription returns `user_subscription: null`; the response never returns a subscription list.
+      operationId: getActiveUserSubscription
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Active user subscription, or null when no subscription is active
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActiveUserSubscriptionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+  /api/user-order-manuals:
+    get:
+      summary: List the authenticated user's manual subscription orders
+      description: Returns the authenticated user's manual subscription order history, newest first, with five orders per page.
+      operationId: listUserOrderManuals
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          required: false
+          description: One-based pagination page number.
+          schema:
+            type: integer
+            minimum: 1
+            example: 1
+          example: 1
+      responses:
+        '200':
+          description: Manual subscription order history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOrderManualListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    post:
+      summary: Create a manual subscription order
+      description: Creates a pending manual subscription order for the authenticated user's role. Sending the same plan while a pending payment order already exists returns that existing order instead of creating a duplicate.
+      operationId: createUserOrderManual
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserOrderManualStoreRequest'
+            example:
+              subscription_uuid: 8b1f4f8a-5d6f-4a4d-a43d-5f3c9f8c2a11
+      responses:
+        '201':
+          description: Manual subscription order created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOrderManualResponse'
+        '200':
+          description: Existing pending order returned for the selected plan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOrderManualResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
 
   /api/refresh-token:
     post:
@@ -4187,6 +4278,233 @@ components:
           properties:
             user:
               $ref: '#/components/schemas/AuthenticatedUser'
+    ActiveUserSubscriptionResponse:
+      type: object
+      required: [status, data]
+      properties:
+        status:
+          type: boolean
+          example: true
+        data:
+          type: object
+          required: [user_subscription]
+          properties:
+            user_subscription:
+              anyOf:
+                - $ref: '#/components/schemas/UserSubscription'
+                - type: 'null'
+
+    UserSubscription:
+      type: object
+      required:
+        - id
+        - uuid
+        - user_id
+        - master_subscription_id
+        - user_order_manual_id
+        - role
+        - subscription_name
+        - price
+        - started_at
+        - expired_at
+        - status
+        - limits
+        - notes
+        - cancelled_at
+        - remaining_days
+        - is_active
+        - created_at
+        - updated_at
+        - subscription
+      properties:
+        id:
+          type: integer
+          example: 1
+        uuid:
+          type: string
+          format: uuid
+        user_id:
+          type: integer
+          example: 12
+        master_subscription_id:
+          type: integer
+          example: 2
+        user_order_manual_id:
+          type: [integer, 'null']
+          example: 8
+        role:
+          type: string
+          enum: [security, bujp, client]
+        subscription_name:
+          type: string
+          example: Profesional
+        price:
+          type: string
+          description: Subscription price as a decimal string with two fractional digits.
+          example: '49000.00'
+        started_at:
+          type: [string, 'null']
+          format: date-time
+        expired_at:
+          type: [string, 'null']
+          format: date-time
+        status:
+          type: string
+          example: active
+        limits:
+          type: [object, 'null']
+          additionalProperties: true
+        notes:
+          type: [string, 'null']
+        cancelled_at:
+          type: [string, 'null']
+          format: date-time
+        remaining_days:
+          type: integer
+          minimum: 0
+          example: 29
+        is_active:
+          type: boolean
+          example: true
+        created_at:
+          type: [string, 'null']
+          format: date-time
+        updated_at:
+          type: [string, 'null']
+          format: date-time
+        subscription:
+          anyOf:
+            - $ref: '#/components/schemas/MasterSubscription'
+            - type: 'null'
+    UserOrderManualStoreRequest:
+      type: object
+      additionalProperties: false
+      required: [subscription_uuid]
+      properties:
+        subscription_uuid:
+          type: string
+          format: uuid
+          description: UUID of an active subscription plan for the authenticated user's role.
+
+    UserOrderManualListResponse:
+      type: object
+      required: [status, data]
+      properties:
+        status:
+          type: boolean
+          example: true
+        data:
+          type: object
+          required: [user_order_manuals, pagination]
+          properties:
+            user_order_manuals:
+              type: array
+              items:
+                $ref: '#/components/schemas/UserOrderManual'
+            pagination:
+              $ref: '#/components/schemas/TrainingPagination'
+
+    UserOrderManualResponse:
+      type: object
+      required: [status, message, data]
+      properties:
+        status:
+          type: boolean
+          example: true
+        message:
+          type: string
+        data:
+          type: object
+          required: [user_order_manual]
+          properties:
+            user_order_manual:
+              $ref: '#/components/schemas/UserOrderManual'
+
+    UserOrderManual:
+      type: object
+      required:
+        - id
+        - uuid
+        - user_id
+        - master_subscription_id
+        - role
+        - order_number
+        - price
+        - payment_method
+        - payment_account
+        - payment_date
+        - file
+        - status
+        - notes
+        - rejected_reason
+        - verified_by
+        - verified_at
+        - expired_at
+        - created_at
+        - updated_at
+        - subscription
+      properties:
+        id:
+          type: integer
+          example: 1
+        uuid:
+          type: string
+          format: uuid
+        user_id:
+          type: integer
+          example: 12
+        master_subscription_id:
+          type: integer
+          example: 2
+        role:
+          type: string
+          enum: [security, bujp, client]
+        order_number:
+          type: string
+          example: ORD-20260924-00001
+        price:
+          type: string
+          description: Order price as a decimal string with two fractional digits.
+          example: '49000.00'
+        payment_method:
+          type: [string, 'null']
+          example: transfer
+        payment_account:
+          type: [string, 'null']
+          example: 'BCA 1234567890 a.n. PT Example'
+        payment_date:
+          type: [string, 'null']
+          format: date-time
+        file:
+          type: [string, 'null']
+          description: Stored payment proof path, when uploaded.
+        status:
+          type: string
+          example: pending_payment
+        notes:
+          type: [string, 'null']
+        rejected_reason:
+          type: [string, 'null']
+        verified_by:
+          type: [string, 'null']
+        verified_at:
+          type: [string, 'null']
+          format: date-time
+        expired_at:
+          type: [string, 'null']
+          format: date-time
+        created_at:
+          type: [string, 'null']
+          format: date-time
+        updated_at:
+          type: [string, 'null']
+          format: date-time
+        subscription:
+          anyOf:
+            - $ref: '#/components/schemas/MasterSubscription'
+            - type: 'null'
+
+
 
     AuthenticatedUser:
       type: object

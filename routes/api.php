@@ -18,6 +18,8 @@ use App\Http\Controllers\Api\SecurityCertificateController;
 use App\Http\Controllers\Api\SecurityHistoryController;
 use App\Http\Controllers\Api\TrainingApplicationController;
 use App\Http\Controllers\Api\TrainingController;
+use App\Http\Controllers\Api\UserSubscriptionController;
+use App\Http\Controllers\Api\UserOrderManualController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', LoginController::class)->name('api.login');
@@ -34,6 +36,7 @@ Route::middleware('api.token')->group(function () {
     Route::post('/company/trainings', [OwnedTrainingController::class, 'store'])->name('api.company.trainings.store');
     Route::get('/company/trainings/{uuid}', [OwnedTrainingController::class, 'show'])->name('api.company.trainings.show');
     Route::patch('/company/trainings/{uuid}', [OwnedTrainingController::class, 'update'])->name('api.company.trainings.update');
+    Route::post('/company/trainings/{uuid}/submit', [OwnedTrainingController::class, 'submit'])->name('api.company.trainings.submit');
     Route::get('/company/trainings/{uuid}/participants', [OwnedTrainingParticipantController::class, 'index'])->name('api.company.trainings.participants.index');
     Route::patch('/company/trainings/{uuid}/participants/{applicationUuid}/status', [OwnedTrainingParticipantController::class, 'updateStatus'])->name('api.company.trainings.participants.status');
     Route::get('/job-vacancies', [JobVacancyController::class, 'index'])->name('api.job-vacancies.index');
@@ -48,6 +51,9 @@ Route::middleware('api.token')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('api.profile.update');
     Route::patch('/password', ChangePasswordController::class)->name('api.password.update');
     Route::get('/me', MeController::class)->name('api.me');
+    Route::get('/user-order-manuals', [UserOrderManualController::class, 'index'])->name('api.user-order-manuals.index');
+    Route::post('/user-order-manuals', [UserOrderManualController::class, 'store'])->name('api.user-order-manuals.store');
+    Route::get('/user-subscriptions/active', [UserSubscriptionController::class, 'active'])->name('api.user-subscriptions.active');
     Route::post('/logout', LogoutController::class)->name('api.logout');
     Route::apiResource('security-histories', SecurityHistoryController::class)
         ->parameters(['security-histories' => 'uuid'])
