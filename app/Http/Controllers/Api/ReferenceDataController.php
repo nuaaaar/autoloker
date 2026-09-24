@@ -126,8 +126,20 @@ class ReferenceDataController extends Controller
 
     private function decodeFeatures(mixed $features): ?object
     {
-        if ($features === null || ! is_string($features) || trim($features) === '') {
-            return $features === null ? null : (object) [];
+        if ($features === null) {
+            return null;
+        }
+
+        if (is_object($features)) {
+            return $features;
+        }
+
+        if (is_array($features)) {
+            return (object) $features;
+        }
+
+        if (! is_string($features) || trim($features) === '') {
+            return (object) [];
         }
 
         $decoded = json_decode($features);

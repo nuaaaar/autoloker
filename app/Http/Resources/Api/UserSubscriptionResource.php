@@ -21,7 +21,7 @@ class UserSubscriptionResource extends JsonResource
             'started_at' => $this->started_at,
             'expired_at' => $this->expired_at,
             'status' => $this->status,
-            'limits' => $this->limits,
+            'limits' => $this->featureObject($this->limits),
             'notes' => $this->notes,
             'cancelled_at' => $this->cancelled_at,
             'remaining_days' => (int) $this->remainingDays(),
@@ -45,11 +45,34 @@ class UserSubscriptionResource extends JsonResource
                     'duration' => $subscription->duration,
                     'duration_type' => $subscription->duration_type,
                     'description' => $subscription->description,
-                    'features' => $subscription->features,
+                    'features' => $this->featureObject($subscription->features),
                     'is_active' => (bool) $subscription->is_active,
                     'sort_order' => $subscription->sort_order,
                 ];
             }),
         ];
+    }
+
+    private function featureObject(mixed $value): ?object
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        if (is_object($value)) {
+            return $value;
+        }
+
+        if (is_array($value)) {
+            return (object) $value;
+        }
+
+        if (! is_string($value) || trim($value) === '') {
+            return (object) [];
+        }
+
+        $decoded = json_decode($value);
+
+        return is_object($decoded) ? $decoded : (object) [];
     }
 }

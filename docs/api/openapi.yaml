@@ -4359,6 +4359,7 @@ components:
           example: active
         limits:
           type: [object, 'null']
+          description: Feature limits keyed by feature name; returned as a JSON object.
           additionalProperties: true
         notes:
           type: [string, 'null']
