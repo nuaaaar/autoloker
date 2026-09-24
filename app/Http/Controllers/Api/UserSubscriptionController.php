@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\UserSubscriptionResource;
+use App\Models\JobApplication;
+use App\Models\TrainingApplication;
 use App\Models\UserSubscription;
 use App\Models\MasterSubscription;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -38,6 +41,7 @@ class UserSubscriptionController extends Controller
         $subscription ??= $role === null
             ? null
             : $this->defaultSubscription($request, $role);
+        $subscription?->setAttribute('limit_usage', $this->limitUsage($request));
 
         return response()->json([
             'status' => true,
@@ -47,6 +51,33 @@ class UserSubscriptionController extends Controller
                     : null,
             ],
         ]);
+    }
+
+    private function limitUsage(Request $request): array
+    {
+        $security = $request->user()?->user_security?->security;
+
+        if (! $security) {
+            return [
+                'total_active_job_applications' => 0,
+                'total_active_training_applications' => 0,
+            ];
+        }
+
+        return [
+            'total_active_job_applications' => JobApplication::query()
+                ->where('security_id', $security->getKey())
+                ->whereHas('job_vacancy', function (Builder $query): void {
+                    $query->where('status', 'published');
+                })
+                ->count(),
+            'total_active_training_applications' => TrainingApplication::query()
+                ->where('security_id', $security->getKey())
+                ->whereHas('training', function (Builder $query): void {
+                    $query->where('status', 'published');
+                })
+                ->count(),
+        ];
     }
 
     private function defaultSubscription(Request $request, string $role): ?UserSubscription

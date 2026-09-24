@@ -26,6 +26,10 @@ class UserSubscriptionResource extends JsonResource
             'cancelled_at' => $this->cancelled_at,
             'remaining_days' => (int) $this->remainingDays(),
             'is_active' => $this->isActive(),
+            'limit_usage' => $this->limit_usage ?? [
+                'total_active_job_applications' => 0,
+                'total_active_training_applications' => 0,
+            ],
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'subscription' => $this->whenLoaded('subscription', function (): ?array {

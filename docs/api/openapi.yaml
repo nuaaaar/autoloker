@@ -1720,8 +1720,9 @@ paths:
       description: >-
         Returns the authenticated user's active subscription for the user's mapped role. When no
         active subscription exists, returns the active price-zero default plan for that same role.
-        The response returns `user_subscription: null` only when the role is unsupported or no matching
-        active default plan is configured.
+        The response includes limit_usage counts for the user's applications on published jobs and
+        trainings. It returns `user_subscription: null` only when the role is unsupported or no
+        matching active default plan is configured.
       operationId: getActiveUserSubscription
       security:
         - bearerAuth: []
@@ -4319,6 +4320,7 @@ components:
         - cancelled_at
         - remaining_days
         - is_active
+        - limit_usage
         - created_at
         - updated_at
         - subscription
@@ -4373,6 +4375,18 @@ components:
         is_active:
           type: boolean
           example: true
+        limit_usage:
+          type: object
+          required: [total_active_job_applications, total_active_training_applications]
+          properties:
+            total_active_job_applications:
+              type: integer
+              minimum: 0
+              description: Applications by the user for published job vacancies.
+            total_active_training_applications:
+              type: integer
+              minimum: 0
+              description: Applications by the user for published trainings.
         created_at:
           type: [string, 'null']
           format: date-time
