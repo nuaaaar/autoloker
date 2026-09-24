@@ -1457,8 +1457,12 @@ paths:
           $ref: '#/components/responses/Unauthenticated'
   /api/masters/subscriptions:
     get:
-      summary: List active subscription plans
-      description: Returns active master_subscriptions ordered by sort_order and id. The features field is returned as a decoded JSON object containing feature limits.
+      summary: List active subscription plans for the authenticated user's role
+      description: >-
+        Returns active master_subscriptions matching the authenticated user's role. User roles map to
+        subscription roles as follows: satpam to security, bujp to bujp, and company or perusahaan to
+        client. Results are ordered by sort_order and id. The features field is returned as a decoded
+        JSON object containing feature limits.
       operationId: listMasterSubscriptions
       security:
         - bearerAuth: []
@@ -1712,16 +1716,18 @@ paths:
 
   /api/user-subscriptions/active:
     get:
-      summary: Get the authenticated user's active subscription
+      summary: Get the authenticated user's active subscription or default plan
       description: >-
-        Returns the single active user subscription for the authenticated user. An expired, cancelled,
-        or missing subscription returns `user_subscription: null`; the response never returns a subscription list.
+        Returns the authenticated user's active subscription for the user's mapped role. When no
+        active subscription exists, returns the active price-zero default plan for that same role.
+        The response returns `user_subscription: null` only when the role is unsupported or no matching
+        active default plan is configured.
       operationId: getActiveUserSubscription
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: Active user subscription, or null when no subscription is active
+          description: Active user subscription or same-role default free plan
           content:
             application/json:
               schema:
@@ -4318,8 +4324,8 @@ components:
         - subscription
       properties:
         id:
-          type: integer
-          example: 1
+          type: [integer, 'null']
+          description: Persisted user subscription ID; null for the non-persisted default plan fallback.
         uuid:
           type: string
           format: uuid

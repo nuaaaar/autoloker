@@ -20,6 +20,13 @@ use Laravolt\Indonesia\Models\Village;
 
 class ReferenceDataController extends Controller
 {
+    private const SUBSCRIPTION_ROLE_MAPPING = [
+        'satpam' => 'security',
+        'bujp' => 'bujp',
+        'company' => 'client',
+        'perusahaan' => 'client',
+    ];
+
     public function positions(): JsonResponse
     {
         return $this->master(MasterPosition::query());
@@ -66,12 +73,19 @@ class ReferenceDataController extends Controller
         return $this->master(MasterIndustry::query());
     }
 
-    public function subscriptions(): JsonResponse
+    public function subscriptions(Request $request): JsonResponse
     {
-        $subscriptions = MasterSubscription::query()
-            ->where('is_active', true)
-            ->orderBy('sort_order')
-            ->orderBy('id')
+        $role = self::SUBSCRIPTION_ROLE_MAPPING[
+            strtolower(trim((string) $request->user()?->role))
+        ] ?? null;
+
+        $subscriptions = $role === null
+            ? collect()
+            : MasterSubscription::query()
+                ->where('role', $role)
+                ->where('is_active', true)
+                ->orderBy('sort_order')
+                ->orderBy('id')
             ->get([
                 'id',
                 'uuid',
