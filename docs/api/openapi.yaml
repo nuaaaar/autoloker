@@ -1738,7 +1738,10 @@ paths:
   /api/user-order-manuals:
     get:
       summary: List the authenticated user's manual subscription orders
-      description: Returns the authenticated user's manual subscription order history, newest first, with five orders per page.
+      description: >-
+        Returns the authenticated user's manual subscription order history, newest first, with five
+        orders per page. Payment, verification, and expiration fields that are not yet set are
+        returned as `null`, not empty strings. Each order includes the selected subscription plan.
       operationId: listUserOrderManuals
       security:
         - bearerAuth: []
@@ -1759,13 +1762,72 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserOrderManualListResponse'
+              examples:
+                verifiedOrderHistory:
+                  summary: Verified manual subscription order history
+                  value:
+                    status: true
+                    data:
+                      user_order_manuals:
+                        - id: 1
+                          uuid: 4c6f5d8a-0c2d-4f4b-a4b6-1f5a0e2c7d91
+                          user_id: 12
+                          master_subscription_id: 2
+                          role: security
+                          order_number: ORD-20260924-00001
+                          price: '49000.00'
+                          payment_method: transfer
+                          payment_account: 'BCA 1234567890 a.n. PT Example'
+                          payment_date: '2026-09-24T03:15:00.000000Z'
+                          file: payment_ORD-20260924-00001_1727147700.jpg
+                          status: approved
+                          notes: Payment verified by the administrator.
+                          rejected_reason: null
+                          verified_by: '7'
+                          verified_at: '2026-09-24T04:00:00.000000Z'
+                          expired_at: '2026-10-24T03:15:00.000000Z'
+                          created_at: '2026-09-24T03:00:00.000000Z'
+                          updated_at: '2026-09-24T04:00:00.000000Z'
+                          subscription:
+                            id: 2
+                            uuid: 8b1f4f8a-5d6f-4a4d-a43d-5f3c9f8c2a11
+                            name: Profesional
+                            slug: profesional
+                            role: security
+                            price: '49000.00'
+                            duration: 1
+                            duration_type: month
+                            description: Untuk satpam aktif yang ingin melamar lebih banyak.
+                            features:
+                              job_vacancy:
+                                enabled: true
+                                limit: 5
+                              training:
+                                enabled: true
+                                limit: 5
+                            is_active: true
+                            sort_order: 1
+                      pagination:
+                        current_page: 1
+                        last_page: 1
+                        per_page: 5
+                        total: 1
+                        from: 1
+                        to: 1
+                        has_more: false
+                        next_page_url: null
+                        previous_page_url: null
         '401':
           $ref: '#/components/responses/Unauthenticated'
         '422':
           $ref: '#/components/responses/ValidationError'
     post:
       summary: Create a manual subscription order
-      description: Creates a pending manual subscription order for the authenticated user's role. Sending the same plan while a pending payment order already exists returns that existing order instead of creating a duplicate.
+      description: >-
+        Creates a pending manual subscription order for the authenticated user's role. Payment and
+        verification fields are `null` until the user submits proof and an administrator reviews
+        the payment. Sending the same plan while a pending payment order already exists returns
+        that existing order instead of creating a duplicate.
       operationId: createUserOrderManual
       security:
         - bearerAuth: []
@@ -1784,6 +1846,52 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserOrderManualResponse'
+              examples:
+                createdPendingOrder:
+                  summary: Newly created order awaiting payment
+                  value:
+                    status: true
+                    message: Manual subscription order created successfully.
+                    data:
+                      user_order_manual:
+                        id: 2
+                        uuid: 9d2e4f6a-6c5b-4a2d-9f3e-7b1c8d0a5e64
+                        user_id: 12
+                        master_subscription_id: 2
+                        role: security
+                        order_number: ORD-20260926031500-AB12C
+                        price: '49000.00'
+                        payment_method: null
+                        payment_account: null
+                        payment_date: null
+                        file: null
+                        status: pending_payment
+                        notes: null
+                        rejected_reason: null
+                        verified_by: null
+                        verified_at: null
+                        expired_at: null
+                        created_at: '2026-09-26T03:15:00.000000Z'
+                        updated_at: '2026-09-26T03:15:00.000000Z'
+                        subscription:
+                          id: 2
+                          uuid: 8b1f4f8a-5d6f-4a4d-a43d-5f3c9f8c2a11
+                          name: Profesional
+                          slug: profesional
+                          role: security
+                          price: '49000.00'
+                          duration: 1
+                          duration_type: month
+                          description: Untuk satpam aktif yang ingin melamar lebih banyak.
+                          features:
+                            job_vacancy:
+                              enabled: true
+                              limit: 5
+                            training:
+                              enabled: true
+                              limit: 5
+                          is_active: true
+                          sort_order: 1
         '200':
           description: Existing pending order returned for the selected plan
           content:
@@ -4437,6 +4545,59 @@ components:
             user_order_manual:
               $ref: '#/components/schemas/UserOrderManual'
 
+    UserOrderManualSubscription:
+      type: object
+      description: Subscription plan snapshot embedded in a manual order.
+      required: [id, uuid, name, slug, role, price, duration, duration_type, description, features, is_active, sort_order]
+      properties:
+        id:
+          type: integer
+          example: 2
+        uuid:
+          type: [string, 'null']
+          format: uuid
+          example: 8b1f4f8a-5d6f-4a4d-a43d-5f3c9f8c2a11
+        name:
+          type: [string, 'null']
+          example: Profesional
+        slug:
+          type: [string, 'null']
+          example: profesional
+        role:
+          type: [string, 'null']
+          enum: [security, bujp, client, null]
+        price:
+          type: string
+          description: Subscription price snapshot as a decimal string with two fractional digits.
+          example: '49000.00'
+        duration:
+          type: integer
+          example: 1
+        duration_type:
+          type: string
+          enum: [day, month, year]
+          example: month
+        description:
+          type: [string, 'null']
+          example: Untuk satpam aktif yang ingin melamar lebih banyak.
+        features:
+          type: [object, 'null']
+          additionalProperties: true
+          example:
+            job_vacancy:
+              enabled: true
+              limit: 5
+            training:
+              enabled: true
+              limit: 5
+        is_active:
+          type: boolean
+          example: true
+        sort_order:
+          type: integer
+          minimum: 0
+          example: 1
+
     UserOrderManual:
       type: object
       required:
@@ -4467,6 +4628,7 @@ components:
         uuid:
           type: string
           format: uuid
+          example: 4c6f5d8a-0c2d-4f4b-a4b6-1f5a0e2c7d91
         user_id:
           type: integer
           example: 12
@@ -4492,33 +4654,43 @@ components:
         payment_date:
           type: [string, 'null']
           format: date-time
+          example: '2026-09-24T03:15:00.000000Z'
         file:
           type: [string, 'null']
-          description: Stored payment proof path, when uploaded.
+          description: Stored payment proof filename, when uploaded.
+          example: payment_ORD-20260924-00001_1727147700.jpg
         status:
           type: string
-          example: pending_payment
+          description: 'Order lifecycle status: pending_payment, verification, approved, or rejected.'
         notes:
           type: [string, 'null']
+          example: Payment is being reviewed by the administrator.
         rejected_reason:
           type: [string, 'null']
+          example: null
         verified_by:
           type: [string, 'null']
+          description: Authenticated administrator user ID that reviewed the order.
+          example: null
         verified_at:
           type: [string, 'null']
           format: date-time
+          example: null
         expired_at:
           type: [string, 'null']
           format: date-time
+          example: null
         created_at:
           type: [string, 'null']
           format: date-time
+          example: '2026-09-24T03:00:00.000000Z'
         updated_at:
           type: [string, 'null']
           format: date-time
+          example: '2026-09-24T03:00:00.000000Z'
         subscription:
           anyOf:
-            - $ref: '#/components/schemas/MasterSubscription'
+            - $ref: '#/components/schemas/UserOrderManualSubscription'
             - type: 'null'
 
 
