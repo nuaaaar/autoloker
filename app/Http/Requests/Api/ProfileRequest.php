@@ -79,7 +79,7 @@ class ProfileRequest extends FormRequest
         }
 
         $business = [
-            'company_name' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'company_name' => ['sometimes', 'string', 'max:255'],
             'industry' => ['sometimes', 'nullable', 'string', 'max:255', Rule::exists('master_industries', 'title')->whereNull('deleted_at')],
             'logo' => ['sometimes', 'file', 'image', 'max:5120'],
             'description' => ['sometimes', 'nullable', 'string'],

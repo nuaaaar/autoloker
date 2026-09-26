@@ -4812,10 +4812,12 @@ components:
 
     UpdateCompanyProfileRequest:
       type: object
-      description: Partial company profile update. Location fields use master location codes.
+      description: >-
+        Partial company profile update. Location fields use master location codes. When `company_name`
+        is provided, the authenticated company account name is synchronized to the same value.
       additionalProperties: false
       properties:
-        company_name: {type: [string, 'null'], maxLength: 255}
+        company_name: {type: string, maxLength: 255}
         industry: {type: [string, 'null'], maxLength: 255}
         logo: {type: string, format: binary}
         description: {type: [string, 'null']}
@@ -4838,10 +4840,12 @@ components:
 
     UpdateBujpProfileRequest:
       type: object
-      description: Partial BUJP profile update. Location fields use master location codes.
+      description: >-
+        Partial BUJP profile update. Location fields use master location codes. When `company_name`
+        is provided, the authenticated BUJP account name is synchronized to the same value.
       additionalProperties: false
       properties:
-        company_name: {type: [string, 'null'], maxLength: 255}
+        company_name: {type: string, maxLength: 255}
         industry: {type: [string, 'null'], maxLength: 255}
         logo: {type: string, format: binary}
         description: {type: [string, 'null']}

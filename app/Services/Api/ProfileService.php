@@ -148,6 +148,12 @@ class ProfileService
         try {
             DB::transaction(function () use ($user, $profile, $profileData): void {
                 $userData = array_intersect_key($profileData, array_flip(['name', 'email', 'phone_number']));
+                if (
+                    in_array($user->role, ['company', 'bujp'], true)
+                    && array_key_exists('company_name', $profileData)
+                ) {
+                    $userData['name'] = $profileData['company_name'];
+                }
                 if ($userData !== []) {
                     $user->update($userData);
                 }
