@@ -107,7 +107,7 @@ class ReferenceDataController extends Controller
                     'name' => $subscription->name,
                     'slug' => $subscription->slug,
                     'role' => $subscription->role,
-                    'price' => $subscription->price,
+                    'price' => (float) $subscription->price,
                     'duration' => $subscription->duration,
                     'duration_type' => $subscription->duration_type,
                     'description' => $subscription->description,
