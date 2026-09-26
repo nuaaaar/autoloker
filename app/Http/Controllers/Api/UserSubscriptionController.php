@@ -30,7 +30,6 @@ class UserSubscriptionController extends Controller
         $subscription = $role === null
             ? null
             : UserSubscription::query()
-                ->with('subscription')
                 ->where('user_id', $request->user()->getKey())
                 ->where('role', $role)
                 ->active()
@@ -116,7 +115,6 @@ class UserSubscriptionController extends Controller
             'notes' => null,
             'cancelled_at' => null,
         ]);
-        $subscription->setRelation('subscription', $default);
 
         return $subscription;
     }

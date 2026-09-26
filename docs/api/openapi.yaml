@@ -4323,7 +4323,6 @@ components:
         - limit_usage
         - created_at
         - updated_at
-        - subscription
       properties:
         id:
           type: [integer, 'null']
@@ -4347,9 +4346,10 @@ components:
           type: string
           example: Profesional
         price:
-          type: string
-          description: Subscription price as a decimal string with two fractional digits.
-          example: '49000.00'
+          type: number
+          format: double
+          description: Subscription price as a JSON number.
+          example: 49000.0
         started_at:
           type: [string, 'null']
           format: date-time
@@ -4393,10 +4393,6 @@ components:
         updated_at:
           type: [string, 'null']
           format: date-time
-        subscription:
-          anyOf:
-            - $ref: '#/components/schemas/MasterSubscription'
-            - type: 'null'
     UserOrderManualStoreRequest:
       type: object
       additionalProperties: false

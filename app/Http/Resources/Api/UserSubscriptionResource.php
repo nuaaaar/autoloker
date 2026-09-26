@@ -17,7 +17,7 @@ class UserSubscriptionResource extends JsonResource
             'user_order_manual_id' => $this->user_order_manual_id,
             'role' => $this->role,
             'subscription_name' => $this->subscription_name,
-            'price' => $this->price,
+            'price' => (float) $this->price,
             'started_at' => $this->started_at,
             'expired_at' => $this->expired_at,
             'status' => $this->status,
@@ -32,28 +32,6 @@ class UserSubscriptionResource extends JsonResource
             ],
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-            'subscription' => $this->whenLoaded('subscription', function (): ?array {
-                $subscription = $this->subscription;
-
-                if (! $subscription) {
-                    return null;
-                }
-
-                return [
-                    'id' => $subscription->id,
-                    'uuid' => $subscription->uuid,
-                    'name' => $subscription->name,
-                    'slug' => $subscription->slug,
-                    'role' => $subscription->role,
-                    'price' => $subscription->price,
-                    'duration' => $subscription->duration,
-                    'duration_type' => $subscription->duration_type,
-                    'description' => $subscription->description,
-                    'features' => $this->featureObject($subscription->features),
-                    'is_active' => (bool) $subscription->is_active,
-                    'sort_order' => $subscription->sort_order,
-                ];
-            }),
         ];
     }
 
