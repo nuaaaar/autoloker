@@ -1904,6 +1904,61 @@ paths:
           $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/ValidationError'
+  /api/user-order-manuals/{uuid}:
+    get:
+      summary: Get a manual subscription order
+      description: >-
+        Returns an order owned by the authenticated user with its subscription details and current
+        payment status. Repeat this request to poll for status changes. Every response includes
+        `Cache-Control: no-store` so a cached response does not mask an updated payment status.
+      operationId: getUserOrderManual
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          description: UUID of the manual order.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Manual order details with its latest payment status
+          headers:
+            Cache-Control:
+              description: Prevents caching the payment status response.
+              schema:
+                type: string
+                example: no-store, private
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOrderManualResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          description: Order does not exist or is not owned by the authenticated user
+          headers:
+            Cache-Control:
+              description: Prevents caching the payment status response.
+              schema:
+                type: string
+                example: no-store, private
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, message, data]
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Order not found.
+                  data:
+                    type: 'null'
   /api/user-order-manuals/{uuid}/upload-proof:
     post:
       summary: Upload payment proof for a manual subscription order

@@ -14,6 +14,27 @@ class UserOrderManualProofUploadTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_requesting_checkout_again_reuses_the_existing_pending_order(): void
+    {
+        $user = $this->createUser('Pending User', 'pending@example.com', '081234567894', 'pending-google-id');
+        $subscription = $this->createSubscription();
+        $token = app(TokenService::class)->issue($user)['access_token'];
+
+        $firstOrder = $this->withToken($token)
+            ->postJson('/api/user-order-manuals', ['subscription_uuid' => $subscription->uuid])
+            ->assertCreated();
+        $firstOrderUuid = $firstOrder->json('data.user_order_manual.uuid');
+
+        $secondOrder = $this->withToken($token)
+            ->postJson('/api/user-order-manuals', ['subscription_uuid' => $subscription->uuid])
+            ->assertOk()
+            ->assertJsonPath('data.user_order_manual.uuid', $firstOrderUuid)
+            ->assertJsonPath('data.user_order_manual.status', 'pending_payment');
+
+        $this->assertSame($firstOrderUuid, $secondOrder->json('data.user_order_manual.uuid'));
+        $this->assertDatabaseCount('user_order_manuals', 1);
+    }
+
     public function test_authenticated_owner_can_create_an_order_and_upload_payment_proof(): void
     {
         $user = $this->createUser('Payment User', 'payment@example.com', '081234567890', 'payment-google-id');
@@ -130,6 +151,41 @@ class UserOrderManualProofUploadTest extends TestCase
             'file' => null,
         ]);
     }
+
+    public function test_order_detail_is_owner_scoped_and_returns_latest_payment_status_for_polling(): void
+    {
+        $owner = $this->createUser('Detail Owner', 'detail-owner@example.com', '081234567895', 'detail-owner-google-id');
+        $other = $this->createUser('Other Detail User', 'other-detail@example.com', '081234567896', 'other-detail-google-id');
+        $subscription = $this->createSubscription();
+        $ownerToken = app(TokenService::class)->issue($owner)['access_token'];
+        $otherToken = app(TokenService::class)->issue($other)['access_token'];
+        $created = $this->withToken($ownerToken)
+            ->postJson('/api/user-order-manuals', ['subscription_uuid' => $subscription->uuid])
+            ->assertCreated();
+        $orderUuid = $created->json('data.user_order_manual.uuid');
+        $endpoint = "/api/user-order-manuals/{$orderUuid}";
+
+        $this->withToken($ownerToken)->getJson($endpoint)
+            ->assertOk()
+            ->assertJsonPath('data.user_order_manual.uuid', $orderUuid)
+            ->assertJsonPath('data.user_order_manual.status', 'pending_payment')
+            ->assertJsonPath('data.user_order_manual.subscription.name', 'Premium')
+            ->assertHeader('Cache-Control', 'no-store, private');
+
+        UserOrderManual::query()->where('uuid', $orderUuid)->update([
+            'status' => 'approved',
+            'notes' => 'Payment verified.',
+        ]);
+
+        $this->withToken($ownerToken)->getJson($endpoint)
+            ->assertOk()
+            ->assertJsonPath('data.user_order_manual.status', 'approved')
+            ->assertJsonPath('data.user_order_manual.notes', 'Payment verified.')
+            ->assertHeader('Cache-Control', 'no-store, private');
+
+        $this->withToken($otherToken)->getJson($endpoint)->assertNotFound();
+    }
+
 
     private function createUser(string $name, string $email, string $phone, string $googleId): User
     {

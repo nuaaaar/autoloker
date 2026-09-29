@@ -42,6 +42,32 @@ class UserOrderManualController extends Controller
         ]);
     }
 
+    public function show(Request $request, string $uuid): JsonResponse
+    {
+        $order = UserOrderManual::query()
+            ->with('subscription')
+            ->where('uuid', $uuid)
+            ->where('user_id', $request->user()->getKey())
+            ->first();
+
+        if (! $order) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Order not found.',
+                'data' => null,
+            ], 404)->header('Cache-Control', 'no-store');
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Manual subscription order retrieved successfully.',
+            'data' => [
+                'user_order_manual' => (new UserOrderManualResource($order))->resolve($request),
+            ],
+        ])->header('Cache-Control', 'no-store');
+    }
+
+
     public function store(UserOrderManualStoreRequest $request): JsonResponse
     {
         $role = self::ROLE_MAPPING[strtolower(trim($request->user()->role))] ?? null;

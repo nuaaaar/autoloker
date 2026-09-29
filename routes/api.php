@@ -52,6 +52,7 @@ Route::middleware('api.token')->group(function () {
     Route::patch('/password', ChangePasswordController::class)->name('api.password.update');
     Route::get('/me', MeController::class)->name('api.me');
     Route::get('/user-order-manuals', [UserOrderManualController::class, 'index'])->name('api.user-order-manuals.index');
+    Route::get('/user-order-manuals/{uuid}', [UserOrderManualController::class, 'show'])->name('api.user-order-manuals.show');
     Route::post('/user-order-manuals', [UserOrderManualController::class, 'store'])->name('api.user-order-manuals.store');
     Route::post('/user-order-manuals/{uuid}/upload-proof', [UserOrderManualController::class, 'uploadProof'])->name('api.user-order-manuals.upload-proof');
     Route::get('/user-subscriptions/active', [UserSubscriptionController::class, 'active'])->name('api.user-subscriptions.active');
