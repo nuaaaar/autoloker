@@ -10,6 +10,7 @@ use App\Models\MasterSubscription;
 use App\Models\UserOrderManual;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class UserOrderManualController extends Controller
@@ -111,6 +112,67 @@ class UserOrderManualController extends Controller
                 'user_order_manual' => (new UserOrderManualResource($order))->resolve($request),
             ],
         ], 201);
+    }
+
+    public function uploadProof(Request $request, string $uuid): JsonResponse
+    {
+        $order = UserOrderManual::query()
+            ->with('subscription')
+            ->where('uuid', $uuid)
+            ->where('user_id', $request->user()->getKey())
+            ->whereIn('status', ['pending_payment', 'rejected'])
+            ->first();
+
+        if (! $order) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Order not found or cannot accept payment proof.',
+                'data' => null,
+            ], 404);
+        }
+
+        $validated = $request->validate([
+            'payment_method' => ['required', 'string', 'max:50'],
+            'payment_account' => ['nullable', 'string', 'max:255'],
+            'payment_date' => ['required', 'date'],
+            'payment_proof' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+        ]);
+
+        $file = $request->file('payment_proof');
+        $uploadPath = public_path('uploads/payment');
+
+        if (! is_dir($uploadPath) && ! mkdir($uploadPath, 0755, true) && ! is_dir($uploadPath)) {
+            throw new \RuntimeException('Unable to create payment upload directory.');
+        }
+
+        $filename = 'payment_'.$order->order_number.'_'.now()->timestamp.'_'.Str::random(8).'.'.$file->getClientOriginalExtension();
+        $file->move($uploadPath, $filename);
+
+        $previousFilename = $order->file;
+        $order->update([
+            'payment_method' => $validated['payment_method'],
+            'payment_account' => $validated['payment_account'] ?? null,
+            'payment_date' => $validated['payment_date'],
+            'file' => $filename,
+            'status' => 'verification',
+            'rejected_reason' => null,
+        ]);
+        $order->load('subscription');
+
+        if ($previousFilename) {
+            $previousPath = $uploadPath.'/'.basename($previousFilename);
+            if (is_file($previousPath)) {
+                unlink($previousPath);
+            }
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Payment proof uploaded and is awaiting verification.',
+            'data' => [
+                'user_order_manual' => (new UserOrderManualResource($order))->resolve($request),
+            ],
+        ]);
     }
 
     private function generateOrderNumber(): string

@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Autoloker API
   version: 1.0.0
-  description: API documentation for mobile authentication, profile editing, security work history CRUD, security certificate CRUD, public job vacancy and training listings, company- and BUJP-owned job vacancy and training management, job vacancy and training applications, paginated vacancy, published training, registered training listings, owned application status follow-up, active subscription plans, and hierarchical location references.
+  description: API documentation for mobile authentication, profile editing, security work history CRUD, security certificate CRUD, public job vacancy and training listings, company- and BUJP-owned job vacancy and training management, job vacancy and training applications, paginated vacancy, published training, registered training listings, owned application status follow-up, active subscription plans, manual subscription order payments and proof uploads, bank references, and hierarchical location references.
   license:
     name: Proprietary
 
@@ -1904,6 +1904,43 @@ paths:
           $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/ValidationError'
+  /api/user-order-manuals/{uuid}/upload-proof:
+    post:
+      summary: Upload payment proof for a manual subscription order
+      description: >-
+        Uploads a payment proof for an order belonging to the authenticated user. Orders in
+        `pending_payment` or `rejected` status can accept a new proof. A successful upload moves
+        the order to `verification` and clears any rejection reason.
+      operationId: uploadUserOrderManualProof
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserOrderManualProofUploadRequest'
+      responses:
+        '200':
+          description: Proof received and awaiting administrator verification
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOrderManualResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
 
 
   /api/refresh-token:
@@ -4510,6 +4547,27 @@ components:
           type: string
           format: uuid
           description: UUID of an active subscription plan for the authenticated user's role.
+    UserOrderManualProofUploadRequest:
+      type: object
+      additionalProperties: false
+      required: [payment_method, payment_date, payment_proof]
+      properties:
+        payment_method:
+          type: string
+          maxLength: 50
+          description: Selected destination bank name.
+        payment_account:
+          type: [string, 'null']
+          maxLength: 255
+          description: Sender's bank account number.
+        payment_date:
+          type: string
+          format: date
+        payment_proof:
+          type: string
+          format: binary
+          description: JPG, JPEG, PNG, or PDF proof, up to 5 MB.
+
 
     UserOrderManualListResponse:
       type: object

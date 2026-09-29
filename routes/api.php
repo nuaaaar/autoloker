@@ -8,8 +8,8 @@ use App\Http\Controllers\Api\LogoutController;
 use App\Http\Controllers\Api\MeController;
 use App\Http\Controllers\Api\OwnedJobApplicantController;
 use App\Http\Controllers\Api\OwnedJobVacancyController;
-use App\Http\Controllers\Api\OwnedTrainingParticipantController;
 use App\Http\Controllers\Api\OwnedTrainingController;
+use App\Http\Controllers\Api\OwnedTrainingParticipantController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ReferenceDataController;
 use App\Http\Controllers\Api\RefreshTokenController;
@@ -18,8 +18,8 @@ use App\Http\Controllers\Api\SecurityCertificateController;
 use App\Http\Controllers\Api\SecurityHistoryController;
 use App\Http\Controllers\Api\TrainingApplicationController;
 use App\Http\Controllers\Api\TrainingController;
-use App\Http\Controllers\Api\UserSubscriptionController;
 use App\Http\Controllers\Api\UserOrderManualController;
+use App\Http\Controllers\Api\UserSubscriptionController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', LoginController::class)->name('api.login');
@@ -53,6 +53,7 @@ Route::middleware('api.token')->group(function () {
     Route::get('/me', MeController::class)->name('api.me');
     Route::get('/user-order-manuals', [UserOrderManualController::class, 'index'])->name('api.user-order-manuals.index');
     Route::post('/user-order-manuals', [UserOrderManualController::class, 'store'])->name('api.user-order-manuals.store');
+    Route::post('/user-order-manuals/{uuid}/upload-proof', [UserOrderManualController::class, 'uploadProof'])->name('api.user-order-manuals.upload-proof');
     Route::get('/user-subscriptions/active', [UserSubscriptionController::class, 'active'])->name('api.user-subscriptions.active');
     Route::post('/logout', LogoutController::class)->name('api.logout');
     Route::apiResource('security-histories', SecurityHistoryController::class)
