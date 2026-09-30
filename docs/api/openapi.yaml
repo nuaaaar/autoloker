@@ -1826,8 +1826,8 @@ paths:
       description: >-
         Creates a pending manual subscription order for the authenticated user's role. Payment and
         verification fields are `null` until the user submits proof and an administrator reviews
-        the payment. Sending the same plan while a pending payment order already exists returns
-        that existing order instead of creating a duplicate.
+        the payment. A `pending_payment` order blocks creation of another order for this account,
+        regardless of the selected plan. A conflict returns HTTP 409 with the existing order details.
       operationId: createUserOrderManual
       security:
         - bearerAuth: []
@@ -1892,12 +1892,29 @@ paths:
                               limit: 5
                           is_active: true
                           sort_order: 1
-        '200':
-          description: Existing pending order returned for the selected plan
+        '409':
+          description: The authenticated user already has an order awaiting payment.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserOrderManualResponse'
+                type: object
+                required: [status, code, message, data]
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  code:
+                    type: string
+                    example: pending_payment_order_exists
+                  message:
+                    type: string
+                    example: You already have an order waiting for payment.
+                  data:
+                    type: object
+                    required: [user_order_manual]
+                    properties:
+                      user_order_manual:
+                        $ref: '#/components/schemas/UserOrderManual'
         '401':
           $ref: '#/components/responses/Unauthenticated'
         '404':

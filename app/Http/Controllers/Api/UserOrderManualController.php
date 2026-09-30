@@ -7,10 +7,12 @@ use App\Http\Requests\Api\UserOrderManualIndexRequest;
 use App\Http\Requests\Api\UserOrderManualStoreRequest;
 use App\Http\Resources\Api\UserOrderManualResource;
 use App\Models\MasterSubscription;
+use App\Models\User;
 use App\Models\UserOrderManual;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class UserOrderManualController extends Controller
@@ -67,7 +69,6 @@ class UserOrderManualController extends Controller
         ])->header('Cache-Control', 'no-store');
     }
 
-
     public function store(UserOrderManualStoreRequest $request): JsonResponse
     {
         $role = self::ROLE_MAPPING[strtolower(trim($request->user()->role))] ?? null;
@@ -102,42 +103,52 @@ class UserOrderManualController extends Controller
             ], 422);
         }
 
-        $pendingOrder = UserOrderManual::query()
-            ->with('subscription')
-            ->where('user_id', $request->user()->getKey())
-            ->where('master_subscription_id', $subscription->getKey())
-            ->where('status', 'pending_payment')
-            ->latest('id')
-            ->first();
+        $userId = $request->user()->getKey();
 
-        if ($pendingOrder) {
+        return DB::transaction(function () use ($request, $subscription, $role, $userId): JsonResponse {
+            $user = User::query()
+                ->whereKey($userId)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $pendingOrder = UserOrderManual::query()
+                ->with('subscription')
+                ->where('user_id', $user->getKey())
+                ->where('status', 'pending_payment')
+                ->latest('id')
+                ->lockForUpdate()
+                ->first();
+
+            if ($pendingOrder) {
+                return response()->json([
+                    'status' => false,
+                    'code' => 'pending_payment_order_exists',
+                    'message' => 'You already have an order waiting for payment.',
+                    'data' => [
+                        'user_order_manual' => (new UserOrderManualResource($pendingOrder))->resolve($request),
+                    ],
+                ], 409);
+            }
+
+            $order = UserOrderManual::create([
+                'user_id' => $user->getKey(),
+                'master_subscription_id' => $subscription->getKey(),
+                'role' => $role,
+                'order_number' => $this->generateOrderNumber(),
+                'price' => $subscription->price,
+                'status' => 'pending_payment',
+            ]);
+
+            $order->load('subscription');
+
             return response()->json([
                 'status' => true,
-                'message' => 'You already have an order waiting for payment.',
+                'message' => 'Manual subscription order created successfully.',
                 'data' => [
-                    'user_order_manual' => (new UserOrderManualResource($pendingOrder))->resolve($request),
+                    'user_order_manual' => (new UserOrderManualResource($order))->resolve($request),
                 ],
-            ]);
-        }
-
-        $order = UserOrderManual::create([
-            'user_id' => $request->user()->getKey(),
-            'master_subscription_id' => $subscription->getKey(),
-            'role' => $role,
-            'order_number' => $this->generateOrderNumber(),
-            'price' => $subscription->price,
-            'status' => 'pending_payment',
-        ]);
-
-        $order->load('subscription');
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Manual subscription order created successfully.',
-            'data' => [
-                'user_order_manual' => (new UserOrderManualResource($order))->resolve($request),
-            ],
-        ], 201);
+            ], 201);
+        });
     }
 
     public function uploadProof(Request $request, string $uuid): JsonResponse
