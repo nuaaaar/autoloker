@@ -151,6 +151,45 @@ class UserOrderManualController extends Controller
         });
     }
 
+    public function cancel(Request $request, string $uuid): JsonResponse
+    {
+        return DB::transaction(function () use ($request, $uuid): JsonResponse {
+            $order = UserOrderManual::query()
+                ->where('uuid', $uuid)
+                ->where('user_id', $request->user()->getKey())
+                ->lockForUpdate()
+                ->first();
+
+            if (! $order) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Order not found.',
+                    'data' => null,
+                ], 404);
+            }
+
+            if ($order->status !== 'pending_payment') {
+                return response()->json([
+                    'status' => false,
+                    'code' => 'manual_order_not_cancellable',
+                    'message' => 'Only orders awaiting payment can be cancelled.',
+                    'data' => null,
+                ], 409);
+            }
+
+            $order->update(['status' => 'cancelled']);
+            $order->load('subscription');
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Manual subscription order cancelled successfully.',
+                'data' => [
+                    'user_order_manual' => (new UserOrderManualResource($order))->resolve($request),
+                ],
+            ]);
+        });
+    }
+
     public function uploadProof(Request $request, string $uuid): JsonResponse
     {
         $order = UserOrderManual::query()

@@ -129,6 +129,90 @@ class UserOrderManualProofUploadTest extends TestCase
         ]);
     }
 
+    public function test_owner_can_cancel_a_pending_order_and_create_another(): void
+    {
+        $user = $this->createUser('Cancel Owner', 'cancel-owner@example.com', '081234567897', 'cancel-owner-google-id');
+        $subscription = $this->createSubscription();
+        $token = app(TokenService::class)->issue($user)['access_token'];
+
+        $created = $this->withToken($token)
+            ->postJson('/api/user-order-manuals', ['subscription_uuid' => $subscription->uuid])
+            ->assertCreated();
+        $orderUuid = $created->json('data.user_order_manual.uuid');
+
+        $this->withToken($token)
+            ->postJson("/api/user-order-manuals/{$orderUuid}/cancel")
+            ->assertOk()
+            ->assertJsonPath('status', true)
+            ->assertJsonPath('message', 'Manual subscription order cancelled successfully.')
+            ->assertJsonPath('data.user_order_manual.uuid', $orderUuid)
+            ->assertJsonPath('data.user_order_manual.status', 'cancelled');
+
+        $this->assertDatabaseHas('user_order_manuals', [
+            'uuid' => $orderUuid,
+            'user_id' => $user->id,
+            'status' => 'cancelled',
+        ]);
+
+        $this->withToken($token)
+            ->postJson('/api/user-order-manuals', ['subscription_uuid' => $subscription->uuid])
+            ->assertCreated()
+            ->assertJsonPath('data.user_order_manual.status', 'pending_payment');
+
+        $this->assertDatabaseCount('user_order_manuals', 2);
+    }
+
+    public function test_user_cannot_cancel_another_users_order(): void
+    {
+        $owner = $this->createUser('Cancel Owner', 'cancel-scope-owner@example.com', '081234567897', 'cancel-scope-owner-google-id');
+        $other = $this->createUser('Other User', 'cancel-scope-other@example.com', '081234567898', 'cancel-scope-other-google-id');
+        $subscription = $this->createSubscription();
+        $ownerToken = app(TokenService::class)->issue($owner)['access_token'];
+        $otherToken = app(TokenService::class)->issue($other)['access_token'];
+
+        $created = $this->withToken($ownerToken)
+            ->postJson('/api/user-order-manuals', ['subscription_uuid' => $subscription->uuid])
+            ->assertCreated();
+        $orderUuid = $created->json('data.user_order_manual.uuid');
+
+        $this->withToken($otherToken)
+            ->postJson("/api/user-order-manuals/{$orderUuid}/cancel")
+            ->assertNotFound();
+
+        $this->assertDatabaseHas('user_order_manuals', [
+            'uuid' => $orderUuid,
+            'user_id' => $owner->id,
+            'status' => 'pending_payment',
+        ]);
+    }
+
+    public function test_only_pending_payment_orders_can_be_cancelled(): void
+    {
+        $user = $this->createUser('Cancel Status User', 'cancel-status@example.com', '081234567897', 'cancel-status-google-id');
+        $subscription = $this->createSubscription();
+        $token = app(TokenService::class)->issue($user)['access_token'];
+
+        foreach (['verification', 'approved', 'rejected'] as $status) {
+            $created = $this->withToken($token)
+                ->postJson('/api/user-order-manuals', ['subscription_uuid' => $subscription->uuid])
+                ->assertCreated();
+            $orderUuid = $created->json('data.user_order_manual.uuid');
+            UserOrderManual::query()->where('uuid', $orderUuid)->update(['status' => $status]);
+
+            $this->withToken($token)
+                ->postJson("/api/user-order-manuals/{$orderUuid}/cancel")
+                ->assertStatus(409)
+                ->assertJsonPath('status', false)
+                ->assertJsonPath('code', 'manual_order_not_cancellable')
+                ->assertJsonPath('message', 'Only orders awaiting payment can be cancelled.');
+
+            $this->assertDatabaseHas('user_order_manuals', [
+                'uuid' => $orderUuid,
+                'status' => $status,
+            ]);
+        }
+    }
+
     public function test_authenticated_owner_can_create_an_order_and_upload_payment_proof(): void
     {
         $user = $this->createUser('Payment User', 'payment@example.com', '081234567890', 'payment-google-id');

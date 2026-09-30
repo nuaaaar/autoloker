@@ -54,6 +54,7 @@ Route::middleware('api.token')->group(function () {
     Route::get('/user-order-manuals', [UserOrderManualController::class, 'index'])->name('api.user-order-manuals.index');
     Route::get('/user-order-manuals/{uuid}', [UserOrderManualController::class, 'show'])->name('api.user-order-manuals.show');
     Route::post('/user-order-manuals', [UserOrderManualController::class, 'store'])->name('api.user-order-manuals.store');
+    Route::post('/user-order-manuals/{uuid}/cancel', [UserOrderManualController::class, 'cancel'])->name('api.user-order-manuals.cancel');
     Route::post('/user-order-manuals/{uuid}/upload-proof', [UserOrderManualController::class, 'uploadProof'])->name('api.user-order-manuals.upload-proof');
     Route::get('/user-subscriptions/active', [UserSubscriptionController::class, 'active'])->name('api.user-subscriptions.active');
     Route::post('/logout', LogoutController::class)->name('api.logout');
