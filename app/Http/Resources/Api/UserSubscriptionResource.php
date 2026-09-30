@@ -29,6 +29,8 @@ class UserSubscriptionResource extends JsonResource
             'limit_usage' => $this->limit_usage ?? [
                 'total_active_job_applications' => 0,
                 'total_active_training_applications' => 0,
+                'total_active_job_posts' => 0,
+                'total_active_training_posts' => 0,
             ],
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

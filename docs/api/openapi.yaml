@@ -1720,9 +1720,11 @@ paths:
       description: >-
         Returns the authenticated user's active subscription for the user's mapped role. When no
         active subscription exists, returns the active price-zero default plan for that same role.
-        The response includes limit_usage counts for the user's applications on published jobs and
-        trainings. It returns `user_subscription: null` only when the role is unsupported or no
-        matching active default plan is configured.
+        It returns `user_subscription: null` only when the role is unsupported or no matching
+        active default plan is configured. The `limit_usage` counters are role-specific: security
+        users' applications must belong to published jobs or trainings; BUJP users' job and training
+        posts and company users' job posts count when their status is `submitted` or `published`.
+        Company training usage is zero.
       operationId: getActiveUserSubscription
       security:
         - bearerAuth: []
@@ -4656,16 +4658,28 @@ components:
           example: true
         limit_usage:
           type: object
-          required: [total_active_job_applications, total_active_training_applications]
+          required:
+            - total_active_job_applications
+            - total_active_training_applications
+            - total_active_job_posts
+            - total_active_training_posts
           properties:
             total_active_job_applications:
               type: integer
               minimum: 0
-              description: Applications by the user for published job vacancies.
+              description: Security user's applications on published job vacancies; zero for other roles.
             total_active_training_applications:
               type: integer
               minimum: 0
-              description: Applications by the user for published trainings.
+              description: Security user's applications on published trainings; zero for other roles.
+            total_active_job_posts:
+              type: integer
+              minimum: 0
+              description: BUJP or company job posts with submitted or published status; zero for other roles.
+            total_active_training_posts:
+              type: integer
+              minimum: 0
+              description: BUJP training posts with submitted or published status; zero for company and security roles.
         created_at:
           type: [string, 'null']
           format: date-time

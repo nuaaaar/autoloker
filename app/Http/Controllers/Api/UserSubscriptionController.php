@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\UserSubscriptionResource;
 use App\Models\JobApplication;
+use App\Models\JobVacancy;
+use App\Models\Training;
 use App\Models\TrainingApplication;
 use App\Models\UserSubscription;
 use App\Models\MasterSubscription;
@@ -40,7 +42,7 @@ class UserSubscriptionController extends Controller
         $subscription ??= $role === null
             ? null
             : $this->defaultSubscription($request, $role);
-        $subscription?->setAttribute('limit_usage', $this->limitUsage($request));
+        $subscription?->setAttribute('limit_usage', $this->limitUsage($request, $role));
 
         return response()->json([
             'status' => true,
@@ -52,31 +54,68 @@ class UserSubscriptionController extends Controller
         ]);
     }
 
-    private function limitUsage(Request $request): array
+    private function limitUsage(Request $request, ?string $role): array
     {
-        $security = $request->user()?->user_security?->security;
+        $usage = [
+            'total_active_job_applications' => 0,
+            'total_active_training_applications' => 0,
+            'total_active_job_posts' => 0,
+            'total_active_training_posts' => 0,
+        ];
+        $user = $request->user();
 
-        if (! $security) {
-            return [
-                'total_active_job_applications' => 0,
-                'total_active_training_applications' => 0,
-            ];
-        }
+        if ($role === 'security') {
+            $security = $user?->user_security?->security;
 
-        return [
-            'total_active_job_applications' => JobApplication::query()
+            if (! $security) {
+                return $usage;
+            }
+
+            $usage['total_active_job_applications'] = JobApplication::query()
                 ->where('security_id', $security->getKey())
                 ->whereHas('job_vacancy', function (Builder $query): void {
                     $query->where('status', 'published');
                 })
-                ->count(),
-            'total_active_training_applications' => TrainingApplication::query()
+                ->count();
+            $usage['total_active_training_applications'] = TrainingApplication::query()
                 ->where('security_id', $security->getKey())
                 ->whereHas('training', function (Builder $query): void {
                     $query->where('status', 'published');
                 })
-                ->count(),
-        ];
+                ->count();
+
+            return $usage;
+        }
+
+        $owner = match ($role) {
+            'bujp' => [
+                'column' => 'b_u_j_p_id',
+                'id' => $user?->user_bujp?->bujp?->getKey(),
+            ],
+            'client' => [
+                'column' => 'company_id',
+                'id' => $user?->user_company?->company?->getKey(),
+            ],
+            default => null,
+        };
+
+        if ($owner === null || $owner['id'] === null) {
+            return $usage;
+        }
+
+        $usage['total_active_job_posts'] = JobVacancy::query()
+            ->where($owner['column'], $owner['id'])
+            ->whereIn('status', ['submitted', 'published'])
+            ->count();
+
+        if ($role === 'bujp') {
+            $usage['total_active_training_posts'] = Training::query()
+                ->where('b_u_j_p_id', $owner['id'])
+                ->whereIn('status', ['submitted', 'published'])
+                ->count();
+        }
+
+        return $usage;
     }
 
     private function defaultSubscription(Request $request, string $role): ?UserSubscription
