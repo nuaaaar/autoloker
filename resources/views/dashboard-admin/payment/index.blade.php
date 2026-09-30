@@ -151,6 +151,10 @@
                                 Ditolak
                             </option>
 
+                            <option value="cancelled">
+                                Dibatalkan
+                            </option>
+
                         </select>
 
                     </div>
@@ -951,6 +955,16 @@ $(document).ready(function () {
 
                     }
 
+                    if (data === 'cancelled') {
+
+                        return `
+                            <span class="badge badge-light-dark">
+                                Dibatalkan
+                            </span>
+                        `;
+
+                    }
+
 
                     return `
                         <span class="badge badge-light-secondary">
@@ -1587,6 +1601,16 @@ function detailData(uuid)
                 `;
 
             }
+            else if (data.status === 'cancelled') {
+
+                statusHtml = `
+                    <span class="badge badge-light-dark">
+                        Dibatalkan
+                    </span>
+                `;
+
+            }
+
             else {
 
                 statusHtml = `
