@@ -60,7 +60,7 @@ class SecurityCertificateController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Security certificate created successfully.',
+            'message' => 'Sertifikat keamanan berhasil dibuat.',
             'data' => ['security_certificate' => $certificate->only(self::FIELDS)],
         ], 201);
     }
@@ -86,7 +86,7 @@ class SecurityCertificateController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Security certificate updated successfully.',
+            'message' => 'Sertifikat keamanan berhasil diperbarui.',
             'data' => ['security_certificate' => $certificate->fresh()->only(self::FIELDS)],
         ]);
     }
@@ -97,17 +97,17 @@ class SecurityCertificateController extends Controller
         $this->deleteFile($certificate->file);
         $certificate->delete();
 
-        return response()->json(['status' => true, 'message' => 'Security certificate deleted successfully.']);
+        return response()->json(['status' => true, 'message' => 'Sertifikat keamanan berhasil dihapus.']);
     }
 
     private function security(Request $request)
     {
         if ($request->user()?->role !== 'satpam') {
-            throw new NotFoundHttpException('Security profile not found.');
+            throw new NotFoundHttpException('Profil satpam tidak ditemukan.');
         }
         $security = $request->user()->user_security?->security;
         if (!$security) {
-            throw new NotFoundHttpException('Security profile not found.');
+            throw new NotFoundHttpException('Profil satpam tidak ditemukan.');
         }
         return $security;
     }

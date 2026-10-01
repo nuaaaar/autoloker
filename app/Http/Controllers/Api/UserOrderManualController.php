@@ -55,14 +55,14 @@ class UserOrderManualController extends Controller
         if (! $order) {
             return response()->json([
                 'status' => false,
-                'message' => 'Order not found.',
+                'message' => 'Pesanan tidak ditemukan.',
                 'data' => null,
             ], 404)->header('Cache-Control', 'no-store');
         }
 
         return response()->json([
             'status' => true,
-            'message' => 'Manual subscription order retrieved successfully.',
+            'message' => 'Detail pesanan paket langganan berhasil dimuat.',
             'data' => [
                 'user_order_manual' => (new UserOrderManualResource($order))->resolve($request),
             ],
@@ -76,7 +76,7 @@ class UserOrderManualController extends Controller
         if (! $role) {
             return response()->json([
                 'status' => false,
-                'message' => 'User role is not valid for subscription orders.',
+                'message' => 'Akun Anda tidak dapat memesan paket langganan.',
                 'data' => null,
             ], 422);
         }
@@ -90,7 +90,7 @@ class UserOrderManualController extends Controller
         if (! $subscription) {
             return response()->json([
                 'status' => false,
-                'message' => 'Subscription plan not found.',
+                'message' => 'Paket langganan tidak ditemukan, tidak aktif, atau tidak tersedia untuk peran akun Anda.',
                 'data' => null,
             ], 404);
         }
@@ -98,7 +98,7 @@ class UserOrderManualController extends Controller
         if (strtolower(trim((string) $subscription->slug)) === 'dasar') {
             return response()->json([
                 'status' => false,
-                'message' => 'The Dasar plan is free and does not require an order.',
+                'message' => 'Paket Dasar gratis dan tidak memerlukan pesanan.',
                 'data' => null,
             ], 422);
         }
@@ -123,7 +123,7 @@ class UserOrderManualController extends Controller
                 return response()->json([
                     'status' => false,
                     'code' => 'pending_payment_order_exists',
-                    'message' => 'You already have an order waiting for payment.',
+                    'message' => 'Masih ada pesanan paket yang menunggu pembayaran. Selesaikan atau batalkan pesanan tersebut sebelum membuat pesanan baru.',
                     'data' => [
                         'user_order_manual' => (new UserOrderManualResource($pendingOrder))->resolve($request),
                     ],
@@ -143,7 +143,7 @@ class UserOrderManualController extends Controller
 
             return response()->json([
                 'status' => true,
-                'message' => 'Manual subscription order created successfully.',
+                'message' => 'Pesanan paket langganan berhasil dibuat.',
                 'data' => [
                     'user_order_manual' => (new UserOrderManualResource($order))->resolve($request),
                 ],
@@ -163,7 +163,7 @@ class UserOrderManualController extends Controller
             if (! $order) {
                 return response()->json([
                     'status' => false,
-                    'message' => 'Order not found.',
+                    'message' => 'Pesanan tidak ditemukan.',
                     'data' => null,
                 ], 404);
             }
@@ -172,7 +172,7 @@ class UserOrderManualController extends Controller
                 return response()->json([
                     'status' => false,
                     'code' => 'manual_order_not_cancellable',
-                    'message' => 'Only orders awaiting payment can be cancelled.',
+                    'message' => 'Pesanan hanya dapat dibatalkan saat menunggu pembayaran.',
                     'data' => null,
                 ], 409);
             }
@@ -182,7 +182,7 @@ class UserOrderManualController extends Controller
 
             return response()->json([
                 'status' => true,
-                'message' => 'Manual subscription order cancelled successfully.',
+                'message' => 'Pesanan paket langganan berhasil dibatalkan.',
                 'data' => [
                     'user_order_manual' => (new UserOrderManualResource($order))->resolve($request),
                 ],
@@ -202,7 +202,7 @@ class UserOrderManualController extends Controller
         if (! $order) {
             return response()->json([
                 'status' => false,
-                'message' => 'Order not found or cannot accept payment proof.',
+                'message' => 'Pesanan tidak ditemukan atau tidak dapat menerima bukti pembayaran. Bukti hanya dapat diunggah saat pesanan menunggu pembayaran atau ditolak.',
                 'data' => null,
             ], 404);
         }
@@ -212,13 +212,25 @@ class UserOrderManualController extends Controller
             'payment_account' => ['nullable', 'string', 'max:255'],
             'payment_date' => ['required', 'date'],
             'payment_proof' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+        ], [
+            'payment_method.required' => 'Metode pembayaran wajib diisi.',
+            'payment_method.string' => 'Metode pembayaran harus berupa teks.',
+            'payment_method.max' => 'Metode pembayaran maksimal :max karakter.',
+            'payment_account.string' => 'Nomor rekening pembayaran harus berupa teks.',
+            'payment_account.max' => 'Nomor rekening pembayaran maksimal :max karakter.',
+            'payment_date.required' => 'Tanggal pembayaran wajib diisi.',
+            'payment_date.date' => 'Tanggal pembayaran harus berupa tanggal yang valid.',
+            'payment_proof.required' => 'Bukti pembayaran wajib diunggah.',
+            'payment_proof.file' => 'Bukti pembayaran harus berupa file.',
+            'payment_proof.mimes' => 'Bukti pembayaran harus berformat JPG, JPEG, PNG, atau PDF.',
+            'payment_proof.max' => 'Ukuran bukti pembayaran maksimal 5 MB.',
         ]);
 
         $file = $request->file('payment_proof');
         $uploadPath = public_path('uploads/payment');
 
         if (! is_dir($uploadPath) && ! mkdir($uploadPath, 0755, true) && ! is_dir($uploadPath)) {
-            throw new \RuntimeException('Unable to create payment upload directory.');
+            throw new \RuntimeException('Gagal menyiapkan folder penyimpanan bukti pembayaran.');
         }
 
         $filename = 'payment_'.$order->order_number.'_'.now()->timestamp.'_'.Str::random(8).'.'.$file->getClientOriginalExtension();
@@ -244,7 +256,7 @@ class UserOrderManualController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Payment proof uploaded and is awaiting verification.',
+            'message' => 'Bukti pembayaran berhasil diunggah dan menunggu verifikasi.',
             'data' => [
                 'user_order_manual' => (new UserOrderManualResource($order))->resolve($request),
             ],

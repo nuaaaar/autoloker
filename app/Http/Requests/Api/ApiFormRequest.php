@@ -12,7 +12,7 @@ abstract class ApiFormRequest extends FormRequest
     {
         throw new HttpResponseException(response()->json([
             'status' => false,
-            'message' => 'The given data was invalid.',
+            'message' => 'Data yang diberikan tidak valid.',
             'data' => null,
             'errors' => $validator->errors(),
         ], 422));

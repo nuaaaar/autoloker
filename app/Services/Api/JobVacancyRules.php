@@ -108,7 +108,7 @@ final class JobVacancyRules
             ->first(['code']);
 
         if (! $province) {
-            return ['province' => ['The selected province is invalid.']];
+            return ['province' => ['Provinsi yang dipilih tidak valid.']];
         }
 
         $cityExists = City::query()
@@ -118,12 +118,23 @@ final class JobVacancyRules
 
         return $cityExists
             ? []
-            : ['city' => ['The selected city is not in the selected province.']];
+            : ['city' => ['Kota yang dipilih bukan bagian dari provinsi yang dipilih.']];
     }
 
     public static function rangeErrors(array $data): array
     {
         $errors = [];
+
+        $labels = [
+            'min_age' => 'usia minimum',
+            'max_age' => 'usia maksimum',
+            'min_height' => 'tinggi minimum',
+            'max_height' => 'tinggi maksimum',
+            'min_weight' => 'berat minimum',
+            'max_weight' => 'berat maksimum',
+            'min_price' => 'nilai gaji/biaya minimum',
+            'max_price' => 'nilai gaji/biaya maksimum',
+        ];
 
         foreach ([
             'min_age' => 'max_age',
@@ -135,7 +146,7 @@ final class JobVacancyRules
             $max = $data[$maximum] ?? null;
 
             if ($min !== null && $max !== null && is_numeric($min) && is_numeric($max) && (float) $min > (float) $max) {
-                $message = "The {$maximum} must be greater than or equal to {$minimum}.";
+                $message = ucfirst($labels[$maximum]).' harus lebih besar dari atau sama dengan '.$labels[$minimum].'.';
                 $errors[$minimum][] = $message;
                 $errors[$maximum][] = $message;
             }

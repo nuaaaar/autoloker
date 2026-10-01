@@ -1156,12 +1156,12 @@ paths:
                   summary: Application is awaiting approval
                   value:
                     status: false
-                    message: Your training application is awaiting approval.
+                    message: Pendaftaran pelatihan Anda sedang menunggu persetujuan.
                 full_quota:
                   summary: Approved quota is full
                   value:
                     status: false
-                    message: The training quota is full.
+                    message: Kuota pelatihan penuh (20/20 peserta disetujui). Pendaftaran tidak dapat dilakukan.
 
   /api/training-applications:
     get:
@@ -1295,7 +1295,7 @@ paths:
                   summary: Duplicate application
                   value:
                     status: false
-                    message: You have already applied for this job vacancy.
+                    message: Anda sudah melamar lowongan kerja ini.
 
   /api/job-applications:
     get:
@@ -1853,7 +1853,7 @@ paths:
                   summary: Newly created order awaiting payment
                   value:
                     status: true
-                    message: Manual subscription order created successfully.
+                    message: Pesanan paket langganan berhasil dibuat.
                     data:
                       user_order_manual:
                         id: 2
@@ -1910,7 +1910,7 @@ paths:
                     example: pending_payment_order_exists
                   message:
                     type: string
-                    example: You already have an order waiting for payment.
+                    example: Masih ada pesanan paket yang menunggu pembayaran. Selesaikan atau batalkan pesanan tersebut sebelum membuat pesanan baru.
                   data:
                     type: object
                     required: [user_order_manual]
@@ -1975,7 +1975,7 @@ paths:
                     example: false
                   message:
                     type: string
-                    example: Order not found.
+                    example: Pesanan tidak ditemukan.
                   data:
                     type: 'null'
   /api/user-order-manuals/{uuid}/cancel:
@@ -2018,7 +2018,7 @@ paths:
                     example: false
                   message:
                     type: string
-                    example: Order not found.
+                    example: Pesanan tidak ditemukan.
                   data:
                     type: 'null'
         '409':
@@ -2037,7 +2037,7 @@ paths:
                     example: manual_order_not_cancellable
                   message:
                     type: string
-                    example: Only orders awaiting payment can be cancelled.
+                    example: Pesanan hanya dapat dibatalkan saat menunggu pembayaran.
                   data:
                     type: 'null'
   /api/user-order-manuals/{uuid}/upload-proof:
@@ -3069,7 +3069,7 @@ components:
           example: true
         message:
           type: string
-          example: Training created successfully.
+          example: Pelatihan berhasil dibuat.
         data:
           type: object
           required: [training]
@@ -3457,7 +3457,7 @@ components:
           example: true
         message:
           type: string
-          example: Job applicant status updated successfully.
+          example: Status pelamar kerja berhasil diperbarui.
         data:
           type: object
           required: [job_applicant]
@@ -3474,7 +3474,7 @@ components:
           example: true
         message:
           type: string
-          example: Training participant status updated successfully.
+          example: Status peserta pelatihan berhasil diperbarui.
         data:
           type: object
           required: [training_participant]
@@ -3557,7 +3557,7 @@ components:
           example: true
         message:
           type: string
-          example: Training application submitted successfully.
+          example: Pendaftaran pelatihan berhasil dikirim.
         data:
           type: object
           required: [training_application]
@@ -3783,7 +3783,7 @@ components:
           example: true
         message:
           type: string
-          example: Job vacancy updated successfully.
+          example: Lowongan kerja berhasil diperbarui.
         data:
           type: object
           required: [job_vacancy]
@@ -4238,7 +4238,7 @@ components:
           example: true
         message:
           type: string
-          example: Job application submitted successfully.
+          example: Lamaran kerja berhasil dikirim.
         data:
           type: object
           required: [job_application]
@@ -4528,7 +4528,7 @@ components:
           example: true
         message:
           type: string
-          example: Login successful.
+          example: Login berhasil.
         data:
           allOf:
             - $ref: '#/components/schemas/TokenData'
@@ -4870,7 +4870,7 @@ components:
           description: 'Order lifecycle status: pending_payment, verification, approved, rejected, or cancelled.'
         notes:
           type: [string, 'null']
-          example: Payment is being reviewed by the administrator.
+          example: Pembayaran sedang ditinjau oleh administrator.
         rejected_reason:
           type: [string, 'null']
           example: null
@@ -5444,7 +5444,7 @@ components:
           example: true
         message:
           type: string
-          example: Registration successful.
+          example: Pendaftaran berhasil.
         data:
           $ref: '#/components/schemas/RegisteredUser'
 
@@ -5741,7 +5741,7 @@ components:
       summary: Created training application
       value:
         status: true
-        message: Training application submitted successfully.
+        message: Pendaftaran pelatihan berhasil dikirim.
         data:
           training_application:
             id: 12
@@ -5754,7 +5754,7 @@ components:
       summary: Created job application
       value:
         status: true
-        message: Job application submitted successfully.
+        message: Lamaran kerja berhasil dikirim.
         data:
           job_application:
             id: 12
@@ -5883,7 +5883,7 @@ components:
       summary: Security registration response
       value:
         status: true
-        message: Registration successful.
+        message: Pendaftaran berhasil.
         data:
           id: 42
           uuid: 550e8400-e29b-41d4-a716-446655440000
@@ -5894,7 +5894,7 @@ components:
       summary: Company registration response
       value:
         status: true
-        message: Registration successful.
+        message: Pendaftaran berhasil.
         data:
           id: 43
           uuid: 550e8400-e29b-41d4-a716-446655440001
@@ -5905,7 +5905,7 @@ components:
       summary: BUJP registration response
       value:
         status: true
-        message: Registration successful.
+        message: Pendaftaran berhasil.
         data:
           id: 44
           uuid: 550e8400-e29b-41d4-a716-446655440002
@@ -5957,7 +5957,7 @@ components:
       summary: Created security certificate response
       value:
         status: true
-        message: Security certificate created successfully.
+        message: Sertifikat keamanan berhasil dibuat.
         data:
           security_certificate:
             uuid: ecc78e02-7b37-4196-b0b0-6984b23c9bdc
@@ -5973,7 +5973,7 @@ components:
       summary: Updated security certificate response
       value:
         status: true
-        message: Security certificate updated successfully.
+        message: Sertifikat keamanan berhasil diperbarui.
         data:
           security_certificate:
             uuid: ecc78e02-7b37-4196-b0b0-6984b23c9bdc

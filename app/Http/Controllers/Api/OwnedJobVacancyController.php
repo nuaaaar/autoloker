@@ -73,7 +73,7 @@ class OwnedJobVacancyController extends OwnedOrganizationController
 
         return $this->mutationResponse(
             $vacancy,
-            'Job vacancy created successfully.',
+            'Lowongan kerja berhasil dibuat.',
             201,
             true,
         );
@@ -85,7 +85,7 @@ class OwnedJobVacancyController extends OwnedOrganizationController
 
         return response()->json([
             'status' => true,
-            'message' => 'Job vacancy retrieved successfully.',
+            'message' => 'Lowongan kerja berhasil diambil.',
             'data' => [
                 'job_vacancy' => $this->resourceData($vacancy),
             ],
@@ -102,7 +102,7 @@ class OwnedJobVacancyController extends OwnedOrganizationController
 
         return $this->mutationResponse(
             $vacancy,
-            'Job vacancy updated successfully.',
+            'Lowongan kerja berhasil diperbarui.',
         );
     }
 
@@ -116,7 +116,7 @@ class OwnedJobVacancyController extends OwnedOrganizationController
 
         return $this->mutationResponse(
             $vacancy,
-            'Job vacancy submitted for review successfully.',
+            'Lowongan kerja berhasil diajukan untuk ditinjau.',
         );
     }
 

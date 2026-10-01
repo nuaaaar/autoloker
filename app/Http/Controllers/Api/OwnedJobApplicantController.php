@@ -85,7 +85,7 @@ class OwnedJobApplicantController extends OwnedOrganizationController
 
         return response()->json([
             'status' => true,
-            'message' => 'Job applicant status updated successfully.',
+            'message' => 'Status pelamar kerja berhasil diperbarui.',
             'data' => [
                 'job_applicant' => (new JobApplicantResource($application))->resolve(),
             ],

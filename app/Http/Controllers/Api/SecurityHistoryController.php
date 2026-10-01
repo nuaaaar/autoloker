@@ -61,7 +61,7 @@ class SecurityHistoryController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Security history created successfully.',
+            'message' => 'Riwayat keamanan berhasil dibuat.',
             'data' => ['security_history' => $this->historyData($history)],
         ], 201);
     }
@@ -84,7 +84,7 @@ class SecurityHistoryController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Security history updated successfully.',
+            'message' => 'Riwayat keamanan berhasil diperbarui.',
             'data' => ['security_history' => $this->historyData($history)],
         ]);
     }
@@ -95,7 +95,7 @@ class SecurityHistoryController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Security history deleted successfully.',
+            'message' => 'Riwayat keamanan berhasil dihapus.',
         ]);
     }
 
@@ -118,7 +118,7 @@ class SecurityHistoryController extends Controller
 
         if ($endDate === null && $isCurrent !== true) {
             throw ValidationException::withMessages([
-                'end_date' => 'The end date may be null only when is_current is true.',
+                'end_date' => 'Tanggal akhir hanya boleh dikosongkan jika riwayat ini masih berlaku.',
             ]);
         }
     }
@@ -126,12 +126,12 @@ class SecurityHistoryController extends Controller
     private function security(Request $request)
     {
         if ($request->user()?->role !== 'satpam') {
-            throw new NotFoundHttpException('Security profile not found.');
+            throw new NotFoundHttpException('Profil satpam tidak ditemukan.');
         }
 
         $security = $request->user()->user_security?->security;
         if (!$security) {
-            throw new NotFoundHttpException('Security profile not found.');
+            throw new NotFoundHttpException('Profil satpam tidak ditemukan.');
         }
 
         return $security;

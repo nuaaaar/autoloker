@@ -16,7 +16,7 @@ class AuthenticateApiToken
         if (!$plainToken) {
             return response()->json([
                 'status' => false,
-                'message' => 'Unauthenticated.',
+                'message' => 'Sesi Anda tidak valid atau telah berakhir. Silakan masuk kembali.',
             ], 401);
         }
 
@@ -27,7 +27,7 @@ class AuthenticateApiToken
         if (!$token || !$token->isAccessValid() || $token->user->status !== 'active') {
             return response()->json([
                 'status' => false,
-                'message' => 'Unauthenticated.',
+                'message' => 'Sesi Anda tidak valid atau telah berakhir. Silakan masuk kembali.',
             ], 401);
         }
 

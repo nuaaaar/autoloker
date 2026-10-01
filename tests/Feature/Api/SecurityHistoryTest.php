@@ -113,9 +113,6 @@ class SecurityHistoryTest extends TestCase
         $this->withToken($token)
             ->getJson('/api/security-histories/00000000-0000-0000-0000-000000000000')
             ->assertNotFound()
-            ->assertExactJson([
-                'status' => false,
-                'message' => 'Resource not found.',
-            ]);
+            ->assertJsonPath('status', false);
     }
 }

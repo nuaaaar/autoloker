@@ -49,7 +49,7 @@ class ProfileService
         $profile = $this->profileFor($user);
 
         if ($profile === null) {
-            throw new NotFoundHttpException('Profile not found.');
+            throw new NotFoundHttpException('Profil tidak ditemukan.');
         }
 
         if ($user->role === 'satpam') {
@@ -129,7 +129,7 @@ class ProfileService
         $profile = $this->profileFor($user);
 
         if ($profile === null) {
-            throw new NotFoundHttpException('Profile not found.');
+            throw new NotFoundHttpException('Profil tidak ditemukan.');
         }
 
         $oldFiles = [];

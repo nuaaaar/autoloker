@@ -151,14 +151,14 @@ final class TrainingRules
             $seen = [];
             foreach ($data[$field] as $index => $item) {
                 if (! is_string($item) || trim($item) === '') {
-                    $errors["{$field}.{$index}"][] = 'The item must not be empty.';
+                    $errors["{$field}.{$index}"][] = 'Isian tidak boleh kosong.';
                     continue;
                 }
 
                 if ($field === 'tags') {
                     $key = mb_strtolower(trim($item));
                     if (isset($seen[$key])) {
-                        $errors["{$field}.{$index}"][] = 'The tags must not contain duplicates.';
+                        $errors["{$field}.{$index}"][] = 'Tag tidak boleh duplikat.';
                     }
                     $seen[$key] = true;
                 }
@@ -185,8 +185,8 @@ final class TrainingRules
         }
 
         return [
-            'start_date' => ['The start date must be before or equal to the end date.'],
-            'end_date' => ['The end date must be greater than or equal to the start date.'],
+            'start_date' => ['Tanggal mulai harus sebelum atau sama dengan tanggal selesai.'],
+            'end_date' => ['Tanggal selesai harus sama dengan atau setelah tanggal mulai.'],
         ];
     }
 
@@ -204,10 +204,10 @@ final class TrainingRules
 
         $errors = [];
         if ($provinceBlank) {
-            $errors['province'][] = 'The province is required when a city is provided.';
+            $errors['province'][] = 'Provinsi wajib diisi jika kota diisi.';
         }
         if ($cityBlank) {
-            $errors['city'][] = 'The city is required when a province is provided.';
+            $errors['city'][] = 'Kota wajib diisi jika provinsi diisi.';
         }
         if ($errors !== []) {
             return $errors;
@@ -218,7 +218,7 @@ final class TrainingRules
             ->first(['code']);
 
         if (! $province) {
-            return ['province' => ['The selected province is invalid.']];
+            return ['province' => ['Provinsi yang dipilih tidak valid.']];
         }
 
         $cityExists = City::query()
@@ -228,7 +228,7 @@ final class TrainingRules
 
         return $cityExists
             ? []
-            : ['city' => ['The selected city is not in the selected province.']];
+            : ['city' => ['Kota yang dipilih bukan bagian dari provinsi yang dipilih.']];
     }
 
     /** @return list<mixed> */
@@ -245,7 +245,7 @@ final class TrainingRules
             'max:2048',
             function (string $attribute, mixed $value, \Closure $fail): void {
                 if (is_string($value) && preg_match('/^(?:[A-Za-z]:[\\\\\/]|\\\\\\\\|\\/)(?:home|root|var|tmp|private|Users)(?:[\\\\\/]|$)/i', $value)) {
-                    $fail('The poster must be a public storage key or path.');
+                    $fail('Poster harus berupa alamat file publik, bukan jalur file lokal.');
                 }
             },
         ];

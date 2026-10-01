@@ -23,7 +23,7 @@ class TrainingController extends Controller
     public function index(TrainingIndexRequest $request): JsonResponse
     {
         if ($request->user()?->role !== 'satpam') {
-            throw new NotFoundHttpException('Security profile not found.');
+            throw new NotFoundHttpException('Profil satpam tidak ditemukan.');
         }
 
         $filters = $request->validated();
@@ -96,7 +96,7 @@ class TrainingController extends Controller
 
             if ($training->status !== 'published') {
                 return [
-                    'error' => 'The training is not available for applications.',
+                    'error' => 'Pelatihan ini tidak tersedia untuk pendaftaran.',
                     'status' => 404,
                 ];
             }
@@ -110,15 +110,15 @@ class TrainingController extends Controller
             if ($application) {
                 return [
                     'error' => $application->status === 'approved'
-                        ? 'You are already registered for this training.'
-                        : 'Your training application is awaiting approval.',
+                        ? 'Anda sudah terdaftar dalam pelatihan ini.'
+                        : 'Pendaftaran pelatihan Anda sedang menunggu persetujuan.',
                     'status' => 422,
                 ];
             }
 
             if ($training->start_date && now()->startOfDay()->gt($training->start_date)) {
                 return [
-                    'error' => 'Training registration has closed.',
+                    'error' => 'Pendaftaran pelatihan telah ditutup.',
                     'status' => 422,
                 ];
             }
@@ -133,7 +133,7 @@ class TrainingController extends Controller
 
                 if ($approvedCount >= $quota) {
                     return [
-                        'error' => 'The training quota is full.',
+                        'error' => "Kuota pelatihan penuh ({$approvedCount}/{$quota} peserta disetujui). Pendaftaran tidak dapat dilakukan.",
                         'status' => 422,
                     ];
                 }
@@ -160,7 +160,7 @@ class TrainingController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Training application submitted successfully.',
+            'message' => 'Pendaftaran pelatihan berhasil dikirim.',
             'data' => [
                 'training_application' => [
                     'id' => $application->id,
@@ -176,13 +176,13 @@ class TrainingController extends Controller
     private function security(Request $request)
     {
         if ($request->user()?->role !== 'satpam') {
-            throw new NotFoundHttpException('Security profile not found.');
+            throw new NotFoundHttpException('Profil satpam tidak ditemukan.');
         }
 
         $security = $request->user()->user_security?->security;
 
         if (! $security) {
-            throw new NotFoundHttpException('Security profile not found.');
+            throw new NotFoundHttpException('Profil satpam tidak ditemukan.');
         }
 
         return $security;

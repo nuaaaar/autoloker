@@ -16,7 +16,7 @@ class RefreshTokenController extends Controller
         try {
             $tokens = $this->tokens->refresh($request->validated('refresh_token'));
         } catch (\InvalidArgumentException) {
-            return response()->json(['status' => false, 'message' => 'Invalid refresh token.'], 401);
+            return response()->json(['status' => false, 'message' => 'Token penyegaran tidak valid.'], 401);
         }
 
         return response()->json(['status' => true, 'data' => $tokens]);

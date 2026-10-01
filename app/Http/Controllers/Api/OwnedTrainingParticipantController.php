@@ -22,7 +22,7 @@ class OwnedTrainingParticipantController extends OwnedOrganizationController
     public function index(OwnedTrainingParticipantIndexRequest $request, string $uuid): JsonResponse
     {
         if ($request->user()?->role !== 'bujp') {
-            throw new NotFoundHttpException('BUJP profile not found.');
+            throw new NotFoundHttpException('Profil BUJP tidak ditemukan.');
         }
 
         $owner = $this->owner($request);
@@ -74,7 +74,7 @@ class OwnedTrainingParticipantController extends OwnedOrganizationController
         string $applicationUuid,
     ): JsonResponse {
         if ($request->user()?->role !== 'bujp') {
-            throw new NotFoundHttpException('BUJP profile not found.');
+            throw new NotFoundHttpException('Profil BUJP tidak ditemukan.');
         }
 
         $owner = $this->owner($request);
@@ -104,7 +104,7 @@ class OwnedTrainingParticipantController extends OwnedOrganizationController
 
                 if ($quota > 0 && $approvedCount >= $quota) {
                     return [
-                        'error' => 'The training quota is full.',
+                        'error' => "Kuota pelatihan penuh ({$approvedCount}/{$quota} peserta disetujui). Persetujuan peserta baru tidak dapat dilakukan.",
                         'status' => 422,
                     ];
                 }
@@ -134,7 +134,7 @@ class OwnedTrainingParticipantController extends OwnedOrganizationController
 
         return response()->json([
             'status' => true,
-            'message' => 'Training participant status updated successfully.',
+            'message' => 'Status peserta pelatihan berhasil diperbarui.',
             'data' => [
                 'training_participant' => (new TrainingParticipantResource($application))->resolve(),
             ],

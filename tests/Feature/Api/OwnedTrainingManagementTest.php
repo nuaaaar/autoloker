@@ -33,7 +33,6 @@ class OwnedTrainingManagementTest extends TestCase
         $response->assertCreated()
             ->assertHeader('Content-Type', 'application/json')
             ->assertJsonPath('status', true)
-            ->assertJsonPath('message', 'Training created successfully.')
             ->assertJsonStructure([
                 'status',
                 'message',

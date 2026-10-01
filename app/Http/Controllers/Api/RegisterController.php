@@ -20,7 +20,7 @@ class RegisterController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Registration successful.',
+            'message' => 'Pendaftaran berhasil.',
             'data' => [
                 'id' => $user->id,
                 'uuid' => $user->uuid,

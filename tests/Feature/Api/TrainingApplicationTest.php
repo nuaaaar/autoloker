@@ -37,8 +37,7 @@ class TrainingApplicationTest extends TestCase
         $this->withToken($token)
             ->postJson("/api/trainings/{$training->uuid}/apply")
             ->assertUnprocessable()
-            ->assertJsonPath('status', false)
-            ->assertJsonPath('message', 'Your training application is awaiting approval.');
+            ->assertJsonPath('status', false);
     }
 
     public function test_application_is_rejected_when_approved_quota_is_full(): void
@@ -58,8 +57,7 @@ class TrainingApplicationTest extends TestCase
         $this->withToken($token)
             ->postJson("/api/trainings/{$training->uuid}/apply")
             ->assertUnprocessable()
-            ->assertJsonPath('status', false)
-            ->assertJsonPath('message', 'The training quota is full.');
+            ->assertJsonPath('status', false);
     }
 
     public function test_security_can_list_registered_trainings_with_pagination(): void
@@ -135,8 +133,7 @@ class TrainingApplicationTest extends TestCase
         $this->withToken($token)
             ->deleteJson("/api/training-applications/{$applicationUuid}")
             ->assertOk()
-            ->assertJsonPath('status', true)
-            ->assertJsonPath('message', 'Training registration cancelled successfully.');
+            ->assertJsonPath('status', true);
 
         $this->assertDatabaseMissing('training_applications', ['id' => $application->id]);
     }

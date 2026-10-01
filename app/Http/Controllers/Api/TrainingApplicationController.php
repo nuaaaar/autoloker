@@ -80,20 +80,20 @@ class TrainingApplicationController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Training registration cancelled successfully.',
+            'message' => 'Pendaftaran pelatihan berhasil dibatalkan.',
         ]);
     }
 
     private function security(Request $request)
     {
         if ($request->user()?->role !== 'satpam') {
-            throw new NotFoundHttpException('Security profile not found.');
+            throw new NotFoundHttpException('Profil satpam tidak ditemukan.');
         }
 
         $security = $request->user()->user_security?->security;
 
         if (! $security) {
-            throw new NotFoundHttpException('Security profile not found.');
+            throw new NotFoundHttpException('Profil satpam tidak ditemukan.');
         }
 
         return $security;

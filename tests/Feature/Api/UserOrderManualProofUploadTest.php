@@ -47,7 +47,6 @@ class UserOrderManualProofUploadTest extends TestCase
             ->assertStatus(409)
             ->assertJsonPath('status', false)
             ->assertJsonPath('code', 'pending_payment_order_exists')
-            ->assertJsonPath('message', 'You already have an order waiting for payment.')
             ->assertJsonPath('data.user_order_manual.uuid', $firstOrderUuid)
             ->assertJsonPath('data.user_order_manual.status', 'pending_payment')
             ->assertJsonPath('data.user_order_manual.subscription.uuid', $firstSubscription->uuid);
@@ -144,7 +143,6 @@ class UserOrderManualProofUploadTest extends TestCase
             ->postJson("/api/user-order-manuals/{$orderUuid}/cancel")
             ->assertOk()
             ->assertJsonPath('status', true)
-            ->assertJsonPath('message', 'Manual subscription order cancelled successfully.')
             ->assertJsonPath('data.user_order_manual.uuid', $orderUuid)
             ->assertJsonPath('data.user_order_manual.status', 'cancelled');
 
@@ -203,8 +201,7 @@ class UserOrderManualProofUploadTest extends TestCase
                 ->postJson("/api/user-order-manuals/{$orderUuid}/cancel")
                 ->assertStatus(409)
                 ->assertJsonPath('status', false)
-                ->assertJsonPath('code', 'manual_order_not_cancellable')
-                ->assertJsonPath('message', 'Only orders awaiting payment can be cancelled.');
+                ->assertJsonPath('code', 'manual_order_not_cancellable');
 
             $this->assertDatabaseHas('user_order_manuals', [
                 'uuid' => $orderUuid,

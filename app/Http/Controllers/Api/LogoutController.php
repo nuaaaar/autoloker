@@ -12,6 +12,6 @@ class LogoutController extends Controller
     public function __invoke(Request $request, TokenService $tokens): JsonResponse
     {
         $tokens->revoke($request->attributes->get('api_token'));
-        return response()->json(['status' => true, 'message' => 'Logout successful.']);
+        return response()->json(['status' => true, 'message' => 'Logout berhasil.']);
     }
 }

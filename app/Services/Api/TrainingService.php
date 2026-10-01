@@ -74,7 +74,7 @@ class TrainingService
     {
         if (! in_array($training->status, ['draft', 'rejected'], true)) {
             $this->throwValidation([
-                'status' => ['Only draft or rejected trainings can be submitted.'],
+                'status' => ['Hanya pelatihan berstatus draf atau ditolak yang dapat diajukan.'],
             ]);
         }
 
@@ -237,7 +237,7 @@ class TrainingService
 
         if ((int) $quota < $activeParticipants) {
             $this->throwConflict([
-                'quota' => ["The quota cannot be lower than the {$activeParticipants} active participants."],
+                'quota' => ["Jumlah peserta aktif ({$activeParticipants}) melebihi kuota yang diminta ({$quota})."],
             ]);
         }
     }
@@ -287,7 +287,7 @@ class TrainingService
     {
         throw new HttpResponseException(response()->json([
             'status' => false,
-            'message' => 'The given data was invalid.',
+            'message' => 'Data yang diberikan tidak valid.',
             'data' => null,
             'errors' => $errors,
         ], 422));
@@ -298,7 +298,7 @@ class TrainingService
     {
         throw new HttpResponseException(response()->json([
             'status' => false,
-            'message' => 'The request conflicts with the current training participants.',
+            'message' => 'Jumlah peserta aktif melebihi kuota yang diminta.',
             'data' => null,
             'errors' => $errors,
         ], 409));

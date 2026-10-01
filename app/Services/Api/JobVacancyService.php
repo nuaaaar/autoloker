@@ -54,7 +54,7 @@ class JobVacancyService
     {
         if (! in_array($vacancy->status, ['draft', 'rejected'], true)) {
             $this->throwErrors([
-                'status' => ['Only draft or rejected job vacancies can be submitted.'],
+                'status' => ['Hanya lowongan kerja berstatus draf atau ditolak yang dapat diajukan.'],
             ]);
         }
 
@@ -115,7 +115,7 @@ class JobVacancyService
             ->first(['code', 'name']);
 
         if (! $province) {
-            $errors['province'][] = 'The selected province is invalid.';
+            $errors['province'][] = 'Provinsi yang dipilih tidak valid.';
 
             return [$data, $errors];
         }
@@ -126,7 +126,7 @@ class JobVacancyService
         $city = $cities->firstWhere('province_code', $province->code);
 
         if (! $city) {
-            $errors['city'][] = 'The selected city is not in the selected province.';
+            $errors['city'][] = 'Kota yang dipilih tidak berada di provinsi tersebut.';
 
             return [$data, $errors];
         }
@@ -232,7 +232,7 @@ class JobVacancyService
     {
         throw new HttpResponseException(response()->json([
             'status' => false,
-            'message' => 'The given data was invalid.',
+            'message' => 'Data yang diberikan tidak valid.',
             'data' => null,
             'errors' => $validator->errors(),
         ], 422));
@@ -243,7 +243,7 @@ class JobVacancyService
     {
         throw new HttpResponseException(response()->json([
             'status' => false,
-            'message' => 'The given data was invalid.',
+            'message' => 'Data yang diberikan tidak valid.',
             'data' => null,
             'errors' => $errors,
         ], 422));

@@ -15,4 +15,12 @@ class UserOrderManualStoreRequest extends ApiFormRequest
             'subscription_uuid' => ['required', 'string'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'subscription_uuid.required' => 'Pilih paket langganan terlebih dahulu.',
+            'subscription_uuid.string' => 'ID paket langganan tidak valid.',
+        ];
+    }
 }

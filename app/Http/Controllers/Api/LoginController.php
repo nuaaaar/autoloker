@@ -17,7 +17,7 @@ class LoginController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Login successful.',
+            'message' => 'Login berhasil.',
             'data' => array_merge($result['tokens'], ['user' => $result['user']]),
         ]);
     }

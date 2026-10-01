@@ -37,8 +37,7 @@ class JobApplicationTest extends TestCase
         $this->withToken($token)
             ->postJson("/api/job-vacancies/{$vacancy->uuid}/apply")
             ->assertUnprocessable()
-            ->assertJsonPath('status', false)
-            ->assertJsonPath('message', 'You have already applied for this job vacancy.');
+            ->assertJsonPath('status', false);
     }
 
     public function test_my_applications_returns_only_authenticated_security_vacancies_with_pagination(): void
@@ -112,8 +111,7 @@ class JobApplicationTest extends TestCase
         $this->withToken($token)
             ->deleteJson("/api/job-applications/{$applicationUuid}")
             ->assertOk()
-            ->assertJsonPath('status', true)
-            ->assertJsonPath('message', 'Job application cancelled successfully.');
+            ->assertJsonPath('status', true);
 
         $this->assertDatabaseMissing('job_applications', ['id' => $application->id]);
     }

@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Api;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
 
 class ProfileRequest extends FormRequest
@@ -109,6 +111,14 @@ class ProfileRequest extends FormRequest
 
         return array_merge($common, $business);
     }
+
+    protected function failedValidation(Validator $validator): void
+    {
+        throw new HttpResponseException(response()->json([
+            'message' => 'Data yang dikirim tidak valid.',
+            'errors' => $validator->errors(),
+        ], 422));
+    }
     public function withValidator($validator): void
     {
         $validator->after(function ($validator): void {
@@ -130,7 +140,16 @@ class ProfileRequest extends FormRequest
                         ->where('code', $this->input($child))
                         ->where($foreignKey, $this->input($parent))
                         ->exists()) {
-                    $validator->errors()->add($child, 'The selected '.$child.' does not belong to the selected '.$parent.'.');
+                    $labels = [
+                        'province' => 'provinsi',
+                        'city' => 'kota',
+                        'district' => 'kecamatan',
+                        'village' => 'kelurahan/desa',
+                    ];
+                    $validator->errors()->add(
+                        $child,
+                        'Pilihan '.$labels[$child].' tidak sesuai dengan '.$labels[$parent].' yang dipilih.',
+                    );
                 }
             }
         });

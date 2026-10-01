@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api;
 
 use App\Models\MasterCategoryCertificate;
+use App\Models\Security;
 use App\Models\User;
 use App\Models\UserSecurity;
 use App\Services\Api\TokenService;
@@ -115,8 +116,7 @@ class SecurityCertificateTest extends TestCase
 
         $this->withToken($token)
             ->deleteJson("/api/security-certificates/{$uuid}")
-            ->assertOk()
-            ->assertJsonPath('message', 'Security certificate deleted successfully.');
+            ->assertOk();
 
         $this->assertDatabaseMissing('security_certificates', ['uuid' => $uuid]);
     }

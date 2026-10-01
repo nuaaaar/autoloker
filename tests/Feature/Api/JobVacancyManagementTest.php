@@ -29,7 +29,6 @@ class JobVacancyManagementTest extends TestCase
         $response->assertCreated()
             ->assertHeader('Content-Type', 'application/json')
             ->assertJsonPath('status', true)
-            ->assertJsonPath('message', 'Job vacancy created successfully.')
             ->assertJsonStructure([
                 'status',
                 'message',

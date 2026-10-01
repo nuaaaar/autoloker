@@ -82,7 +82,7 @@ class OwnedTrainingController extends OwnedOrganizationController
 
         return $this->mutationResponse(
             $training,
-            'Training created successfully.',
+            'Pelatihan berhasil dibuat.',
             201,
             true,
         );
@@ -94,7 +94,7 @@ class OwnedTrainingController extends OwnedOrganizationController
 
         return response()->json([
             'status' => true,
-            'message' => 'Training retrieved successfully.',
+            'message' => 'Pelatihan berhasil diambil.',
             'data' => [
                 'training' => $this->resourceData($training),
             ],
@@ -111,7 +111,7 @@ class OwnedTrainingController extends OwnedOrganizationController
 
         return $this->mutationResponse(
             $training,
-            'Training updated successfully.',
+            'Pelatihan berhasil diperbarui.',
         );
     }
 
@@ -125,7 +125,7 @@ class OwnedTrainingController extends OwnedOrganizationController
 
         return $this->mutationResponse(
             $training,
-            'Training submitted for review successfully.',
+            'Pelatihan berhasil diajukan untuk ditinjau.',
         );
     }
 
@@ -143,7 +143,7 @@ class OwnedTrainingController extends OwnedOrganizationController
     private function ensureBujp(Request $request): void
     {
         if ($request->user()?->role !== 'bujp') {
-            throw new NotFoundHttpException('BUJP profile not found.');
+            throw new NotFoundHttpException('Profil BUJP tidak ditemukan.');
         }
     }
 

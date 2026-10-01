@@ -78,14 +78,14 @@ class JobApplicationController extends Controller
 
             if ($vacancy->status !== 'published') {
                 return [
-                    'error' => 'The job vacancy is not available for applications.',
+                    'error' => 'Lowongan kerja ini tidak tersedia untuk dilamar.',
                     'status' => 404,
                 ];
             }
 
             if ($vacancy->end_date && now()->startOfDay()->gt($vacancy->end_date)) {
                 return [
-                    'error' => 'The application period for this job vacancy has ended.',
+                    'error' => 'Masa lamaran lowongan kerja ini telah berakhir.',
                     'status' => 422,
                 ];
             }
@@ -97,7 +97,7 @@ class JobApplicationController extends Controller
 
             if ($application) {
                 return [
-                    'error' => 'You have already applied for this job vacancy.',
+                    'error' => 'Anda sudah melamar lowongan kerja ini.',
                     'status' => 422,
                 ];
             }
@@ -109,7 +109,7 @@ class JobApplicationController extends Controller
 
                 if ($applicantCount >= $vacancy->kuota) {
                     return [
-                        'error' => 'The applicant quota for this job vacancy is full.',
+                        'error' => "Kuota lowongan penuh ({$applicantCount}/{$vacancy->kuota} lamaran). Lamaran baru tidak dapat dikirim.",
                         'status' => 422,
                     ];
                 }
@@ -135,7 +135,7 @@ class JobApplicationController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Job application submitted successfully.',
+            'message' => 'Lamaran kerja berhasil dikirim.',
             'data' => [
                 'job_application' => [
                     'id' => $application->id,
@@ -159,20 +159,20 @@ class JobApplicationController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Job application cancelled successfully.',
+            'message' => 'Lamaran kerja berhasil dibatalkan.',
         ]);
     }
 
     private function security(Request $request)
     {
         if ($request->user()?->role !== 'satpam') {
-            throw new NotFoundHttpException('Security profile not found.');
+            throw new NotFoundHttpException('Profil satpam tidak ditemukan.');
         }
 
         $security = $request->user()->user_security?->security;
 
         if (! $security) {
-            throw new NotFoundHttpException('Security profile not found.');
+            throw new NotFoundHttpException('Profil satpam tidak ditemukan.');
         }
 
         return $security;

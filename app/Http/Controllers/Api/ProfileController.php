@@ -24,7 +24,7 @@ class ProfileController extends Controller
     {
         return response()->json([
             'status' => true,
-            'message' => 'Profile updated successfully.',
+            'message' => 'Profil berhasil diperbarui.',
             'data' => ['profile' => $this->profiles->update($request->user(), $request->validated())],
         ]);
     }

@@ -31,7 +31,7 @@ abstract class OwnedOrganizationController extends Controller
         };
 
         if (! $owner || ! $owner['profile']) {
-            throw new NotFoundHttpException('Company or BUJP profile not found.');
+            throw new NotFoundHttpException('Profil perusahaan atau BUJP tidak ditemukan.');
         }
 
         return [

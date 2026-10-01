@@ -49,13 +49,13 @@ return Application::configure(basePath: dirname(__DIR__))
             };
 
             $message = match ($status) {
-                401 => 'Unauthenticated.',
-                403 => 'Forbidden.',
-                404 => 'Resource not found.',
-                405 => 'Method not allowed.',
+                401 => 'Sesi Anda tidak valid atau telah berakhir. Silakan masuk kembali.',
+                403 => 'Anda tidak memiliki akses untuk melakukan tindakan ini.',
+                404 => 'Data yang diminta tidak ditemukan.',
+                405 => 'Metode permintaan tidak didukung.',
                 default => $status >= 500
-                    ? 'An unexpected error occurred.'
-                    : 'The request could not be processed.',
+                    ? 'Terjadi kesalahan yang tidak terduga.'
+                    : 'Permintaan tidak dapat diproses.',
             };
 
             return response()->json([

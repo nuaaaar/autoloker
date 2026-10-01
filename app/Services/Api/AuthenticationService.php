@@ -15,7 +15,7 @@ class AuthenticationService
     {
         $key = 'api-login:'.strtolower($data['identifier']).'|'.$this->requestIp();
         if (RateLimiter::tooManyAttempts($key, 5)) {
-            throw ValidationException::withMessages(['identifier' => 'Too many login attempts.']);
+            throw ValidationException::withMessages(['identifier' => 'Terlalu banyak percobaan masuk.']);
         }
 
         $user = User::where(function ($query) use ($data) {
@@ -25,18 +25,18 @@ class AuthenticationService
 
         if (! $user || ! Hash::check($data['password'], $user->password)) {
             RateLimiter::hit($key, 60);
-            throw ValidationException::withMessages(['identifier' => 'Invalid credentials.']);
+            throw ValidationException::withMessages(['identifier' => 'Kredensial tidak valid.']);
         }
 
         RateLimiter::clear($key);
 
         if ($user->status !== 'active') {
-            throw ValidationException::withMessages(['identifier' => 'Account is inactive.']);
+            throw ValidationException::withMessages(['identifier' => 'Akun tidak aktif.']);
         }
 
         $expectedRole = $data['role'] === 'security' ? 'satpam' : $data['role'];
         if ($user->role !== $expectedRole) {
-            throw ValidationException::withMessages(['role' => 'Account role does not match.']);
+            throw ValidationException::withMessages(['role' => 'Peran akun tidak sesuai.']);
         }
 
         return [
@@ -49,7 +49,7 @@ class AuthenticationService
     {
         if ($user->has_local_password && ! Hash::check($data['current_password'], $user->password)) {
             throw ValidationException::withMessages([
-                'current_password' => 'Current password is incorrect.',
+                'current_password' => 'Kata sandi saat ini salah.',
             ]);
         }
 
