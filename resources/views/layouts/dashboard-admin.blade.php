@@ -360,99 +360,381 @@
                                         </a>
 
                                     </div>
-                                    <div data-kt-menu-trigger="click" class="menu-item {{ Route::is('dashboard-admin.master.*') ? 'here show' : '' }} menu-accordion">
+                                    <div data-kt-menu-trigger="click"
+                                        class="menu-item {{ Route::is('dashboard-admin.master.*') ? 'here show' : '' }} menu-accordion">
+
                                         <!--begin:Menu link-->
                                         <span class="menu-link">
                                             <span class="menu-icon">
                                                 <i class="ki-duotone ki-data fs-2">
                                                 </i>
                                             </span>
+
                                             <span class="menu-title">Master</span>
+
                                             <span class="menu-arrow"></span>
                                         </span>
                                         <!--end:Menu link-->
+
+
                                         <!--begin:Menu sub-->
                                         <div class="menu-sub menu-sub-accordion">
-                                            <!--begin:Menu item-->
-                                            <div class="menu-item">
-                                                <!--begin:Menu link-->
-                                                <a class="menu-link {{ Route::is('dashboard-admin.master.position.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.master.position.index') }}">
+
+                                            <!-- ===================================================== -->
+                                            <!-- CLEANING SERVICE -->
+                                            <!-- ===================================================== -->
+
+                                            <div data-kt-menu-trigger="click"
+                                                class="menu-item {{ request()->route('category') === 'cs' ? 'here show' : '' }} menu-accordion">
+
+                                                <!--begin:Cleaning Service link-->
+                                                <span class="menu-link">
                                                     <span class="menu-bullet">
                                                         <span class="bullet bullet-dot"></span>
                                                     </span>
-                                                    <span class="menu-title">Jabatan</span>
-                                                </a>
-                                                <a class="menu-link {{ Route::is('dashboard-admin.master.position-security.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.master.position-security.index') }}">
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
+
+                                                    <span class="menu-title">
+                                                        Cleaning Service
                                                     </span>
-                                                    <span class="menu-title">Jabatan Satpam</span>
-                                                </a>
-                                                <a class="menu-link {{ Route::is('dashboard-admin.master.placement.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.master.placement.index') }}">
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
-                                                    </span>
-                                                    <span class="menu-title">Penempatan</span>
-                                                </a>
-                                                <a class="menu-link {{ Route::is('dashboard-admin.master.ability.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.master.ability.index') }}">
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
-                                                    </span>
-                                                    <span class="menu-title">Kemampuan</span>
-                                                </a>
-                                                <a class="menu-link {{ Route::is('dashboard-admin.master.category-certificate.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.master.category-certificate.index') }}">
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
-                                                    </span>
-                                                    <span class="menu-title">Kategori Sertifikasi</span>
-                                                </a>
-                                                <a class="menu-link {{ Route::is('dashboard-admin.master.certificate.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.master.certificate.index') }}">
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
-                                                    </span>
-                                                    <span class="menu-title">Sertifikasi</span>
-                                                </a>
-                                                <a class="menu-link {{ Route::is('dashboard-admin.master.competency-scheme.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.master.competency-scheme.index') }}">
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
-                                                    </span>
-                                                    <span class="menu-title">Kompetensi Skema</span>
-                                                </a>
-                                                <a class="menu-link {{ Route::is('dashboard-admin.master.industry.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.master.industry.index') }}">
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
-                                                    </span>
-                                                    <span class="menu-title">Bidang Usaha</span>
-                                                </a>
-                                                <a class="menu-link {{ Route::is('dashboard-admin.master.subscription.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.master.subscription.index') }}">
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
-                                                    </span>
-                                                    <span class="menu-title">Subscription</span>
-                                                </a>
-                                                <a class="menu-link {{ Route::is('dashboard-admin.master.faq.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.master.faq.index') }}">
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
-                                                    </span>
-                                                    <span class="menu-title">FAQ</span>
-                                                </a>
-                                                <a class="menu-link {{ Route::is('dashboard-admin.master.notification.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.master.notification.index') }}">
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
-                                                    </span>
-                                                    <span class="menu-title">Notifikasi</span>
-                                                </a>
-                                                <a class="menu-link {{ Route::is('dashboard-admin.master.bank.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.master.bank.index') }}">
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
-                                                    </span>
-                                                    <span class="menu-title">Bank</span>
-                                                </a>
-                                                <!--end:Menu link-->
+
+                                                    <span class="menu-arrow"></span>
+                                                </span>
+                                                <!--end:Cleaning Service link-->
+
+
+                                                <!--begin:Cleaning Service sub-->
+                                                <div class="menu-sub menu-sub-accordion">
+
+                                                    <!-- Jabatan -->
+                                                    <div class="menu-item">
+                                                        <a class="menu-link {{ Route::is('dashboard-admin.master.position.category.index') && request()->route('category') === 'cs' ? 'active' : '' }}"
+                                                            href="{{ route('dashboard-admin.master.position.category.index', ['category' => 'cs']) }}">
+
+                                                            <span class="menu-bullet">
+                                                                <span class="bullet bullet-dot"></span>
+                                                            </span>
+
+                                                            <span class="menu-title">
+                                                                Jabatan
+                                                            </span>
+                                                        </a>
+                                                    </div>
+
+
+                                                    <!-- Posisi Loker -->
+                                                    <div class="menu-item">
+                                                        <a class="menu-link {{ Route::is('dashboard-admin.master.position-cleaning-service.*') ? 'active' : '' }}"
+                                                            href="{{ route('dashboard-admin.master.position-cleaning-service.index') }}">
+
+                                                            <span class="menu-bullet">
+                                                                <span class="bullet bullet-dot"></span>
+                                                            </span>
+
+                                                            <span class="menu-title">
+                                                                Posisi Loker
+                                                            </span>
+                                                        </a>
+                                                    </div>
+
+
+                                                    <!-- Penempatan -->
+                                                    <div class="menu-item">
+                                                        <a class="menu-link {{ Route::is('dashboard-admin.master.placement.category.index') && request()->route('category') === 'cs' ? 'active' : '' }}"
+                                                            href="{{ route('dashboard-admin.master.placement.category.index', ['category' => 'cs']) }}">
+
+                                                            <span class="menu-bullet">
+                                                                <span class="bullet bullet-dot"></span>
+                                                            </span>
+
+                                                            <span class="menu-title">
+                                                                Penempatan
+                                                            </span>
+                                                        </a>
+                                                    </div>
+
+
+                                                    <!-- Kemampuan -->
+                                                    <div class="menu-item">
+                                                        <a class="menu-link {{ Route::is('dashboard-admin.master.ability.category.index') && request()->route('category') === 'cs' ? 'active' : '' }}"
+                                                            href="{{ route('dashboard-admin.master.ability.category.index', ['category' => 'cs']) }}">
+
+                                                            <span class="menu-bullet">
+                                                                <span class="bullet bullet-dot"></span>
+                                                            </span>
+
+                                                            <span class="menu-title">
+                                                                Kemampuan
+                                                            </span>
+                                                        </a>
+                                                    </div>
+
+
+                                                    <!-- Kategori Sertifikasi -->
+                                                    <div class="menu-item">
+                                                        <a class="menu-link {{ Route::is('dashboard-admin.master.category-certificate.category.index') && request()->route('category') === 'cs' ? 'active' : '' }}"
+                                                            href="{{ route('dashboard-admin.master.category-certificate.category.index', ['category' => 'cs']) }}">
+
+                                                            <span class="menu-bullet">
+                                                                <span class="bullet bullet-dot"></span>
+                                                            </span>
+
+                                                            <span class="menu-title">
+                                                                Kategori Sertifikasi
+                                                            </span>
+                                                        </a>
+                                                    </div>
+
+
+                                                    <!-- Sertifikasi -->
+                                                    <div class="menu-item">
+                                                        <a class="menu-link {{ Route::is('dashboard-admin.master.certificate.category.index') && request()->route('category') === 'cs' ? 'active' : '' }}"
+                                                            href="{{ route('dashboard-admin.master.certificate.category.index', ['category' => 'cs']) }}">
+
+                                                            <span class="menu-bullet">
+                                                                <span class="bullet bullet-dot"></span>
+                                                            </span>
+
+                                                            <span class="menu-title">
+                                                                Sertifikasi
+                                                            </span>
+                                                        </a>
+                                                    </div>
+
+                                                </div>
+                                                <!--end:Cleaning Service sub-->
+
                                             </div>
-                                            <!--end:Menu item-->
+
+
+                                            <!-- ===================================================== -->
+                                            <!-- SATPAM -->
+                                            <!-- ===================================================== -->
+
+                                            <div data-kt-menu-trigger="click"
+                                                class="menu-item {{ request()->route('category') === 'security' ? 'here show' : '' }} menu-accordion">
+
+                                                <!--begin:Satpam link-->
+                                                <span class="menu-link">
+                                                    <span class="menu-bullet">
+                                                        <span class="bullet bullet-dot"></span>
+                                                    </span>
+
+                                                    <span class="menu-title">
+                                                        Satpam
+                                                    </span>
+
+                                                    <span class="menu-arrow"></span>
+                                                </span>
+                                                <!--end:Satpam link-->
+
+
+                                                <!--begin:Satpam sub-->
+                                                <div class="menu-sub menu-sub-accordion">
+
+                                                    <!-- Jabatan -->
+                                                    <div class="menu-item">
+                                                        <a class="menu-link {{ Route::is('dashboard-admin.master.position.category.index') && request()->route('category') === 'security' ? 'active' : '' }}"
+                                                            href="{{ route('dashboard-admin.master.position.category.index', ['category' => 'security']) }}">
+
+                                                            <span class="menu-bullet">
+                                                                <span class="bullet bullet-dot"></span>
+                                                            </span>
+
+                                                            <span class="menu-title">
+                                                                Jabatan
+                                                            </span>
+                                                        </a>
+                                                    </div>
+
+
+                                                    <!-- Posisi Loker -->
+                                                    <div class="menu-item">
+                                                        <a class="menu-link {{ Route::is('dashboard-admin.master.position-security.*') ? 'active' : '' }}"
+                                                            href="{{ route('dashboard-admin.master.position-security.index') }}">
+
+                                                            <span class="menu-bullet">
+                                                                <span class="bullet bullet-dot"></span>
+                                                            </span>
+
+                                                            <span class="menu-title">
+                                                                Posisi Loker
+                                                            </span>
+                                                        </a>
+                                                    </div>
+
+
+                                                    <!-- Penempatan -->
+                                                    <div class="menu-item">
+                                                        <a class="menu-link {{ Route::is('dashboard-admin.master.placement.category.index') && request()->route('category') === 'security' ? 'active' : '' }}"
+                                                            href="{{ route('dashboard-admin.master.placement.category.index', ['category' => 'security']) }}">
+
+                                                            <span class="menu-bullet">
+                                                                <span class="bullet bullet-dot"></span>
+                                                            </span>
+
+                                                            <span class="menu-title">
+                                                                Penempatan
+                                                            </span>
+                                                        </a>
+                                                    </div>
+
+
+                                                    <!-- Kemampuan -->
+                                                    <div class="menu-item">
+                                                        <a class="menu-link {{ Route::is('dashboard-admin.master.ability.category.index') && request()->route('category') === 'security' ? 'active' : '' }}"
+                                                            href="{{ route('dashboard-admin.master.ability.category.index', ['category' => 'security']) }}">
+
+                                                            <span class="menu-bullet">
+                                                                <span class="bullet bullet-dot"></span>
+                                                            </span>
+
+                                                            <span class="menu-title">
+                                                                Kemampuan
+                                                            </span>
+                                                        </a>
+                                                    </div>
+
+
+                                                    <!-- Kategori Sertifikasi -->
+                                                    <div class="menu-item">
+                                                        <a class="menu-link {{ Route::is('dashboard-admin.master.category-certificate.category.index') && request()->route('category') === 'security' ? 'active' : '' }}"
+                                                            href="{{ route('dashboard-admin.master.category-certificate.category.index', ['category' => 'security']) }}">
+
+                                                            <span class="menu-bullet">
+                                                                <span class="bullet bullet-dot"></span>
+                                                            </span>
+
+                                                            <span class="menu-title">
+                                                                Kategori Sertifikasi
+                                                            </span>
+                                                        </a>
+                                                    </div>
+
+
+                                                    <!-- Sertifikasi -->
+                                                    <div class="menu-item">
+                                                        <a class="menu-link {{ Route::is('dashboard-admin.master.certificate.category.index') && request()->route('category') === 'security' ? 'active' : '' }}"
+                                                            href="{{ route('dashboard-admin.master.certificate.category.index', ['category' => 'security']) }}">
+
+                                                            <span class="menu-bullet">
+                                                                <span class="bullet bullet-dot"></span>
+                                                            </span>
+
+                                                            <span class="menu-title">
+                                                                Sertifikasi
+                                                            </span>
+                                                        </a>
+                                                    </div>
+
+                                                </div>
+                                                <!--end:Satpam sub-->
+
+                                            </div>
+
+
+                                            <!-- ===================================================== -->
+                                            <!-- MENU LAINNYA - TIDAK DIUBAH -->
+                                            <!-- ===================================================== -->
+
+
+                                            <!-- Kompetensi Skema -->
+                                            <div class="menu-item">
+                                                <a class="menu-link {{ Route::is('dashboard-admin.master.competency-scheme.*') ? 'active' : '' }}"
+                                                    href="{{ route('dashboard-admin.master.competency-scheme.index') }}">
+
+                                                    <span class="menu-bullet">
+                                                        <span class="bullet bullet-dot"></span>
+                                                    </span>
+
+                                                    <span class="menu-title">
+                                                        Kompetensi Skema
+                                                    </span>
+                                                </a>
+                                            </div>
+
+
+                                            <!-- Bidang Usaha -->
+                                            <div class="menu-item">
+                                                <a class="menu-link {{ Route::is('dashboard-admin.master.industry.*') ? 'active' : '' }}"
+                                                    href="{{ route('dashboard-admin.master.industry.index') }}">
+
+                                                    <span class="menu-bullet">
+                                                        <span class="bullet bullet-dot"></span>
+                                                    </span>
+
+                                                    <span class="menu-title">
+                                                        Bidang Usaha
+                                                    </span>
+                                                </a>
+                                            </div>
+
+
+                                            <!-- Subscription -->
+                                            <div class="menu-item">
+                                                <a class="menu-link {{ Route::is('dashboard-admin.master.subscription.*') ? 'active' : '' }}"
+                                                    href="{{ route('dashboard-admin.master.subscription.index') }}">
+
+                                                    <span class="menu-bullet">
+                                                        <span class="bullet bullet-dot"></span>
+                                                    </span>
+
+                                                    <span class="menu-title">
+                                                        Subscription
+                                                    </span>
+                                                </a>
+                                            </div>
+
+
+                                            <!-- FAQ -->
+                                            <div class="menu-item">
+                                                <a class="menu-link {{ Route::is('dashboard-admin.master.faq.*') ? 'active' : '' }}"
+                                                    href="{{ route('dashboard-admin.master.faq.index') }}">
+
+                                                    <span class="menu-bullet">
+                                                        <span class="bullet bullet-dot"></span>
+                                                    </span>
+
+                                                    <span class="menu-title">
+                                                        FAQ
+                                                    </span>
+                                                </a>
+                                            </div>
+
+
+                                            <!-- Notifikasi -->
+                                            <div class="menu-item">
+                                                <a class="menu-link {{ Route::is('dashboard-admin.master.notification.*') ? 'active' : '' }}"
+                                                    href="{{ route('dashboard-admin.master.notification.index') }}">
+
+                                                    <span class="menu-bullet">
+                                                        <span class="bullet bullet-dot"></span>
+                                                    </span>
+
+                                                    <span class="menu-title">
+                                                        Notifikasi
+                                                    </span>
+                                                </a>
+                                            </div>
+
+
+                                            <!-- Bank -->
+                                            <div class="menu-item">
+                                                <a class="menu-link {{ Route::is('dashboard-admin.master.bank.*') ? 'active' : '' }}"
+                                                    href="{{ route('dashboard-admin.master.bank.index') }}">
+
+                                                    <span class="menu-bullet">
+                                                        <span class="bullet bullet-dot"></span>
+                                                    </span>
+
+                                                    <span class="menu-title">
+                                                        Bank
+                                                    </span>
+                                                </a>
+                                            </div>
+
                                         </div>
                                         <!--end:Menu sub-->
+
                                     </div>
 
                                     <div data-kt-menu-trigger="click" class="menu-item {{ Route::is('dashboard-admin.management-user.*') ? 'here show' : '' }} menu-accordion">

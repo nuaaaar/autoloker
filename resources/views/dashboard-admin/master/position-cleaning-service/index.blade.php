@@ -1,6 +1,6 @@
 @extends('layouts.dashboard-admin')
 
-@section('title', 'Posisi Loker Satpam')
+@section('title', 'Posisi Loker Cleaning Service')
 
 @section('css')
 
@@ -9,7 +9,7 @@
 @section('breadcrumb')
     <h1
         class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">
-        Posisi Loker Satpam</h1>
+        Posisi Loker Cleaning Service</h1>
     <!--end::Title-->
     <!--begin::Breadcrumb-->
     <ul class="breadcrumb breadcrumb-separatorless fw-semibold fs-7 my-0 pt-1">
@@ -30,7 +30,7 @@
         </li>
         <!--end::Item-->
         <!--begin::Item-->
-        <li class="breadcrumb-item text-muted">Posisi Loker Satpam</li>
+        <li class="breadcrumb-item text-muted">Posisi Loker Cleaning Service</li>
         <!--end::Item-->
     </ul>
     <!--end::Breadcrumb-->
@@ -71,7 +71,7 @@
                         <thead>
                             <tr>
                                 <th width="1%">ID</th>
-                                <th>Nama Posisi Loker Satpam</th>
+                                <th>Nama Posisi Loker Cleaning Service</th>
                                 <th class="text-end" width="5%">Aksi</th>
                             </tr>
                         </thead>
@@ -96,7 +96,7 @@
                     <div class="modal-header">
 
                         <h5 class="modal-title">
-                            Tambah Posisi Loker Satpam
+                            Tambah Posisi Loker Cleaning Service
                         </h5>
 
                         <button
@@ -118,7 +118,7 @@
                         <div class="mb-5">
 
                             <label class="form-label required">
-                                Nama Posisi Loker Satpam
+                                Nama Posisi Loker Cleaning Service
                             </label>
 
                             <input
@@ -126,7 +126,7 @@
                                 class="form-control"
                                 name="title"
                                 id="create_title"
-                                placeholder="Masukkan Posisi Loker Satpam"
+                                placeholder="Masukkan Posisi Loker Cleaning Service"
                                 required>
 
                         </div>
@@ -258,7 +258,7 @@
                     <div class="modal-header">
 
                         <h5 class="modal-title">
-                            Edit Posisi Loker Satpam
+                            Edit Posisi Loker Cleaning Service
                         </h5>
 
                         <button
@@ -280,7 +280,7 @@
                         <div class="mb-5">
 
                             <label class="form-label required">
-                                Nama Posisi Loker Satpam
+                                Nama Posisi Loker Cleaning Service
                             </label>
 
                             <input
@@ -382,7 +382,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Hapus Posisi Loker Satpam</h5>
+                    <h5 class="modal-title">Hapus Posisi Loker Cleaning Service</h5>
                     <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close" data-bs-original-title="" title=""></button>
                 </div>
                 <div class="modal-body">
@@ -418,7 +418,7 @@
                 "aLengthMenu": [[10, 25, 50, 75, 999999], [10, 25, 50, 75, "All"]],
                 ajax: {
 
-                    url: '{{ route("dashboard-admin.master.position-security.index") }}',
+                    url: '{{ route("dashboard-admin.master.position-cleaning-service.index") }}',
                     type: 'GET',
 
                     data: function (d) {
@@ -526,7 +526,7 @@
             $.ajax({
 
                 url:
-                    "{{ route('dashboard-admin.master.position-security.index') }}/"
+                    "{{ route('dashboard-admin.master.position-cleaning-service.index') }}/"
                     + uuid,
 
                 type: "GET",
@@ -657,7 +657,7 @@
 
             $.ajax({
 
-                url: "{{ route('dashboard-admin.master.position-security.store') }}",
+                url: "{{ route('dashboard-admin.master.position-cleaning-service.store') }}",
 
                 type: "POST",
 
@@ -785,7 +785,7 @@
             $.ajax({
 
                 url:
-                    "{{ route('dashboard-admin.master.position-security.index') }}/"
+                    "{{ route('dashboard-admin.master.position-cleaning-service.index') }}/"
                     + uuid,
 
                 type: "POST",
@@ -909,7 +909,7 @@
 
             $.ajax({
 
-                url: "{{ route('dashboard-admin.master.position-security.index') }}/" + uuid,
+                url: "{{ route('dashboard-admin.master.position-cleaning-service.index') }}/" + uuid,
 
                 type: "DELETE",
 

@@ -2,55 +2,77 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Resources\MasterResource;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\MasterResource;
 use App\Models\MasterPlacement;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class MasterPlacementController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(Request $request, $category)
     {
+        $this->validateCategory($category);
+
         if ($request->ajax()) {
             $searchValue = $request->input('search.value');
+
             $orderColumn = $request->input('order.0.column') ?? 0;
             $orderSort = $request->input('order.0.dir') ?? 'asc';
-            $orderValue  = $request->input('columns.' . $orderColumn . '.data') ?? 'id';
-            //get data
-            $data = MasterPlacement::when($searchValue, function($q) use($searchValue) {
-                $q->orWhere('title', 'like', '%' . $searchValue . '%');
-            })
-            ->orderBy($orderValue, $orderSort)->paginate($request->length ?? 10);
 
-            //return with Api Resource
-            return new MasterResource(true, '00', 'List Data', $data);
+            $orderValue = $request->input(
+                'columns.' . $orderColumn . '.data'
+            ) ?? 'id';
+
+            $data = MasterPlacement::where('category', $category)
+                ->when($searchValue, function ($q) use ($searchValue) {
+                    $q->where(
+                        'title',
+                        'like',
+                        '%' . $searchValue . '%'
+                    );
+                })
+                ->orderBy($orderValue, $orderSort)
+                ->paginate($request->length ?? 10);
+
+            return new MasterResource(
+                true,
+                '00',
+                'List Data',
+                $data
+            );
         }
 
-        return view('dashboard-admin.master.placement.index');
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        return view(
+            'dashboard-admin.master.placement.index',
+            compact('category')
+        );
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, $category)
     {
+        $this->validateCategory($category);
+
         $request->validate([
-            'title' => 'required|max:255|unique:master_placements,title'
+            'title' => [
+                'required',
+                'max:255',
+                Rule::unique('master_placements', 'title')
+                    ->where(function ($query) use ($category) {
+                        return $query->where('category', $category);
+                    }),
+            ],
         ]);
 
         MasterPlacement::create([
-            'title' => $request->title
+            'title' => $request->title,
+            'category' => $category,
         ]);
 
         return response()->json([
@@ -60,48 +82,53 @@ class MasterPlacementController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $uuid)
-    {
+    public function update(
+        Request $request,
+        $category,
+        $uuid
+    ) {
+        $this->validateCategory($category);
+
+        $data = MasterPlacement::where('uuid', $uuid)
+            ->where('category', $category)
+            ->firstOrFail();
+
         $request->validate([
-            'title' => 'required|max:255|unique:master_placements,title,' . $uuid . ',uuid'
+            'title' => [
+                'required',
+                'max:255',
+                Rule::unique('master_placements', 'title')
+                    ->where(function ($query) use ($category) {
+                        return $query->where('category', $category);
+                    })
+                    ->ignore($uuid, 'uuid'),
+            ],
         ]);
 
-        $data = MasterPlacement::where('uuid',$uuid)->firstOrFail();
-
         $data->update([
-            'title'=>$request->title
+            'title' => $request->title
         ]);
 
         return response()->json([
-            'status'=>true,
-            'message'=>'Data berhasil diperbarui.'
+            'status' => true,
+            'message' => 'Data berhasil diperbarui.'
         ]);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
-    {
-        $data = MasterPlacement::where('uuid', $id)->first();
+    public function destroy(
+        $category,
+        $uuid
+    ) {
+        $this->validateCategory($category);
+
+        $data = MasterPlacement::where('uuid', $uuid)
+            ->where('category', $category)
+            ->first();
 
         if (!$data) {
             return response()->json([
@@ -116,5 +143,16 @@ class MasterPlacementController extends Controller
             'status' => true,
             'message' => 'Data berhasil dihapus.'
         ]);
+    }
+
+    /**
+     * Validate placement category.
+     */
+    private function validateCategory($category)
+    {
+        abort_unless(
+            in_array($category, ['cs', 'security']),
+            404
+        );
     }
 }

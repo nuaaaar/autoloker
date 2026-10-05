@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\MasterPositionCleaningServiceController as ADMMasterPositionCleaningService;
 use App\Http\Controllers\Admin\MasterCategoryCertificateController as ADMMasterCategoryCertificate;
 use App\Http\Controllers\Admin\MasterPositionSecurityController as ADMMasterPositionSecurity;
 use App\Http\Controllers\Admin\MasterPlacementController as ADMMasterPlacement;
@@ -104,13 +105,102 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [ADMDashboard::class,'index'])->name('index');
         
         Route::prefix('master')->name('master.')->group(function () {
-            Route::resource('placement', ADMMasterPlacement::class); 
-            Route::resource('position', ADMMasterPosition::class); 
-            Route::resource('ability', ADMMasterAbility::class); 
-            Route::resource('category-certificate', ADMMasterCategoryCertificate::class); 
+            Route::prefix('placement/{category}')->group(function () {
+
+                Route::get('/', [ADMMasterPlacement::class, 'index'])
+                    ->name('placement.category.index');
+
+                Route::post('/', [ADMMasterPlacement::class, 'store'])
+                    ->name('placement.category.store');
+
+                Route::put('/{uuid}', [ADMMasterPlacement::class, 'update'])
+                    ->name('placement.category.update');
+
+                Route::delete('/{uuid}', [ADMMasterPlacement::class, 'destroy'])
+                    ->name('placement.category.destroy');
+
+            });
+ 
+            Route::prefix('position/{category}')->group(function () {
+                Route::get('/', [ADMMasterPosition::class, 'index'])
+                    ->name('position.category.index');
+
+                Route::post('/', [ADMMasterPosition::class, 'store'])
+                    ->name('position.category.store');
+
+                Route::put('/{uuid}', [ADMMasterPosition::class, 'update'])
+                    ->name('position.category.update');
+
+                Route::delete('/{uuid}', [ADMMasterPosition::class, 'destroy'])
+                    ->name('position.category.destroy');
+            });
+            Route::prefix('ability/{category}')->group(function () {
+
+                Route::get('/', [
+                    ADMMasterAbility::class,
+                    'index'
+                ])->name('ability.category.index');
+
+                Route::post('/', [
+                    ADMMasterAbility::class,
+                    'store'
+                ])->name('ability.category.store');
+
+                Route::put('/{uuid}', [
+                    ADMMasterAbility::class,
+                    'update'
+                ])->name('ability.category.update');
+
+                Route::delete('/{uuid}', [
+                    ADMMasterAbility::class,
+                    'destroy'
+                ])->name('ability.category.destroy');
+
+            });
+ 
+            Route::prefix('category-certificate/{category}')->group(function () {
+
+                Route::get('/', [
+                    ADMMasterCategoryCertificate::class,
+                    'index'
+                ])->name('category-certificate.category.index');
+
+                Route::post('/', [
+                    ADMMasterCategoryCertificate::class,
+                    'store'
+                ])->name('category-certificate.category.store');
+
+                Route::put('/{uuid}', [
+                    ADMMasterCategoryCertificate::class,
+                    'update'
+                ])->name('category-certificate.category.update');
+
+                Route::delete('/{uuid}', [
+                    ADMMasterCategoryCertificate::class,
+                    'destroy'
+                ])->name('category-certificate.category.destroy');
+
+            });
+ 
             Route::resource('industry', ADMMasterIndustry::class); 
-            Route::resource('certificate', ADMMasterCertificate::class); 
+            
+            Route::prefix('certificate/{category}')->group(function () {
+
+                Route::get('/', [ADMMasterCertificate::class, 'index'])
+                    ->name('certificate.category.index');
+
+                Route::post('/', [ADMMasterCertificate::class, 'store'])
+                    ->name('certificate.category.store');
+
+                Route::put('/{uuid}', [ADMMasterCertificate::class, 'update'])
+                    ->name('certificate.category.update');
+
+                Route::delete('/{uuid}', [ADMMasterCertificate::class, 'destroy'])
+                    ->name('certificate.category.destroy');
+
+            }); 
             Route::resource('position-security', ADMMasterPositionSecurity::class); 
+            Route::resource('position-cleaning-service', ADMMasterPositionCleaningService::class); 
             Route::resource('competency-scheme', ADMMasterCompetencyScheme::class); 
             Route::resource('subscription', ADMMasterSubscription::class);
             Route::resource('faq', ADMMasterFAQ::class); 

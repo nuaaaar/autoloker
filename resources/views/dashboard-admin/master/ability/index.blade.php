@@ -1,44 +1,70 @@
 @extends('layouts.dashboard-admin')
 
-@section('title', 'Kemampuan')
+@section(
+    'title',
+    $category === 'cs'
+        ? 'Cleaning Service'
+        : 'Satpam'
+)
 
 @section('css')
-
 @endsection
+
 
 @section('breadcrumb')
-    <h1
-        class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">
-        Kemampuan</h1>
-    <!--end::Title-->
-    <!--begin::Breadcrumb-->
+
+    <h1 class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">
+
+        {{ $category === 'cs' ? 'Cleaning Service' : 'Satpam' }}
+
+    </h1>
+
     <ul class="breadcrumb breadcrumb-separatorless fw-semibold fs-7 my-0 pt-1">
-        <!--begin::Item-->
+
         <li class="breadcrumb-item text-muted">
-            <a href="javascript:;" class="text-muted text-hover-primary">Beranda</a>
+            <a
+                href="javascript:;"
+                class="text-muted text-hover-primary">
+                Beranda
+            </a>
         </li>
-        <!--end::Item-->
-        <!--begin::Item-->
+
         <li class="breadcrumb-item">
             <span class="bullet bg-gray-500 w-5px h-2px"></span>
         </li>
-        <!--end::Item-->
-        <li class="breadcrumb-item text-muted">Master</li>
-        <!--begin::Item-->
+
+        <li class="breadcrumb-item text-muted">
+            Master
+        </li>
+
         <li class="breadcrumb-item">
             <span class="bullet bg-gray-500 w-5px h-2px"></span>
         </li>
-        <!--end::Item-->
-        <!--begin::Item-->
-        <li class="breadcrumb-item text-muted">Kemampuan</li>
-        <!--end::Item-->
+
+        <li class="breadcrumb-item text-muted">
+            Kemampuan
+        </li>
+
+        <li class="breadcrumb-item">
+            <span class="bullet bg-gray-500 w-5px h-2px"></span>
+        </li>
+
+        <li class="breadcrumb-item text-muted">
+            {{ $category === 'cs' ? 'Cleaning Service' : 'Satpam' }}
+        </li>
+
     </ul>
-    <!--end::Breadcrumb-->
+
 @endsection
 
+
 @section('content')
+
+    {{-- ADD BUTTON --}}
     <div class="row">
+
         <div class="col-lg-12">
+
             <button
                 class="btn btn-primary py-2 mb-3"
                 style="float:right"
@@ -50,41 +76,96 @@
                 Tambah
 
             </button>
+
         </div>
+
     </div>
 
+
+    {{-- TABLE --}}
     <div class="row">
+
         <div class="col-lg-12">
+
             <div class="card">
+
                 <div class="card-header">
+
                     <div class="d-flex justify-content-between">
-                        <h5 class="card-title mb-0">List Data</h5>
+
+                        <h5 class="card-title mb-0">
+
+                            List
+                            {{ $category === 'cs'
+                                ? 'Cleaning Service'
+                                : 'Satpam'
+                            }}
+
+                        </h5>
+
                         <div class="card-toolbar">
+
                             <div class="card-button"></div>
+
                         </div>
+
                     </div>
+
                 </div>
+
+
                 <div class="card-body">
-                    <table id="datatable"
+
+                    <table
+                        id="datatable"
                         class="table table-bordered dt-responsive nowrap w-100 dataTable no-footer dtr-inline"
-                        aria-describedby="datatable_info" style="width: 1090px;">
+                        aria-describedby="datatable_info"
+                        style="width: 1090px;">
+
                         <thead>
+
                             <tr>
-                                <th width="1%">ID</th>
-                                <th>Nama Kemampuan</th>
-                                <th class="text-end" width="5%">Aksi</th>
+
+                                <th width="1%">
+                                    ID
+                                </th>
+
+                                <th>
+                                    Nama Kemampuan
+                                </th>
+
+                                <th
+                                    class="text-end"
+                                    width="5%">
+                                    Aksi
+                                </th>
+
                             </tr>
+
                         </thead>
+
                         <tbody>
                         </tbody>
-                    </table>
-                </div>
-            </div>
-        </div><!--end col-->
-    </div><!--end row-->
 
-    <div class="modal fade" id="createModal" tabindex="-1">
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    {{-- CREATE MODAL --}}
+    <div
+        class="modal fade"
+        id="createModal"
+        tabindex="-1">
+
         <div class="modal-dialog">
+
             <div class="modal-content">
 
                 <form id="formCreate">
@@ -92,14 +173,25 @@
                     @csrf
 
                     <div class="modal-header">
+
                         <h5 class="modal-title">
+
                             Tambah Kemampuan
+                            {{ $category === 'cs'
+                                ? 'Cleaning Service'
+                                : 'Satpam'
+                            }}
+
                         </h5>
 
-                        <button class="btn-close"
+                        <button
+                            class="btn-close"
                             data-bs-dismiss="modal"
-                            type="button"></button>
+                            type="button">
+                        </button>
+
                     </div>
+
 
                     <div class="modal-body">
 
@@ -116,6 +208,7 @@
                             required>
 
                     </div>
+
 
                     <div class="modal-footer">
 
@@ -141,31 +234,48 @@
                 </form>
 
             </div>
+
         </div>
+
     </div>
 
-    <div class="modal fade" id="editModal" tabindex="-1">
+
+    {{-- EDIT MODAL --}}
+    <div
+        class="modal fade"
+        id="editModal"
+        tabindex="-1">
+
         <div class="modal-dialog">
+
             <div class="modal-content">
 
                 <form id="formEdit">
 
                     @csrf
+
                     @method('PUT')
 
-                    <input type="hidden" id="edit_uuid">
+                    <input
+                        type="hidden"
+                        id="edit_uuid">
 
                     <div class="modal-header">
 
                         <h5 class="modal-title">
+
                             Edit Kemampuan
+
                         </h5>
 
-                        <button class="btn-close"
+                        <button
+                            class="btn-close"
                             data-bs-dismiss="modal"
-                            type="button"></button>
+                            type="button">
+                        </button>
 
                     </div>
+
 
                     <div class="modal-body">
 
@@ -181,6 +291,7 @@
                             required>
 
                     </div>
+
 
                     <div class="modal-footer">
 
@@ -206,336 +317,652 @@
                 </form>
 
             </div>
+
         </div>
+
     </div>
 
-    <div class="modal fade" tabindex="-1" role="dialog" id="deleteModal">
-        <div class="modal-dialog" role="document">
+
+    {{-- DELETE MODAL --}}
+    <div
+        class="modal fade"
+        tabindex="-1"
+        role="dialog"
+        id="deleteModal">
+
+        <div
+            class="modal-dialog"
+            role="document">
+
             <div class="modal-content">
+
                 <div class="modal-header">
-                    <h5 class="modal-title">Hapus Kemampuan</h5>
-                    <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close" data-bs-original-title="" title=""></button>
+
+                    <h5 class="modal-title">
+                        Hapus Kemampuan
+                    </h5>
+
+                    <button
+                        class="btn-close"
+                        type="button"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                    </button>
+
                 </div>
+
+
                 <div class="modal-body">
-                    <p>Tindakan ini akan menghapus data dan data yang dihapus tidak dapat dipulihkan, yakin ingin melanjutkan?</p>
+
+                    <p>
+                        Tindakan ini akan menghapus data dan data
+                        yang dihapus tidak dapat dipulihkan, yakin
+                        ingin melanjutkan?
+                    </p>
+
                 </div>
+
+
                 <div class="modal-footer">
-                    <form action="" method="post" id="formDelete">
+
+                    <form
+                        action=""
+                        method="post"
+                        id="formDelete">
+
                         @csrf
+
                         @method("DELETE")
-                        <input type="hidden" id="deleteUuid">
-                        <button type="button" class="btn btn-light font-weight-bolder" data-bs-dismiss="modal">Tutup</button>
-                        <button type="submit" class="btn btn-danger font-weight-bolder" id="btn-submit-delete">Iya, Hapus</button>
+
+                        <input
+                            type="hidden"
+                            id="deleteUuid">
+
+                        <button
+                            type="button"
+                            class="btn btn-light font-weight-bolder"
+                            data-bs-dismiss="modal">
+
+                            Tutup
+
+                        </button>
+
+                        <button
+                            type="submit"
+                            class="btn btn-danger font-weight-bolder"
+                            id="btn-submit-delete">
+
+                            Iya, Hapus
+
+                        </button>
+
                     </form>
+
                 </div>
+
             </div>
+
         </div>
+
     </div>
+
 @endsection
 
-@section('js')
-    <script>
-        $(document).ready(function() {
-            let currentDraw = 1;
 
-             if ($.fn.DataTable.isDataTable('#datatable')) {
-                $('#datatable').DataTable().destroy();
+@section('js')
+
+<script>
+
+$(document).ready(function() {
+
+    let currentDraw = 1;
+
+    /*
+    |--------------------------------------------------------------------------
+    | CATEGORY
+    |--------------------------------------------------------------------------
+    */
+
+    const category = @json($category);
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | URL
+    |--------------------------------------------------------------------------
+    */
+
+    const indexUrl = @json(
+        route(
+            'dashboard-admin.master.ability.category.index',
+            [
+                'category' => $category
+            ]
+        )
+    );
+
+    const storeUrl = @json(
+        route(
+            'dashboard-admin.master.ability.category.store',
+            [
+                'category' => $category
+            ]
+        )
+    );
+
+    const updateUrlTemplate = @json(
+        route(
+            'dashboard-admin.master.ability.category.update',
+            [
+                'category' => $category,
+                'uuid' => '__UUID__'
+            ]
+        )
+    );
+
+    const deleteUrlTemplate = @json(
+        route(
+            'dashboard-admin.master.ability.category.destroy',
+            [
+                'category' => $category,
+                'uuid' => '__UUID__'
+            ]
+        )
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | DATATABLE
+    |--------------------------------------------------------------------------
+    */
+
+    if (
+        $.fn.DataTable.isDataTable('#datatable')
+    ) {
+
+        $('#datatable')
+            .DataTable()
+            .destroy();
+
+    }
+
+
+    let table = $('#datatable').DataTable({
+
+        processing: true,
+
+        serverSide: true,
+
+        scrollX: true,
+
+        aLengthMenu: [
+            [10, 25, 50, 75, 999999],
+            [10, 25, 50, 75, "All"]
+        ],
+
+        ajax: {
+
+            url: indexUrl,
+
+            type: 'GET',
+
+            data: function(d) {
+
+                currentDraw = d.draw;
+
+                d.page =
+                    (d.start / d.length) + 1;
+
+                d.length = d.length;
+
+            },
+
+            dataFilter: function(response) {
+
+                let json = JSON.parse(response);
+
+                return JSON.stringify({
+
+                    draw: currentDraw,
+
+                    recordsTotal:
+                        json.results.total,
+
+                    recordsFiltered:
+                        json.results.total,
+
+                    data:
+                        json.results.data
+
+                });
+
             }
 
-            let table = $('#datatable').DataTable({
-                processing: true,
-                serverSide: true,
-                scrollX: true,
-                "aLengthMenu": [[10, 25, 50, 75, 999999], [10, 25, 50, 75, "All"]],
-                ajax: {
+        },
 
-                    url: '{{ route("dashboard-admin.master.ability.index") }}',
-                    type: 'GET',
 
-                    data: function (d) {
+        columns: [
 
-                        currentDraw = d.draw;
+            {
+                data: "id",
 
-                        d.page = (d.start / d.length) + 1;
-                        d.length = d.length;
+                render: function(data) {
 
-                    },
+                    return (
+                        '000000' + data
+                    ).slice(-6);
 
-                    dataFilter: function (response) {
-
-                        let json = JSON.parse(response);
-
-                        return JSON.stringify({
-
-                            draw: currentDraw,
-
-                            recordsTotal: json.results.total,
-
-                            recordsFiltered: json.results.total,
-
-                            data: json.results.data
-
-                        });
-
-                    }
-
-                },
-                columns: [
-                    {
-                        data: "id",
-                        render: function(data){
-                            return ('000000' + data).slice(-6);
-                        }
-                    },
-                    {
-                        data: "title"
-                    },
-                    {
-                        data: null,
-                        orderable: false,
-                        searchable: false,
-                        className: "text-end",
-                        render:function(data){
-                            return `
-                                <button
-                                class="btn btn-outline-primary btn-sm me-1"
-                                onclick="editData('${data.uuid}','${data.title}')">
-
-                                <i class="fas fa-pencil-alt"
-                                style="display: contents;"
-                                ></i>
-
-                                </button>
-
-                                <button
-                                class="btn btn-outline-danger btn-sm" 
-                                onclick="deleteData('${data.uuid}')">
-
-                                <i class="fas fa-trash-alt"
-                                style="display: contents;"
-                                ></i>
-
-                                </button>
-                            `;
-
-                        }
-                    }
-                ],
-                dom: 'Blfrtip',
-                buttons: [
-                    {
-                        extend: 'colvis',
-                        text: '<i class="fas fa-eye me-1"></i>Kolom',
-                        className: 'btn btn-light-primary'
-                    },
-                    {
-                        extend: 'copy',
-                        text: '<i class="fas fa-copy me-1"></i>Copy',
-                        className: 'btn btn-light-danger'
-                    },
-                    {
-                        extend: 'excel',
-                        text: '<i class="fas fa-file-excel me-1"></i>Excel',
-                        className: 'btn btn-light-success'
-                    }
-                ],
-                drawCallback: function() {
-                    // Inisialisasi tooltip setelah DataTables selesai merender data
-                    $('[data-bs-toggle="tooltip"]').tooltip();
                 }
-            });
-            table.buttons().container().appendTo('.card-button');
-        });
 
-        function editData(uuid,title){
+            },
 
-            $("#edit_uuid").val(uuid);
+            {
+                data: "title"
+            },
 
-            $("#edit_title").val(title);
+            {
+                data: null,
 
-            $("#editModal").modal("show");
+                orderable: false,
+
+                searchable: false,
+
+                className: "text-end",
+
+                render: function(data) {
+
+                    return `
+
+                        <button
+                            class="btn btn-outline-primary btn-sm me-1"
+                            onclick="editData(
+                                '${data.uuid}',
+                                '${data.title}'
+                            )">
+
+                            <i
+                                class="fas fa-pencil-alt"
+                                style="display: contents;">
+                            </i>
+
+                        </button>
+
+                        <button
+                            class="btn btn-outline-danger btn-sm"
+                            onclick="deleteData(
+                                '${data.uuid}'
+                            )">
+
+                            <i
+                                class="fas fa-trash-alt"
+                                style="display: contents;">
+                            </i>
+
+                        </button>
+
+                    `;
+
+                }
+
+            }
+
+        ],
+
+
+        dom: 'Blfrtip',
+
+
+        buttons: [
+
+            {
+                extend: 'colvis',
+
+                text:
+                    '<i class="fas fa-eye me-1"></i>Kolom',
+
+                className:
+                    'btn btn-light-primary'
+            },
+
+            {
+                extend: 'copy',
+
+                text:
+                    '<i class="fas fa-copy me-1"></i>Copy',
+
+                className:
+                    'btn btn-light-danger'
+            },
+
+            {
+                extend: 'excel',
+
+                text:
+                    '<i class="fas fa-file-excel me-1"></i>Excel',
+
+                className:
+                    'btn btn-light-success'
+            }
+
+        ],
+
+
+        drawCallback: function() {
+
+            $('[data-bs-toggle="tooltip"]').tooltip();
 
         }
 
-        $("#formCreate").submit(function(e){
+    });
 
-            e.preventDefault();
 
-            $.ajax({
+    table
+        .buttons()
+        .container()
+        .appendTo('.card-button');
 
-                url:"{{ route('dashboard-admin.master.ability.store') }}",
+});
 
-                type:"POST",
 
-                data:$(this).serialize(),
+/*
+|--------------------------------------------------------------------------
+| EDIT
+|--------------------------------------------------------------------------
+*/
 
-                success:function(res){
+function editData(uuid, title)
+{
+    $("#edit_uuid").val(uuid);
 
-                    $("#createModal").modal("hide");
+    $("#edit_title").val(title);
 
-                    $("#formCreate")[0].reset();
+    $("#editModal").modal("show");
+}
 
-                    Swal.fire({
 
-                        icon:"success",
+/*
+|--------------------------------------------------------------------------
+| CREATE
+|--------------------------------------------------------------------------
+*/
 
-                        title:"Berhasil",
+$("#formCreate").submit(function(e) {
 
-                        text:res.message,
+    e.preventDefault();
 
-                        timer:1500,
+    $.ajax({
 
-                        showConfirmButton:false
+        url: @json(
+            route(
+                'dashboard-admin.master.ability.category.store',
+                [
+                    'category' => $category
+                ]
+            )
+        ),
 
-                    });
+        type: "POST",
 
-                    $('#datatable').DataTable().ajax.reload(null, false);
+        data: $(this).serialize(),
 
-                },
+        success: function(res) {
 
-                error:function(xhr){
+            $("#createModal").modal("hide");
 
-                    Swal.fire({
+            $("#formCreate")[0].reset();
 
-                        icon:"error",
+            Swal.fire({
 
-                        title:"Gagal",
+                icon: "success",
 
-                        text:xhr.responseJSON.message
+                title: "Berhasil",
 
-                    });
+                text: res.message,
 
-                }
+                timer: 1500,
 
-            });
-
-        });
-
-        $("#formEdit").submit(function(e){
-
-            e.preventDefault();
-
-            let uuid=$("#edit_uuid").val();
-
-            $.ajax({
-
-                url:"{{ route('dashboard-admin.master.ability.index') }}/"+uuid,
-
-                type:"POST",
-
-                data:{
-
-                    _token:"{{ csrf_token() }}",
-
-                    _method:"PUT",
-
-                    title:$("#edit_title").val()
-
-                },
-
-                success:function(res){
-
-                    $("#editModal").modal("hide");
-
-                    Swal.fire({
-
-                        icon:"success",
-
-                        title:"Berhasil",
-
-                        text:res.message,
-
-                        timer:1500,
-
-                        showConfirmButton:false
-
-                    });
-
-                    $('#datatable').DataTable().ajax.reload(null, false);
-
-                }
+                showConfirmButton: false
 
             });
 
-        });
+            $('#datatable')
+                .DataTable()
+                .ajax
+                .reload(null, false);
 
-        function deleteData(uuid)
-        {
-            $("#deleteUuid").val(uuid);
+        },
 
-            $("#deleteModal").modal("show");
+        error: function(xhr) {
+
+            let message =
+                xhr.responseJSON?.message ??
+                "Terjadi kesalahan.";
+
+            if (
+                xhr.responseJSON?.errors?.title
+            ) {
+
+                message =
+                    xhr.responseJSON.errors.title[0];
+
+            }
+
+            Swal.fire({
+
+                icon: "error",
+
+                title: "Gagal",
+
+                text: message
+
+            });
+
         }
 
-        $("#formDelete").submit(function(e){
+    });
 
-            e.preventDefault();
+});
 
-            let uuid = $("#deleteUuid").val();
 
-            $.ajax({
+/*
+|--------------------------------------------------------------------------
+| UPDATE
+|--------------------------------------------------------------------------
+*/
 
-                url: "{{ route('dashboard-admin.master.ability.index') }}/" + uuid,
+$("#formEdit").submit(function(e) {
 
-                type: "DELETE",
+    e.preventDefault();
 
-                data: {
-                    _token: "{{ csrf_token() }}"
-                },
+    let uuid =
+        $("#edit_uuid").val();
 
-                beforeSend:function(){
+    let updateUrl =
+        updateUrlTemplate.replace(
+            '__UUID__',
+            uuid
+        );
 
-                    $("#btn-submit-delete")
-                        .prop("disabled",true)
-                        .html("Menghapus...");
 
-                },
+    $.ajax({
 
-                success:function(res){
+        url: updateUrl,
 
-                    $("#deleteModal").modal("hide");
+        type: "POST",
 
-                    Swal.fire({
+        data: {
 
-                        icon:"success",
+            _token:
+                "{{ csrf_token() }}",
 
-                        title:"Berhasil",
+            _method:
+                "PUT",
 
-                        text:res.message,
+            title:
+                $("#edit_title").val()
 
-                        timer:1800,
+        },
 
-                        showConfirmButton:false
+        success: function(res) {
 
-                    });
+            $("#editModal").modal("hide");
 
-                    $('#datatable').DataTable().ajax.reload(null, false);
+            Swal.fire({
 
-                },
+                icon: "success",
 
-                error:function(xhr){
+                title: "Berhasil",
 
-                    Swal.fire({
+                text: res.message,
 
-                        icon:"error",
+                timer: 1500,
 
-                        title:"Gagal",
-
-                        text:xhr.responseJSON?.message ?? "Terjadi kesalahan."
-
-                    });
-
-                },
-
-                complete:function(){
-
-                    $("#btn-submit-delete")
-                        .prop("disabled",false)
-                        .html("Iya, Hapus");
-
-                }
+                showConfirmButton: false
 
             });
 
-        });
-    </script>
+            $('#datatable')
+                .DataTable()
+                .ajax
+                .reload(null, false);
+
+        },
+
+        error: function(xhr) {
+
+            let message =
+                xhr.responseJSON?.message ??
+                "Terjadi kesalahan.";
+
+            if (
+                xhr.responseJSON?.errors?.title
+            ) {
+
+                message =
+                    xhr.responseJSON.errors.title[0];
+
+            }
+
+            Swal.fire({
+
+                icon: "error",
+
+                title: "Gagal",
+
+                text: message
+
+            });
+
+        }
+
+    });
+
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| DELETE
+|--------------------------------------------------------------------------
+*/
+
+function deleteData(uuid)
+{
+    $("#deleteUuid").val(uuid);
+
+    $("#deleteModal").modal("show");
+}
+
+
+$("#formDelete").submit(function(e) {
+
+    e.preventDefault();
+
+    let uuid =
+        $("#deleteUuid").val();
+
+    let deleteUrl =
+        deleteUrlTemplate.replace(
+            '__UUID__',
+            uuid
+        );
+
+
+    $.ajax({
+
+        url: deleteUrl,
+
+        type: "DELETE",
+
+        data: {
+
+            _token:
+                "{{ csrf_token() }}"
+
+        },
+
+        beforeSend: function() {
+
+            $("#btn-submit-delete")
+                .prop("disabled", true)
+                .html("Menghapus...");
+
+        },
+
+        success: function(res) {
+
+            $("#deleteModal").modal("hide");
+
+            Swal.fire({
+
+                icon: "success",
+
+                title: "Berhasil",
+
+                text: res.message,
+
+                timer: 1800,
+
+                showConfirmButton: false
+
+            });
+
+            $('#datatable')
+                .DataTable()
+                .ajax
+                .reload(null, false);
+
+        },
+
+        error: function(xhr) {
+
+            Swal.fire({
+
+                icon: "error",
+
+                title: "Gagal",
+
+                text:
+                    xhr.responseJSON?.message ??
+                    "Terjadi kesalahan."
+
+            });
+
+        },
+
+        complete: function() {
+
+            $("#btn-submit-delete")
+                .prop("disabled", false)
+                .html("Iya, Hapus");
+
+        }
+
+    });
+
+});
+
+</script>
+
 @endsection
