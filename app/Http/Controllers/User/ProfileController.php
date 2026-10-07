@@ -134,7 +134,6 @@ class ProfileController extends Controller
 
         $data['npwp'] = $request->npwp;
         $data['nib'] = $request->nib;
-        $data['business_license'] = $request->business_license;
 
         $data['email'] = $request->email;
         $data['phone'] = $request->phone;
@@ -157,23 +156,23 @@ class ProfileController extends Controller
         {
             $data['sio_number'] = $request->sio_number;
             $data['sio_expired_date'] = $request->sio_expired_date;
+        }
 
-            if ($request->hasFile('sio_file')) {
+        if ($request->hasFile('sio_file')) {
 
-                if (
-                    $company->sio_file &&
-                    Storage::disk('public')->exists($company->sio_file)
-                ) {
+            if (
+                $company->sio_file &&
+                Storage::disk('public')->exists($company->sio_file)
+            ) {
 
-                    Storage::disk('public')->delete($company->sio_file);
-
-                }
-
-                $data['sio_file'] = $request
-                    ->file('sio_file')
-                    ->store('sio-file', 'public');
+                Storage::disk('public')->delete($company->sio_file);
 
             }
+
+            $data['sio_file'] = $request
+                ->file('sio_file')
+                ->store('sio-file', 'public');
+
         }
 
         $company->update($data);

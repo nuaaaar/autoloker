@@ -534,15 +534,27 @@
             <div class="row mt-5">
 
                 <div class="col-lg-6 mb-3">
-                    <a href="{{ route('user-page.profile.edit-personal-data', Auth::user()->user_security->security->uuid) }}">
-                        <button class="btn-profile-complete w-100">
+                    @php
+                        $profileUuid = null;
 
-                            <i class="ki-duotone ki-user fs-5 me-1 text-white"></i>
+                        if (Auth::user()->role === 'satpam') {
+                            $profileUuid = Auth::user()->user_security?->security?->uuid;
+                        } elseif (Auth::user()->role === 'cs') {
+                            $profileUuid = Auth::user()->user_cleaning_service?->cleaning_service?->uuid;
+                        }
+                    @endphp
 
-                            Lengkapi Data Diri
+                    @if ($profileUuid)
+                        <a href="{{ route('user-page.profile.edit-personal-data', $profileUuid) }}">
+                            <button class="btn-profile-complete w-100">
 
-                        </button>
-                    </a>
+                                <i class="ki-duotone ki-user fs-5 me-1 text-white"></i>
+
+                                Lengkapi Data Diri
+
+                            </button>
+                        </a>
+                    @endif
                 </div>
 
                 <div class="col-lg-6">

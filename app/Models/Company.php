@@ -22,7 +22,6 @@ class Company extends Model
 
             'npwp'              => 'NPWP',
             'nib'               => 'Nomor Induk Berusaha (NIB)',
-            'business_license'  => 'Nomor Izin Usaha',
 
             'email'             => 'Email Perusahaan',
             'phone'             => 'Nomor Telepon',

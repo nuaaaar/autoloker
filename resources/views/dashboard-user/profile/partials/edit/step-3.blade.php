@@ -69,7 +69,7 @@
 
             </div>
 
-            <div class="col-md-12 mb-5">
+            {{-- <div class="col-md-12 mb-5">
 
                 <label class="form-label required">
 
@@ -87,46 +87,50 @@
 
                 </div>
 
-            </div>
+            </div> --}}
 
-            <div class="col-md-6 mb-5">
+            @if(Auth::user()->role == 'bujp')
 
-                <label class="form-label required">
+                <div class="col-md-6 mb-5">
 
-                    Nomor Surat Izin Operasional (SIO)
+                    <label class="form-label required">
 
-                </label>
+                        Nomor Surat Izin Operasional (SIO)
 
-                <div class="input-icon">
+                    </label>
 
-                    <i class="ki-duotone ki-files"></i>
+                    <div class="input-icon">
 
-                    <input type="text" name="sio_number" class="form-control auto-input"
-                    placeholder="Nomor Surat Izin Operasional (SIO)"
-                    value="{{ $data->sio_number }}">
+                        <i class="ki-duotone ki-files"></i>
 
-                </div>
+                        <input type="text" name="sio_number" class="form-control auto-input"
+                        placeholder="Nomor Surat Izin Operasional (SIO)"
+                        value="{{ $data->sio_number }}">
 
-            </div>
-
-            <div class="col-md-6 mb-5">
-
-                <label class="form-label required">
-
-                    Masa Berlaku Surat Izin Operasional (SIO)
-
-                </label>
-
-                <div class="input-icon">
-
-                    <i class="ki-duotone ki-calendar"></i>
-
-                    <input type="date" name="sio_expired_date" class="form-control auto-input"
-                    value="{{ $data->sio_expired_date }}">
+                    </div>
 
                 </div>
 
-            </div>
+                <div class="col-md-6 mb-5">
+
+                    <label class="form-label required">
+
+                        Masa Berlaku Surat Izin Operasional (SIO)
+
+                    </label>
+
+                    <div class="input-icon">
+
+                        <i class="ki-duotone ki-calendar"></i>
+
+                        <input type="date" name="sio_expired_date" class="form-control auto-input"
+                        value="{{ $data->sio_expired_date }}">
+
+                    </div>
+
+                </div>
+
+            @endif
 
             <div class="upload-card mb-8">
 
@@ -154,7 +158,11 @@
                                     </i>
 
                                     <div class="fw-bold text-white">
-                                        Dokumen SIO
+                                        @if(Auth::user()->role == 'bujp')
+                                            Dokumen SIO
+                                        @elseif(Auth::user()->role == 'company')
+                                            Dokumen NIB
+                                        @endif
                                     </div>
 
                                     <small class="text-success">
@@ -173,7 +181,11 @@
                                     </i>
 
                                     <div>
-                                        Upload Dokumen SIO
+                                        @if(Auth::user()->role == 'bujp')
+                                            Upload Dokumen SIO
+                                        @elseif(Auth::user()->role == 'company')
+                                            Upload Dokumen NIB
+                                        @endif
                                     </div>
 
                                     <small>PDF / JPG / PNG</small>
@@ -186,57 +198,92 @@
 
                     </div>
 
-                    <!-- RIGHT -->
-                    <div class="col-lg-8">
+                    @if(Auth::user()->role == 'bujp')
+                        <!-- RIGHT -->
+                        <div class="col-lg-8">
 
-                        <h5 class="text-white mb-3">
-                            Dokumen Surat Izin Operasional (SIO)
-                        </h5>
+                            <h5 class="text-white mb-3">
+                                Dokumen Surat Izin Operasional (SIO)
+                            </h5>
 
-                        <p class="text-gray-500 mb-3">
-                            Unggah dokumen Surat Izin Operasional (SIO) yang masih berlaku.
-                            Dokumen ini digunakan sebagai salah satu syarat verifikasi akun BUJP.
-                        </p>
+                            <p class="text-gray-500 mb-3">
+                                Unggah dokumen Surat Izin Operasional (SIO) yang masih berlaku.
+                                Dokumen ini digunakan sebagai salah satu syarat verifikasi akun BUJP.
+                            </p>
 
-                        <ul class="upload-info mb-3">
+                            <ul class="upload-info mb-3">
 
-                            <li>Format PDF, JPG atau PNG</li>
+                                <li>Format PDF, JPG atau PNG</li>
 
-                            <li>Ukuran maksimal 5 MB</li>
+                                <li>Ukuran maksimal 5 MB</li>
 
-                            <li>Pastikan seluruh isi dokumen terbaca dengan jelas</li>
+                                <li>Pastikan seluruh isi dokumen terbaca dengan jelas</li>
 
-                            <li>Dokumen masih dalam masa berlaku</li>
+                                <li>Dokumen masih dalam masa berlaku</li>
 
-                        </ul>
+                            </ul>
 
-                        @if($data->sio_file)
+                            @if($data->sio_file)
 
-                            <div class="mb-3">
+                                <div class="mb-3">
 
-                                <a href="{{ Storage::url($data->sio_file) }}"
-                                target="_blank"
-                                class="btn btn-warning btn-sm">
+                                    <a href="{{ Storage::url($data->sio_file) }}"
+                                    target="_blank"
+                                    class="btn btn-warning btn-sm">
 
-                                    <i class="ki-duotone ki-eye fs-6 me-1"></i>
+                                        <i class="ki-duotone ki-eye fs-6 me-1"></i>
 
-                                    Lihat Dokumen
+                                        Lihat Dokumen
 
-                                </a>
+                                    </a>
+
+                                </div>
+
+                            @endif
+
+                            <div class="upload-file-info d-none" id="sioFileInfo">
+
+                                <div class="fw-semibold text-warning" id="sioFileName"></div>
+
+                                <small class="text-muted" id="sioFileSize"></small>
 
                             </div>
 
-                        @endif
+                        </div>
+                    @elseif(Auth::user()->role == 'company')
+                        <!-- RIGHT -->
+                        <div class="col-lg-8">
 
-                        <div class="upload-file-info d-none" id="sioFileInfo">
+                            <h5 class="text-white mb-3"> Dokumen Nomor Induk Berusaha (NIB) </h5> <p class="text-gray-500 mb-3"> Unggah dokumen Nomor Induk Berusaha (NIB) yang masih berlaku. Dokumen ini digunakan sebagai salah satu syarat verifikasi akun BUJP. </p> <ul class="upload-info mb-3"> <li>Format PDF, JPG atau PNG</li> <li>Ukuran maksimal 5 MB</li> <li>Pastikan seluruh isi dokumen terbaca dengan jelas</li> <li>Dokumen masih dalam masa berlaku</li> </ul>
 
-                            <div class="fw-semibold text-warning" id="sioFileName"></div>
+                            @if($data->sio_file)
 
-                            <small class="text-muted" id="sioFileSize"></small>
+                                <div class="mb-3">
+
+                                    <a href="{{ Storage::url($data->sio_file) }}"
+                                    target="_blank"
+                                    class="btn btn-warning btn-sm">
+
+                                        <i class="ki-duotone ki-eye fs-6 me-1"></i>
+
+                                        Lihat Dokumen
+
+                                    </a>
+
+                                </div>
+
+                            @endif
+
+                            <div class="upload-file-info d-none" id="sioFileInfo">
+
+                                <div class="fw-semibold text-warning" id="sioFileName"></div>
+
+                                <small class="text-muted" id="sioFileSize"></small>
+
+                            </div>
 
                         </div>
-
-                    </div>
+                    @endif
 
                 </div>
 

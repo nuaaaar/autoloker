@@ -489,9 +489,7 @@ class ProfileController extends Controller
         | CEK JIKA ROLE SAMA
         |--------------------------------------------------------------------------
         */
-
         if ($user->role === $request->role) {
-
             return redirect()
                 ->back()
                 ->with('swal', [
@@ -504,23 +502,83 @@ class ProfileController extends Controller
                 ]);
         }
 
-
         /*
         |--------------------------------------------------------------------------
         | UPDATE ROLE USER
         |--------------------------------------------------------------------------
         */
-
         $user->role = $request->role;
         $user->save();
 
+        /*
+        |--------------------------------------------------------------------------
+        | JIKA ROLE CLEANING SERVICE
+        |--------------------------------------------------------------------------
+        |
+        | Alur:
+        |
+        | User
+        |   ↓
+        | UserCleaningService
+        |   ↓
+        | CleaningService
+        |
+        */
+        if ($request->role === 'cs') {
+
+            /*
+            |--------------------------------------------------------------------------
+            | 1. CARI / BUAT USER CLEANING SERVICE
+            |--------------------------------------------------------------------------
+            */
+            $userCleaningService = UserCleaningService::firstOrCreate(
+                [
+                    'user_id' => $user->id,
+                ],
+            );
+
+            /*
+            |--------------------------------------------------------------------------
+            | 2. CARI / BUAT CLEANING SERVICE
+            |--------------------------------------------------------------------------
+            */
+            CleaningService::firstOrCreate(
+                [
+                    'user_cleaning_service_id' => $userCleaningService->id,
+                ],
+                [
+                    'name'  => $user->name,
+                    'email' => $user->email,
+                ]
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | JIKA ROLE SATPAM
+        |--------------------------------------------------------------------------
+        |
+        | Bagian ini tetap menggunakan struktur Security yang sekarang.
+        |
+        */
+        if ($request->role === 'satpam') {
+
+            Security::firstOrCreate(
+                [
+                    'uuid' => $user->uuid,
+                ],
+                [
+                    'name'  => $user->name,
+                    'email' => $user->email,
+                ]
+            );
+        }
 
         /*
         |--------------------------------------------------------------------------
         | REDIRECT
         |--------------------------------------------------------------------------
         */
-
         return redirect()
             ->back()
             ->with('swal', [
