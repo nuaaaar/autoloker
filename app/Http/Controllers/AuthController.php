@@ -20,7 +20,7 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'role' => 'required|in:satpam,company',
+            'role' => 'required|in:satpam,company,cs',
             'email' => 'required',
             'password' => 'required',
         ]);
@@ -43,7 +43,7 @@ class AuthController extends Controller
 
         // Cek role
         $allowedRoles = [
-            'satpam' => ['satpam'],
+            'satpam' => ['satpam', 'cs'],
             'company' => ['company', 'bujp'],
         ];
 

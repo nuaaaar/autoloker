@@ -5,461 +5,570 @@
 @section('css')
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
     <style>
-        .map-card{
+        /* =========================================================
+        THEME VARIABLES
+        ========================================================= */
 
-            background:#111827;
-            color:white;
-            border:1px solid #374151;
+        :root,
+        [data-bs-theme="light"] {
+            --map-card-bg: #ffffff;
+            --map-card-border: #e2e8f0;
+            --map-header-bg: #ffffff;
+            --map-header-border: #e2e8f0;
 
+            --map-text: #182338;
+            --map-text-secondary: #64748b;
+            --map-text-muted: #94a3b8;
+
+            --map-container-bg: #e8eef5;
+
+            --map-card-inner-bg: #ffffff;
+            --map-card-inner-border: #e2e8f0;
+
+            --map-popup-bg: #ffffff;
+            --map-popup-border: #e2e8f0;
+            --map-popup-footer-bg: #f8fafc;
+
+            --map-divider: rgba(15, 23, 42, .08);
+
+            --map-accent: #f59e0b;
+            --map-primary: #2563eb;
+
+            --map-success: #16a34a;
+            --map-danger: #dc2626;
+            --map-warning: #d97706;
+            --map-info: #0891b2;
+            --map-secondary: #6b7280;
+
+            --map-shadow: 0 8px 25px rgba(15, 23, 42, .08);
+            --map-hover-shadow: 0 15px 30px rgba(15, 23, 42, .12);
+
+            --map-leaflet-text: #182338;
         }
 
 
-        #indonesia-map{
+        [data-bs-theme="dark"] {
+            --map-card-bg: #111827;
+            --map-card-border: #374151;
+            --map-header-bg: #111827;
+            --map-header-border: #293548;
 
-            width:100%;
-            height:450px;
+            --map-text: #ffffff;
+            --map-text-secondary: #9ca3af;
+            --map-text-muted: #6b7280;
 
+            --map-container-bg: #020617;
+
+            --map-card-inner-bg: #111827;
+            --map-card-inner-border: #273244;
+
+            --map-popup-bg: #111827;
+            --map-popup-border: #293548;
+            --map-popup-footer-bg: #0f172a;
+
+            --map-divider: rgba(255, 255, 255, .08);
+
+            --map-accent: #f59e0b;
+            --map-primary: #2563eb;
+
+            --map-success: #16a34a;
+            --map-danger: #dc2626;
+            --map-warning: #d97706;
+            --map-info: #0891b2;
+            --map-secondary: #6b7280;
+
+            --map-shadow: 0 8px 25px rgba(0, 0, 0, .25);
+            --map-hover-shadow: 0 15px 30px rgba(0, 0, 0, .35);
+
+            --map-leaflet-text: #ffffff;
         }
 
 
-        .leaflet-container{
+        /* =========================================================
+        MAP CARD
+        ========================================================= */
 
-            background:#020617;
-
+        .map-card {
+            background: var(--map-card-bg);
+            color: var(--map-text);
+            border: 1px solid var(--map-card-border);
+            box-shadow: var(--map-shadow);
         }
 
 
-
-        .marker-dot{
-
-
-            width:16px;
-            height:16px;
+        #indonesia-map {
+            width: 100%;
+            height: 450px;
+        }
 
 
-            background:#f59e0b;
+        .leaflet-container {
+            background: var(--map-container-bg);
+        }
 
 
-            border-radius:50%;
+        /* =========================================================
+        MARKER
+        ========================================================= */
 
+        .marker-dot {
+            width: 16px;
+            height: 16px;
 
-            border:3px solid white;
+            background: var(--map-accent);
 
+            border-radius: 50%;
+            border: 3px solid #fff;
 
             box-shadow:
-            0 0 10px #f59e0b,
-            0 0 20px #f59e0b;
-
-
-        }
-        
-        .card-header{
-            background:#111827;
-            border-bottom:1px solid #293548;
-        }
-
-        .map-icon{
-
-            width:52px;
-            height:52px;
-
-            border-radius:14px;
-
-            background:linear-gradient(135deg,#2563eb,#3b82f6);
-
-            display:flex;
-            align-items:center;
-            justify-content:center;
-
-            color:#fff;
-            font-size:22px;
-
-            box-shadow:0 0 15px rgba(59,130,246,.35);
-
-        }
-
-        .card-header h5{
-            color:#fff;
-        }
-
-        .card-header small{
-            color:#9CA3AF !important;
-        }
-
-        .dashboard-card{
-
-            position:relative;
-
-            display:flex;
-            align-items:center;
-
-            padding:18px;
-
-            border-radius:16px;
-
-            background:#111827;
-
-            border:1px solid #273244;
-
-            overflow:hidden;
-
-            transition:.3s;
-
-            min-height:110px;
-
-        }
-
-        .dashboard-card:hover{
-
-            transform:translateY(-5px);
-
-            border-color:#3b82f6;
-
-            box-shadow:0 15px 30px rgba(0,0,0,.35);
-
-        }
-
-        .dashboard-card::after{
-
-            content:"";
-
-            position:absolute;
-
-            right:-35px;
-            top:-35px;
-
-            width:90px;
-            height:90px;
-
-            border-radius:50%;
-
-            opacity:.08;
-
-            background:white;
-
-        }
-
-        .card-icon{
-
-            width:56px;
-            height:56px;
-
-            border-radius:14px;
-
-            display:flex;
-            align-items:center;
-            justify-content:center;
-
-            font-size:22px;
-
-            color:#fff;
-
-            margin-right:16px;
-
-            flex-shrink:0;
-
-        }
-
-        .card-content span{
-
-            color:#9CA3AF;
-
-            font-size:13px;
-
-            display:block;
-
-        }
-
-        .card-content h3{
-
-            color:#fff;
-
-            margin:4px 0;
-
-            font-size:28px;
-
-            font-weight:700;
-
-        }
-
-        .card-content small{
-
-            color:#6B7280;
-
-        }
-
-        /* Warna */
-
-        .success .card-icon{
-            background:#16a34a;
-        }
-
-        .danger .card-icon{
-            background:#dc2626;
-        }
-
-        .primary .card-icon{
-            background:#2563eb;
-        }
-
-        .warning .card-icon{
-            background:#d97706;
-        }
-
-        .info .card-icon{
-            background:#0891b2;
-        }
-
-        .secondary .card-icon{
-            background:#6b7280;
-        }
-
-        .province-popup{
-            width:280px;
-        }
-
-        .popup-title{
-            color:#f59e0b;
-            font-weight:700;
-            margin-bottom:2px;
-        }
-
-        .popup-subtitle{
-            color:#9CA3AF;
-            font-size:12px;
-            margin-bottom:10px;
-        }
-
-        /* ===========================
-        LEAFLET POPUP
-        =========================== */
-
-        .leaflet-popup-content-wrapper{
-
-            padding:0;
-
-            border-radius:14px;
-
-            overflow:hidden;
-
-            background:#111827;
-
-        }
-
-        .leaflet-popup-tip{
-
-            background:#111827;
-
-        }
-
-        .leaflet-popup-content{
-
-            margin:0 !important;
-
+                0 0 10px var(--map-accent),
+                0 0 20px var(--map-accent);
         }
 
 
+        /* =========================================================
+        CARD HEADER
+        ========================================================= */
 
-        /* ===========================
+        .map-card .card-header {
+            background: var(--map-header-bg);
+            border-bottom: 1px solid var(--map-header-border);
+        }
+
+
+        .map-card .card-header h5 {
+            color: var(--map-text);
+        }
+
+
+        .map-card .card-header small {
+            color: var(--map-text-secondary) !important;
+        }
+
+
+        /* =========================================================
+        MAP ICON
+        ========================================================= */
+
+        .map-icon {
+            width: 52px;
+            height: 52px;
+
+            border-radius: 14px;
+
+            background: linear-gradient(
+                135deg,
+                #2563eb,
+                #3b82f6
+            );
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            color: #fff;
+            font-size: 22px;
+
+            box-shadow: 0 0 15px rgba(59, 130, 246, .35);
+        }
+
+
+        /* =========================================================
+        DASHBOARD CARD
+        ========================================================= */
+
+        .dashboard-card {
+            position: relative;
+
+            display: flex;
+            align-items: center;
+
+            padding: 18px;
+
+            border-radius: 16px;
+
+            background: var(--map-card-inner-bg);
+            border: 1px solid var(--map-card-inner-border);
+
+            overflow: hidden;
+
+            transition: .3s;
+
+            min-height: 110px;
+        }
+
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+
+            border-color: var(--map-primary);
+
+            box-shadow: var(--map-hover-shadow);
+        }
+
+
+        .dashboard-card::after {
+            content: "";
+
+            position: absolute;
+
+            right: -35px;
+            top: -35px;
+
+            width: 90px;
+            height: 90px;
+
+            border-radius: 50%;
+
+            opacity: .08;
+
+            background: var(--map-text);
+        }
+
+
+        /* =========================================================
+        CARD ICON
+        ========================================================= */
+
+        .dashboard-card .card-icon {
+            width: 56px;
+            height: 56px;
+
+            border-radius: 14px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 22px;
+
+            color: #fff;
+
+            margin-right: 16px;
+
+            flex-shrink: 0;
+        }
+
+
+        /* =========================================================
+        CARD CONTENT
+        ========================================================= */
+
+        .card-content span {
+            color: var(--map-text-secondary);
+
+            font-size: 13px;
+
+            display: block;
+        }
+
+
+        .card-content h3 {
+            color: var(--map-text);
+
+            margin: 4px 0;
+
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+
+        .card-content small {
+            color: var(--map-text-muted);
+        }
+
+
+        /* =========================================================
+        CARD COLORS
+        ========================================================= */
+
+        .dashboard-card.success .card-icon {
+            background: var(--map-success);
+        }
+
+
+        .dashboard-card.danger .card-icon {
+            background: var(--map-danger);
+        }
+
+
+        .dashboard-card.primary .card-icon {
+            background: var(--map-primary);
+        }
+
+
+        .dashboard-card.warning .card-icon {
+            background: var(--map-warning);
+        }
+
+
+        .dashboard-card.info .card-icon {
+            background: var(--map-info);
+        }
+
+
+        .dashboard-card.secondary .card-icon {
+            background: var(--map-secondary);
+        }
+
+
+        /* =========================================================
+        LEAFLET POPUP WRAPPER
+        ========================================================= */
+
+        .leaflet-popup-content-wrapper {
+            padding: 0;
+
+            border-radius: 14px;
+
+            overflow: hidden;
+
+            background: var(--map-popup-bg);
+
+            color: var(--map-text);
+
+            border: 1px solid var(--map-popup-border);
+
+            box-shadow: var(--map-shadow);
+        }
+
+
+        .leaflet-popup-tip {
+            background: var(--map-popup-bg);
+        }
+
+
+        .leaflet-popup-content {
+            margin: 0 !important;
+        }
+
+
+        /* =========================================================
         POPUP
-        =========================== */
+        ========================================================= */
 
-        .province-popup{
+        .province-popup {
+            width: 320px;
 
-            width:320px;
+            background: var(--map-popup-bg);
 
-            background:#111827;
-
-            color:#fff;
-
+            color: var(--map-text);
         }
 
 
+        /* =========================================================
+        POPUP HEADER
+        ========================================================= */
 
-        /* HEADER */
+        .popup-header {
+            padding: 18px;
 
-        .popup-header{
+            text-align: center;
 
-            padding:18px;
-
-            text-align:center;
-
-            border-bottom:1px solid #293548;
-
-        }
-
-        .popup-header h5{
-
-            margin:0;
-
-            color:#f59e0b;
-
-            font-weight:700;
-
-            font-size:18px;
-
-        }
-
-        .popup-header small{
-
-            color:#9CA3AF;
-
+            border-bottom: 1px solid var(--map-popup-border);
         }
 
 
+        .popup-header h5 {
+            margin: 0;
 
-        /* BODY */
+            color: var(--map-accent);
 
-        .popup-body{
+            font-weight: 700;
 
-            padding:15px;
-
+            font-size: 18px;
         }
 
 
-
-        /* GRID */
-
-        .popup-row{
-
-            display:grid;
-
-            grid-template-columns:2fr 1fr 1fr;
-
-            align-items:center;
-
-            padding:10px 0;
-
-            border-bottom:1px solid rgba(255,255,255,.08);
-
-        }
-
-        .popup-row:last-child{
-
-            border-bottom:none;
-
+        .popup-header small {
+            color: var(--map-text-secondary);
         }
 
 
+        /* =========================================================
+        POPUP BODY
+        ========================================================= */
 
-        .popup-head{
-
-            color:#9CA3AF;
-
-            font-size:12px;
-
-            font-weight:600;
-
-            text-transform:uppercase;
-
-            padding-bottom:12px;
-
+        .popup-body {
+            padding: 15px;
         }
 
 
+        /* =========================================================
+        POPUP GRID
+        ========================================================= */
 
-        .user-name{
+        .popup-row {
+            display: grid;
 
-            display:flex;
+            grid-template-columns: 2fr 1fr 1fr;
 
-            align-items:center;
+            align-items: center;
 
-            gap:10px;
+            padding: 10px 0;
 
-            font-weight:500;
-
+            border-bottom: 1px solid var(--map-divider);
         }
 
 
-
-        /* BADGE */
-
-        .badge{
-
-            width:34px;
-
-            height:34px;
-
-            display:flex;
-
-            justify-content:center;
-
-            align-items:center;
-
-            margin:auto;
-
-            border-radius:50%;
-
-            font-size:14px;
-
-            font-weight:700;
-
+        .popup-row:last-child {
+            border-bottom: none;
         }
 
 
+        .popup-head {
+            color: var(--map-text-secondary);
 
-        .badge-success{
+            font-size: 12px;
 
-            background:#16a34a;
+            font-weight: 600;
 
-            color:#fff;
+            text-transform: uppercase;
 
+            padding-bottom: 12px;
         }
 
 
+        /* =========================================================
+        USER NAME
+        ========================================================= */
 
-        .badge-danger{
+        .user-name {
+            display: flex;
 
-            background:#dc2626;
+            align-items: center;
 
-            color:#fff;
+            gap: 10px;
 
+            font-weight: 500;
+
+            color: var(--map-text);
         }
 
 
+        /* =========================================================
+        BADGE
+        ========================================================= */
 
-        /* FOOTER */
+        .province-popup .badge {
+            width: 34px;
+            height: 34px;
 
-        .popup-footer{
+            display: flex;
 
-            display:flex;
+            justify-content: center;
+            align-items: center;
 
-            justify-content:space-between;
+            margin: auto;
 
-            padding:15px 18px;
+            border-radius: 50%;
 
-            border-top:1px solid #293548;
+            font-size: 14px;
 
-            background:#0f172a;
-
+            font-weight: 700;
         }
 
 
-
-        .footer-item{
-
-            text-align:center;
-
-            flex:1;
-
+        .province-popup .badge-success {
+            background: var(--map-success);
+            color: #fff;
         }
 
 
-
-        .footer-item small{
-
-            display:block;
-
-            color:#9CA3AF;
-
+        .province-popup .badge-danger {
+            background: var(--map-danger);
+            color: #fff;
         }
 
 
+        /* =========================================================
+        POPUP FOOTER
+        ========================================================= */
 
-        .footer-item strong{
+        .popup-footer {
+            display: flex;
 
-            font-size:20px;
+            justify-content: space-between;
 
+            padding: 15px 18px;
+
+            border-top: 1px solid var(--map-popup-border);
+
+            background: var(--map-popup-footer-bg);
+        }
+
+
+        .footer-item {
+            text-align: center;
+
+            flex: 1;
+        }
+
+
+        .footer-item small {
+            display: block;
+
+            color: var(--map-text-secondary);
+        }
+
+
+        .footer-item strong {
+            font-size: 20px;
+
+            color: var(--map-text);
+        }
+
+
+        /* =========================================================
+        LEAFLET CONTROLS
+        Supaya tombol zoom juga mengikuti theme
+        ========================================================= */
+
+        .leaflet-control-zoom a {
+            background: var(--map-card-bg);
+            color: var(--map-text);
+            border-color: var(--map-card-border);
+        }
+
+
+        .leaflet-control-zoom a:hover {
+            background: var(--map-card-inner-border);
+            color: var(--map-text);
+        }
+
+
+        /* =========================================================
+        LEAFLET ATTRIBUTION
+        ========================================================= */
+
+        .leaflet-control-attribution {
+            background: var(--map-card-bg) !important;
+            color: var(--map-text-secondary) !important;
+        }
+
+
+        .leaflet-control-attribution a {
+            color: var(--map-primary);
+        }
+
+
+        /* =========================================================
+        LIGHT MODE - LEAFLET POPUP SHADOW
+        ========================================================= */
+
+        [data-bs-theme="light"] .leaflet-popup-content-wrapper {
+            box-shadow: 0 10px 30px rgba(15, 23, 42, .15);
+        }
+
+
+        /* =========================================================
+        DARK MODE - LEAFLET POPUP SHADOW
+        ========================================================= */
+
+        [data-bs-theme="dark"] .leaflet-popup-content-wrapper {
+            box-shadow:
+                0 10px 30px rgba(0, 0, 0, .45),
+                0 0 20px rgba(0, 0, 0, .15);
         }
     </style>
 @endsection
@@ -654,186 +763,229 @@
 @section('js')
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-    <script>
-        $(document).ready(function(){
+<script>
+    $(document).ready(function () {
+
+        let map = L.map('indonesia-map')
+            .setView(
+                [-2.5, 118],
+                5
+            );
 
 
-            let map = L.map('indonesia-map')
-                .setView(
-                    [-2.5,118],
-                    5
-                );
+        /*
+        |--------------------------------------------------------------------------
+        | OpenStreetMap
+        |--------------------------------------------------------------------------
+        | Tidak membutuhkan API key
+        |--------------------------------------------------------------------------
+        */
+
+        L.tileLayer(
+            'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap contributors'
+            }
+        ).addTo(map);
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | Data Laravel
+        |--------------------------------------------------------------------------
+        */
 
-            /*
-            Dark Map
-            */
+        let provinces = @json($provinces);
 
-            L.tileLayer(
-                'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-                {
-
-                    maxZoom:19
-
-                }
-
-            ).addTo(map);
+        console.log(provinces);
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | Custom Marker
+        |--------------------------------------------------------------------------
+        */
+
+        let markerIcon = L.divIcon({
+
+            className: 'custom-marker',
+
+            html: `
+                <div class="marker-dot"></div>
+            `,
+
+            iconSize: [
+                16,
+                16
+            ],
+
+            iconAnchor: [
+                8,
+                8
+            ]
+
+        });
 
 
-            /*
-            Data Laravel
-            */
+        /*
+        |--------------------------------------------------------------------------
+        | Province Marker
+        |--------------------------------------------------------------------------
+        */
 
-            let provinces = @json($provinces);
+        $.each(provinces, function (index, province) {
+
+            const popup = `
+
+                <div class="province-popup">
+
+                    <div class="popup-header">
+
+                        <h5>${province.name}</h5>
+
+                        <small>
+                            Ringkasan Pengguna
+                        </small>
+
+                    </div>
 
 
+                    <div class="popup-body">
 
-            console.log(provinces);
+                        <div class="popup-row popup-head">
 
+                            <div>User</div>
 
+                            <div class="text-success">
+                                Aktif
+                            </div>
 
-            /*
-            Custom Marker
-            */
-
-
-            let markerIcon = L.divIcon({
-
-                className:'custom-marker',
-
-                html:`
-
-                    <div class="marker-dot"></div>
-
-                `,
-
-                iconSize:[
-                    16,
-                    16
-                ],
-
-                iconAnchor:[
-                    8,
-                    8
-                ]
-
-            });
-
-            $.each(provinces, function(index, province){
-
-                const popup = `
-                    <div class="province-popup">
-
-                        <div class="popup-header">
-                            <h5>${province.name}</h5>
-                            <small>Ringkasan Pengguna</small>
                         </div>
 
-                        <div class="popup-body">
 
-                            <div class="popup-row popup-head">
-                                <div>User</div>
-                                <div class="text-success">Aktif</div>
-                            </div>
+                        <div class="popup-row">
 
-                            <div class="popup-row">
+                            <div class="user-name">
 
-                                <div class="user-name">
-                                    <i class="fas fa-user-shield text-primary"></i>
-                                    Satpam
-                                </div>
+                                <i class="fas fa-user-shield text-primary"></i>
 
-                                <div>
-                                    <span class="badge badge-success">
-                                        4
-                                    </span>
-                                </div>
+                                Satpam
 
                             </div>
 
-                            <div class="popup-row">
+                            <div>
 
-                                <div class="user-name">
-                                    <i class="fas fa-building text-warning"></i>
-                                    Perusahaan
-                                </div>
-
-                                <div>
-                                    <span class="badge badge-success">
-                                        3
-                                    </span>
-                                </div>
-
-                            </div>
-
-                            <div class="popup-row">
-
-                                <div class="user-name">
-                                    <i class="fas fa-shield-halved text-info"></i>
-                                    BUJP
-                                </div>
-
-                                <div>
-                                    <span class="badge badge-success">
-                                        2
-                                    </span>
-                                </div>
+                                <span class="badge badge-success">
+                                    4
+                                </span>
 
                             </div>
 
                         </div>
 
-                        <div class="popup-footer">
 
-                            <div class="footer-item">
+                        <div class="popup-row">
 
-                                <small>Total Aktif</small>
+                            <div class="user-name">
 
-                                <strong class="text-success">
-                                    9
-                                </strong>
+                                <i class="fas fa-building text-warning"></i>
+
+                                Perusahaan
+
+                            </div>
+
+                            <div>
+
+                                <span class="badge badge-success">
+                                    3
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="popup-row">
+
+                            <div class="user-name">
+
+                                <i class="fas fa-shield-halved text-info"></i>
+
+                                BUJP
+
+                            </div>
+
+                            <div>
+
+                                <span class="badge badge-success">
+                                    2
+                                </span>
 
                             </div>
 
                         </div>
 
                     </div>
-                `;
 
 
-                L.marker(
-                    [province.lat, province.lng],
-                    {
-                        icon: markerIcon
-                    }
-                )
-                .addTo(map)
-                .bindPopup(popup,{
-                    minWidth:320,
-                    maxWidth:320
-                });
+                    <div class="popup-footer">
 
-            });
-        
-            /*
-            fix ukuran map
-            */
+                        <div class="footer-item">
 
-            setTimeout(function(){
+                            <small>
+                                Total Aktif
+                            </small>
 
-                map.invalidateSize();
+                            <strong class="text-success">
+                                9
+                            </strong>
 
-            },500);
+                        </div>
+
+                    </div>
+
+                </div>
+
+            `;
 
 
+            L.marker(
+                [
+                    province.lat,
+                    province.lng
+                ],
+                {
+                    icon: markerIcon
+                }
+            )
+
+            .addTo(map)
+
+            .bindPopup(
+                popup,
+                {
+                    minWidth: 320,
+                    maxWidth: 320
+                }
+            );
 
         });
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | Fix ukuran map
+        |--------------------------------------------------------------------------
+        */
 
-        </script>
+        setTimeout(function () {
+
+            map.invalidateSize();
+
+        }, 500);
+
+    });
+</script>
 
 @endsection

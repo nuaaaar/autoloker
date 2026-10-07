@@ -1,8 +1,8 @@
 <!-- Reminder -->
-@if($security->reminderCertificate)
+@if($profile->reminderCertificate)
 
     @php
-        $certificate = $security->reminderCertificate;
+        $certificate = $profile->reminderCertificate;
         $isExpired = \Carbon\Carbon::parse($certificate->expired_date)->isPast();
     @endphp
 

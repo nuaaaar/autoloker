@@ -998,13 +998,23 @@
         <div class="row mt-8">
 
             <div class="col-md-12 mb-3">
-                <a href="{{ route('user-page.profile.edit-personal-data', Auth::user()->user_security->security->uuid) }}">
-                    <button class="btn btn-profile-primary w-100">
+                @php
+                    $profileUuid = null;
 
-                        Edit Data Diri
+                    if (Auth::user()->role === 'satpam') {
+                        $profileUuid = Auth::user()->user_security?->security?->uuid;
+                    } elseif (Auth::user()->role === 'cs') {
+                        $profileUuid = Auth::user()->user_cleaning_service?->cleaning_service?->uuid;
+                    }
+                @endphp
 
-                    </button>
-                </a>
+                @if ($profileUuid)
+                    <a href="{{ route('user-page.profile.edit-personal-data', $profileUuid) }}">
+                        <button class="btn btn-profile-primary w-100">
+                            Edit Data Diri
+                        </button>
+                    </a>
+                @endif
 
             </div>
 

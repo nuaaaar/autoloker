@@ -1,199 +1,202 @@
 <style>
-    /* ===============================
-    UPLOAD LOGO
-    ================================= */
+    /* =========================================================
+       UPLOAD LOGO - THEME VARIABLES
+       ========================================================= */
 
-    .upload-photo{
+    :root,
+    [data-bs-theme="light"] {
+        --upload-photo-bg: #f8fafc;
+        --upload-photo-border: #cbd5e1;
 
-        width:200px;
-        height:200px;
+        --upload-placeholder-bg: #f1f5f9;
+        --upload-placeholder-text: #71809a;
+        --upload-placeholder-title: #182338;
 
-        border:2px dashed #33415c;
-        border-radius:18px;
+        --upload-gold: #e8a801;
+        --upload-gold-hover: #d99b00;
 
-        overflow:hidden;
+        --upload-preview-bg: #ffffff;
+        --upload-preview-image-bg: #ffffff;
 
-        cursor:pointer;
+        --upload-overlay: rgba(8, 13, 28, .78);
 
-        position:relative;
+        --upload-info-bg: #f8fafc;
+        --upload-info-border: #dce3eb;
+        --upload-info-text: #71809a;
 
-        background:#10182b;
-
-        display:block;
-
-        transition:.3s;
-
+        --upload-shadow: rgba(232, 168, 1, .12);
     }
 
-    .upload-photo:hover{
+    [data-bs-theme="dark"] {
+        --upload-photo-bg: #10182b;
+        --upload-photo-border: #33415c;
 
-        border-color:#f7b003;
+        --upload-placeholder-bg: #151d33;
+        --upload-placeholder-text: #8fa0bc;
+        --upload-placeholder-title: #ffffff;
 
-        transform:translateY(-2px);
+        --upload-gold: #f7b003;
+        --upload-gold-hover: #f7b003;
 
-        box-shadow:0 10px 30px rgba(247,176,3,.12);
+        --upload-preview-bg: #ffffff;
+        --upload-preview-image-bg: #ffffff;
 
+        --upload-overlay: rgba(8, 13, 28, .82);
+
+        --upload-info-bg: #1b2440;
+        --upload-info-border: #304061;
+        --upload-info-text: #8fa0bc;
+
+        --upload-shadow: rgba(247, 176, 3, .12);
     }
 
-    .upload-placeholder{
 
-        width:100%;
-        height:100%;
+    /* =========================================================
+       UPLOAD LOGO
+       ========================================================= */
 
-        display:flex;
-
-        flex-direction:column;
-
-        justify-content:center;
-
-        align-items:center;
-
-        text-align:center;
-
-        color:#8fa0bc;
-
-        background:#151d33;
-
-        transition:.3s;
-
+    .upload-photo {
+        width: 200px;
+        height: 200px;
+        border: 2px dashed var(--upload-photo-border);
+        border-radius: 18px;
+        overflow: hidden;
+        cursor: pointer;
+        position: relative;
+        background: var(--upload-photo-bg);
+        display: block;
+        transition: .3s;
     }
 
-    .upload-placeholder i{
-
-        color:#f7b003;
-
+    .upload-photo:hover {
+        border-color: var(--upload-gold);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px var(--upload-shadow);
     }
 
-    .upload-placeholder div{
 
-        font-size:13px;
+    /* =========================================================
+       PLACEHOLDER
+       ========================================================= */
 
-        font-weight:600;
-
-        color:#ffffff;
-
-        margin-top:4px;
-
+    .upload-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        color: var(--upload-placeholder-text);
+        background: var(--upload-placeholder-bg);
+        transition: .3s;
     }
 
-    .upload-placeholder small{
-
-        margin-top:4px;
-
-        font-size:11px;
-
-        color:#8fa0bc;
-
+    .upload-placeholder i {
+        color: var(--upload-gold);
     }
 
-    .upload-preview{
-
-        width:100%;
-
-        height:100%;
-
-        position:relative;
-
-        background:#ffffff;
-
+    .upload-placeholder div {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--upload-placeholder-title);
+        margin-top: 4px;
     }
 
-    .upload-preview img{
-
-        width:100%;
-
-        height:100%;
-
-        object-fit:contain;
-
-        padding:16px;
-
-        background:#ffffff;
-
+    .upload-placeholder small {
+        margin-top: 4px;
+        font-size: 11px;
+        color: var(--upload-placeholder-text);
     }
 
-    .preview-overlay{
 
-        position:absolute;
+    /* =========================================================
+       PREVIEW
+       ========================================================= */
 
-        inset:0;
-
-        background:rgba(8,13,28,.82);
-
-        display:flex;
-
-        flex-direction:column;
-
-        justify-content:center;
-
-        align-items:center;
-
-        gap:6px;
-
-        color:#ffffff;
-
-        opacity:0;
-
-        transition:.25s;
-
+    .upload-preview {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        background: var(--upload-preview-bg);
     }
 
-    .preview-overlay span{
-
-        font-size:12px;
-
-        font-weight:600;
-
+    .upload-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        padding: 16px;
+        background: var(--upload-preview-image-bg);
     }
 
-    .upload-preview:hover .preview-overlay{
 
-        opacity:1;
+    /* =========================================================
+       PREVIEW OVERLAY
+       ========================================================= */
 
+    .preview-overlay {
+        position: absolute;
+        inset: 0;
+        background: var(--upload-overlay);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 6px;
+        color: #ffffff;
+        opacity: 0;
+        transition: .25s;
     }
 
-    .upload-file-info{
-
-        padding:12px 16px;
-
-        background:#1b2440;
-
-        border:1px solid #304061;
-
-        border-radius:12px;
-
+    .preview-overlay span {
+        font-size: 12px;
+        font-weight: 600;
     }
 
-    .upload-info{
-
-        margin:0;
-        padding-left:18px;
-
-        color:#8fa0bc;
-
-        font-size:12px;
-
-        line-height:1.9;
-
+    .upload-preview:hover .preview-overlay {
+        opacity: 1;
     }
 
-    .upload-info li{
 
-        margin-bottom:2px;
+    /* =========================================================
+       FILE INFO
+       ========================================================= */
 
+    .upload-file-info {
+        padding: 12px 16px;
+        background: var(--upload-info-bg);
+        border: 1px solid var(--upload-info-border);
+        border-radius: 12px;
     }
 
-    @media(max-width:991px){
 
-        .upload-photo{
+    /* =========================================================
+       UPLOAD INFO
+       ========================================================= */
 
-            width:170px;
-            height:170px;
+    .upload-info {
+        margin: 0;
+        padding-left: 18px;
+        color: var(--upload-info-text);
+        font-size: 12px;
+        line-height: 1.9;
+    }
 
-            margin:auto;
+    .upload-info li {
+        margin-bottom: 2px;
+    }
 
+
+    /* =========================================================
+       RESPONSIVE
+       ========================================================= */
+
+    @media (max-width: 991px) {
+        .upload-photo {
+            width: 170px;
+            height: 170px;
+            margin: auto;
         }
-
     }
 </style>
 

@@ -6,9 +6,9 @@
 
 <div class="container-fluid">
 
-    {{-- ================================================= --}}
-    {{-- HEADER --}}
-    {{-- ================================================= --}}
+    {{-- =================================================
+        HEADER
+    ================================================== --}}
 
     <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-7">
 
@@ -27,17 +27,15 @@
     </div>
 
 
-    {{-- ================================================= --}}
-    {{-- SUMMARY --}}
-    {{-- ================================================= --}}
+    {{-- =================================================
+        SUMMARY KESELURUHAN
+    ================================================== --}}
 
     <div class="row g-5 mb-7">
 
-        {{-- ================================================= --}}
-        {{-- ROW 1 --}}
-        {{-- ================================================= --}}
 
         {{-- TOTAL LOWONGAN --}}
+
         <div class="col-12 col-md-4">
 
             <div class="card card-flush h-100">
@@ -75,6 +73,7 @@
 
 
         {{-- PUBLISHED --}}
+
         <div class="col-12 col-md-4">
 
             <div class="card card-flush h-100">
@@ -112,6 +111,7 @@
 
 
         {{-- DRAFT --}}
+
         <div class="col-12 col-md-4">
 
             <div class="card card-flush h-100">
@@ -148,12 +148,8 @@
         </div>
 
 
-
-        {{-- ================================================= --}}
-        {{-- ROW 2 --}}
-        {{-- ================================================= --}}
-
         {{-- CLOSED --}}
+
         <div class="col-12 col-md-4">
 
             <div class="card card-flush h-100">
@@ -191,6 +187,7 @@
 
 
         {{-- TOTAL PELAMAR --}}
+
         <div class="col-12 col-md-4">
 
             <div class="card card-flush h-100">
@@ -228,6 +225,7 @@
 
 
         {{-- PELAMAR AKTIF --}}
+
         <div class="col-12 col-md-4">
 
             <div class="card card-flush h-100">
@@ -266,44 +264,673 @@
     </div>
 
 
-    {{-- ================================================= --}}
-    {{-- CHART --}}
-    {{-- ================================================= --}}
+    {{-- =================================================
+        STATISTIK BERDASARKAN CATEGORY
+    ================================================== --}}
 
     <div class="row g-5 mb-7">
 
 
-        {{-- TREND --}}
+        {{-- =================================================
+            SATPAM
+        ================================================== --}}
 
-        <div class="col-xl-8">
+        <div class="col-12 col-xl-6">
 
-        <div class="card card-flush h-100">
+            <div class="card card-flush h-100">
 
-            <div class="card-header">
+                <div class="card-header">
 
-                <div class="card-title">
+                    <div class="card-title">
 
-                    <h3 class="fw-bold">
-                        Trend Lowongan & Pelamar
-                    </h3>
+                        <div>
+
+                            <h3 class="fw-bold mb-1">
+
+                                <i class="fas fa-shield-alt text-primary me-2"></i>
+
+                                Satpam
+
+                            </h3>
+
+                            <div class="text-muted fs-7">
+                                Statistik lowongan kategori Satpam
+                            </div>
+
+                        </div>
+
+                    </div>
 
                 </div>
 
-                <div class="card-toolbar">
 
-                    <span class="text-muted fs-7">
-                        Tahun {{ now()->year }}
-                    </span>
+                <div class="card-body">
+
+                    <div class="row g-4">
+
+
+                        {{-- TOTAL LOWONGAN --}}
+
+                        <div class="col-6">
+
+                            <div class="border rounded p-4 h-100">
+
+                                <div class="text-muted fs-7 mb-1">
+                                    Total Lowongan
+                                </div>
+
+                                <div class="fs-2x fw-bold text-gray-900">
+
+                                    {{ $categoryStatistics['security']['totalJobs'] }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        {{-- PUBLISHED --}}
+
+                        <div class="col-6">
+
+                            <div class="border rounded p-4 h-100">
+
+                                <div class="text-muted fs-7 mb-1">
+                                    Published
+                                </div>
+
+                                <div class="fs-2x fw-bold text-success">
+
+                                    {{ $categoryStatistics['security']['publishedJobs'] }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        {{-- DRAFT --}}
+
+                        <div class="col-6">
+
+                            <div class="border rounded p-4 h-100">
+
+                                <div class="text-muted fs-7 mb-1">
+                                    Draft
+                                </div>
+
+                                <div class="fs-2x fw-bold text-warning">
+
+                                    {{ $categoryStatistics['security']['draftJobs'] }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        {{-- CLOSED --}}
+
+                        <div class="col-6">
+
+                            <div class="border rounded p-4 h-100">
+
+                                <div class="text-muted fs-7 mb-1">
+                                    Closed
+                                </div>
+
+                                <div class="fs-2x fw-bold text-danger">
+
+                                    {{ $categoryStatistics['security']['closedJobs'] }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        {{-- TOTAL PELAMAR --}}
+
+                        <div class="col-6">
+
+                            <div class="border rounded p-4 h-100">
+
+                                <div class="text-muted fs-7 mb-1">
+                                    Total Pelamar
+                                </div>
+
+                                <div class="fs-2x fw-bold text-info">
+
+                                    {{ $categoryStatistics['security']['totalApplications'] }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        {{-- PELAMAR AKTIF --}}
+
+                        <div class="col-6">
+
+                            <div class="border rounded p-4 h-100">
+
+                                <div class="text-muted fs-7 mb-1">
+                                    Pelamar Aktif
+                                </div>
+
+                                <div class="fs-2x fw-bold text-primary">
+
+                                    {{ $categoryStatistics['security']['activeApplications'] }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <div class="separator my-6"></div>
+
+
+                    {{-- STATUS PELAMAR --}}
+
+                    <div class="mb-5">
+
+                        <div class="fw-bold text-gray-800 mb-4">
+                            Status Pelamar
+                        </div>
+
+
+                        <div class="row g-3">
+
+
+                            <div class="col-6 col-lg-3">
+
+                                <div class="bg-light-primary rounded p-3">
+
+                                    <div class="text-muted fs-8">
+                                        Applied
+                                    </div>
+
+                                    <div class="fs-3 fw-bold text-primary">
+
+                                        {{ $categoryStatistics['security']['appliedApplications'] }}
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-6 col-lg-3">
+
+                                <div class="bg-light-warning rounded p-3">
+
+                                    <div class="text-muted fs-8">
+                                        Reviewed
+                                    </div>
+
+                                    <div class="fs-3 fw-bold text-warning">
+
+                                        {{ $categoryStatistics['security']['reviewedApplications'] }}
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-6 col-lg-3">
+
+                                <div class="bg-light-success rounded p-3">
+
+                                    <div class="text-muted fs-8">
+                                        Shortlisted
+                                    </div>
+
+                                    <div class="fs-3 fw-bold text-success">
+
+                                        {{ $categoryStatistics['security']['shortlistedApplications'] }}
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-6 col-lg-3">
+
+                                <div class="bg-light-danger rounded p-3">
+
+                                    <div class="text-muted fs-8">
+                                        Rejected
+                                    </div>
+
+                                    <div class="fs-3 fw-bold text-danger">
+
+                                        {{ $categoryStatistics['security']['rejectedApplications'] }}
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+
+                    {{-- CONVERSION --}}
+
+                    <div class="row g-3">
+
+
+                        <div class="col-4">
+
+                            <div class="text-center">
+
+                                <div class="text-muted fs-8">
+                                    Review Rate
+                                </div>
+
+                                <div class="fs-2 fw-bold text-primary">
+
+                                    {{ $categoryStatistics['security']['reviewRate'] }}%
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-4">
+
+                            <div class="text-center">
+
+                                <div class="text-muted fs-8">
+                                    Shortlist Rate
+                                </div>
+
+                                <div class="fs-2 fw-bold text-success">
+
+                                    {{ $categoryStatistics['security']['shortlistRate'] }}%
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-4">
+
+                            <div class="text-center">
+
+                                <div class="text-muted fs-8">
+                                    Rejection Rate
+                                </div>
+
+                                <div class="fs-2 fw-bold text-danger">
+
+                                    {{ $categoryStatistics['security']['rejectionRate'] }}%
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
 
                 </div>
 
             </div>
 
-            <div class="card-body">
+        </div>
 
-                <div style="height: 350px;">
 
-                    <canvas id="jobApplicationChart"></canvas>
+        {{-- =================================================
+            CLEANING SERVICE
+        ================================================== --}}
+
+        <div class="col-12 col-xl-6">
+
+            <div class="card card-flush h-100">
+
+                <div class="card-header">
+
+                    <div class="card-title">
+
+                        <div>
+
+                            <h3 class="fw-bold mb-1">
+
+                                <i class="fas fa-broom text-success me-2"></i>
+
+                                Cleaning Service
+
+                            </h3>
+
+                            <div class="text-muted fs-7">
+                                Statistik lowongan kategori Cleaning Service
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card-body">
+
+                    <div class="row g-4">
+
+
+                        {{-- TOTAL LOWONGAN --}}
+
+                        <div class="col-6">
+
+                            <div class="border rounded p-4 h-100">
+
+                                <div class="text-muted fs-7 mb-1">
+                                    Total Lowongan
+                                </div>
+
+                                <div class="fs-2x fw-bold text-gray-900">
+
+                                    {{ $categoryStatistics['cs']['totalJobs'] }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        {{-- PUBLISHED --}}
+
+                        <div class="col-6">
+
+                            <div class="border rounded p-4 h-100">
+
+                                <div class="text-muted fs-7 mb-1">
+                                    Published
+                                </div>
+
+                                <div class="fs-2x fw-bold text-success">
+
+                                    {{ $categoryStatistics['cs']['publishedJobs'] }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        {{-- DRAFT --}}
+
+                        <div class="col-6">
+
+                            <div class="border rounded p-4 h-100">
+
+                                <div class="text-muted fs-7 mb-1">
+                                    Draft
+                                </div>
+
+                                <div class="fs-2x fw-bold text-warning">
+
+                                    {{ $categoryStatistics['cs']['draftJobs'] }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        {{-- CLOSED --}}
+
+                        <div class="col-6">
+
+                            <div class="border rounded p-4 h-100">
+
+                                <div class="text-muted fs-7 mb-1">
+                                    Closed
+                                </div>
+
+                                <div class="fs-2x fw-bold text-danger">
+
+                                    {{ $categoryStatistics['cs']['closedJobs'] }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        {{-- TOTAL PELAMAR --}}
+
+                        <div class="col-6">
+
+                            <div class="border rounded p-4 h-100">
+
+                                <div class="text-muted fs-7 mb-1">
+                                    Total Pelamar
+                                </div>
+
+                                <div class="fs-2x fw-bold text-info">
+
+                                    {{ $categoryStatistics['cs']['totalApplications'] }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        {{-- PELAMAR AKTIF --}}
+
+                        <div class="col-6">
+
+                            <div class="border rounded p-4 h-100">
+
+                                <div class="text-muted fs-7 mb-1">
+                                    Pelamar Aktif
+                                </div>
+
+                                <div class="fs-2x fw-bold text-primary">
+
+                                    {{ $categoryStatistics['cs']['activeApplications'] }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <div class="separator my-6"></div>
+
+
+                    {{-- STATUS PELAMAR --}}
+
+                    <div class="mb-5">
+
+                        <div class="fw-bold text-gray-800 mb-4">
+                            Status Pelamar
+                        </div>
+
+
+                        <div class="row g-3">
+
+
+                            <div class="col-6 col-lg-3">
+
+                                <div class="bg-light-primary rounded p-3">
+
+                                    <div class="text-muted fs-8">
+                                        Applied
+                                    </div>
+
+                                    <div class="fs-3 fw-bold text-primary">
+
+                                        {{ $categoryStatistics['cs']['appliedApplications'] }}
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-6 col-lg-3">
+
+                                <div class="bg-light-warning rounded p-3">
+
+                                    <div class="text-muted fs-8">
+                                        Reviewed
+                                    </div>
+
+                                    <div class="fs-3 fw-bold text-warning">
+
+                                        {{ $categoryStatistics['cs']['reviewedApplications'] }}
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-6 col-lg-3">
+
+                                <div class="bg-light-success rounded p-3">
+
+                                    <div class="text-muted fs-8">
+                                        Shortlisted
+                                    </div>
+
+                                    <div class="fs-3 fw-bold text-success">
+
+                                        {{ $categoryStatistics['cs']['shortlistedApplications'] }}
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-6 col-lg-3">
+
+                                <div class="bg-light-danger rounded p-3">
+
+                                    <div class="text-muted fs-8">
+                                        Rejected
+                                    </div>
+
+                                    <div class="fs-3 fw-bold text-danger">
+
+                                        {{ $categoryStatistics['cs']['rejectedApplications'] }}
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+
+                    {{-- CONVERSION --}}
+
+                    <div class="row g-3">
+
+
+                        <div class="col-4">
+
+                            <div class="text-center">
+
+                                <div class="text-muted fs-8">
+                                    Review Rate
+                                </div>
+
+                                <div class="fs-2 fw-bold text-primary">
+
+                                    {{ $categoryStatistics['cs']['reviewRate'] }}%
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-4">
+
+                            <div class="text-center">
+
+                                <div class="text-muted fs-8">
+                                    Shortlist Rate
+                                </div>
+
+                                <div class="fs-2 fw-bold text-success">
+
+                                    {{ $categoryStatistics['cs']['shortlistRate'] }}%
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-4">
+
+                            <div class="text-center">
+
+                                <div class="text-muted fs-8">
+                                    Rejection Rate
+                                </div>
+
+                                <div class="fs-2 fw-bold text-danger">
+
+                                    {{ $categoryStatistics['cs']['rejectionRate'] }}%
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
 
                 </div>
 
@@ -312,6 +939,55 @@
         </div>
 
     </div>
+
+
+    {{-- =================================================
+        CHART
+    ================================================== --}}
+
+    <div class="row g-5 mb-7">
+
+
+        {{-- TREND --}}
+
+        <div class="col-xl-8">
+
+            <div class="card card-flush h-100">
+
+                <div class="card-header">
+
+                    <div class="card-title">
+
+                        <h3 class="fw-bold">
+                            Trend Lowongan & Pelamar
+                        </h3>
+
+                    </div>
+
+                    <div class="card-toolbar">
+
+                        <span class="text-muted fs-7">
+                            Tahun {{ now()->year }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card-body">
+
+                    <div style="height: 350px;">
+
+                        <canvas id="jobApplicationChart"></canvas>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
 
 
         {{-- STATUS PELAMAR --}}
@@ -332,11 +1008,13 @@
 
                 </div>
 
+
                 <div class="card-body">
 
                     <canvas
                         id="applicationStatusChart"
-                        height="250">
+                        height="250"
+                    >
                     </canvas>
 
                 </div>
@@ -348,12 +1026,14 @@
     </div>
 
 
-    {{-- ================================================= --}}
-    {{-- CONVERSION --}}
-    {{-- ================================================= --}}
+    {{-- =================================================
+        CONVERSION KESELURUHAN
+    ================================================== --}}
 
     <div class="row g-5 mb-7">
 
+
+        {{-- REVIEW RATE --}}
 
         <div class="col-md-4">
 
@@ -366,16 +1046,17 @@
                     </div>
 
                     <div class="fs-1 fw-bold text-primary">
-
                         {{ $reviewRate }}%
-
                     </div>
 
                     <div class="text-muted fs-7 mt-2">
 
                         {{ $reviewedApplications }}
+
                         dari
+
                         {{ $totalApplications }}
+
                         pelamar
 
                     </div>
@@ -386,6 +1067,8 @@
 
         </div>
 
+
+        {{-- SHORTLIST RATE --}}
 
         <div class="col-md-4">
 
@@ -398,16 +1081,17 @@
                     </div>
 
                     <div class="fs-1 fw-bold text-success">
-
                         {{ $shortlistRate }}%
-
                     </div>
 
                     <div class="text-muted fs-7 mt-2">
 
                         {{ $shortlistedApplications }}
+
                         dari
+
                         {{ $totalApplications }}
+
                         pelamar
 
                     </div>
@@ -418,6 +1102,8 @@
 
         </div>
 
+
+        {{-- REJECTION RATE --}}
 
         <div class="col-md-4">
 
@@ -430,16 +1116,17 @@
                     </div>
 
                     <div class="fs-1 fw-bold text-danger">
-
                         {{ $rejectionRate }}%
-
                     </div>
 
                     <div class="text-muted fs-7 mt-2">
 
                         {{ $rejectedApplications }}
+
                         dari
+
                         {{ $totalApplications }}
+
                         pelamar
 
                     </div>
@@ -453,9 +1140,9 @@
     </div>
 
 
-    {{-- ================================================= --}}
-    {{-- TOP LOWONGAN --}}
-    {{-- ================================================= --}}
+    {{-- =================================================
+        TOP LOWONGAN
+    ================================================== --}}
 
     <div class="card card-flush mb-7">
 
@@ -471,11 +1158,13 @@
 
         </div>
 
+
         <div class="card-body">
 
             @php
 
-                $maxApplicants = $topJobs->max('applications_count') ?: 1;
+                $maxApplicants =
+                    $topJobs->max('applications_count') ?: 1;
 
             @endphp
 
@@ -484,26 +1173,61 @@
 
                 @php
 
-                    $percentage = $maxApplicants > 0
-                        ? ($job->applications_count / $maxApplicants) * 100
-                        : 0;
+                    $percentage =
+                        $maxApplicants > 0
+                            ? ($job->applications_count / $maxApplicants) * 100
+                            : 0;
 
                 @endphp
 
 
                 <div class="mb-7">
 
+
                     <div class="d-flex justify-content-between align-items-center mb-2">
 
-                        <div class="fw-semibold text-gray-800">
+                        <div>
 
-                            {{ $job->position ?? 'Lowongan Tanpa Nama' }}
+                            <div class="fw-semibold text-gray-800">
+
+                                {{ $job->position ?? 'Lowongan Tanpa Nama' }}
+
+                            </div>
+
+
+                            {{-- CATEGORY --}}
+
+                            @switch($job->category)
+
+                                @case('security')
+
+                                    <span class="badge badge-light-primary mt-1">
+                                        <i class="fas fa-shield-alt me-1"></i>
+                                        Satpam
+                                    </span>
+
+                                @break
+
+
+                                @case('cs')
+
+                                    <span class="badge badge-light-success mt-1">
+                                        <i class="fas fa-broom me-1"></i>
+                                        Cleaning Service
+                                    </span>
+
+                                @break
+
+
+                            @endswitch
 
                         </div>
+
 
                         <div class="text-muted fs-7">
 
                             {{ $job->applications_count ?? 0 }}
+
                             pelamar
 
                         </div>
@@ -519,18 +1243,21 @@
                             style="width: {{ $percentage }}%"
                             aria-valuenow="{{ $percentage }}"
                             aria-valuemin="0"
-                            aria-valuemax="100">
+                            aria-valuemax="100"
+                        >
                         </div>
 
                     </div>
 
                 </div>
 
+
             @empty
 
                 <div class="text-center text-muted py-10">
 
-                    <i class="ki-duotone ki-information-5 fs-3x text-muted mb-3"></i>
+                    <i class="ki-duotone ki-information-5 fs-3x text-muted mb-3">
+                    </i>
 
                     <div>
                         Belum ada data lowongan.
@@ -543,7 +1270,6 @@
         </div>
 
     </div>
-
 
 </div>
 
@@ -558,6 +1284,7 @@
 
 document.addEventListener('DOMContentLoaded', function () {
 
+
     /*
     |--------------------------------------------------------------------------
     | TREND CHART
@@ -569,6 +1296,7 @@ document.addEventListener('DOMContentLoaded', function () {
             'jobApplicationChart'
         );
 
+
     if (jobApplicationCanvas) {
 
         new Chart(
@@ -579,37 +1307,45 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 data: {
 
-                    labels: @json($monthLabels),
+                    labels:
+                        @json($monthLabels),
 
                     datasets: [
 
                         {
+
                             label: 'Lowongan',
 
-                            data: @json($jobChartData),
+                            data:
+                                @json($jobChartData),
 
                             tension: 0.4,
 
                             borderWidth: 2,
 
                             fill: false
+
                         },
 
                         {
+
                             label: 'Pelamar',
 
-                            data: @json($applicationChartData),
+                            data:
+                                @json($applicationChartData),
 
                             tension: 0.4,
 
                             borderWidth: 2,
 
                             fill: false
+
                         }
 
                     ]
 
                 },
+
 
                 options: {
 
@@ -626,6 +1362,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
 
                     },
+
 
                     scales: {
 
@@ -662,6 +1399,7 @@ document.addEventListener('DOMContentLoaded', function () {
             'applicationStatusChart'
         );
 
+
     if (statusCanvas) {
 
         new Chart(
@@ -681,6 +1419,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     ],
 
+
                     datasets: [
 
                         {
@@ -688,8 +1427,11 @@ document.addEventListener('DOMContentLoaded', function () {
                             data: [
 
                                 {{ $appliedApplications }},
+
                                 {{ $reviewedApplications }},
+
                                 {{ $shortlistedApplications }},
+
                                 {{ $rejectedApplications }}
 
                             ],
@@ -701,6 +1443,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     ]
 
                 },
+
 
                 options: {
 

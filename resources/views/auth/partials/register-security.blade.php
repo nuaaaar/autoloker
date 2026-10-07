@@ -24,7 +24,7 @@
     </a>
 
     <h2 class="text-white fw-bold mt-5">
-        Data Diri Satpam
+        Data Diri
     </h2>
 
     <p class="text-muted mb-8 fs-7">

@@ -2,119 +2,196 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Resources\MasterResource;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\MasterResource;
 use App\Models\MasterCompetencyScheme;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class MasterCompetencySchemeController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Category yang diperbolehkan.
      */
-    public function index(Request $request)
-    {
-        if ($request->ajax()) {
-            $searchValue = $request->input('search.value');
-            $orderColumn = $request->input('order.0.column') ?? 0;
-            $orderSort = $request->input('order.0.dir') ?? 'asc';
-            $orderValue  = $request->input('columns.' . $orderColumn . '.data') ?? 'id';
-            //get data
-            $data = MasterCompetencyScheme::when($searchValue, function($q) use($searchValue) {
-                $q->orWhere('title', 'like', '%' . $searchValue . '%');
-            })
-            ->orderBy($orderValue, $orderSort)->paginate($request->length ?? 10);
-
-            //return with Api Resource
-            return new MasterResource(true, '00', 'List Data', $data);
-        }
-
-        return view('dashboard-admin.master.competency-scheme.index');
-    }
+    private array $categories = [
+        'security',
+        'cs',
+    ];
 
     /**
-     * Show the form for creating a new resource.
+     * Display a listing of the resource.
      */
-    public function create()
+    public function index(Request $request, $category)
     {
-        //
+        $this->validateCategory($category);
+
+        if ($request->ajax()) {
+
+            $searchValue = $request->input('search.value');
+
+            $orderColumn = $request->input('order.0.column') ?? 0;
+            $orderSort   = $request->input('order.0.dir') ?? 'asc';
+            $orderValue  = $request->input(
+                'columns.' . $orderColumn . '.data'
+            ) ?? 'id';
+
+            /*
+             * Kolom yang boleh digunakan untuk sorting.
+             * Mencegah user memasukkan nama kolom sembarangan.
+             */
+            $allowedOrderColumns = [
+                'id',
+                'title',
+                'category',
+            ];
+
+            if (!in_array($orderValue, $allowedOrderColumns)) {
+                $orderValue = 'id';
+            }
+
+            $data = MasterCompetencyScheme::query()
+                ->where('category', $category)
+
+                ->when($searchValue, function ($q) use ($searchValue) {
+                    $q->where(function ($query) use ($searchValue) {
+                        $query->where(
+                            'title',
+                            'like',
+                            '%' . $searchValue . '%'
+                        );
+                    });
+                })
+
+                ->orderBy($orderValue, $orderSort)
+                ->paginate($request->length ?? 10);
+
+            return new MasterResource(
+                true,
+                '00',
+                'List Data',
+                $data
+            );
+        }
+
+        return view(
+            'dashboard-admin.master.competency-scheme.index',
+            compact('category')
+        );
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, $category)
     {
+        $this->validateCategory($category);
+
         $request->validate([
-            'title' => 'required|max:255|unique:master_competency_schemes,title'
+            'title' => [
+                'required',
+                'max:255',
+                Rule::unique('master_competency_schemes', 'title')
+                    ->where(function ($query) use ($category) {
+                        return $query->where('category', $category);
+                    }),
+            ],
         ]);
 
         MasterCompetencyScheme::create([
-            'title' => $request->title
+            'title'    => $request->title,
+            'category' => $category,
         ]);
 
         return response()->json([
-            'status' => true,
-            'message' => 'Data berhasil ditambahkan.'
+            'status'  => true,
+            'message' => 'Data berhasil ditambahkan.',
         ]);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show($id)
+    public function show($category, $uuid)
     {
-        //
-    }
+        $this->validateCategory($category);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        //
+        $data = MasterCompetencyScheme::where('category', $category)
+            ->where('uuid', $uuid)
+            ->firstOrFail();
+
+        return response()->json([
+            'status' => true,
+            'data'   => $data,
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $uuid)
+    public function update(Request $request, $category, $uuid)
     {
+        $this->validateCategory($category);
+
+        $data = MasterCompetencyScheme::where('category', $category)
+            ->where('uuid', $uuid)
+            ->firstOrFail();
+
         $request->validate([
-            'title' => 'required|max:255|unique:master_competency_schemes,title,' . $uuid . ',uuid'
+            'title' => [
+                'required',
+                'max:255',
+                Rule::unique('master_competency_schemes', 'title')
+                    ->where(function ($query) use ($category) {
+                        return $query->where('category', $category);
+                    })
+                    ->ignore($data->id),
+            ],
         ]);
 
-        $data = MasterCompetencyScheme::where('uuid',$uuid)->firstOrFail();
-
         $data->update([
-            'title'=>$request->title
+            'title' => $request->title,
         ]);
 
         return response()->json([
-            'status'=>true,
-            'message'=>'Data berhasil diperbarui.'
+            'status'  => true,
+            'message' => 'Data berhasil diperbarui.',
         ]);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy($category, $uuid)
     {
-        $data = MasterCompetencyScheme::where('uuid', $id)->first();
+        $this->validateCategory($category);
+
+        $data = MasterCompetencyScheme::where('category', $category)
+            ->where('uuid', $uuid)
+            ->first();
 
         if (!$data) {
             return response()->json([
-                'status' => false,
-                'message' => 'Data tidak ditemukan.'
+                'status'  => false,
+                'message' => 'Data tidak ditemukan.',
             ], 404);
         }
 
         $data->delete();
 
         return response()->json([
-            'status' => true,
-            'message' => 'Data berhasil dihapus.'
+            'status'  => true,
+            'message' => 'Data berhasil dihapus.',
         ]);
+    }
+
+    /**
+     * Validasi category.
+     */
+    private function validateCategory($category)
+    {
+        abort_unless(
+            in_array($category, $this->categories),
+            404
+        );
     }
 }

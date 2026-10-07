@@ -1,66 +1,113 @@
 @extends('layouts.dashboard-user')
 
 @section('breadcrumb')
-    <h1
-        class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">
-        Lowongan Saya</h1>
-    <!--end::Title-->
-    <!--begin::Breadcrumb-->
+
+    <h1 class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">
+        Lowongan Saya
+    </h1>
+
     <ul class="breadcrumb breadcrumb-separatorless fw-semibold fs-7 my-0 pt-1">
-        <!--begin::Item-->
+
         <li class="breadcrumb-item text-muted">
-            <a href="javascript:;" class="text-muted text-hover-primary">Beranda</a>
+            <a href="javascript:;" class="text-muted text-hover-primary">
+                Beranda
+            </a>
         </li>
-        <!--end::Item-->
+
         <li class="breadcrumb-item">
             <span class="bullet bg-gray-500 w-5px h-2px"></span>
         </li>
-        <!--end::Item-->
-        <!--begin::Item-->
+
         <li class="breadcrumb-item text-muted">
-            <a href="{{ route('dashboard-user.job-vacancy.index') }}" class="text-muted text-hover-primary">Lowongan Saya</a>
+            <a
+                href="{{ route('dashboard-user.job-vacancy.index') }}"
+                class="text-muted text-hover-primary"
+            >
+                Lowongan Saya
+            </a>
         </li>
-        <!--end::Item-->
-        <!--end::Item-->
+
         <li class="breadcrumb-item">
             <span class="bullet bg-gray-500 w-5px h-2px"></span>
         </li>
-        <!--end::Item-->
-        <!--begin::Item-->
-        <a href="{{ route('dashboard-user.job-application.index',$job->uuid) }}" class="text-muted text-hover-primary ms-2">Lihat Pelamar</a>
-        <!--end::Item-->
-        <!--end::Item-->
+
+        <li class="breadcrumb-item text-muted">
+            <a
+                href="{{ route('dashboard-user.job-application.index', $job->uuid) }}"
+                class="text-muted text-hover-primary"
+            >
+                Lihat Pelamar
+            </a>
+        </li>
+
         <li class="breadcrumb-item">
             <span class="bullet bg-gray-500 w-5px h-2px"></span>
         </li>
-        <!--end::Item-->
-        <!--begin::Item-->
-        <a href="javascript:;" class="text-muted text-hover-primary ms-2">Detail</a>
-        <!--end::Item-->
+
+        <li class="breadcrumb-item text-muted">
+            <a href="javascript:;" class="text-muted text-hover-primary">
+                Detail
+            </a>
+        </li>
+
     </ul>
-    <!--end::Breadcrumb-->
+
 @endsection
+
 
 @section('content')
 
+@php
+    /*
+    |--------------------------------------------------------------------------
+    | PROFILE PELAMAR
+    |--------------------------------------------------------------------------
+    |
+    | Security:
+    |     $application->security
+    |
+    | Cleaning Service:
+    |     $application->cleaning_service
+    |
+    */
+    $profile = null;
+
+    if (($job->category ?? null) === 'security') {
+
+        $profile = $application->security;
+
+    } elseif (($job->category ?? null) === 'cs') {
+
+        $profile = $application->cleaning_service;
+
+    }
+@endphp
+
+
 <div class="container-fluid py-5">
+
+    {{-- =========================================================
+        TOP ACTION
+    ========================================================== --}}
 
     <div class="d-flex align-items-center justify-content-between mb-4">
 
-            <div>
-
-            </div>
-
-            <a href="{{ route('dashboard-user.job-application.index',$job->uuid) }}"
-            class="btn btn-light">
-
-                <i class="fas fa-arrow-left me-2"></i>
-
-                Kembali
-
-            </a>
-
+        <div>
         </div>
+
+        <a
+            href="{{ route(
+                'dashboard-user.job-application.index',
+                $job->uuid
+            ) }}"
+            class="btn btn-light"
+        >
+            <i class="fas fa-arrow-left me-2"></i>
+            Kembali
+        </a>
+
+    </div>
+
 
     {{-- =========================================================
         HEADER
@@ -82,7 +129,6 @@
 
                     </div>
 
-
                     <div class="text-muted">
 
                         {{ $job->position ?? '-' }}
@@ -97,6 +143,40 @@
 
                     </div>
 
+                    {{-- CATEGORY --}}
+
+                    <div class="mt-3">
+
+                        @switch($job->category)
+
+                            @case('security')
+
+                                <span class="badge badge-light-primary">
+                                    <i class="fas fa-shield-alt me-1"></i>
+                                    Satpam
+                                </span>
+
+                            @break
+
+                            @case('cs')
+
+                                <span class="badge badge-light-success">
+                                    <i class="fas fa-broom me-1"></i>
+                                    Cleaning Service
+                                </span>
+
+                            @break
+
+                            @default
+
+                                <span class="badge badge-light-secondary">
+                                    -
+                                </span>
+
+                        @endswitch
+
+                    </div>
+
                 </div>
 
 
@@ -104,9 +184,9 @@
 
                 <div>
 
-                    @switch($application->status)
+                    @switch(strtolower($application->status))
 
-                        @case('APPLIED')
+                        @case('applied')
 
                             <span class="badge badge-light-primary fs-6 px-4 py-3">
 
@@ -116,10 +196,10 @@
 
                             </span>
 
-                            @break
+                        @break
 
 
-                        @case('REVIEWED')
+                        @case('reviewed')
 
                             <span class="badge badge-light-warning fs-6 px-4 py-3">
 
@@ -129,10 +209,10 @@
 
                             </span>
 
-                            @break
+                        @break
 
 
-                        @case('SHORTLISTED')
+                        @case('shortlisted')
 
                             <span class="badge badge-light-success fs-6 px-4 py-3">
 
@@ -142,10 +222,10 @@
 
                             </span>
 
-                            @break
+                        @break
 
 
-                        @case('REJECTED')
+                        @case('rejected')
 
                             <span class="badge badge-light-danger fs-6 px-4 py-3">
 
@@ -155,7 +235,7 @@
 
                             </span>
 
-                            @break
+                        @break
 
 
                         @default
@@ -175,7 +255,6 @@
         </div>
 
     </div>
-
 
 
     {{-- =========================================================
@@ -218,17 +297,15 @@
 
                     <div class="d-flex align-items-center mb-8">
 
-
                         <div class="symbol symbol-100px symbol-circle me-5 overflow-hidden">
 
-                            @if($application->security?->formal_photo)
+                            @if($profile?->formal_photo)
 
                                 <img
                                     src="{{ asset(
-                                        'storage/' .
-                                        $application->security->formal_photo
+                                        'storage/' . $profile->formal_photo
                                     ) }}"
-                                    alt="{{ $application->security?->name }}"
+                                    alt="{{ $profile?->name ?? '-' }}"
                                     style="
                                         width:100px;
                                         height:100px;
@@ -252,9 +329,7 @@
                         <div>
 
                             <h2 class="fw-bold mb-2">
-
-                                {{ $application->security?->name ?? '-' }}
-
+                                {{ $profile?->name ?? '-' }}
                             </h2>
 
 
@@ -262,7 +337,7 @@
 
                                 <i class="fas fa-envelope me-2"></i>
 
-                                {{ $application->security?->email ?? '-' }}
+                                {{ $profile?->email ?? '-' }}
 
                             </div>
 
@@ -271,7 +346,7 @@
 
                                 <i class="fas fa-phone me-2"></i>
 
-                                {{ $application->security?->phone ?? '-' }}
+                                {{ $profile?->phone ?? '-' }}
 
                             </div>
 
@@ -295,7 +370,7 @@
                             </div>
 
                             <div class="fw-bold">
-                                {{ $application->security?->name ?? '-' }}
+                                {{ $profile?->name ?? '-' }}
                             </div>
 
                         </div>
@@ -308,7 +383,7 @@
                             </div>
 
                             <div class="fw-bold">
-                                {{ $application->security?->email ?? '-' }}
+                                {{ $profile?->email ?? '-' }}
                             </div>
 
                         </div>
@@ -321,7 +396,7 @@
                             </div>
 
                             <div class="fw-bold">
-                                {{ $application->security?->ktp_number ?? '-' }}
+                                {{ $profile?->ktp_number ?? '-' }}
                             </div>
 
                         </div>
@@ -334,7 +409,7 @@
                             </div>
 
                             <div class="fw-bold">
-                                {{ $application->security?->phone ?? '-' }}
+                                {{ $profile?->phone ?? '-' }}
                             </div>
 
                         </div>
@@ -345,7 +420,6 @@
                 </div>
 
             </div>
-
 
 
             {{-- =================================================
@@ -387,9 +461,7 @@
                         <div>
 
                             <h4 class="fw-bold mb-1">
-
                                 {{ $job->position ?? '-' }}
-
                             </h4>
 
 
@@ -420,6 +492,49 @@
                     <div class="row g-6">
 
 
+                        {{-- CATEGORY --}}
+
+                        <div class="col-md-4">
+
+                            <div class="text-muted fs-7">
+                                Kategori
+                            </div>
+
+                            <div class="fw-bold mt-1">
+
+                                @switch($job->category)
+
+                                    @case('security')
+
+                                        <span class="text-primary">
+                                            <i class="fas fa-shield-alt me-1"></i>
+                                            Satpam
+                                        </span>
+
+                                    @break
+
+                                    @case('cs')
+
+                                        <span class="text-success">
+                                            <i class="fas fa-broom me-1"></i>
+                                            Cleaning Service
+                                        </span>
+
+                                    @break
+
+                                    @default
+
+                                        -
+
+                                @endswitch
+
+                            </div>
+
+                        </div>
+
+
+                        {{-- JENIS PEKERJAAN --}}
+
                         <div class="col-md-4">
 
                             <div class="text-muted fs-7">
@@ -432,19 +547,19 @@
 
                                     @case('permanent')
                                         Tetap
-                                        @break
+                                    @break
 
                                     @case('contract')
                                         Kontrak
-                                        @break
+                                    @break
 
                                     @case('internship')
                                         Internship
-                                        @break
+                                    @break
 
                                     @case('freelance')
                                         Freelance
-                                        @break
+                                    @break
 
                                     @default
                                         -
@@ -455,6 +570,8 @@
 
                         </div>
 
+
+                        {{-- SISTEM KERJA --}}
 
                         <div class="col-md-4">
 
@@ -473,6 +590,8 @@
                         </div>
 
 
+                        {{-- KUOTA --}}
+
                         <div class="col-md-4">
 
                             <div class="text-muted fs-7">
@@ -482,7 +601,6 @@
                             <div class="fw-bold mt-1">
 
                                 {{ $job->kuota ?? '-' }}
-
                                 Orang
 
                             </div>
@@ -496,112 +614,7 @@
 
             </div>
 
-
-
-            {{-- =================================================
-                DOKUMEN
-            ================================================== --}}
-
-            {{-- <div class="card mb-5">
-
-                <div class="card-header">
-
-                    <div class="card-title">
-
-                        <h3 class="fw-bold m-0">
-                            Dokumen Lamaran
-                        </h3>
-
-                    </div>
-
-                </div>
-
-
-                <div class="card-body">
-
-
-                    @if($application->document)
-
-                        <div class="border rounded p-5">
-
-
-                            <div class="d-flex justify-content-between align-items-center">
-
-
-                                <div class="d-flex align-items-center">
-
-
-                                    <div class="symbol symbol-50px me-4">
-
-                                        <div class="symbol-label bg-light-danger">
-
-                                            <i class="fas fa-file-pdf text-danger fs-2"></i>
-
-                                        </div>
-
-                                    </div>
-
-
-                                    <div>
-
-                                        <div class="fw-bold">
-                                            Dokumen Lamaran
-                                        </div>
-
-                                        <div class="text-muted fs-7">
-                                            Dokumen yang dikirim oleh pelamar
-                                        </div>
-
-                                    </div>
-
-                                </div>
-
-
-                                <a
-                                    href="{{ asset(
-                                        'storage/' .
-                                        $application->document
-                                    ) }}"
-                                    target="_blank"
-                                    class="btn btn-light-primary"
-                                >
-
-                                    <i class="fas fa-external-link-alt me-2"></i>
-
-                                    Lihat Dokumen
-
-                                </a>
-
-                            </div>
-
-                        </div>
-
-
-                    @else
-
-                        <div class="text-center py-8">
-
-                            <i class="fas fa-file-slash fs-3x text-muted mb-4"></i>
-
-                            <div class="fw-bold">
-                                Tidak ada dokumen
-                            </div>
-
-                            <div class="text-muted fs-7">
-                                Pelamar tidak mengunggah dokumen.
-                            </div>
-
-                        </div>
-
-                    @endif
-
-                </div>
-
-            </div> --}}
-
-
         </div>
-
 
 
         {{-- =====================================================
@@ -614,7 +627,9 @@
             {{-- =================================================
                 STATUS
             ================================================== --}}
+
             @if($job->status == 'published')
+
                 <div class="card mb-5">
 
                     <div class="card-header">
@@ -636,9 +651,7 @@
                         <div class="mb-5">
 
                             <label class="form-label fw-semibold">
-
                                 Status
-
                             </label>
 
 
@@ -650,7 +663,7 @@
                                 <option
                                     value="applied"
                                     @selected(
-                                        $application->status === 'applied'
+                                        strtolower($application->status) === 'applied'
                                     )
                                 >
                                     Applied
@@ -660,7 +673,7 @@
                                 <option
                                     value="reviewed"
                                     @selected(
-                                        $application->status === 'reviewed'
+                                        strtolower($application->status) === 'reviewed'
                                     )
                                 >
                                     Reviewed
@@ -670,7 +683,7 @@
                                 <option
                                     value="shortlisted"
                                     @selected(
-                                        $application->status === 'shortlisted'
+                                        strtolower($application->status) === 'shortlisted'
                                     )
                                 >
                                     Shortlisted
@@ -680,7 +693,7 @@
                                 <option
                                     value="rejected"
                                     @selected(
-                                        $application->status === 'rejected'
+                                        strtolower($application->status) === 'rejected'
                                     )
                                 >
                                     Rejected
@@ -706,8 +719,8 @@
                     </div>
 
                 </div>
-            @endif
 
+            @endif
 
 
             {{-- =================================================
@@ -732,6 +745,8 @@
                 <div class="card-body">
 
 
+                    {{-- ID --}}
+
                     <div class="mb-5">
 
                         <div class="text-muted fs-7">
@@ -752,6 +767,8 @@
                     </div>
 
 
+                    {{-- TANGGAL --}}
+
                     <div class="mb-5">
 
                         <div class="text-muted fs-7">
@@ -770,15 +787,50 @@
                     </div>
 
 
-                    <div>
+                    {{-- POSISI --}}
+
+                    <div class="mb-5">
 
                         <div class="text-muted fs-7">
                             Posisi
                         </div>
 
                         <div class="fw-bold">
-
                             {{ $job->position ?? '-' }}
+                        </div>
+
+                    </div>
+
+
+                    {{-- KATEGORI --}}
+
+                    <div>
+
+                        <div class="text-muted fs-7">
+                            Kategori
+                        </div>
+
+                        <div class="fw-bold">
+
+                            @switch($job->category)
+
+                                @case('security')
+
+                                    Satpam
+
+                                @break
+
+                                @case('cs')
+
+                                    Cleaning Service
+
+                                @break
+
+                                @default
+
+                                    -
+
+                            @endswitch
 
                         </div>
 
@@ -787,7 +839,7 @@
                 </div>
 
             </div>
-            
+
         </div>
 
     </div>
@@ -795,6 +847,7 @@
 </div>
 
 @endsection
+
 
 @section('js')
 
@@ -828,9 +881,7 @@
             }).then(function(result) {
 
                 if (!result.isConfirmed) {
-
                     return;
-
                 }
 
 
@@ -898,12 +949,6 @@
 
                         });
 
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | UPDATE BADGE HEADER
-                        |--------------------------------------------------------------------------
-                        */
 
                         setTimeout(function() {
 

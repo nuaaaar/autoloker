@@ -376,7 +376,7 @@
 
                         <i class="ki-duotone ki-shield-search fs-6 me-2"></i>
 
-                        Profil Satpam
+                        Profil 
 
                     </div>
 

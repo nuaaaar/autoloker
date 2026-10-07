@@ -4,261 +4,403 @@
 
 @section('css')
     <style>
-        .page-title{
+        /* =========================================================
+        THEME VARIABLES
+        ========================================================= */
 
-            font-size:28px;
+        :root,
+        [data-bs-theme="light"] {
+            --job-bg: #ffffff;
+            --job-surface: #ffffff;
+            --job-surface-soft: #f8fafc;
 
-            font-weight:700;
+            --job-text: #152040;
+            --job-text-secondary: #6c757d;
+            --job-text-muted: #94a3b8;
 
+            --job-border: #e2e8f0;
+            --job-border-soft: #ececec;
+
+            --job-navy: #152040;
+            --job-navy-hover: #1d2b52;
+
+            --job-gold: #ffd54a;
+            --job-gold-hover: #ffc107;
+            --job-gold-text: #152040;
+
+            --job-icon-bg: #152040;
+            --job-icon-text: #ffffff;
+
+            --job-summary-bg: #ffd54a;
+            --job-summary-text: #152040;
+            --job-summary-small: #555555;
+
+            --job-table-text: #6c757d;
+            --job-table-heading: #152040;
+
+            --job-check-text: #334155;
+            --job-check-icon: #ffc107;
+
+            --job-certificate-bg: #152040;
+            --job-certificate-text: #ffffff;
+            --job-certificate-hover-bg: #ffc107;
+            --job-certificate-hover-text: #152040;
+
+            --job-shadow: 0 4px 16px rgba(15, 23, 42, .06);
         }
 
-        .job-header-card{
 
-            border-radius:18px;
+        [data-bs-theme="dark"] {
+            --job-bg: #0f172a;
+            --job-surface: #11192c;
+            --job-surface-soft: #182338;
 
+            --job-text: #ffffff;
+            --job-text-secondary: #94a3b8;
+            --job-text-muted: #73819d;
+
+            --job-border: rgba(255, 255, 255, .07);
+            --job-border-soft: rgba(255, 255, 255, .07);
+
+            --job-navy: #152040;
+            --job-navy-hover: #1d2b52;
+
+            --job-gold: #ffd54a;
+            --job-gold-hover: #ffc107;
+            --job-gold-text: #152040;
+
+            --job-icon-bg: #152040;
+            --job-icon-text: #ffffff;
+
+            --job-summary-bg: #ffd54a;
+            --job-summary-text: #152040;
+            --job-summary-small: #3f3f3f;
+
+            --job-table-text: #a7b3c9;
+            --job-table-heading: #ffffff;
+
+            --job-check-text: #d7deeb;
+            --job-check-icon: #ffc107;
+
+            --job-certificate-bg: #152040;
+            --job-certificate-text: #ffffff;
+            --job-certificate-hover-bg: #ffc107;
+            --job-certificate-hover-text: #152040;
+
+            --job-shadow: 0 4px 18px rgba(0, 0, 0, .18);
         }
 
-        .job-icon{
 
-            width:90px;
+        /* =========================================================
+        PAGE TITLE
+        ========================================================= */
 
-            height:90px;
-
-            border-radius:18px;
-
-            background:#152040;
-
-            color:#fff;
-
-            display:flex;
-
-            justify-content:center;
-
-            align-items:center;
-
-            font-size:34px;
-
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--job-text);
         }
+
+
+        /* =========================================================
+        JOB HEADER
+        ========================================================= */
+
+        .job-header-card {
+            border-radius: 18px;
+            background: var(--job-surface);
+            border: 1px solid var(--job-border);
+            box-shadow: var(--job-shadow);
+        }
+
+
+        .job-icon {
+            width: 90px;
+            height: 90px;
+
+            border-radius: 18px;
+
+            background: var(--job-icon-bg);
+            color: var(--job-icon-text);
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            font-size: 34px;
+
+            flex-shrink: 0;
+        }
+
 
         .job-location,
-        .job-period{
-
-            color:#6c757d;
-
-            font-size:15px;
-
+        .job-period {
+            color: var(--job-text-secondary);
+            font-size: 15px;
         }
 
-        .badge-status{
 
-            font-size:14px;
+        /* =========================================================
+        STATUS BADGE
+        ========================================================= */
 
-            padding:12px 20px;
-
-            border-radius:30px;
-
+        .badge-status {
+            font-size: 14px;
+            padding: 12px 20px;
+            border-radius: 30px;
         }
 
-        .summary-card{
 
-            background:#FFD54A;
+        /* =========================================================
+        SUMMARY CARD
+        ========================================================= */
 
-            border-radius:15px;
+        .summary-card {
+            background: var(--job-summary-bg);
+            border-radius: 15px;
+            padding: 22px;
 
-            padding:22px;
+            display: flex;
+            align-items: center;
 
-            display:flex;
+            transition: .3s;
+            height: 100%;
 
-            align-items:center;
-
-            transition:.3s;
-
-            height:100%;
-
+            border: 1px solid rgba(21, 32, 64, .08);
         }
 
-        .summary-card:hover{
-
-            transform:translateY(-4px);
-
+        .summary-card:hover {
+            transform: translateY(-4px);
         }
 
-        .summary-icon{
 
-            width:60px;
+        .summary-icon {
+            width: 60px;
+            height: 60px;
 
-            height:60px;
+            border-radius: 50%;
 
-            border-radius:50%;
+            background: var(--job-icon-bg);
+            color: var(--job-icon-text);
 
-            background:#152040;
+            display: flex;
+            justify-content: center;
+            align-items: center;
 
-            color:#fff;
+            font-size: 22px;
 
-            display:flex;
+            margin-right: 18px;
 
-            justify-content:center;
-
-            align-items:center;
-
-            font-size:22px;
-
-            margin-right:18px;
-
+            flex-shrink: 0;
         }
 
-        .summary-card small{
 
-            display:block;
-
-            color:#555;
-
-            font-weight:600;
-
+        .summary-card small {
+            display: block;
+            color: var(--job-summary-small);
+            font-weight: 600;
         }
 
-        .summary-card h4{
 
-            margin:3px 0 0;
+        .summary-card h4 {
+            margin: 3px 0 0;
 
-            font-size:19px;
+            font-size: 19px;
+            font-weight: 700;
 
-            font-weight:700;
-
-            color:#152040;
-
+            color: var(--job-summary-text);
         }
 
-        .detail-card{
 
-            border-radius:16px;
+        /* =========================================================
+        DETAIL CARD
+        ========================================================= */
 
+        .detail-card {
+            border-radius: 16px;
+
+            background: var(--job-surface);
+            border: 1px solid var(--job-border);
+
+            box-shadow: var(--job-shadow);
         }
 
-        .detail-card .card-header{
 
-            padding:18px 22px;
+        .detail-card .card-header {
+            padding: 18px 22px;
 
+            background: transparent;
+            border-bottom: 1px solid var(--job-border);
         }
 
-        .detail-card .card-header h5{
 
-            font-size:18px;
+        .detail-card .card-header h5 {
+            font-size: 18px;
+            font-weight: 700;
 
-            font-weight:700;
-
-            color:#152040;
-
+            color: var(--job-text);
         }
 
-        .detail-table{
 
-            margin-bottom:0;
-
+        .detail-card .card-body {
+            line-height: 1.8;
+            color: var(--job-text);
         }
 
-        .detail-table td{
 
-            color:#6c757d;
+        /* =========================================================
+        DETAIL TABLE
+        ========================================================= */
 
-            padding:12px 6px;
-
-            vertical-align:top;
-
-            font-weight:500;
-
+        .detail-table {
+            margin-bottom: 0;
         }
 
-        .detail-table th{
 
-            color:#152040;
+        .detail-table td {
+            color: var(--job-table-text);
 
-            padding:12px 6px;
+            padding: 12px 6px;
 
-            font-weight:600;
-
+            vertical-align: top;
+            font-weight: 500;
         }
 
-        .detail-table tr:not(:last-child){
 
-            border-bottom:1px dashed #ececec;
+        .detail-table th {
+            color: var(--job-table-heading);
 
+            padding: 12px 6px;
+
+            font-weight: 600;
         }
 
-        .salary-text{
 
-            color:white;
-
-            font-size:30px;
-
-            font-weight:700;
-
+        .detail-table tr:not(:last-child) {
+            border-bottom: 1px dashed var(--job-border-soft);
         }
 
-        .check-item{
 
-            display:flex;
+        /* =========================================================
+        SALARY
+        ========================================================= */
 
-            align-items:flex-start;
-
-            margin-bottom:14px;
-
+        .salary-text {
+            color: var(--job-text);
+            font-size: 30px;
+            font-weight: 700;
         }
 
-        .check-item i{
 
-            color:#ffc107;
+        /* =========================================================
+        CHECK ITEM
+        ========================================================= */
 
-            font-size:18px;
-
-            margin-right:12px;
-
-            margin-top:3px;
-
+        .check-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 14px;
         }
 
-        .check-item span{
 
-            color:white;
+        .check-item i {
+            color: var(--job-check-icon);
 
-            line-height:1.7;
+            font-size: 18px;
 
+            margin-right: 12px;
+            margin-top: 3px;
+
+            flex-shrink: 0;
         }
 
-        .certificate-badge{
 
-            display:inline-block;
-
-            background:#152040;
-
-            color:#fff;
-
-            padding:10px 18px;
-
-            border-radius:30px;
-
-            margin:6px;
-
-            font-size:14px;
-
-            font-weight:600;
-
-            transition:.3s;
-
+        .check-item span {
+            color: var(--job-check-text);
+            line-height: 1.7;
         }
 
-        .certificate-badge:hover{
 
-            background:#ffc107;
+        /* =========================================================
+        CERTIFICATE BADGE
+        ========================================================= */
 
-            color:#152040;
+        .certificate-badge {
+            display: inline-block;
 
+            background: var(--job-certificate-bg);
+            color: var(--job-certificate-text);
+
+            padding: 10px 18px;
+
+            border-radius: 30px;
+            margin: 6px;
+
+            font-size: 14px;
+            font-weight: 600;
+
+            transition: .3s;
+
+            border: 1px solid transparent;
         }
 
-        .detail-card .card-body{
 
-            line-height:1.8;
+        .certificate-badge:hover {
+            background: var(--job-certificate-hover-bg);
+            color: var(--job-certificate-hover-text);
+        }
 
+
+        /* =========================================================
+        RESPONSIVE
+        ========================================================= */
+
+        @media (max-width: 768px) {
+
+            .page-title {
+                font-size: 23px;
+            }
+
+            .job-icon {
+                width: 70px;
+                height: 70px;
+                border-radius: 15px;
+                font-size: 27px;
+            }
+
+            .summary-card {
+                padding: 18px;
+            }
+
+            .summary-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 19px;
+                margin-right: 14px;
+            }
+
+            .summary-card h4 {
+                font-size: 17px;
+            }
+
+            .detail-card .card-header {
+                padding: 15px 17px;
+            }
+
+            .detail-table th,
+            .detail-table td {
+                padding: 10px 4px;
+            }
+
+            .salary-text {
+                font-size: 25px;
+            }
+
+            .certificate-badge {
+                padding: 8px 14px;
+                font-size: 13px;
+                margin: 4px;
+            }
         }
     </style>
 @endsection
@@ -330,18 +472,43 @@
                         <div class="d-flex align-items-center">
 
                             <div class="job-icon">
-
                                 <i class="fas fa-briefcase"></i>
-
                             </div>
 
                             <div class="ms-4">
 
                                 <h2 class="mb-2">
-
                                     {{ $data->position }}
-
                                 </h2>
+
+                                {{-- CATEGORY --}}
+                                <div class="mb-2">
+
+                                    @switch($data->category)
+
+                                        @case('security')
+                                            <span class="badge badge-light-primary">
+                                                <i class="fas fa-shield-alt me-1"></i>
+                                                Satpam
+                                            </span>
+                                        @break
+
+                                        @case('cs')
+                                            <span class="badge badge-light-success">
+                                                <i class="fas fa-broom me-1"></i>
+                                                Cleaning Service
+                                            </span>
+                                        @break
+
+                                        @default
+                                            <span class="badge badge-light-secondary">
+                                                -
+                                            </span>
+                                        @break
+
+                                    @endswitch
+
+                                </div>
 
                                 <div class="d-flex flex-wrap">
 
@@ -355,9 +522,7 @@
                                     </span>
 
                                     <span class="mx-3 text-muted">
-
                                         |
-
                                     </span>
 
                                     <span class="job-period">
@@ -387,9 +552,7 @@
                             @case('draft')
 
                                 <span class="badge badge-status badge-secondary">
-
                                     Draft
-
                                 </span>
 
                             @break
@@ -397,9 +560,7 @@
                             @case('submitted')
 
                                 <span class="badge badge-status badge-warning">
-
                                     Menunggu Persetujuan
-
                                 </span>
 
                             @break
@@ -407,9 +568,7 @@
                             @case('published')
 
                                 <span class="badge badge-status badge-success">
-
                                     Dipublikasikan
-
                                 </span>
 
                             @break
@@ -417,9 +576,7 @@
                             @case('closed')
 
                                 <span class="badge badge-status badge-dark">
-
                                     Ditutup
-
                                 </span>
 
                             @break
@@ -427,9 +584,7 @@
                             @case('rejected')
 
                                 <span class="badge badge-status badge-danger">
-
                                     Ditolak
-
                                 </span>
 
                             @break
@@ -587,7 +742,7 @@
 
                 <div class="card border-0 shadow-sm detail-card">
 
-                    <div class="card-header bg-white border-0">
+                    <div class="card-header  border-0">
 
                         <h5 class="mb-0">
                             <i class="fas fa-circle-info text-warning me-2"></i>
@@ -692,7 +847,7 @@
 
                 <div class="card border-0 shadow-sm detail-card">
 
-                    <div class="card-header bg-white border-0">
+                    <div class="card-header  border-0">
 
                         <h5 class="mb-0">
 
@@ -769,7 +924,7 @@
 
                 <div class="card border-0 shadow-sm detail-card">
 
-                    <div class="card-header bg-white border-0">
+                    <div class="card-header  border-0">
 
                         <h5 class="mb-0">
                             <i class="fas fa-file-lines text-warning me-2"></i>
@@ -796,7 +951,7 @@
 
                 <div class="card border-0 shadow-sm detail-card">
 
-                    <div class="card-header bg-white border-0">
+                    <div class="card-header  border-0">
 
                         <h5 class="mb-0">
 
@@ -964,7 +1119,7 @@
 
                 <div class="card border-0 shadow-sm detail-card">
 
-                    <div class="card-header bg-white border-0">
+                    <div class="card-header  border-0">
 
                         <h5 class="mb-0">
 
@@ -1020,7 +1175,7 @@
 
                 <div class="card border-0 shadow-sm detail-card">
 
-                    <div class="card-header bg-white border-0">
+                    <div class="card-header  border-0">
 
                         <h5 class="mb-0">
 
@@ -1074,7 +1229,7 @@
 
                 <div class="card border-0 shadow-sm detail-card">
 
-                    <div class="card-header bg-white border-0">
+                    <div class="card-header  border-0">
 
                         <h5 class="mb-0">
 
@@ -1128,7 +1283,7 @@
 
                 <div class="card border-0 shadow-sm detail-card">
 
-                    <div class="card-header bg-white border-0">
+                    <div class="card-header  border-0">
 
                         <h5 class="mb-0">
 
@@ -1178,7 +1333,7 @@
 
                 <div class="card border-0 shadow-sm detail-card">
 
-                    <div class="card-header bg-white border-0">
+                    <div class="card-header  border-0">
 
                         <h5 class="mb-0">
 

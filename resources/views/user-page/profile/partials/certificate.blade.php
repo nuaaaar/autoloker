@@ -1689,7 +1689,7 @@
 
                     Tambahkan sertifikat pelatihan, lisensi, atau kompetensi
                     yang Anda miliki agar profil lebih dipercaya oleh
-                    perusahaan maupun BUJP.
+                    perusahaan.
 
                 </div>
 
@@ -1844,8 +1844,20 @@
                             <option>Pilih kategori...</option>
 
                             @php
-                                $master_category_certificates = \App\Models\MasterCategoryCertificate::orderBy('title')->get();
+                                $role = Auth::user()->role;
+
+                                $category = $role === 'satpam'
+                                    ? 'security'
+                                    : 'cs';
+
+                                $master_category_certificates = \App\Models\MasterCategoryCertificate::where(
+                                    'category',
+                                    $category
+                                )
+                                ->orderBy('title')
+                                ->get();
                             @endphp
+
 
                             @foreach($master_category_certificates as $certificate)
 

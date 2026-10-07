@@ -3,14 +3,75 @@
 namespace App\Http\Controllers\UserPage;
 
 use App\Http\Controllers\Controller;
+
 use Illuminate\Http\Request;
+
 use App\Models\JobBookmark;
+
 use App\Models\JobVacancy;
+
 use App\Models\Security;
+
+use App\Models\CleaningService;
+
 use Auth;
 
 class JobBookmarkController extends Controller
 {
+    /**
+     * Get profile berdasarkan role user.
+     */
+    private function getProfile()
+    {
+        $user = Auth::user();
+
+        if ($user->role === 'satpam') {
+            return $user->user_security?->security;
+        }
+
+        if ($user->role === 'cs') {
+            return $user->user_cleaning_service?->cleaning_service;
+        }
+
+        abort(403, 'Role tidak valid.');
+    }
+
+    /**
+     * Get category berdasarkan role user.
+     */
+    private function getCategory()
+    {
+        $user = Auth::user();
+
+        if ($user->role === 'satpam') {
+            return 'security';
+        }
+
+        if ($user->role === 'cs') {
+            return 'cs';
+        }
+
+        abort(403, 'Role tidak valid.');
+    }
+
+    /**
+     * Get kolom owner bookmark berdasarkan role user.
+     */
+    private function getOwnerColumn()
+    {
+        $user = Auth::user();
+
+        if ($user->role === 'satpam') {
+            return 'security_id';
+        }
+
+        if ($user->role === 'cs') {
+            return 'cleaning_service_id';
+        }
+
+        abort(403, 'Role tidak valid.');
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -54,8 +115,10 @@ class JobBookmarkController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, JobBookmark $jobBookmark)
-    {
+    public function update(
+        Request $request,
+        JobBookmark $jobBookmark
+    ) {
         //
     }
 
@@ -69,16 +132,56 @@ class JobBookmarkController extends Controller
 
     public function bookmark($uuid)
     {
-        $security = Auth::user()
-            ->user_security
-            ->security;
+        /*
+        |--------------------------------------------------------------------------
+        | PROFILE
+        |--------------------------------------------------------------------------
+        */
+
+        $security = $this->getProfile();
+
+        if (!$security) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data profile belum tersedia.'
+            ], 403);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | CATEGORY & OWNER
+        |--------------------------------------------------------------------------
+        */
+
+        $category = $this->getCategory();
+
+        $ownerColumn = $this->getOwnerColumn();
+
+        /*
+        |--------------------------------------------------------------------------
+        | JOB
+        |--------------------------------------------------------------------------
+        */
 
         $job = JobVacancy::where('uuid', $uuid)
             ->where('status', 'published')
+            ->where('category', $category)
             ->firstOrFail();
 
-        $bookmark = JobBookmark::where('security_id', $security->id)
-            ->where('job_vacancy_id', $job->id)
+        /*
+        |--------------------------------------------------------------------------
+        | CHECK BOOKMARK
+        |--------------------------------------------------------------------------
+        */
+
+        $bookmark = JobBookmark::where(
+                $ownerColumn,
+                $security->id
+            )
+            ->where(
+                'job_vacancy_id',
+                $job->id
+            )
             ->first();
 
         /*
@@ -105,7 +208,7 @@ class JobBookmarkController extends Controller
         */
 
         JobBookmark::create([
-            'security_id' => $security->id,
+            $ownerColumn => $security->id,
             'job_vacancy_id' => $job->id,
         ]);
 

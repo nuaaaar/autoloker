@@ -35,6 +35,11 @@ class User extends Authenticatable
         return $this->hasOne('App\Models\UserSecurity');
     }
 
+    public function user_cleaning_service()
+    {
+        return $this->hasOne('App\Models\UserCleaningService');
+    }
+
     public function user_company()
     {
         return $this->hasOne('App\Models\UserCompany');

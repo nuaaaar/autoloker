@@ -16,7 +16,7 @@
                 </div>
 
                 <h2 class="step-title">
-                    Profil Satpam
+                    Profil 
                 </h2>
 
                 <div class="step-description">
@@ -33,7 +33,7 @@
             <div class="col-md-6 mb-5">
 
                 <label class="form-label required">
-                    Status Satpam
+                    Status 
                 </label>
 
                 <select class="form-select auto-input" name="work_status">
@@ -79,12 +79,30 @@
 
                 <select class="form-select auto-input" name="position">
                     @php
-                        $master_positions = \App\Models\MasterPosition::orderBy('title')->get();
-                    @endphp
-                    @foreach($master_positions as $position)
-                        <option value="{{ $position->title }}" {{ $data->position == $position->title ? 'selected' : '' }}>{{ $position->title }}</option>
-                    @endforeach
+                        $role = Auth::user()->role;
 
+                        $categoryMap = [
+                            'satpam' => 'security',
+                            'cs'     => 'cs',
+                        ];
+
+                        $category = $categoryMap[$role] ?? null;
+
+                        $master_positions = $category
+                            ? \App\Models\MasterPosition::where('category', $category)
+                                ->orderBy('title')
+                                ->get()
+                            : collect();
+                    @endphp
+
+                    @foreach($master_positions as $position)
+                        <option
+                            value="{{ $position->title }}"
+                            {{ $data->position == $position->title ? 'selected' : '' }}
+                        >
+                            {{ $position->title }}
+                        </option>
+                    @endforeach
                 </select>
 
             </div>
@@ -191,7 +209,7 @@
                     name="self_description"
                     class="form-control auto-input"
                     rows="5"
-                    placeholder="Ceritakan pengalaman Anda sebagai anggota satpam...">{{ $data->self_description }}</textarea>
+                    placeholder="Ceritakan pengalaman Anda...">{{ $data->self_description }}</textarea>
 
             </div>
 

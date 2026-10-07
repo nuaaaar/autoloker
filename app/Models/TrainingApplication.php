@@ -14,6 +14,11 @@ class TrainingApplication extends Model
         return $this->belongsTo('App\Models\Security');
     }
 
+    public function cleaning_service()
+    {
+        return $this->belongsTo('App\Models\CleaningService');
+    }
+
     public function training()
     {
         return $this->belongsTo('App\Models\Training');

@@ -219,6 +219,32 @@
 
         }
 
+        .role-btn{
+
+            height: 36px;
+
+            border-radius:12px;
+
+            border:1px solid #2c3954;
+
+            background:transparent;
+
+            color:#8fa0bc;
+
+            transition:.25s;
+
+        }
+
+        .role-btn.active{
+
+            background:#f6b000;
+
+            color:#111;
+
+            border-color:#f6b000;
+
+        }
+
         .wizard-footer{
 
             max-width:760px;
@@ -449,6 +475,14 @@
             }
 
             .gender-btn{
+
+                height:40px;
+
+                font-size:12px;
+
+            }
+
+            .role-btn{
 
                 height:40px;
 
@@ -1076,6 +1110,18 @@
             border-color:#f6b000;
         }
 
+        [data-bs-theme="light"] .role-btn{
+            border-color:#dbe3ee;
+            color:#64748b;
+            background:transparent;
+        }
+
+        [data-bs-theme="light"] .role-btn.active{
+            background:#f6b000;
+            color:#111;
+            border-color:#f6b000;
+        }
+
         [data-bs-theme="light"] .btn-next-step{
             background:#f6b000;
             color:#111;
@@ -1410,6 +1456,16 @@
 
         });
 
+        $(document).on('click', '.role-btn', function () {
+
+            $('.role-btn').removeClass('active');
+
+            $(this).addClass('active');
+
+            $('#role').val($(this).val());
+
+        });
+
         $(function(){
 
             $("#photoInput").on("change",function(){
@@ -1483,200 +1539,10 @@
             });
 
         });
+        
     </script>
 
-   <script>
-
-    function refreshSkill() {
-
-        let selected = [];
-        let html = "";
-
-        $(".skill-chip.active").each(function () {
-
-            selected.push($(this).data("value"));
-
-        });
-
-        // jumlah skill
-        $("#skillCount").text(selected.length);
-
-        // hidden input
-        $("#skills").val(selected.join(","));
-
-        // badge terpilih
-        if(selected.length){
-
-            $.each(selected,function(i,item){
-
-                html += `
-                    <span class="selected-item" data-value="${item}">
-                        ${item}
-                        <i class="ki-duotone ki-cross fs-8 ms-1"></i>
-                    </span>
-                `;
-
-            });
-
-        }else{
-
-            html = `
-                <span class="text-muted">
-                    Belum memilih kemampuan
-                </span>
-            `;
-
-        }
-
-        $("#selectedSkill").html(html);
-
-    }
-
-
-    /* pilih skill */
-
-    $(document).on("click",".skill-chip",function(){
-
-        $(this).toggleClass("active");
-
-        refreshSkill();
-
-    });
-
-
-    /* hapus dari badge */
-
-    $(document).on("click",".selected-item",function(){
-
-        let value=$(this).data("value");
-
-        $('.skill-chip[data-value="'+value+'"]')
-            .removeClass("active");
-
-        refreshSkill();
-
-    });
-
-
-    /* hapus semua */
-
-    $("#clearSkill").on("click",function(e){
-
-        e.preventDefault();
-
-        $(".skill-chip").removeClass("active");
-
-        refreshSkill();
-
-    });
-
-
-    $(function(){
-
-        refreshSkill();
-
-    });
-
-    </script>
-
-    {{-- STEP 4 --}}
     <script>
-        function refreshPlacementSite() {
-
-            let selected = [];
-            let html = '';
-
-            $(".placement-site-item.active").each(function () {
-
-                let value = $(this).data("value");
-
-                selected.push(value);
-
-            });
-
-            $("#placementCount").text(selected.length);
-
-            $("#placements").val(selected.join(","));
-
-            if (selected.length == 0) {
-
-                html = '<span class="text-muted">Belum memilih penempatan</span>';
-
-            } else {
-
-                $.each(selected, function (i, value) {
-
-                    html += `
-                        <span class="selected-placement" data-name="${value}">
-                            ${value} &times;
-                        </span>
-                    `;
-
-                });
-
-            }
-
-            $("#placementSelectedList").html(html);
-
-        }
-
-
-        /* Pilih Penempatan */
-
-        $(document).on("click", ".placement-site-item", function () {
-
-            $(this).toggleClass("active");
-
-            refreshPlacementSite();
-
-        });
-
-
-        /* Hapus satu */
-
-        $(document).on("click", ".selected-placement", function () {
-
-            let name = $(this).data("name");
-
-            $(".placement-site-item").each(function () {
-
-                if ($(this).data("value") == name) {
-
-                    $(this).removeClass("active");
-
-                }
-
-            });
-
-            refreshPlacementSite();
-
-        });
-
-
-        /* Hapus Semua */
-
-        $("#clearPlacement").on("click", function (e) {
-
-            e.preventDefault();
-
-            $(".placement-site-item").removeClass("active");
-
-            refreshPlacementSite();
-
-        });
-
-
-        /* Counter Catatan */
-
-        $("#placement_note").on("input", function () {
-
-            $("#placementChar").text($(this).val().length);
-
-        });
-
-
-        refreshPlacementSite();
-
         $(document).ready(function(){
 
             function loadCities(province, selected=""){
@@ -1872,4 +1738,736 @@
             }
         });
     </script>
+
+    <script>
+        $(document).ready(function () {
+
+            /*
+            |--------------------------------------------------------------------------
+            | ROLE AWAL
+            |--------------------------------------------------------------------------
+            */
+
+            const initialRole = $('#role').val();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | DATA AWAL DARI DATABASE
+            |--------------------------------------------------------------------------
+            */
+
+            const initialSkills = $('#skills').val() || '';
+            const initialPlacements = $('#placements').val() || '';
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | STATE ABILITY PER ROLE
+            |--------------------------------------------------------------------------
+            */
+
+            let roleSkillState = {
+                satpam: initialRole === 'satpam'
+                    ? initialSkills
+                    : '',
+
+                cs: initialRole === 'cs'
+                    ? initialSkills
+                    : ''
+            };
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | STATE PLACEMENT PER ROLE
+            |--------------------------------------------------------------------------
+            */
+
+            let rolePlacementState = {
+                satpam: initialRole === 'satpam'
+                    ? initialPlacements
+                    : '',
+
+                cs: initialRole === 'cs'
+                    ? initialPlacements
+                    : ''
+            };
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | HELPER STRING -> ARRAY
+            |--------------------------------------------------------------------------
+            */
+
+            function stringToArray(value) {
+
+                if (!value) {
+                    return [];
+                }
+
+                return value
+                    .split(',')
+                    .map(function (item) {
+                        return item.trim();
+                    })
+                    .filter(function (item) {
+                        return item !== '';
+                    });
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | ESCAPE HTML
+            |--------------------------------------------------------------------------
+            */
+
+            function escapeHtml(text) {
+
+                return $('<div>')
+                    .text(text)
+                    .html();
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | ROLE CHANGE
+            |--------------------------------------------------------------------------
+            */
+
+            $('.role-btn').on('click', function () {
+
+                const role = $(this).val();
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | SET ROLE
+                |--------------------------------------------------------------------------
+                */
+
+                $('#role').val(role);
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | ACTIVE BUTTON
+                |--------------------------------------------------------------------------
+                */
+
+                $('.role-btn').removeClass('active');
+
+                $(this).addClass('active');
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | TAMPILKAN ABILITY SESUAI ROLE
+                |
+                | display: contents dipakai agar CSS lama tetap bekerja.
+                | Dengan ini gap / spacing dari .skill-list tidak rusak.
+                |--------------------------------------------------------------------------
+                */
+
+                $('.skill-role-list').hide();
+
+                $('.skill-role-list[data-role="' + role + '"]')
+                    .css('display', 'contents');
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | TAMPILKAN PLACEMENT SESUAI ROLE
+                |--------------------------------------------------------------------------
+                */
+
+                $('.placement-role-list').hide();
+
+                $('.placement-role-list[data-role="' + role + '"]')
+                    .css('display', 'contents');
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | RESTORE ABILITY
+                |--------------------------------------------------------------------------
+                */
+
+                restoreSkills(role);
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | RESTORE PLACEMENT
+                |--------------------------------------------------------------------------
+                */
+
+                restorePlacements(role);
+            });
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | RESTORE SKILLS
+            |--------------------------------------------------------------------------
+            */
+
+            function restoreSkills(role) {
+
+                const savedSkills =
+                    roleSkillState[role] || '';
+
+                const selected =
+                    stringToArray(savedSkills);
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | RESET SEMUA ACTIVE
+                |--------------------------------------------------------------------------
+                */
+
+                $('.skill-chip')
+                    .removeClass('active');
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | ACTIVE SESUAI STATE ROLE
+                |--------------------------------------------------------------------------
+                */
+
+                $('.skill-role-list[data-role="' + role + '"] .skill-chip')
+                    .each(function () {
+
+                        const value = String(
+                            $(this).data('value')
+                        ).trim();
+
+                        if (selected.includes(value)) {
+
+                            $(this).addClass('active');
+                        }
+                    });
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | HIDDEN INPUT
+                |--------------------------------------------------------------------------
+                */
+
+                $('#skills').val(
+                    selected.join(',')
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | REFRESH DISPLAY
+                |--------------------------------------------------------------------------
+                */
+
+                refreshSkill();
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | RESTORE PLACEMENTS
+            |--------------------------------------------------------------------------
+            */
+
+            function restorePlacements(role) {
+
+                const savedPlacements =
+                    rolePlacementState[role] || '';
+
+                const selected =
+                    stringToArray(savedPlacements);
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | RESET SEMUA ACTIVE
+                |--------------------------------------------------------------------------
+                */
+
+                $('.placement-site-item')
+                    .removeClass('active');
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | ACTIVE SESUAI STATE ROLE
+                |--------------------------------------------------------------------------
+                */
+
+                $('.placement-role-list[data-role="' + role + '"] .placement-site-item')
+                    .each(function () {
+
+                        const value = String(
+                            $(this).data('value')
+                        ).trim();
+
+                        if (selected.includes(value)) {
+
+                            $(this).addClass('active');
+                        }
+                    });
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | HIDDEN INPUT
+                |--------------------------------------------------------------------------
+                */
+
+                $('#placements').val(
+                    selected.join(',')
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | REFRESH DISPLAY
+                |--------------------------------------------------------------------------
+                */
+
+                refreshPlacementSite();
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | REFRESH SKILL
+            |--------------------------------------------------------------------------
+            */
+
+            function refreshSkill() {
+
+                const role = $('#role').val();
+
+                let selected = [];
+
+                let html = '';
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | AMBIL SKILL DARI ROLE AKTIF SAJA
+                |--------------------------------------------------------------------------
+                */
+
+                $('.skill-role-list[data-role="' + role + '"] .skill-chip.active')
+                    .each(function () {
+
+                        selected.push(
+                            $(this).data('value')
+                        );
+                    });
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | UPDATE STATE ROLE
+                |--------------------------------------------------------------------------
+                */
+
+                roleSkillState[role] =
+                    selected.join(',');
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | COUNTER
+                |--------------------------------------------------------------------------
+                */
+
+                $('#skillCount').text(
+                    selected.length
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | HIDDEN INPUT
+                |--------------------------------------------------------------------------
+                */
+
+                $('#skills').val(
+                    selected.join(',')
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | SELECTED BADGE
+                |--------------------------------------------------------------------------
+                */
+
+                if (selected.length) {
+
+                    $.each(
+                        selected,
+                        function (i, item) {
+
+                            html += `
+                                <span
+                                    class="selected-item"
+                                    data-value="${escapeHtml(item)}"
+                                >
+                                    ${escapeHtml(item)}
+                                    <i class="ki-duotone ki-cross fs-8 ms-1"></i>
+                                </span>
+                            `;
+                        }
+                    );
+
+                } else {
+
+                    html = `
+                        <span class="text-muted">
+                            Belum memilih kemampuan
+                        </span>
+                    `;
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | RENDER
+                |--------------------------------------------------------------------------
+                */
+
+                $('#selectedSkill').html(html);
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CLICK SKILL
+            |--------------------------------------------------------------------------
+            */
+
+            $(document).on(
+                'click',
+                '.skill-chip',
+                function () {
+
+                    $(this).toggleClass('active');
+
+                    refreshSkill();
+                }
+            );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | DELETE SINGLE SKILL
+            |--------------------------------------------------------------------------
+            */
+
+            $(document).on(
+                'click',
+                '.selected-item',
+                function () {
+
+                    const value = String(
+                        $(this).data('value')
+                    ).trim();
+
+                    const role = $('#role').val();
+
+
+                    $('.skill-role-list[data-role="' + role + '"] .skill-chip')
+                        .each(function () {
+
+                            const chipValue = String(
+                                $(this).data('value')
+                            ).trim();
+
+                            if (chipValue === value) {
+
+                                $(this)
+                                    .removeClass('active');
+                            }
+                        });
+
+
+                    refreshSkill();
+                }
+            );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CLEAR ALL SKILL
+            |--------------------------------------------------------------------------
+            */
+
+            $('#clearSkill').on(
+                'click',
+                function (e) {
+
+                    e.preventDefault();
+
+                    const role = $('#role').val();
+
+
+                    $('.skill-role-list[data-role="' + role + '"] .skill-chip')
+                        .removeClass('active');
+
+
+                    refreshSkill();
+                }
+            );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | REFRESH PLACEMENT
+            |--------------------------------------------------------------------------
+            */
+
+            function refreshPlacementSite() {
+
+                const role = $('#role').val();
+
+                let selected = [];
+
+                let html = '';
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | AMBIL PLACEMENT ROLE AKTIF SAJA
+                |--------------------------------------------------------------------------
+                */
+
+                $('.placement-role-list[data-role="' + role + '"] .placement-site-item.active')
+                    .each(function () {
+
+                        selected.push(
+                            $(this).data('value')
+                        );
+                    });
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | UPDATE STATE ROLE
+                |--------------------------------------------------------------------------
+                */
+
+                rolePlacementState[role] =
+                    selected.join(',');
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | COUNTER
+                |--------------------------------------------------------------------------
+                */
+
+                $('#placementCount').text(
+                    selected.length
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | HIDDEN INPUT
+                |--------------------------------------------------------------------------
+                */
+
+                $('#placements').val(
+                    selected.join(',')
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | SELECTED BADGE
+                |--------------------------------------------------------------------------
+                */
+
+                if (selected.length === 0) {
+
+                    html = `
+                        <span class="text-muted">
+                            Belum memilih penempatan
+                        </span>
+                    `;
+
+                } else {
+
+                    $.each(
+                        selected,
+                        function (i, value) {
+
+                            html += `
+                                <span
+                                    class="selected-placement"
+                                    data-name="${escapeHtml(value)}"
+                                >
+                                    ${escapeHtml(value)}
+                                    &times;
+                                </span>
+                            `;
+                        }
+                    );
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | RENDER
+                |--------------------------------------------------------------------------
+                */
+
+                $('#placementSelectedList')
+                    .html(html);
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CLICK PLACEMENT
+            |--------------------------------------------------------------------------
+            */
+
+            $(document).on(
+                'click',
+                '.placement-site-item',
+                function () {
+
+                    $(this).toggleClass('active');
+
+                    refreshPlacementSite();
+                }
+            );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | DELETE SINGLE PLACEMENT
+            |--------------------------------------------------------------------------
+            */
+
+            $(document).on(
+                'click',
+                '.selected-placement',
+                function () {
+
+                    const value = String(
+                        $(this).data('name')
+                    ).trim();
+
+                    const role = $('#role').val();
+
+
+                    $('.placement-role-list[data-role="' + role + '"] .placement-site-item')
+                        .each(function () {
+
+                            const placementValue = String(
+                                $(this).data('value')
+                            ).trim();
+
+                            if (placementValue === value) {
+
+                                $(this)
+                                    .removeClass('active');
+                            }
+                        });
+
+
+                    refreshPlacementSite();
+                }
+            );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CLEAR ALL PLACEMENT
+            |--------------------------------------------------------------------------
+            */
+
+            $('#clearPlacement').on(
+                'click',
+                function (e) {
+
+                    e.preventDefault();
+
+                    const role = $('#role').val();
+
+
+                    $('.placement-role-list[data-role="' + role + '"] .placement-site-item')
+                        .removeClass('active');
+
+
+                    refreshPlacementSite();
+                }
+            );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | COUNTER CATATAN
+            |--------------------------------------------------------------------------
+            */
+
+            $('#placement_note').on(
+                'input',
+                function () {
+
+                    $('#placementChar').text(
+                        $(this).val().length
+                    );
+                }
+            );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | INITIAL LOAD
+            |--------------------------------------------------------------------------
+            */
+
+            /*
+            |--------------------------------------------------------------------------
+            | TAMPILKAN ROLE AWAL
+            |--------------------------------------------------------------------------
+            */
+
+            $('.skill-role-list').hide();
+
+            $('.skill-role-list[data-role="' + initialRole + '"]')
+                .css('display', 'contents');
+
+
+            $('.placement-role-list').hide();
+
+            $('.placement-role-list[data-role="' + initialRole + '"]')
+                .css('display', 'contents');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | RESTORE DATA AWAL
+            |--------------------------------------------------------------------------
+            */
+
+            restoreSkills(initialRole);
+
+            restorePlacements(initialRole);
+
+        });
+    </script>
+
+    
+
 @endsection

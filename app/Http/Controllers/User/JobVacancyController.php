@@ -5,7 +5,10 @@ namespace App\Http\Controllers\User;
 use Illuminate\Support\Facades\Validator;
 use Laravolt\Indonesia\Models\Province;
 use Laravolt\Indonesia\Models\District;
+use App\Models\MasterCertificate;
+use App\Models\MasterCompetencyScheme;
 use App\Models\MasterPositionSecurity;
+use App\Models\MasterPositionCleaningService;
 use Laravolt\Indonesia\Models\Village;
 use Laravolt\Indonesia\Models\City;
 use App\Http\Resources\MasterResource;
@@ -25,16 +28,13 @@ class JobVacancyController extends Controller
         | USER
         |--------------------------------------------------------------------------
         */
-
         $user = Auth::user();
-
 
         /*
         |--------------------------------------------------------------------------
         | CARI OWNER
         |--------------------------------------------------------------------------
         */
-
         if ($user->role === 'bujp') {
 
             $ownerColumn = 'b_u_j_p_id';
@@ -52,7 +52,6 @@ class JobVacancyController extends Controller
                 ->user_company
                 ->company
                 ->id;
-
         }
 
 
@@ -61,7 +60,6 @@ class JobVacancyController extends Controller
         | BASE JOB QUERY
         |--------------------------------------------------------------------------
         */
-
         $jobQuery = JobVacancy::where(
             $ownerColumn,
             $ownerId
@@ -73,7 +71,6 @@ class JobVacancyController extends Controller
         | STATISTIK LOWONGAN
         |--------------------------------------------------------------------------
         */
-
         $totalJobs = (clone $jobQuery)->count();
 
         $publishedJobs = (clone $jobQuery)
@@ -91,11 +88,10 @@ class JobVacancyController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | TOTAL APPLICATION
+        | BASE APPLICATION QUERY
         |--------------------------------------------------------------------------
         */
-
-        $totalApplications = JobApplication::whereHas(
+        $applicationQuery = JobApplication::whereHas(
             'job_vacancy',
             function ($q) use ($ownerColumn, $ownerId) {
 
@@ -103,9 +99,17 @@ class JobVacancyController extends Controller
                     $ownerColumn,
                     $ownerId
                 );
-
             }
-        )->count();
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | TOTAL APPLICATION
+        |--------------------------------------------------------------------------
+        */
+        $totalApplications = (clone $applicationQuery)
+            ->count();
 
 
         /*
@@ -113,27 +117,16 @@ class JobVacancyController extends Controller
         | ACTIVE APPLICATION
         |--------------------------------------------------------------------------
         */
-
-        $activeApplications = JobApplication::whereIn(
-            'status',
-            [
-                'applied',
-                'reviewed',
-                'shortlisted',
-            ]
-        )
-        ->whereHas(
-            'job_vacancy',
-            function ($q) use ($ownerColumn, $ownerId) {
-
-                $q->where(
-                    $ownerColumn,
-                    $ownerId
-                );
-
-            }
-        )
-        ->count();
+        $activeApplications = (clone $applicationQuery)
+            ->whereIn(
+                'status',
+                [
+                    'applied',
+                    'reviewed',
+                    'shortlisted',
+                ]
+            )
+            ->count();
 
 
         /*
@@ -141,77 +134,33 @@ class JobVacancyController extends Controller
         | APPLICATION STATUS
         |--------------------------------------------------------------------------
         */
+        $appliedApplications = (clone $applicationQuery)
+            ->where(
+                'status',
+                'applied'
+            )
+            ->count();
 
-        $appliedApplications = JobApplication::where(
-            'status',
-            'applied'
-        )
-        ->whereHas(
-            'job_vacancy',
-            function ($q) use ($ownerColumn, $ownerId) {
+        $reviewedApplications = (clone $applicationQuery)
+            ->where(
+                'status',
+                'reviewed'
+            )
+            ->count();
 
-                $q->where(
-                    $ownerColumn,
-                    $ownerId
-                );
+        $shortlistedApplications = (clone $applicationQuery)
+            ->where(
+                'status',
+                'shortlisted'
+            )
+            ->count();
 
-            }
-        )
-        ->count();
-
-
-        $reviewedApplications = JobApplication::where(
-            'status',
-            'reviewed'
-        )
-        ->whereHas(
-            'job_vacancy',
-            function ($q) use ($ownerColumn, $ownerId) {
-
-                $q->where(
-                    $ownerColumn,
-                    $ownerId
-                );
-
-            }
-        )
-        ->count();
-
-
-        $shortlistedApplications = JobApplication::where(
-            'status',
-            'shortlisted'
-        )
-        ->whereHas(
-            'job_vacancy',
-            function ($q) use ($ownerColumn, $ownerId) {
-
-                $q->where(
-                    $ownerColumn,
-                    $ownerId
-                );
-
-            }
-        )
-        ->count();
-
-
-        $rejectedApplications = JobApplication::where(
-            'status',
-            'rejected'
-        )
-        ->whereHas(
-            'job_vacancy',
-            function ($q) use ($ownerColumn, $ownerId) {
-
-                $q->where(
-                    $ownerColumn,
-                    $ownerId
-                );
-
-            }
-        )
-        ->count();
+        $rejectedApplications = (clone $applicationQuery)
+            ->where(
+                'status',
+                'rejected'
+            )
+            ->count();
 
 
         /*
@@ -219,42 +168,284 @@ class JobVacancyController extends Controller
         | CONVERSION RATE
         |--------------------------------------------------------------------------
         */
-
         $reviewRate = $totalApplications > 0
-
             ? round(
                 ($reviewedApplications / $totalApplications) * 100,
                 1
             )
-
             : 0;
 
-
         $shortlistRate = $totalApplications > 0
-
             ? round(
                 ($shortlistedApplications / $totalApplications) * 100,
                 1
             )
-
             : 0;
 
-
         $rejectionRate = $totalApplications > 0
-
             ? round(
                 ($rejectedApplications / $totalApplications) * 100,
                 1
             )
-
             : 0;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | STATISTIK BERDASARKAN CATEGORY
+        |--------------------------------------------------------------------------
+        |
+        | security = Satpam
+        | cs       = Cleaning Service
+        |
+        */
+        $categoryStatistics = [];
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SECURITY / SATPAM
+        |--------------------------------------------------------------------------
+        */
+        $securityJobQuery = (clone $jobQuery)
+            ->where('category', 'security');
+
+        $securityApplicationQuery = (clone $applicationQuery)
+            ->whereHas(
+                'job_vacancy',
+                function ($q) use ($ownerColumn, $ownerId) {
+
+                    $q->where(
+                        $ownerColumn,
+                        $ownerId
+                    )
+                    ->where(
+                        'category',
+                        'security'
+                    );
+                }
+            );
+
+
+        $securityTotalJobs = (clone $securityJobQuery)
+            ->count();
+
+        $securityPublishedJobs = (clone $securityJobQuery)
+            ->where('status', 'published')
+            ->count();
+
+        $securityDraftJobs = (clone $securityJobQuery)
+            ->where('status', 'draft')
+            ->count();
+
+        $securityClosedJobs = (clone $securityJobQuery)
+            ->where('status', 'closed')
+            ->count();
+
+        $securityTotalApplications = (clone $securityApplicationQuery)
+            ->count();
+
+        $securityActiveApplications = (clone $securityApplicationQuery)
+            ->whereIn(
+                'status',
+                [
+                    'applied',
+                    'reviewed',
+                    'shortlisted',
+                ]
+            )
+            ->count();
+
+        $securityAppliedApplications = (clone $securityApplicationQuery)
+            ->where('status', 'applied')
+            ->count();
+
+        $securityReviewedApplications = (clone $securityApplicationQuery)
+            ->where('status', 'reviewed')
+            ->count();
+
+        $securityShortlistedApplications = (clone $securityApplicationQuery)
+            ->where('status', 'shortlisted')
+            ->count();
+
+        $securityRejectedApplications = (clone $securityApplicationQuery)
+            ->where('status', 'rejected')
+            ->count();
+
+
+        $securityReviewRate = $securityTotalApplications > 0
+            ? round(
+                ($securityReviewedApplications / $securityTotalApplications) * 100,
+                1
+            )
+            : 0;
+
+        $securityShortlistRate = $securityTotalApplications > 0
+            ? round(
+                ($securityShortlistedApplications / $securityTotalApplications) * 100,
+                1
+            )
+            : 0;
+
+        $securityRejectionRate = $securityTotalApplications > 0
+            ? round(
+                ($securityRejectedApplications / $securityTotalApplications) * 100,
+                1
+            )
+            : 0;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CLEANING SERVICE
+        |--------------------------------------------------------------------------
+        */
+        $csJobQuery = (clone $jobQuery)
+            ->where('category', 'cs');
+
+        $csApplicationQuery = (clone $applicationQuery)
+            ->whereHas(
+                'job_vacancy',
+                function ($q) use ($ownerColumn, $ownerId) {
+
+                    $q->where(
+                        $ownerColumn,
+                        $ownerId
+                    )
+                    ->where(
+                        'category',
+                        'cs'
+                    );
+                }
+            );
+
+
+        $csTotalJobs = (clone $csJobQuery)
+            ->count();
+
+        $csPublishedJobs = (clone $csJobQuery)
+            ->where('status', 'published')
+            ->count();
+
+        $csDraftJobs = (clone $csJobQuery)
+            ->where('status', 'draft')
+            ->count();
+
+        $csClosedJobs = (clone $csJobQuery)
+            ->where('status', 'closed')
+            ->count();
+
+        $csTotalApplications = (clone $csApplicationQuery)
+            ->count();
+
+        $csActiveApplications = (clone $csApplicationQuery)
+            ->whereIn(
+                'status',
+                [
+                    'applied',
+                    'reviewed',
+                    'shortlisted',
+                ]
+            )
+            ->count();
+
+        $csAppliedApplications = (clone $csApplicationQuery)
+            ->where('status', 'applied')
+            ->count();
+
+        $csReviewedApplications = (clone $csApplicationQuery)
+            ->where('status', 'reviewed')
+            ->count();
+
+        $csShortlistedApplications = (clone $csApplicationQuery)
+            ->where('status', 'shortlisted')
+            ->count();
+
+        $csRejectedApplications = (clone $csApplicationQuery)
+            ->where('status', 'rejected')
+            ->count();
+
+
+        $csReviewRate = $csTotalApplications > 0
+            ? round(
+                ($csReviewedApplications / $csTotalApplications) * 100,
+                1
+            )
+            : 0;
+
+        $csShortlistRate = $csTotalApplications > 0
+            ? round(
+                ($csShortlistedApplications / $csTotalApplications) * 100,
+                1
+            )
+            : 0;
+
+        $csRejectionRate = $csTotalApplications > 0
+            ? round(
+                ($csRejectedApplications / $csTotalApplications) * 100,
+                1
+            )
+            : 0;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CATEGORY STATISTICS ARRAY
+        |--------------------------------------------------------------------------
+        */
+        $categoryStatistics = [
+
+            'security' => [
+
+                'label' => 'Satpam',
+
+                'totalJobs' => $securityTotalJobs,
+                'publishedJobs' => $securityPublishedJobs,
+                'draftJobs' => $securityDraftJobs,
+                'closedJobs' => $securityClosedJobs,
+
+                'totalApplications' => $securityTotalApplications,
+                'activeApplications' => $securityActiveApplications,
+
+                'appliedApplications' => $securityAppliedApplications,
+                'reviewedApplications' => $securityReviewedApplications,
+                'shortlistedApplications' => $securityShortlistedApplications,
+                'rejectedApplications' => $securityRejectedApplications,
+
+                'reviewRate' => $securityReviewRate,
+                'shortlistRate' => $securityShortlistRate,
+                'rejectionRate' => $securityRejectionRate,
+            ],
+
+            'cs' => [
+
+                'label' => 'Cleaning Service',
+
+                'totalJobs' => $csTotalJobs,
+                'publishedJobs' => $csPublishedJobs,
+                'draftJobs' => $csDraftJobs,
+                'closedJobs' => $csClosedJobs,
+
+                'totalApplications' => $csTotalApplications,
+                'activeApplications' => $csActiveApplications,
+
+                'appliedApplications' => $csAppliedApplications,
+                'reviewedApplications' => $csReviewedApplications,
+                'shortlistedApplications' => $csShortlistedApplications,
+                'rejectedApplications' => $csRejectedApplications,
+
+                'reviewRate' => $csReviewRate,
+                'shortlistRate' => $csShortlistRate,
+                'rejectionRate' => $csRejectionRate,
+            ],
+        ];
+
 
         /*
         |--------------------------------------------------------------------------
         | TOP 5 LOWONGAN BERDASARKAN PELAMAR
         |--------------------------------------------------------------------------
         */
-
         $topJobs = (clone $jobQuery)
             ->withCount('applications')
             ->whereNotNull('position')
@@ -268,27 +459,21 @@ class JobVacancyController extends Controller
         | MONTHLY STATISTICS
         |--------------------------------------------------------------------------
         */
-
         $monthlyJobs = (clone $jobQuery)
-
             ->selectRaw(
                 'MONTH(created_at) as month,
                 COUNT(*) as total'
             )
-
             ->whereYear(
                 'created_at',
                 now()->year
             )
-
             ->groupByRaw(
                 'MONTH(created_at)'
             )
-
             ->orderBy(
                 'month'
             )
-
             ->pluck(
                 'total',
                 'month'
@@ -300,41 +485,25 @@ class JobVacancyController extends Controller
         | MONTHLY APPLICATION
         |--------------------------------------------------------------------------
         */
-
-        $monthlyApplications = JobApplication::whereHas(
-            'job_vacancy',
-            function ($q) use ($ownerColumn, $ownerId) {
-
-                $q->where(
-                    $ownerColumn,
-                    $ownerId
-                );
-
-            }
-        )
-
-        ->selectRaw(
-            'MONTH(created_at) as month,
-            COUNT(*) as total'
-        )
-
-        ->whereYear(
-            'created_at',
-            now()->year
-        )
-
-        ->groupByRaw(
-            'MONTH(created_at)'
-        )
-
-        ->orderBy(
-            'month'
-        )
-
-        ->pluck(
-            'total',
-            'month'
-        );
+        $monthlyApplications = (clone $applicationQuery)
+            ->selectRaw(
+                'MONTH(created_at) as month,
+                COUNT(*) as total'
+            )
+            ->whereYear(
+                'created_at',
+                now()->year
+            )
+            ->groupByRaw(
+                'MONTH(created_at)'
+            )
+            ->orderBy(
+                'month'
+            )
+            ->pluck(
+                'total',
+                'month'
+            );
 
 
         /*
@@ -342,7 +511,6 @@ class JobVacancyController extends Controller
         | MONTH LABEL
         |--------------------------------------------------------------------------
         */
-
         $monthLabels = [
             'Januari',
             'Februari',
@@ -364,9 +532,7 @@ class JobVacancyController extends Controller
         | MONTHLY DATA
         |--------------------------------------------------------------------------
         */
-
         $jobChartData = [];
-
         $applicationChartData = [];
 
         for ($month = 1; $month <= 12; $month++) {
@@ -376,7 +542,6 @@ class JobVacancyController extends Controller
 
             $applicationChartData[] =
                 $monthlyApplications[$month] ?? 0;
-
         }
 
 
@@ -385,11 +550,9 @@ class JobVacancyController extends Controller
         | RETURN VIEW
         |--------------------------------------------------------------------------
         */
-
         return view(
             'dashboard-user.job-vacancy.statistic',
             compact(
-
                 'totalJobs',
                 'publishedJobs',
                 'draftJobs',
@@ -411,8 +574,9 @@ class JobVacancyController extends Controller
 
                 'monthLabels',
                 'jobChartData',
-                'applicationChartData'
+                'applicationChartData',
 
+                'categoryStatistics'
             )
         );
     }
@@ -721,7 +885,81 @@ class JobVacancyController extends Controller
      */
     public function create()
     {
-        $positions = MasterPositionSecurity::query()
+        // Saat halaman pertama dibuka belum ada category
+        // sehingga data master dikosongkan terlebih dahulu.
+        $positions = collect();
+
+        $master_certificates = collect();
+
+        $master_competency_schemes = collect();
+
+        return view(
+            'dashboard-user.job-vacancy.create',
+            compact(
+                'positions',
+                'master_certificates',
+                'master_competency_schemes'
+            )
+        );
+    }
+
+
+    /**
+     * Mengambil master data berdasarkan category.
+     *
+     * security = Satpam
+     * cs       = Cleaning Service
+     */
+    public function masterData(Request $request)
+    {
+        $request->validate([
+            'category' => [
+                'required',
+                'in:security,cs',
+            ],
+        ]);
+
+        $category = $request->category;
+
+        /*
+        |--------------------------------------------------------------------------
+        | POSITION
+        |--------------------------------------------------------------------------
+        | security = MasterPositionSecurity
+        | cs       = MasterPositionCleaningService
+        |--------------------------------------------------------------------------
+        */
+
+        if ($category === 'security') {
+
+            $positions = MasterPositionSecurity::query()
+                ->orderBy('title')
+                ->get([
+                    'id',
+                    'uuid',
+                    'title',
+                ]);
+
+        } else {
+
+            $positions = MasterPositionCleaningService::query()
+                ->orderBy('title')
+                ->get([
+                    'id',
+                    'uuid',
+                    'title',
+                ]);
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CERTIFICATE
+        |--------------------------------------------------------------------------
+        */
+
+        $master_certificates = MasterCertificate::query()
+            ->where('category', $category)
             ->orderBy('title')
             ->get([
                 'id',
@@ -729,17 +967,78 @@ class JobVacancyController extends Controller
                 'title',
             ]);
 
-        return view(
-            'dashboard-user.job-vacancy.create',
-            compact('positions')
-        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | COMPETENCY SCHEME
+        |--------------------------------------------------------------------------
+        */
+
+        $master_competency_schemes = MasterCompetencyScheme::query()
+            ->where('category', $category)
+            ->orderBy('title')
+            ->get([
+                'id',
+                'uuid',
+                'title',
+            ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | RESPONSE
+        |--------------------------------------------------------------------------
+        */
+
+        return response()->json([
+            'success' => true,
+
+            'positions' => $positions,
+
+            'master_certificates' => $master_certificates,
+
+            'master_competency_schemes' => $master_competency_schemes,
+        ]);
     }
 
-    public function getPosition($uuid)
+    public function getPosition(Request $request, $uuid)
     {
-        $position = MasterPositionSecurity::query()
-            ->where('uuid', $uuid)
-            ->firstOrFail();
+        $request->validate([
+            'category' => [
+                'required',
+                'in:security,cs',
+            ],
+        ]);
+
+        $category = $request->category;
+
+        /*
+        |--------------------------------------------------------------------------
+        | POSITION
+        |--------------------------------------------------------------------------
+        | security = MasterPositionSecurity
+        | cs       = MasterPositionCleaningService
+        |--------------------------------------------------------------------------
+        */
+
+        if ($category === 'security') {
+
+            $position = MasterPositionSecurity::query()
+                ->where('uuid', $uuid)
+                ->firstOrFail();
+
+        } else {
+
+            $position = MasterPositionCleaningService::query()
+                ->where('uuid', $uuid)
+                ->firstOrFail();
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | RESPONSE
+        |--------------------------------------------------------------------------
+        */
 
         return response()->json([
 
@@ -1048,6 +1347,8 @@ class JobVacancyController extends Controller
             'certificate'      => $request->certificate,
 
             'competency_scheme'      => $request->competency_scheme,
+
+            'category'      => $request->category,
 
             'is_urgent'        => $request->boolean('is_urgent'),
 

@@ -25,12 +25,12 @@ class SubscriptionController extends Controller
             'satpam' => 'security',
             'bujp' => 'bujp',
             'perusahaan' => 'client',
+            'cs' => 'security'
         ];
 
         $userRole = strtolower(trim($user->role));
 
         $role = $roleMapping[$userRole] ?? null;
-
 
         /*
         |--------------------------------------------------------------------------

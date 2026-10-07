@@ -3,15 +3,75 @@
 namespace App\Http\Controllers\UserPage;
 
 use App\Http\Controllers\Controller;
+
 use App\Models\JobApplication;
+
 use Illuminate\Http\Request;
+
 use App\Models\JobVacancy;
+
 use App\Models\Security;
+
+use App\Models\CleaningService;
+
 use Auth;
 
 class JobApplicationController extends Controller
 {
-    
+    /**
+     * Get profile berdasarkan role user.
+     */
+    private function getProfile()
+    {
+        $user = Auth::user();
+
+        if ($user->role === 'satpam') {
+            return $user->user_security?->security;
+        }
+
+        if ($user->role === 'cs') {
+            return $user->user_cleaning_service?->cleaning_service;
+        }
+
+        abort(403, 'Role tidak valid.');
+    }
+
+    /**
+     * Get category berdasarkan role user.
+     */
+    private function getCategory()
+    {
+        $user = Auth::user();
+
+        if ($user->role === 'satpam') {
+            return 'security';
+        }
+
+        if ($user->role === 'cs') {
+            return 'cs';
+        }
+
+        abort(403, 'Role tidak valid.');
+    }
+
+    /**
+     * Get owner column berdasarkan role user.
+     */
+    private function getOwnerColumn()
+    {
+        $user = Auth::user();
+
+        if ($user->role === 'satpam') {
+            return 'security_id';
+        }
+
+        if ($user->role === 'cs') {
+            return 'cleaning_service_id';
+        }
+
+        abort(403, 'Role tidak valid.');
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -55,8 +115,10 @@ class JobApplicationController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, JobApplication $jobApplication)
-    {
+    public function update(
+        Request $request,
+        JobApplication $jobApplication
+    ) {
         //
     }
 
@@ -70,63 +132,110 @@ class JobApplicationController extends Controller
 
     public function apply($uuid)
     {
-        $security = Auth::user()
-        ->user_security
-        ->security;
-        
+        /*
+        |--------------------------------------------------------------------------
+        | PROFILE
+        |--------------------------------------------------------------------------
+        */
+
+        $security = $this->getProfile();
+
+        if (!$security) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data profile belum tersedia.'
+            ], 403);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | CATEGORY & OWNER
+        |--------------------------------------------------------------------------
+        */
+
+        $category = $this->getCategory();
+
+        $ownerColumn = $this->getOwnerColumn();
+
+        /*
+        |--------------------------------------------------------------------------
+        | JOB
+        |--------------------------------------------------------------------------
+        */
+
         $job = JobVacancy::where('uuid', $uuid)
-        ->where('status', 'published')
-        ->firstOrFail();
-        
-        // Cek apakah sudah pernah melamar
-        $application = JobApplication::where('security_id', $security->id)
-        ->where('job_vacancy_id', $job->id)
-        ->first();
+            ->where('status', 'published')
+            ->where('category', $category)
+            ->firstOrFail();
+
+        /*
+        |--------------------------------------------------------------------------
+        | CEK APAKAH SUDAH PERNAH MELAMAR
+        |--------------------------------------------------------------------------
+        */
+
+        $application = JobApplication::where(
+                $ownerColumn,
+                $security->id
+            )
+            ->where(
+                'job_vacancy_id',
+                $job->id
+            )
+            ->first();
 
         if ($application) {
-
             return response()->json([
                 'success' => false,
                 'message' => 'Anda sudah melamar lowongan ini.'
             ], 422);
-
         }
 
-        // Cek deadline
+        /*
+        |--------------------------------------------------------------------------
+        | CEK DEADLINE
+        |--------------------------------------------------------------------------
+        */
+
         if (
             $job->end_date &&
             now()->startOfDay()->gt($job->end_date)
         ) {
-
             return response()->json([
                 'success' => false,
                 'message' => 'Masa pendaftaran lowongan sudah berakhir.'
             ], 422);
-
         }
 
-        // Cek kuota
+        /*
+        |--------------------------------------------------------------------------
+        | CEK KUOTA
+        |--------------------------------------------------------------------------
+        */
+
         if ($job->kuota) {
 
             $totalApplicant = JobApplication::where(
                 'job_vacancy_id',
                 $job->id
-            )
-            ->count();
+            )->count();
 
             if ($totalApplicant >= $job->kuota) {
-
                 return response()->json([
                     'success' => false,
                     'message' => 'Kuota pelamar sudah penuh.'
                 ], 422);
-
             }
-
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | CREATE APPLICATION
+        |--------------------------------------------------------------------------
+        */
+
         JobApplication::create([
-            'security_id' => $security->id,
+            $ownerColumn => $security->id,
             'job_vacancy_id' => $job->id,
         ]);
 
@@ -138,25 +247,69 @@ class JobApplicationController extends Controller
 
     public function cancelApplication($uuid)
     {
-        $security = Auth::user()
-            ->user_security
-            ->security;
+        /*
+        |--------------------------------------------------------------------------
+        | PROFILE
+        |--------------------------------------------------------------------------
+        */
+
+        $security = $this->getProfile();
+
+        if (!$security) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data profile belum tersedia.'
+            ], 403);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | CATEGORY & OWNER
+        |--------------------------------------------------------------------------
+        */
+
+        $category = $this->getCategory();
+
+        $ownerColumn = $this->getOwnerColumn();
+
+        /*
+        |--------------------------------------------------------------------------
+        | JOB
+        |--------------------------------------------------------------------------
+        */
 
         $job = JobVacancy::where('uuid', $uuid)
+            ->where('category', $category)
             ->firstOrFail();
 
-        $application = JobApplication::where('security_id', $security->id)
-            ->where('job_vacancy_id', $job->id)
+        /*
+        |--------------------------------------------------------------------------
+        | FIND APPLICATION
+        |--------------------------------------------------------------------------
+        */
+
+        $application = JobApplication::where(
+                $ownerColumn,
+                $security->id
+            )
+            ->where(
+                'job_vacancy_id',
+                $job->id
+            )
             ->first();
 
         if (!$application) {
-
             return response()->json([
                 'success' => false,
                 'message' => 'Anda belum melamar lowongan ini.'
             ], 404);
-
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | DELETE APPLICATION
+        |--------------------------------------------------------------------------
+        */
 
         $application->delete();
 

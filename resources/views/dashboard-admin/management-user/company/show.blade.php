@@ -5,323 +5,479 @@
 @section('css')
     <style>
         /* =====================================================
-            COMPANY HEADER
+        COMPANY HEADER
         ===================================================== */
 
-        .company-wrapper{
-            background:#131c31;
-            border-radius:18px;
-            overflow:hidden;
-            border:1px solid #273452;
+        .company-wrapper {
+            background: var(--bs-body-bg);
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid var(--bs-border-color);
+            color: var(--bs-body-color);
         }
 
-        .company-cover{
-            height:180px;
-            background:linear-gradient(135deg,#f7b003 0%,#d89300 100%);
+        .company-cover {
+            height: 180px;
+            background: linear-gradient(135deg, #f7b003 0%, #d89300 100%);
         }
 
-        .company-header{
-            position:relative;
-            padding:30px;
-            display:flex;
-            align-items:flex-end;
-            gap:25px;
-            margin-top:-75px;
+        .company-header {
+            position: relative;
+            padding: 30px;
+            display: flex;
+            align-items: flex-end;
+            gap: 25px;
+            margin-top: -75px;
         }
 
-        .company-logo{
-            width:150px;
-            height:150px;
-            border-radius:20px;
-            background:#fff;
-            object-fit:contain;
-            border:6px solid #131c31;
-            box-shadow:0 12px 35px rgba(0,0,0,.35);
+        .company-logo {
+            width: 150px;
+            height: 150px;
+            border-radius: 20px;
+            background: var(--bs-body-bg);
+            object-fit: contain;
+            border: 6px solid var(--bs-body-bg);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, .18);
         }
 
-        .company-name{
-            font-size:30px;
-            font-weight:700;
-            color:#fff;
+        .company-name {
+            font-size: 30px;
+            font-weight: 700;
+            color: var(--bs-body-color);
         }
 
-        .company-industry{
-            color:#f7b003;
-            margin-top:8px;
-            font-size:16px;
+        .company-industry {
+            color: #c58b00;
+            margin-top: 8px;
+            font-size: 16px;
         }
 
-        .company-location{
-            color:#bfc8d8;
-            margin-top:10px;
-            font-size:15px;
+        .company-location {
+            color: var(--bs-secondary-color);
+            margin-top: 10px;
+            font-size: 15px;
         }
 
 
         /* =====================================================
-            SUMMARY CARD
+        SUMMARY CARD
         ===================================================== */
 
-        .summary-card{
-
-            background:linear-gradient(135deg,#f7b003,#ffca43);
-            border-radius:18px;
-            padding:22px;
-            display:flex;
-            align-items:center;
-            gap:18px;
-            min-height:110px;
-            box-shadow:0 10px 25px rgba(0,0,0,.18);
-
+        .summary-card {
+            background: linear-gradient(135deg, #f7b003, #ffca43);
+            border-radius: 18px;
+            padding: 22px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            min-height: 110px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, .10);
         }
 
-        .summary-icon{
-
-            width:65px;
-            height:65px;
-            border-radius:50%;
-            background:rgba(255,255,255,.25);
-
-            display:flex;
-            align-items:center;
-            justify-content:center;
-
-            color:#3d2b00;
-
+        .summary-icon {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .28);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #3d2b00;
+            flex-shrink: 0;
         }
 
-        .summary-title{
-
-            font-size:13px;
-            font-weight:600;
-            color:#5b4300;
-
+        .summary-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #5b4300;
         }
 
-        .summary-value{
-
-            margin-top:5px;
-            font-size:20px;
-            font-weight:700;
-            color:#2c1f00;
-
+        .summary-value {
+            margin-top: 5px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #2c1f00;
         }
 
 
         /* =====================================================
-            SECTION
+        SECTION
         ===================================================== */
 
-        .company-title{
-
-            padding:18px 25px;
-            background:#1b2742;
-            color:#fff;
-            font-weight:700;
-            border-bottom:1px solid #2d3d60;
-
+        .company-title {
+            padding: 18px 25px;
+            background: var(--bs-tertiary-bg);
+            color: var(--bs-body-color);
+            font-weight: 700;
+            border-bottom: 1px solid var(--bs-border-color);
         }
 
-        .company-body{
-
-            padding:28px;
-
+        .company-body {
+            padding: 28px;
+            background: var(--bs-body-bg);
         }
 
-        .company-label{
-
-            display:block;
-            margin-bottom:8px;
-            font-size:13px;
-            color:#8fa0bc;
-            text-transform:uppercase;
-            letter-spacing:.5px;
-
+        .company-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: var(--bs-secondary-color);
+            text-transform: uppercase;
+            letter-spacing: .5px;
         }
 
-        .company-value{
-
-            background:#1c2641;
-            border:1px solid #2b3959;
-            border-radius:12px;
-            padding:14px 16px;
-            color:#fff;
-            min-height:52px;
-            display:flex;
-            align-items:center;
-
+        .company-value {
+            background: var(--bs-tertiary-bg);
+            border: 1px solid var(--bs-border-color);
+            border-radius: 12px;
+            padding: 14px 16px;
+            color: var(--bs-body-color);
+            min-height: 52px;
+            display: flex;
+            align-items: center;
         }
 
-        .company-description{
-
-            background:#1c2641;
-            border:1px solid #2b3959;
-            border-radius:12px;
-            padding:20px;
-            color:#d8deea;
-            line-height:1.8;
-            min-height:140px;
-
+        .company-description {
+            background: var(--bs-tertiary-bg);
+            border: 1px solid var(--bs-border-color);
+            border-radius: 12px;
+            padding: 20px;
+            color: var(--bs-body-color);
+            line-height: 1.8;
+            min-height: 140px;
         }
 
 
         /* =====================================================
-            EMPTY STATE
+        EMPTY STATE
         ===================================================== */
 
-        .empty-state-small{
-
-            display:flex;
-            align-items:center;
-
-            padding:18px;
-
-            border-radius:12px;
-
-            background:#172033;
-
-            border:1px dashed #394866;
-
-            color:#8fa0bc;
-
+        .empty-state-small {
+            display: flex;
+            align-items: center;
+            padding: 18px;
+            border-radius: 12px;
+            background: var(--bs-tertiary-bg);
+            border: 1px dashed var(--bs-border-color);
+            color: var(--bs-secondary-color);
         }
 
 
         /* =====================================================
-            RESPONSIVE
+        COMPANY ITEM
         ===================================================== */
 
-        @media(max-width:991px){
+        .company-item {
+            padding: 15px 18px;
+            border-radius: 12px;
+            background: var(--bs-tertiary-bg);
+            border: 1px solid var(--bs-border-color);
+            color: var(--bs-body-color);
+        }
 
-            .company-header{
+        .company-item strong {
+            display: block;
+            color: #c58b00;
+            margin-bottom: 6px;
+        }
 
-                flex-direction:column;
-                align-items:center;
-                text-align:center;
+        .company-empty {
+            color: var(--bs-secondary-color);
+            font-style: italic;
+        }
 
+
+        /* =====================================================
+        SOCIAL ITEM
+        ===================================================== */
+
+        .social-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            border-radius: 12px;
+            background: var(--bs-tertiary-bg);
+            border: 1px solid var(--bs-border-color);
+            margin-bottom: 15px;
+        }
+
+        .social-item i {
+            font-size: 22px;
+            color: #c58b00;
+            width: 25px;
+            flex-shrink: 0;
+        }
+
+        .social-item a {
+            color: var(--bs-body-color);
+            text-decoration: none;
+        }
+
+        .social-item a:hover {
+            color: var(--bs-link-hover-color);
+        }
+
+        .social-item span {
+            color: var(--bs-secondary-color);
+        }
+
+
+        /* =====================================================
+        PROGRESS
+        ===================================================== */
+
+        .progress {
+            background: var(--bs-tertiary-bg);
+            border-radius: 30px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            border-radius: 30px;
+            background-color: #f7b003;
+        }
+
+
+        /* =====================================================
+        BUTTON
+        ===================================================== */
+
+        .company-body .btn {
+            min-width: 180px;
+        }
+
+
+        /* =====================================================
+        DARK MODE
+        ===================================================== */
+
+        [data-bs-theme="dark"] .company-wrapper {
+            background: #131c31;
+            border-color: #273452;
+        }
+
+        [data-bs-theme="dark"] .company-logo {
+            background: #fff;
+            border-color: #131c31;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, .35);
+        }
+
+        [data-bs-theme="dark"] .company-name {
+            color: #fff;
+        }
+
+        [data-bs-theme="dark"] .company-industry {
+            color: #f7b003;
+        }
+
+        [data-bs-theme="dark"] .company-location {
+            color: #bfc8d8;
+        }
+
+        [data-bs-theme="dark"] .company-title {
+            background: #1b2742;
+            color: #fff;
+            border-color: #2d3d60;
+        }
+
+        [data-bs-theme="dark"] .company-body {
+            background: #131c31;
+        }
+
+        [data-bs-theme="dark"] .company-label {
+            color: #8fa0bc;
+        }
+
+        [data-bs-theme="dark"] .company-value {
+            background: #1c2641;
+            border-color: #2b3959;
+            color: #fff;
+        }
+
+        [data-bs-theme="dark"] .company-description {
+            background: #1c2641;
+            border-color: #2b3959;
+            color: #d8deea;
+        }
+
+        [data-bs-theme="dark"] .empty-state-small {
+            background: #172033;
+            border-color: #394866;
+            color: #8fa0bc;
+        }
+
+        [data-bs-theme="dark"] .company-item {
+            background: #18233c;
+            border-color: #293758;
+            color: #fff;
+        }
+
+        [data-bs-theme="dark"] .company-item strong {
+            color: #f7b003;
+        }
+
+        [data-bs-theme="dark"] .company-empty {
+            color: #8b97b3;
+        }
+
+        [data-bs-theme="dark"] .social-item {
+            background: #18233c;
+            border-color: #293758;
+        }
+
+        [data-bs-theme="dark"] .social-item i {
+            color: #f7b003;
+        }
+
+        [data-bs-theme="dark"] .social-item a {
+            color: #fff;
+        }
+
+        [data-bs-theme="dark"] .social-item a:hover {
+            color: #f7b003;
+        }
+
+        [data-bs-theme="dark"] .social-item span {
+            color: #8fa0bc;
+        }
+
+        [data-bs-theme="dark"] .progress {
+            background: #263350;
+        }
+
+        [data-bs-theme="dark"] .progress-bar {
+            background-color: #f7b003;
+        }
+
+
+        /* =====================================================
+        LIGHT MODE
+        ===================================================== */
+
+        [data-bs-theme="light"] .company-wrapper {
+            background: #fff;
+            border-color: #e1e5eb;
+        }
+
+        [data-bs-theme="light"] .company-logo {
+            background: #fff;
+            border-color: #fff;
+            box-shadow: 0 12px 35px rgba(30, 45, 70, .12);
+        }
+
+        [data-bs-theme="light"] .company-name {
+            color: #182338;
+        }
+
+        [data-bs-theme="light"] .company-industry {
+            color: #b77d00;
+        }
+
+        [data-bs-theme="light"] .company-location {
+            color: #71809a;
+        }
+
+        [data-bs-theme="light"] .company-title {
+            background: #f7f9fb;
+            color: #182338;
+            border-color: #e1e5eb;
+        }
+
+        [data-bs-theme="light"] .company-body {
+            background: #fff;
+        }
+
+        [data-bs-theme="light"] .company-label {
+            color: #71809a;
+        }
+
+        [data-bs-theme="light"] .company-value {
+            background: #f8fafc;
+            border-color: #e1e5eb;
+            color: #182338;
+        }
+
+        [data-bs-theme="light"] .company-description {
+            background: #f8fafc;
+            border-color: #e1e5eb;
+            color: #4d5b70;
+        }
+
+        [data-bs-theme="light"] .empty-state-small {
+            background: #f8fafc;
+            border-color: #dce2e9;
+            color: #71809a;
+        }
+
+        [data-bs-theme="light"] .company-item {
+            background: #f8fafc;
+            border-color: #e1e5eb;
+            color: #182338;
+        }
+
+        [data-bs-theme="light"] .company-item strong {
+            color: #b77d00;
+        }
+
+        [data-bs-theme="light"] .company-empty {
+            color: #8793a6;
+        }
+
+        [data-bs-theme="light"] .social-item {
+            background: #f8fafc;
+            border-color: #e1e5eb;
+        }
+
+        [data-bs-theme="light"] .social-item i {
+            color: #c58b00;
+        }
+
+        [data-bs-theme="light"] .social-item a {
+            color: #182338;
+        }
+
+        [data-bs-theme="light"] .social-item a:hover {
+            color: #b77d00;
+        }
+
+        [data-bs-theme="light"] .social-item span {
+            color: #71809a;
+        }
+
+        [data-bs-theme="light"] .progress {
+            background: #e9edf2;
+        }
+
+        [data-bs-theme="light"] .progress-bar {
+            background-color: #f7b003;
+        }
+
+
+        /* =====================================================
+        RESPONSIVE
+        ===================================================== */
+
+        @media (max-width: 991px) {
+
+            .company-header {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
             }
 
-            .company-logo{
-
-                width:120px;
-                height:120px;
-
+            .company-logo {
+                width: 120px;
+                height: 120px;
             }
 
-            .company-name{
-
-                font-size:24px;
-
+            .company-name {
+                font-size: 24px;
             }
 
-            .summary-card{
-
-                min-height:auto;
-
+            .summary-card {
+                min-height: auto;
             }
-
-        }
-
-        .company-item{
-
-            padding:15px 18px;
-
-            border-radius:12px;
-
-            background:#18233c;
-
-            border:1px solid #293758;
-
-            color:#fff;
-
-        }
-
-        .company-item strong{
-
-            display:block;
-
-            color:#f7b003;
-
-            margin-bottom:6px;
-
-        }
-
-        .company-empty{
-
-            color:#8b97b3;
-
-            font-style:italic;
-
-        }
-
-        .social-item{
-
-            display:flex;
-
-            align-items:center;
-
-            gap:15px;
-
-            padding:15px;
-
-            border-radius:12px;
-
-            background:#18233c;
-
-            border:1px solid #293758;
-
-            margin-bottom:15px;
-
-        }
-
-        .social-item i{
-
-            font-size:22px;
-
-            color:#f7b003;
-
-            width:25px;
-
-        }
-
-        .social-item a{
-
-            color:#fff;
-
-            text-decoration:none;
-
-        }
-
-        .social-item a:hover{
-
-            color:#f7b003;
-
-        }
-
-        .social-item span{
-
-            color:#8fa0bc;
-
-        }
-
-        .progress{
-
-            background:#263350;
-            border-radius:30px;
-            overflow:hidden;
-
-        }
-
-        .progress-bar{
-
-            border-radius:30px;
-
-        }
-
-        .company-body .btn{
-
-            min-width:180px;
-
         }
     </style>
 @endsection
@@ -703,7 +859,7 @@
 
                     </div>
 
-                    <div class="company-item mt-5">
+                    {{-- <div class="company-item mt-5">
 
                         <strong>Nomor Izin Usaha / SIUP</strong>
 
@@ -723,7 +879,7 @@
 
                         @endif
 
-                    </div>
+                    </div> --}}
 
                 </div>
 

@@ -7,18 +7,25 @@
 @endsection
 
 @section('breadcrumb')
+
     <h1
         class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">
-        Lowongan Saya</h1>
+
+        Lowongan Saya
+
+    </h1>
+
     <!--end::Title-->
+
     <!--begin::Breadcrumb-->
     <ul class="breadcrumb breadcrumb-separatorless fw-semibold fs-7 my-0 pt-1">
 
         {{-- BERANDA --}}
         <li class="breadcrumb-item text-muted">
 
-            <a href="{{ route('dashboard-user.index') }}"
-            class="text-muted text-hover-primary">
+            <a
+                href="{{ route('dashboard-user.index') }}"
+                class="text-muted text-hover-primary">
 
                 Beranda
 
@@ -38,8 +45,9 @@
         {{-- LOWONGAN --}}
         <li class="breadcrumb-item text-muted">
 
-            <a href="{{ route('dashboard-user.job-vacancy.index') }}?status=all"
-            class="text-muted text-hover-primary">
+            <a
+                href="{{ route('dashboard-user.job-vacancy.index') }}?status=all"
+                class="text-muted text-hover-primary">
 
                 Lowongan Saya
 
@@ -98,13 +106,21 @@
 
     </ul>
     <!--end::Breadcrumb-->
+
 @endsection
 
+
 @section('content')
+
+    <!--begin::Add Button-->
     <div class="row">
+
         <div class="col-lg-12">
+
             <a href="{{ route('dashboard-user.job-vacancy.create') }}">
+
                 <button
+                    type="button"
                     class="btn btn-primary py-2 mb-3"
                     style="float:right">
 
@@ -113,49 +129,141 @@
                     Tambah
 
                 </button>
-            </a>
-        </div>
-    </div>
 
+            </a>
+
+        </div>
+
+    </div>
+    <!--end::Add Button-->
+
+
+    <!--begin::Table-->
     <div class="row">
+
         <div class="col-lg-12">
+
             <div class="card">
+
+                <!--begin::Card Header-->
                 <div class="card-header">
+
                     <div class="d-flex justify-content-between">
-                        <h5 class="card-title mb-0">List Data</h5>
+
+                        <h5 class="card-title mb-0">
+                            List Data
+                        </h5>
+
                         <div class="card-toolbar">
+
                             <div class="card-button"></div>
+
                         </div>
+
                     </div>
+
                 </div>
+                <!--end::Card Header-->
+
+
+                <!--begin::Card Body-->
                 <div class="card-body">
-                    <table id="datatable"
+
+                    <table
+                        id="datatable"
                         class="table table-bordered dt-responsive nowrap w-100 dataTable no-footer dtr-inline"
-                        aria-describedby="datatable_info" style="width: 1090px;">
+                        aria-describedby="datatable_info"
+                        style="width: 1090px;">
+
                         <thead>
+
                             <tr>
-                                <th>ID</th>
-                                <th>Posisi</th>
-                                <th>Lokasi</th>
-                                <th>Kuota</th>
-                                <th>Gaji</th>
-                                <th>Periode</th>
-                                <th>Status</th>
-                                <th>Dilihat</th>
-                                <th>Pelamar</th>
-                                <th>Disimpan</th>
-                                <th>Aksi</th>
+
+                                {{-- ID --}}
+                                <th width="5%">
+                                    ID
+                                </th>
+
+                                 {{-- CATEGORY --}}
+                                <th width="8%">
+                                    Category
+                                </th>
+
+                                {{-- POSISI --}}
+                                <th>
+                                    Posisi
+                                </th>
+
+                                {{-- LOKASI --}}
+                                <th>
+                                    Lokasi
+                                </th>
+
+                                {{-- KUOTA --}}
+                                <th>
+                                    Kuota
+                                </th>
+
+                                {{-- GAJI --}}
+                                <th>
+                                    Gaji
+                                </th>
+
+                                {{-- PERIODE --}}
+                                <th>
+                                    Periode
+                                </th>
+
+                                {{-- STATUS --}}
+                                <th>
+                                    Status
+                                </th>
+
+                                {{-- DILIHAT --}}
+                                <th>
+                                    Dilihat
+                                </th>
+
+                                {{-- PELAMAR --}}
+                                <th>
+                                    Pelamar
+                                </th>
+
+                                {{-- DISIMPAN --}}
+                                <th>
+                                    Disimpan
+                                </th>
+
+                                {{-- AKSI --}}
+                                <th>
+                                    Aksi
+                                </th>
+
                             </tr>
+
                         </thead>
+
                         <tbody>
                         </tbody>
-                    </table>
-                </div>
-            </div>
-        </div><!--end col-->
-    </div><!--end row-->
 
-    <div class="modal fade" id="closeModal" tabindex="-1">
+                    </table>
+
+                </div>
+                <!--end::Card Body-->
+
+            </div>
+
+        </div>
+
+    </div>
+    <!--end::Table-->
+
+
+    <!--begin::Close Modal-->
+    <div
+        class="modal fade"
+        id="closeModal"
+        tabindex="-1">
 
         <div class="modal-dialog modal-dialog-centered">
 
@@ -175,18 +283,23 @@
 
                 </div>
 
+
                 <div class="modal-body text-center">
 
                     <div class="mb-5">
 
-                        <i class="fas fa-lock text-warning"
-                            style="font-size:60px"></i>
+                        <i
+                            class="fas fa-lock text-warning"
+                            style="font-size:60px">
+                        </i>
 
                     </div>
+
 
                     <h4 class="mb-3">
                         Yakin ingin menutup lowongan?
                     </h4>
+
 
                     <p class="text-muted mb-0">
 
@@ -195,11 +308,13 @@
 
                     </p>
 
+
                     <input
                         type="hidden"
                         id="closeUuid">
 
                 </div>
+
 
                 <div class="modal-footer">
 
@@ -211,6 +326,7 @@
                         Batal
 
                     </button>
+
 
                     <button
                         type="button"
@@ -230,8 +346,14 @@
         </div>
 
     </div>
+    <!--end::Close Modal-->
 
-    <div class="modal fade" id="withdrawModal" tabindex="-1">
+
+    <!--begin::Withdraw Modal-->
+    <div
+        class="modal fade"
+        id="withdrawModal"
+        tabindex="-1">
 
         <div class="modal-dialog modal-dialog-centered">
 
@@ -240,9 +362,7 @@
                 <div class="modal-header">
 
                     <h5 class="modal-title">
-
                         Tarik Pengajuan
-
                     </h5>
 
                     <button
@@ -253,33 +373,41 @@
 
                 </div>
 
+
                 <div class="modal-body text-center">
 
                     <div class="mb-5">
 
-                        <i class="fas fa-undo text-warning"
-                        style="font-size:60px"></i>
+                        <i
+                            class="fas fa-undo text-warning"
+                            style="font-size:60px">
+                        </i>
 
                     </div>
 
+
                     <h4 class="mb-3">
-
                         Tarik pengajuan lowongan?
-
                     </h4>
+
 
                     <p class="text-muted mb-0">
 
-                        Status lowongan akan dikembalikan menjadi <strong>Draft</strong>.
-                        Anda dapat melakukan perubahan sebelum mengajukan kembali.
+                        Status lowongan akan dikembalikan menjadi
+                        <strong>Draft</strong>.
+
+                        Anda dapat melakukan perubahan sebelum
+                        mengajukan kembali.
 
                     </p>
+
 
                     <input
                         type="hidden"
                         id="withdrawUuid">
 
                 </div>
+
 
                 <div class="modal-footer">
 
@@ -291,6 +419,7 @@
                         Batal
 
                     </button>
+
 
                     <button
                         type="button"
@@ -310,949 +439,1351 @@
         </div>
 
     </div>
+    <!--end::Withdraw Modal-->
 
-    <div class="modal fade" tabindex="-1" role="dialog" id="deleteModal">
-        <div class="modal-dialog" role="document">
+
+    <!--begin::Delete Modal-->
+    <div
+        class="modal fade"
+        tabindex="-1"
+        role="dialog"
+        id="deleteModal">
+
+        <div
+            class="modal-dialog"
+            role="document">
+
             <div class="modal-content">
+
                 <div class="modal-header">
-                    <h5 class="modal-title">Hapus Lowongan</h5>
-                    <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close" data-bs-original-title="" title=""></button>
+
+                    <h5 class="modal-title">
+                        Hapus Lowongan
+                    </h5>
+
+                    <button
+                        class="btn-close"
+                        type="button"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                    </button>
+
                 </div>
+
+
                 <div class="modal-body">
-                    <p>Tindakan ini akan menghapus data dan data yang dihapus tidak dapat dipulihkan, yakin ingin melanjutkan?</p>
+
+                    <p>
+
+                        Tindakan ini akan menghapus data dan data yang
+                        dihapus tidak dapat dipulihkan, yakin ingin
+                        melanjutkan?
+
+                    </p>
+
                 </div>
+
+
                 <div class="modal-footer">
-                    <form action="" method="post" id="formDelete">
+
+                    <form
+                        action=""
+                        method="post"
+                        id="formDelete">
+
                         @csrf
+
                         @method("DELETE")
-                        <input type="hidden" id="deleteUuid">
-                        <button type="button" class="btn btn-light font-weight-bolder" data-bs-dismiss="modal">Tutup</button>
-                        <button type="submit" class="btn btn-danger font-weight-bolder" id="btn-submit-delete">Iya, Hapus</button>
+
+                        <input
+                            type="hidden"
+                            id="deleteUuid">
+
+
+                        <button
+                            type="button"
+                            class="btn btn-light font-weight-bolder"
+                            data-bs-dismiss="modal">
+
+                            Tutup
+
+                        </button>
+
+
+                        <button
+                            type="submit"
+                            class="btn btn-danger font-weight-bolder"
+                            id="btn-submit-delete">
+
+                            Iya, Hapus
+
+                        </button>
+
                     </form>
+
                 </div>
+
             </div>
+
         </div>
+
     </div>
+    <!--end::Delete Modal-->
+
 @endsection
 
+
 @section('js')
-    <script>
-        function deleteData(uuid)
-        {
-            $("#deleteUuid").val(uuid);
 
-            $("#deleteModal").modal("show");
-        }
+<script>
 
-        $("#formDelete").submit(function(e){
+    /*
+    |--------------------------------------------------------------------------
+    | Delete
+    |--------------------------------------------------------------------------
+    */
 
-            e.preventDefault();
+    function deleteData(uuid)
+    {
+        $("#deleteUuid").val(uuid);
 
-            let uuid = $("#deleteUuid").val();
+        $("#deleteModal").modal("show");
+    }
 
-            $.ajax({
 
-                url: "{{ route('dashboard-user.job-vacancy.index') }}/" + uuid,
+    $("#formDelete").submit(function(e){
 
-                type: "DELETE",
+        e.preventDefault();
 
-                data: {
-                    _token: "{{ csrf_token() }}"
-                },
+        let uuid =
+            $("#deleteUuid").val();
 
-                beforeSend:function(){
 
-                    $("#btn-submit-delete")
-                        .prop("disabled",true)
-                        .html("Menghapus...");
+        $.ajax({
 
-                },
+            url:
+                "{{ route('dashboard-user.job-vacancy.index') }}"
+                + "/" + uuid,
 
-                success:function(res){
+            type: "DELETE",
 
-                    $("#deleteModal").modal("hide");
+            data: {
 
-                    Swal.fire({
+                _token:
+                    "{{ csrf_token() }}"
 
-                        icon:"success",
+            },
 
-                        title:"Berhasil",
 
-                        text:res.message,
+            beforeSend: function(){
 
-                        timer:1800,
+                $("#btn-submit-delete")
+                    .prop("disabled", true)
+                    .html("Menghapus...");
 
-                        showConfirmButton:false
+            },
 
-                    });
 
-                    $('#datatable').DataTable().ajax.reload(null, false);
+            success: function(res){
 
-                },
+                $("#deleteModal").modal("hide");
 
-                error:function(xhr){
 
-                    Swal.fire({
+                Swal.fire({
 
-                        icon:"error",
+                    icon: "success",
 
-                        title:"Gagal",
+                    title: "Berhasil",
 
-                        text:xhr.responseJSON?.message ?? "Terjadi kesalahan."
+                    text: res.message,
 
-                    });
+                    timer: 1800,
 
-                },
+                    showConfirmButton: false
 
-                complete:function(){
+                });
 
-                    $("#btn-submit-delete")
-                        .prop("disabled",false)
-                        .html("Iya, Hapus");
 
-                }
+                $('#datatable')
+                    .DataTable()
+                    .ajax
+                    .reload(null, false);
 
-            });
+            },
 
-        });
 
-        function closeVacancy(uuid)
-        {
-            $("#closeUuid").val(uuid);
+            error: function(xhr){
 
-            $("#closeModal").modal("show");
-        }
+                Swal.fire({
 
-        $("#btnCloseVacancy").click(function(){
+                    icon: "error",
 
-            let uuid = $("#closeUuid").val();
+                    title: "Gagal",
 
-            $.ajax({
+                    text:
+                        xhr.responseJSON?.message
+                        ?? "Terjadi kesalahan."
 
-                url: "/dashboard-user/job-vacancy/" + uuid + "/close",
+                });
 
-                type: "POST",
+            },
 
-                data:{
 
-                    _token:$('meta[name="csrf-token"]').attr("content")
+            complete: function(){
 
-                },
+                $("#btn-submit-delete")
+                    .prop("disabled", false)
+                    .html("Iya, Hapus");
 
-                beforeSend:function(){
-
-                    $("#btnCloseVacancy")
-                        .prop("disabled",true)
-                        .html('<span class="spinner-border spinner-border-sm me-2"></span>Memproses...');
-
-                },
-
-                success:function(res){
-
-                    $("#closeModal").modal("hide");
-
-                    Swal.fire({
-
-                        icon:"success",
-
-                        title:"Berhasil",
-
-                        text:res.message,
-
-                        timer:1800,
-
-                        showConfirmButton:false
-
-                    });
-
-                    $('#datatable').DataTable().ajax.reload(null, false);
-
-                },
-
-                error:function(xhr){
-
-                    Swal.fire({
-
-                        icon:"error",
-
-                        title:"Gagal",
-
-                        text:xhr.responseJSON.message
-
-                    });
-
-                },
-
-                complete:function(){
-
-                    $("#btnCloseVacancy")
-                        .prop("disabled",false)
-                        .html('<i class="fas fa-lock me-2"></i>Tutup Lowongan');
-
-                }
-
-            });
-
-        });
-
-        function withdrawVacancy(uuid)
-        {
-            $("#withdrawUuid").val(uuid);
-
-            $("#withdrawModal").modal("show");
-        }
-
-        $("#btnWithdrawVacancy").click(function(){
-
-            let uuid = $("#withdrawUuid").val();
-
-            $.ajax({
-
-                url: "/dashboard-user/job-vacancy/" + uuid + "/withdraw",
-
-                type: "POST",
-
-                data:{
-
-                    _token:$('meta[name="csrf-token"]').attr("content")
-
-                },
-
-                beforeSend:function(){
-
-                    $("#btnWithdrawVacancy")
-                        .prop("disabled",true)
-                        .html('<span class="spinner-border spinner-border-sm me-2"></span>Memproses...');
-
-                },
-
-                success:function(res){
-
-                    $("#withdrawModal").modal("hide");
-
-                    Swal.fire({
-
-                        icon:"success",
-
-                        title:"Berhasil",
-
-                        text:res.message,
-
-                        timer:1800,
-
-                        showConfirmButton:false
-
-                    });
-
-                    $('#datatable').DataTable().ajax.reload(null, false);
-
-                },
-
-                error:function(xhr){
-
-                    Swal.fire({
-
-                        icon:"error",
-
-                        title:"Gagal",
-
-                        text:xhr.responseJSON.message
-
-                    });
-
-                },
-
-                complete:function(){
-
-                    $("#btnWithdrawVacancy")
-                        .prop("disabled",false)
-                        .html('<i class="fas fa-undo me-2"></i>Tarik Pengajuan');
-
-                }
-
-            });
-
-        });
-        
-        $(document).ready(function() {
-            let currentDraw = 1;
-
-             if ($.fn.DataTable.isDataTable('#datatable')) {
-                $('#datatable').DataTable().destroy();
             }
 
-            let table = $('#datatable').DataTable({
+        });
 
-                processing: true,
-                serverSide: true,
+    });
 
-                scrollX: true,
-                responsive: false,
 
-                aLengthMenu: [
-                    [10, 25, 50, 75, 999999],
-                    [10, 25, 50, 75, "All"]
-                ],
+    /*
+    |--------------------------------------------------------------------------
+    | Close Vacancy
+    |--------------------------------------------------------------------------
+    */
 
-                ajax: {
+    function closeVacancy(uuid)
+    {
+        $("#closeUuid").val(uuid);
 
-                    url: '{{ route("dashboard-user.job-vacancy.index") }}',
+        $("#closeModal").modal("show");
+    }
 
-                    type: 'GET',
 
-                    data: function (d) {
+    $("#btnCloseVacancy").click(function(){
 
-                        currentDraw = d.draw;
+        let uuid =
+            $("#closeUuid").val();
 
-                        d.page =
-                            (d.start / d.length) + 1;
 
-                        d.length = d.length;
+        $.ajax({
 
-                        d.status = "{{ request('status', 'all') }}";
+            url:
+                "/dashboard-user/job-vacancy/"
+                + uuid
+                + "/close",
 
-                    },
+            type: "POST",
 
-                    dataFilter: function (response) {
+            data: {
 
-                        let json = JSON.parse(response);
+                _token:
+                    $('meta[name="csrf-token"]').attr("content")
 
-                        return JSON.stringify({
+            },
 
-                            draw: currentDraw,
 
-                            recordsTotal:
-                                json.results.total,
+            beforeSend: function(){
 
-                            recordsFiltered:
-                                json.results.total,
+                $("#btnCloseVacancy")
+                    .prop("disabled", true)
+                    .html(
+                        '<span class="spinner-border spinner-border-sm me-2"></span>'
+                        + 'Memproses...'
+                    );
 
-                            data:
-                                json.results.data
+            },
 
-                        });
+
+            success: function(res){
+
+                $("#closeModal").modal("hide");
+
+
+                Swal.fire({
+
+                    icon: "success",
+
+                    title: "Berhasil",
+
+                    text: res.message,
+
+                    timer: 1800,
+
+                    showConfirmButton: false
+
+                });
+
+
+                $('#datatable')
+                    .DataTable()
+                    .ajax
+                    .reload(null, false);
+
+            },
+
+
+            error: function(xhr){
+
+                Swal.fire({
+
+                    icon: "error",
+
+                    title: "Gagal",
+
+                    text:
+                        xhr.responseJSON?.message
+                        ?? "Terjadi kesalahan."
+
+                });
+
+            },
+
+
+            complete: function(){
+
+                $("#btnCloseVacancy")
+                    .prop("disabled", false)
+                    .html(
+                        '<i class="fas fa-lock me-2"></i>'
+                        + 'Tutup Lowongan'
+                    );
+
+            }
+
+        });
+
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Withdraw Vacancy
+    |--------------------------------------------------------------------------
+    */
+
+    function withdrawVacancy(uuid)
+    {
+        $("#withdrawUuid").val(uuid);
+
+        $("#withdrawModal").modal("show");
+    }
+
+
+    $("#btnWithdrawVacancy").click(function(){
+
+        let uuid =
+            $("#withdrawUuid").val();
+
+
+        $.ajax({
+
+            url:
+                "/dashboard-user/job-vacancy/"
+                + uuid
+                + "/withdraw",
+
+            type: "POST",
+
+            data: {
+
+                _token:
+                    $('meta[name="csrf-token"]').attr("content")
+
+            },
+
+
+            beforeSend: function(){
+
+                $("#btnWithdrawVacancy")
+                    .prop("disabled", true)
+                    .html(
+                        '<span class="spinner-border spinner-border-sm me-2"></span>'
+                        + 'Memproses...'
+                    );
+
+            },
+
+
+            success: function(res){
+
+                $("#withdrawModal").modal("hide");
+
+
+                Swal.fire({
+
+                    icon: "success",
+
+                    title: "Berhasil",
+
+                    text: res.message,
+
+                    timer: 1800,
+
+                    showConfirmButton: false
+
+                });
+
+
+                $('#datatable')
+                    .DataTable()
+                    .ajax
+                    .reload(null, false);
+
+            },
+
+
+            error: function(xhr){
+
+                Swal.fire({
+
+                    icon: "error",
+
+                    title: "Gagal",
+
+                    text:
+                        xhr.responseJSON?.message
+                        ?? "Terjadi kesalahan."
+
+                });
+
+            },
+
+
+            complete: function(){
+
+                $("#btnWithdrawVacancy")
+                    .prop("disabled", false)
+                    .html(
+                        '<i class="fas fa-undo me-2"></i>'
+                        + 'Tarik Pengajuan'
+                    );
+
+            }
+
+        });
+
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | DataTable
+    |--------------------------------------------------------------------------
+    */
+
+    $(document).ready(function() {
+
+        let currentDraw = 1;
+
+
+        if (
+            $.fn.DataTable.isDataTable('#datatable')
+        ) {
+
+            $('#datatable')
+                .DataTable()
+                .destroy();
+
+        }
+
+
+        let table = $('#datatable').DataTable({
+
+            processing: true,
+
+            serverSide: true,
+
+            scrollX: true,
+
+            responsive: false,
+
+
+            aLengthMenu: [
+
+                [10, 25, 50, 75, 999999],
+
+                [10, 25, 50, 75, "All"]
+
+            ],
+
+
+            ajax: {
+
+                url:
+                    '{{ route("dashboard-user.job-vacancy.index") }}',
+
+                type: 'GET',
+
+
+                data: function (d) {
+
+                    currentDraw =
+                        d.draw;
+
+
+                    d.page =
+                        (d.start / d.length) + 1;
+
+
+                    d.length =
+                        d.length;
+
+
+                    d.status =
+                        "{{ request('status', 'all') }}";
+
+                },
+
+
+                dataFilter: function (response) {
+
+                    let json =
+                        JSON.parse(response);
+
+
+                    return JSON.stringify({
+
+                        draw:
+                            currentDraw,
+
+                        recordsTotal:
+                            json.results.total,
+
+                        recordsFiltered:
+                            json.results.total,
+
+                        data:
+                            json.results.data
+
+                    });
+
+                }
+
+            },
+
+
+            columns: [
+
+                /*
+                |--------------------------------------------------------------------------
+                | 2. ID
+                |--------------------------------------------------------------------------
+                */
+
+                {
+
+                    data: "id",
+
+                    render: function(data) {
+
+                        return (
+                            '000000' + data
+                        ).slice(-6);
+
+                    }
+
+                },
+
+                /*
+                |--------------------------------------------------------------------------
+                | 1. CATEGORY
+                |--------------------------------------------------------------------------
+                */
+
+                {
+
+                    data: "category",
+
+                    className: "text-center",
+
+                    render: function(data) {
+
+                        if (!data) {
+
+                            return `
+                                <span
+                                    class="badge badge-light-secondary">
+
+                                    -
+
+                                </span>
+                            `;
+
+                        }
+
+
+                        switch (
+                            String(data).toLowerCase()
+                        ) {
+
+                            case "security":
+
+                                return `
+                                    <span
+                                        class="badge badge-light-primary">
+
+                                        <i
+                                            class="fas fa-shield-alt me-1">
+                                        </i>
+
+                                        Satpam
+
+                                    </span>
+                                `;
+
+
+                            case "cs":
+
+                                return `
+                                    <span
+                                        class="badge badge-light-success">
+
+                                        <i
+                                            class="fas fa-broom me-1">
+                                        </i>
+
+                                        Cleaning Service
+
+                                    </span>
+                                `;
+
+
+                            default:
+
+                                return `
+                                    <span
+                                        class="badge badge-light-secondary">
+
+                                        ${data}
+
+                                    </span>
+                                `;
+
+                        }
 
                     }
 
                 },
 
 
-                columns: [
+                /*
+                |--------------------------------------------------------------------------
+                | 3. POSISI
+                |--------------------------------------------------------------------------
+                */
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | 1. ID
-                    |--------------------------------------------------------------------------
-                    */
+                {
 
-                    {
-                        data: "id",
+                    data: "position",
 
-                        render: function(data) {
+                    render: function(data) {
 
-                            return (
-                                '000000' + data
-                            ).slice(-6);
-
-                        }
-
-                    },
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | 2. POSISI
-                    |--------------------------------------------------------------------------
-                    */
-
-                    {
-                        data: "position",
-
-                        render: function(data) {
-
-                            if (!data) {
-
-                                return `
-                                    <span class="badge badge-light-warning">
-                                        Belum Diisi
-                                    </span>
-                                `;
-
-                            }
+                        if (!data) {
 
                             return `
-                                <div class="fw-bold">
-                                    ${data}
-                                </div>
-                            `;
+                                <span
+                                    class="badge badge-light-warning">
 
-                        }
-
-                    },
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | 3. LOKASI
-                    |--------------------------------------------------------------------------
-                    */
-
-                    {
-                        data: null,
-
-                        render: function(data) {
-
-                            let lokasi = [];
-
-                            if (data.city) {
-                                lokasi.push(data.city);
-                            }
-
-                            if (data.province) {
-                                lokasi.push(data.province);
-                            }
-
-                            if (lokasi.length === 0) {
-
-                                return `
-                                    <span class="badge badge-light-warning">
-                                        Belum Diisi
-                                    </span>
-                                `;
-
-                            }
-
-                            return `
-                                <span>
-                                    <i class="fas fa-map-marker-alt text-muted me-1"></i>
-                                    ${lokasi.join(", ")}
-                                </span>
-                            `;
-
-                        }
-
-                    },
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | 4. KUOTA
-                    |--------------------------------------------------------------------------
-                    */
-
-                    {
-                        data: "kuota",
-
-                        className: "text-center",
-
-                        render: function(data) {
-
-                            if (!data) {
-                                return "-";
-                            }
-
-                            return `
-                                <span class="badge badge-light-primary">
-                                    ${data} Orang
-                                </span>
-                            `;
-
-                        }
-
-                    },
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | 5. GAJI
-                    |--------------------------------------------------------------------------
-                    */
-
-                    {
-                        data: null,
-
-                        render: function(data) {
-
-                            if (data.is_show_fee == 0) {
-
-                                return `
-                                    <span class="badge badge-light-secondary">
-                                        Dirahasiakan
-                                    </span>
-                                `;
-
-                            }
-
-                            let formatter =
-                                new Intl.NumberFormat('id-ID');
-
-                            let min =
-                                data.min_price
-                                    ? formatter.format(data.min_price)
-                                    : "-";
-
-                            let max =
-                                data.max_price
-                                    ? formatter.format(data.max_price)
-                                    : "-";
-
-                            let type =
-                                data.fee_type == "daily"
-                                    ? "/ Hari"
-                                    : "/ Bulan";
-
-                            return `
-                                <span class="fw-semibold">
-                                    Rp ${min} - ${max}
-                                </span>
-
-                                <br>
-
-                                <small class="text-muted">
-                                    ${type}
-                                </small>
-                            `;
-
-                        }
-
-                    },
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | 6. PERIODE
-                    |--------------------------------------------------------------------------
-                    */
-
-                    {
-                        data: null,
-
-                        render: function(data) {
-
-                            if (
-                                !data.start_date ||
-                                !data.end_date
-                            ) {
-
-                                return `
-                                    <span class="badge badge-light-warning">
-                                        Belum Diatur
-                                    </span>
-                                `;
-
-                            }
-
-                            let start =
-                                moment(data.start_date)
-                                    .format("DD-MM-YYYY");
-
-                            let end =
-                                moment(data.end_date)
-                                    .format("DD-MM-YYYY");
-
-                            return `
-                                ${start}
-
-                                <br>
-
-                                <small class="text-muted">
-                                    s/d ${end}
-                                </small>
-                            `;
-
-                        }
-
-                    },
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | 7. STATUS
-                    |--------------------------------------------------------------------------
-                    */
-
-                    {
-                        data: "status",
-
-                        className: "text-center",
-
-                        render: function(data) {
-
-                            switch(data) {
-
-                                case "draft":
-
-                                    return `
-                                        <span class="badge badge-light-secondary">
-                                            Draft
-                                        </span>
-                                    `;
-
-
-                                case "submitted":
-
-                                    return `
-                                        <span class="badge badge-light-warning">
-                                            Submitted
-                                        </span>
-                                    `;
-
-
-                                case "published":
-
-                                    return `
-                                        <span class="badge badge-light-success">
-                                            Published
-                                        </span>
-                                    `;
-
-
-                                case "closed":
-
-                                    return `
-                                        <span class="badge badge-light-danger">
-                                            Closed
-                                        </span>
-                                    `;
-
-
-                                case "rejected":
-
-                                    return `
-                                        <span class="badge badge-light-dark">
-                                            Rejected
-                                        </span>
-                                    `;
-
-
-                                default:
-
-                                    return "-";
-
-                            }
-
-                        }
-
-                    },
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | 8. DILIHAT
-                    |--------------------------------------------------------------------------
-                    */
-
-                    {
-                        data: "total_clicked",
-
-                        className: "text-center",
-
-                        render: function(data) {
-
-                            return `
-                                <span class="badge badge-light-info">
-
-                                    <i class="fas fa-eye me-1"></i>
-
-                                    ${data ?? 0}
+                                    Belum Diisi
 
                                 </span>
                             `;
 
                         }
 
-                    },
+
+                        return `
+                            <div class="fw-bold">
+
+                                ${data}
+
+                            </div>
+                        `;
+
+                    }
+
+                },
 
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | 9. PELAMAR
-                    |--------------------------------------------------------------------------
-                    */
+                /*
+                |--------------------------------------------------------------------------
+                | 4. LOKASI
+                |--------------------------------------------------------------------------
+                */
 
-                    {
-                        data: "applications_count",
+                {
 
-                        className: "text-center",
+                    data: null,
 
-                        render: function(data, type, row) {
+                    render: function(data) {
 
-                            let total =
-                                data ?? 0;
+                        let lokasi = [];
 
-                            let reviewed =
-                                row.reviewed_count ?? 0;
 
-                            let shortlisted =
-                                row.shortlisted_count ?? 0;
+                        if (data.city) {
 
-                            let rejected =
-                                row.rejected_count ?? 0;
+                            lokasi.push(data.city);
+
+                        }
+
+
+                        if (data.province) {
+
+                            lokasi.push(data.province);
+
+                        }
+
+
+                        if (lokasi.length === 0) {
 
                             return `
-                                <div class="d-flex flex-column align-items-center">
+                                <span
+                                    class="badge badge-light-warning">
 
+                                    Belum Diisi
+
+                                </span>
+                            `;
+
+                        }
+
+
+                        return `
+                            <span>
+
+                                <i
+                                    class="fas fa-map-marker-alt text-muted me-1">
+                                </i>
+
+                                ${lokasi.join(", ")}
+
+                            </span>
+                        `;
+
+                    }
+
+                },
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | 5. KUOTA
+                |--------------------------------------------------------------------------
+                */
+
+                {
+
+                    data: "kuota",
+
+                    className: "text-center",
+
+                    render: function(data) {
+
+                        if (!data) {
+
+                            return "-";
+
+                        }
+
+
+                        return `
+                            <span
+                                class="badge badge-light-primary">
+
+                                ${data} Orang
+
+                            </span>
+                        `;
+
+                    }
+
+                },
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | 6. GAJI
+                |--------------------------------------------------------------------------
+                */
+
+                {
+
+                    data: null,
+
+                    render: function(data) {
+
+                        if (
+                            data.is_show_fee == 0
+                        ) {
+
+                            return `
+                                <span
+                                    class="badge badge-light-secondary">
+
+                                    Dirahasiakan
+
+                                </span>
+                            `;
+
+                        }
+
+
+                        let formatter =
+                            new Intl.NumberFormat('id-ID');
+
+
+                        let min =
+                            data.min_price
+                                ? formatter.format(
+                                    data.min_price
+                                )
+                                : "-";
+
+
+                        let max =
+                            data.max_price
+                                ? formatter.format(
+                                    data.max_price
+                                )
+                                : "-";
+
+
+                        let type =
+                            data.fee_type == "daily"
+                                ? "/ Hari"
+                                : "/ Bulan";
+
+
+                        return `
+                            <span class="fw-semibold">
+
+                                Rp ${min} - ${max}
+
+                            </span>
+
+                            <br>
+
+                            <small class="text-muted">
+
+                                ${type}
+
+                            </small>
+                        `;
+
+                    }
+
+                },
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | 7. PERIODE
+                |--------------------------------------------------------------------------
+                */
+
+                {
+
+                    data: null,
+
+                    render: function(data) {
+
+                        if (
+                            !data.start_date ||
+                            !data.end_date
+                        ) {
+
+                            return `
+                                <span
+                                    class="badge badge-light-warning">
+
+                                    Belum Diatur
+
+                                </span>
+                            `;
+
+                        }
+
+
+                        let start =
+                            moment(data.start_date)
+                                .format("DD-MM-YYYY");
+
+
+                        let end =
+                            moment(data.end_date)
+                                .format("DD-MM-YYYY");
+
+
+                        return `
+                            ${start}
+
+                            <br>
+
+                            <small class="text-muted">
+
+                                s/d ${end}
+
+                            </small>
+                        `;
+
+                    }
+
+                },
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | 8. STATUS
+                |--------------------------------------------------------------------------
+                */
+
+                {
+
+                    data: "status",
+
+                    className: "text-center",
+
+                    render: function(data) {
+
+                        switch(data) {
+
+                            case "draft":
+
+                                return `
                                     <span
-                                        class="badge badge-light-primary"
-                                        title="Total Pelamar"
-                                    >
+                                        class="badge badge-light-secondary">
 
-                                        <i class="fas fa-users me-1"></i>
-
-                                        ${total}
+                                        Draft
 
                                     </span>
+                                `;
 
 
-                                    <div class="mt-1">
+                            case "submitted":
 
-                                        <small
-                                            class="text-warning me-1"
-                                            title="Reviewed"
-                                        >
-                                            ${reviewed} Reviewed
-                                        </small>
+                                return `
+                                    <span
+                                        class="badge badge-light-warning">
 
-                                        <small
-                                            class="text-success me-1"
-                                            title="Shortlisted"
-                                        >
-                                            ${shortlisted} Shortlisted
-                                        </small>
+                                        Submitted
 
-                                        <small
-                                            class="text-danger"
-                                            title="Rejected"
-                                        >
-                                            ${rejected} Rejected
-                                        </small>
+                                    </span>
+                                `;
 
-                                    </div>
 
-                                </div>
-                            `;
+                            case "published":
+
+                                return `
+                                    <span
+                                        class="badge badge-light-success">
+
+                                        Published
+
+                                    </span>
+                                `;
+
+
+                            case "closed":
+
+                                return `
+                                    <span
+                                        class="badge badge-light-danger">
+
+                                        Closed
+
+                                    </span>
+                                `;
+
+
+                            case "rejected":
+
+                                return `
+                                    <span
+                                        class="badge badge-light-dark">
+
+                                        Rejected
+
+                                    </span>
+                                `;
+
+
+                            default:
+
+                                return "-";
 
                         }
 
-                    },
+                    }
+
+                },
 
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | 10. DISIMPAN
-                    |--------------------------------------------------------------------------
-                    */
+                /*
+                |--------------------------------------------------------------------------
+                | 9. DILIHAT
+                |--------------------------------------------------------------------------
+                */
 
-                    {
-                        data: "bookmarks_count",
+                {
 
-                        className: "text-center",
+                    data: "total_clicked",
 
-                        render: function(data) {
+                    className: "text-center",
 
-                            return `
-                                <span class="badge badge-light-warning">
+                    render: function(data) {
 
-                                    <i class="fas fa-bookmark me-1"></i>
+                        return `
+                            <span
+                                class="badge badge-light-info">
 
-                                    ${data ?? 0}
+                                <i
+                                    class="fas fa-eye me-1">
+                                </i>
+
+                                ${data ?? 0}
+
+                            </span>
+                        `;
+
+                    }
+
+                },
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | 10. PELAMAR
+                |--------------------------------------------------------------------------
+                */
+
+                {
+
+                    data: "applications_count",
+
+                    className: "text-center",
+
+                    render: function(data, type, row) {
+
+                        let total =
+                            data ?? 0;
+
+
+                        let reviewed =
+                            row.reviewed_count ?? 0;
+
+
+                        let shortlisted =
+                            row.shortlisted_count ?? 0;
+
+
+                        let rejected =
+                            row.rejected_count ?? 0;
+
+
+                        return `
+
+                            <div
+                                class="d-flex flex-column align-items-center">
+
+                                <span
+                                    class="badge badge-light-primary"
+                                    title="Total Pelamar">
+
+                                    <i
+                                        class="fas fa-users me-1">
+                                    </i>
+
+                                    ${total}
 
                                 </span>
-                            `;
-
-                        }
-
-                    },
 
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | 11. AKSI
-                    |--------------------------------------------------------------------------
-                    */
+                                <div class="mt-1">
 
-                    {
-                        data: null,
-                        orderable: false,
-                        searchable: false,
-                        className: "text-end",
+                                    <small
+                                        class="text-warning me-1"
+                                        title="Reviewed">
 
-                        render: function(data) {
+                                        ${reviewed}
+                                        Reviewed
 
-                            let action = `
-
-                                <!-- DETAIL -->
-
-                                <a
-                                    href="/dashboard-user/job-vacancy/${data.uuid}"
-                                    class="btn btn-outline-info btn-sm me-1"
-                                    title="Detail"
-                                    data-bs-toggle="tooltip"
-                                >
-                                    <i class="fas fa-eye"></i>
-                                </a>
+                                    </small>
 
 
-                                <!-- EDIT -->
+                                    <small
+                                        class="text-success me-1"
+                                        title="Shortlisted">
 
-                                ${
-                                    data.status === "draft" || data.status === "rejected"
-                                    ? `
-                                        <a
-                                            href="/dashboard-user/job-vacancy/${data.uuid}/edit"
-                                            class="btn btn-outline-warning btn-sm me-1"
-                                            title="Edit"
-                                            data-bs-toggle="tooltip"
-                                        >
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                    `
-                                    : ''
-                                }
+                                        ${shortlisted}
+                                        Shortlisted
+
+                                    </small>
 
 
-                                <!-- PELAMAR -->
+                                    <small
+                                        class="text-danger"
+                                        title="Rejected">
 
-                                <a
-                                    href="/dashboard-user/job-application/${data.uuid}/applicants"
-                                    class="btn btn-outline-primary btn-sm me-1"
-                                    title="Lihat Pelamar"
-                                    data-bs-toggle="tooltip"
-                                >
-                                    <i class="fas fa-users"></i>
-                                </a>
+                                        ${rejected}
+                                        Rejected
 
-                            `;
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+                        `;
+
+                    }
+
+                },
 
 
-                            /*
-                            |--------------------------------------------------------------------------
-                            | SUBMITTED
-                            |--------------------------------------------------------------------------
-                            | Tarik kembali pengajuan menjadi draft
-                            */
+                /*
+                |--------------------------------------------------------------------------
+                | 11. DISIMPAN
+                |--------------------------------------------------------------------------
+                */
 
-                            if (data.status === "submitted") {
+                {
 
-                                action += `
+                    data: "bookmarks_count",
 
-                                    <button
+                    className: "text-center",
+
+                    render: function(data) {
+
+                        return `
+                            <span
+                                class="badge badge-light-warning">
+
+                                <i
+                                    class="fas fa-bookmark me-1">
+                                </i>
+
+                                ${data ?? 0}
+
+                            </span>
+                        `;
+
+                    }
+
+                },
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | 12. AKSI
+                |--------------------------------------------------------------------------
+                */
+
+                {
+
+                    data: null,
+
+                    orderable: false,
+
+                    searchable: false,
+
+                    className: "text-end",
+
+                    render: function(data) {
+
+                        let action = `
+
+                            <!-- DETAIL -->
+                            <a
+                                href="/dashboard-user/job-vacancy/${data.uuid}"
+                                class="btn btn-outline-info btn-sm me-1"
+                                title="Detail"
+                                data-bs-toggle="tooltip">
+
+                                <i class="fas fa-eye"></i>
+
+                            </a>
+
+
+                            <!-- EDIT -->
+                            ${
+                                data.status === "draft" ||
+                                data.status === "rejected"
+
+                                ? `
+
+                                    <a
+                                        href="/dashboard-user/job-vacancy/${data.uuid}/edit"
                                         class="btn btn-outline-warning btn-sm me-1"
-                                        onclick="withdrawVacancy('${data.uuid}')"
-                                        title="Tarik Kembali ke Draft"
-                                        data-bs-toggle="tooltip"
-                                    >
+                                        title="Edit"
+                                        data-bs-toggle="tooltip">
 
-                                        <i class="fas fa-undo"></i>
+                                        <i class="fas fa-edit"></i>
 
-                                    </button>
+                                    </a>
 
-                                `;
+                                `
 
-                            }
-
-
-                            /*
-                            |--------------------------------------------------------------------------
-                            | PUBLISHED
-                            |--------------------------------------------------------------------------
-                            */
-
-                            if (data.status === "published") {
-
-                                action += `
-
-                                    <button
-                                        class="btn btn-outline-danger btn-sm"
-
-                                        onclick="closeVacancy('${data.uuid}')"
-
-                                        title="Tutup Lowongan"
-
-                                        data-bs-toggle="tooltip"
-                                    >
-
-                                        <i class="fas fa-lock"></i>
-
-                                    </button>
-
-                                `;
+                                : ''
 
                             }
 
 
-                            return action;
+                            <!-- PELAMAR -->
+                            <a
+                                href="/dashboard-user/job-application/${data.uuid}/applicants"
+                                class="btn btn-outline-primary btn-sm me-1"
+                                title="Lihat Pelamar"
+                                data-bs-toggle="tooltip">
+
+                                <i class="fas fa-users"></i>
+
+                            </a>
+
+                        `;
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | SUBMITTED
+                        |--------------------------------------------------------------------------
+                        */
+
+                        if (
+                            data.status === "submitted"
+                        ) {
+
+                            action += `
+
+                                <button
+                                    type="button"
+                                    class="btn btn-outline-warning btn-sm me-1"
+                                    onclick="withdrawVacancy('${data.uuid}')"
+                                    title="Tarik Kembali ke Draft"
+                                    data-bs-toggle="tooltip">
+
+                                    <i class="fas fa-undo"></i>
+
+                                </button>
+
+                            `;
 
                         }
-                    }
-
-                ],
 
 
-                /*
-                |--------------------------------------------------------------------------
-                | BUTTON
-                |--------------------------------------------------------------------------
-                */
+                        /*
+                        |--------------------------------------------------------------------------
+                        | PUBLISHED
+                        |--------------------------------------------------------------------------
+                        */
 
-                dom: 'Blfrtip',
+                        if (
+                            data.status === "published"
+                        ) {
 
-                buttons: [
+                            action += `
 
-                    {
+                                <button
+                                    type="button"
+                                    class="btn btn-outline-danger btn-sm"
+                                    onclick="closeVacancy('${data.uuid}')"
+                                    title="Tutup Lowongan"
+                                    data-bs-toggle="tooltip">
 
-                        extend: 'colvis',
+                                    <i class="fas fa-lock"></i>
 
-                        text:
-                            '<i class="fas fa-eye me-1"></i>Kolom',
+                                </button>
 
-                        className:
-                            'btn btn-light-primary'
+                            `;
 
-                    },
+                        }
 
-                    {
 
-                        extend: 'copy',
-
-                        text:
-                            '<i class="fas fa-copy me-1"></i>Copy',
-
-                        className:
-                            'btn btn-light-danger'
-
-                    },
-
-                    {
-
-                        extend: 'excel',
-
-                        text:
-                            '<i class="fas fa-file-excel me-1"></i>Excel',
-
-                        className:
-                            'btn btn-light-success'
+                        return action;
 
                     }
-
-                ],
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | DRAW
-                |--------------------------------------------------------------------------
-                */
-
-                drawCallback: function() {
-
-                    $('[data-bs-toggle="tooltip"]')
-                        .tooltip();
 
                 }
 
-            });
-            table.buttons().container().appendTo('.card-button');
+            ],
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | BUTTON
+            |--------------------------------------------------------------------------
+            */
+
+            dom: 'Blfrtip',
+
+            buttons: [
+
+                {
+
+                    extend: 'colvis',
+
+                    text:
+                        '<i class="fas fa-eye me-1"></i>Kolom',
+
+                    className:
+                        'btn btn-light-primary'
+
+                },
+
+
+                {
+
+                    extend: 'copy',
+
+                    text:
+                        '<i class="fas fa-copy me-1"></i>Copy',
+
+                    className:
+                        'btn btn-light-danger'
+
+                },
+
+
+                {
+
+                    extend: 'excel',
+
+                    text:
+                        '<i class="fas fa-file-excel me-1"></i>Excel',
+
+                    className:
+                        'btn btn-light-success'
+
+                }
+
+            ],
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | DRAW CALLBACK
+            |--------------------------------------------------------------------------
+            */
+
+            drawCallback: function() {
+
+                $('[data-bs-toggle="tooltip"]')
+                    .tooltip();
+
+            }
+
         });
-    </script>
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Append DataTable Buttons
+        |--------------------------------------------------------------------------
+        */
+
+        table
+            .buttons()
+            .container()
+            .appendTo('.card-button');
+
+    });
+
+</script>
+
 @endsection

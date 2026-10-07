@@ -1079,14 +1079,19 @@
     @forelse ($subscriptions as $subscription)
 
         @php
+
+            /*
+            |--------------------------------------------------------------------------
+            | PACKAGE SLUG
+            |--------------------------------------------------------------------------
+            */
+            $slug = strtolower(trim($subscription->slug ?? ''));
+
             /*
             |--------------------------------------------------------------------------
             | BASIC PACKAGE
             |--------------------------------------------------------------------------
             */
-
-            $slug = strtolower(trim($subscription->slug ?? ''));
-
             $isBasic = $slug === 'dasar';
 
             /*
@@ -1094,30 +1099,30 @@
             | PACKAGE STATUS
             |--------------------------------------------------------------------------
             */
-
             $isCurrent = $currentSubscription
                 && (int) $currentSubscription->master_subscription_id
                     === (int) $subscription->id;
 
             /*
             |--------------------------------------------------------------------------
-            | PACKAGE STYLE
+            | PACKAGE HIGHLIGHT
             |--------------------------------------------------------------------------
+            |
+            | Sebelumnya berdasarkan nama Premium.
+            | Sekarang berdasarkan kolom is_highlight.
+            |
+            | Tetap menggunakan class featured + premium agar
+            | desain CSS Premium sebelumnya tetap berjalan.
+            |
             */
-
-            $isFeatured = in_array($slug, [
-                'profesional',
-                'professional',
-            ]);
-
-            $isPremium = $slug === 'premium';
+            $isFeatured = (bool) $subscription->is_highlight;
+            $isPremium = $isFeatured;
 
             /*
             |--------------------------------------------------------------------------
             | PACKAGE NAME
             |--------------------------------------------------------------------------
             */
-
             $packageName = strtoupper(
                 $subscription->name ?? ''
             );
@@ -1127,7 +1132,6 @@
             | PRICE
             |--------------------------------------------------------------------------
             */
-
             $isFree = (float) $subscription->price <= 0;
 
             /*
@@ -1135,7 +1139,6 @@
             | DURATION
             |--------------------------------------------------------------------------
             */
-
             $durationText = '';
 
             if ($subscription->duration) {
@@ -1143,24 +1146,18 @@
                 switch ($subscription->duration_type) {
 
                     case 'day':
-
                         $durationText =
                             $subscription->duration . ' hari';
-
                         break;
 
                     case 'month':
-
                         $durationText =
                             $subscription->duration . ' bulan';
-
                         break;
 
                     case 'year':
-
                         $durationText =
                             $subscription->duration . ' tahun';
-
                         break;
                 }
             }
@@ -1170,18 +1167,19 @@
             | FEATURES
             |--------------------------------------------------------------------------
             */
-
             $features = is_array($subscription->features)
                 ? $subscription->features
-                : [];
+                : json_decode($subscription->features ?? '{}', true);
 
+            $features = is_array($features)
+                ? $features
+                : [];
 
             /*
             |--------------------------------------------------------------------------
             | JOB VACANCY
             |--------------------------------------------------------------------------
             */
-
             $jobVacancy = $features['job_vacancy'] ?? [];
 
             $jobVacancyEnabled =
@@ -1190,13 +1188,11 @@
             $jobVacancyLimit =
                 $jobVacancy['limit'] ?? 0;
 
-
             /*
             |--------------------------------------------------------------------------
             | TRAINING
             |--------------------------------------------------------------------------
             */
-
             $training = $features['training'] ?? [];
 
             $trainingEnabled =
@@ -1208,18 +1204,18 @@
         @endphp
 
 
-        {{-- =================================================
+        {{-- =========================================================
              PACKAGE CARD
-        ================================================== --}}
+        ========================================================== --}}
 
         <div class="subscription-card
             {{ $isFeatured ? 'featured' : '' }}
             {{ $isPremium ? 'premium' : '' }}">
 
 
-            {{-- =================================================
-                 POPULAR
-            ================================================== --}}
+            {{-- =====================================================
+                 POPULAR / HIGHLIGHT
+            ====================================================== --}}
 
             @if ($isFeatured)
 
@@ -1230,9 +1226,9 @@
             @endif
 
 
-            {{-- =================================================
+            {{-- =====================================================
                  PACKAGE NAME
-            ================================================== --}}
+            ====================================================== --}}
 
             <div class="subscription-package-name">
 
@@ -1241,9 +1237,9 @@
             </div>
 
 
-            {{-- =================================================
+            {{-- =====================================================
                  PRICE
-            ================================================== --}}
+            ====================================================== --}}
 
             <div class="subscription-price-wrapper">
 
@@ -1266,13 +1262,10 @@
 
                     </span>
 
-
                     @if ($durationText)
 
                         <span class="subscription-period">
-
                             /{{ $durationText }}
-
                         </span>
 
                     @endif
@@ -1282,9 +1275,9 @@
             </div>
 
 
-            {{-- =================================================
+            {{-- =====================================================
                  DESCRIPTION
-            ================================================== --}}
+            ====================================================== --}}
 
             <div class="subscription-description">
 
@@ -1293,112 +1286,158 @@
             </div>
 
 
-            {{-- =================================================
+            {{-- =====================================================
                  FEATURES
-            ================================================== --}}
+            ====================================================== --}}
 
             <div class="subscription-features">
 
+                @php
+                    /*
+                    |--------------------------------------------------------------------------
+                    | LABEL FEATURE
+                    |--------------------------------------------------------------------------
+                    | Key JSON => label yang ditampilkan
+                    |
+                    | Jika nanti ada feature baru dan ingin nama khusus,
+                    | tambahkan di sini.
+                    |--------------------------------------------------------------------------
+                    */
+                    $featureLabels = [
+                        'job_vacancy' => 'Lamaran aktif',
+                        'training' => 'Pelatihan aktif',
+                        'video_bimtek' => 'Video Bimtek',
+                    ];
 
-                {{-- =================================================
-                     JOB VACANCY
-                ================================================== --}}
-
-                <div class="subscription-feature">
-
-                    <i class="ki-duotone ki-briefcase">
-
-                        <span class="path1"></span>
-                        <span class="path2"></span>
-
-                    </i>
-
-
-                    <span>
-                        Lamaran aktif
-                    </span>
+                    /*
+                    |--------------------------------------------------------------------------
+                    | ICON FEATURE
+                    |--------------------------------------------------------------------------
+                    */
+                    $featureIcons = [
+                        'job_vacancy' => 'ki-briefcase',
+                        'training' => 'ki-teacher',
+                        'video_bimtek' => 'ki-youtube',
+                    ];
+                @endphp
 
 
-                    @if (!$jobVacancyEnabled)
+                @foreach ($features as $featureKey => $feature)
 
-                        <i class="ki-duotone ki-cross subscription-check"></i>
+                    @php
+                        $enabled = (bool) ($feature['enabled'] ?? false);
+                        $limit = (int) ($feature['limit'] ?? -2);
 
-                    @elseif ((int) $jobVacancyLimit === -1)
+                        /*
+                        |--------------------------------------------------------------------------
+                        | LABEL
+                        |--------------------------------------------------------------------------
+                        | Jika belum ada di $featureLabels, otomatis ubah:
+                        | video_bimtek => Video Bimtek
+                        | job_vacancy  => Job Vacancy
+                        |--------------------------------------------------------------------------
+                        */
+                        $featureLabel = $featureLabels[$featureKey]
+                            ?? ucwords(str_replace('_', ' ', $featureKey));
 
-                        <span class="subscription-feature-value unlimited">
+                        /*
+                        |--------------------------------------------------------------------------
+                        | ICON
+                        |--------------------------------------------------------------------------
+                        */
+                        $featureIcon = $featureIcons[$featureKey]
+                            ?? 'ki-check-circle';
+                    @endphp
 
-                            Tak terbatas
 
+                    <div class="subscription-feature">
+
+                        {{-- ICON FEATURE --}}
+                        <i class="ki-duotone {{ $featureIcon }}">
+
+                            <span class="path1"></span>
+                            <span class="path2"></span>
+
+                        </i>
+
+
+                        {{-- LABEL --}}
+                        <span>
+                            {{ $featureLabel }}
                         </span>
 
-                    @else
 
-                        <span class="subscription-feature-value
-                            {{ !$isBasic ? 'highlight' : '' }}">
+                        {{-- =================================================
+                            FEATURE DISABLED
+                            ================================================= --}}
+                        @if (!$enabled)
 
-                            {{ $jobVacancyLimit }}
+                            <i class="ki-duotone ki-cross subscription-check">
 
-                        </span>
+                                <span class="path1"></span>
+                                <span class="path2"></span>
 
-                    @endif
-
-                </div>
-
-
-                {{-- =================================================
-                     TRAINING
-                ================================================== --}}
-
-                <div class="subscription-feature">
-
-                    <i class="ki-duotone ki-teacher">
-
-                        <span class="path1"></span>
-                        <span class="path2"></span>
-
-                    </i>
+                            </i>
 
 
-                    <span>
-                        Pelatihan aktif
-                    </span>
+                        {{-- =================================================
+                            UNLIMITED
+                            limit = -1
+                            ================================================= --}}
+                        @elseif ($limit === -1)
+
+                            <i class="ki-duotone ki-check subscription-check">
+
+                                <span class="path1"></span>
+                                <span class="path2"></span>
+
+                            </i>
 
 
-                    @if (!$trainingEnabled)
+                        {{-- =================================================
+                            NOT AVAILABLE
+                            limit = -2
+                            ================================================= --}}
+                        @elseif ($limit === -2)
 
-                        <i class="ki-duotone ki-cross subscription-check"></i>
+                            <i class="ki-duotone ki-cross subscription-check">
 
-                    @elseif ((int) $trainingLimit === -1)
+                                <span class="path1"></span>
+                                <span class="path2"></span>
 
-                        <span class="subscription-feature-value unlimited">
+                            </i>
 
-                            Tak terbatas
 
-                        </span>
+                        {{-- =================================================
+                            NORMAL LIMIT
+                            ================================================= --}}
+                        @else
 
-                    @else
+                            <span class="subscription-feature-value
+                                {{ !$isBasic ? 'highlight' : '' }}">
 
-                        <span class="subscription-feature-value
-                            {{ !$isBasic ? 'highlight' : '' }}">
+                                {{ $limit }}
 
-                            {{ $trainingLimit }}
+                            </span>
 
-                        </span>
+                        @endif
 
-                    @endif
+                    </div>
 
-                </div>
+                @endforeach
 
             </div>
 
 
-            {{-- =================================================
+            {{-- =====================================================
                  ACTION BUTTON
-            ================================================== --}}
+            ====================================================== --}}
 
             @if ($isCurrent)
 
-                {{-- CURRENT ACTIVE PACKAGE --}}
+                {{-- -------------------------------------------------
+                     CURRENT ACTIVE PACKAGE
+                -------------------------------------------------- --}}
 
                 <div class="subscription-button disabled">
 
@@ -1409,7 +1448,9 @@
 
             @elseif ($isBasic)
 
-                {{-- DEFAULT FREE PACKAGE --}}
+                {{-- -------------------------------------------------
+                     DEFAULT FREE PACKAGE
+                -------------------------------------------------- --}}
 
                 <div class="subscription-button disabled">
 
@@ -1420,7 +1461,9 @@
 
             @else
 
-                {{-- PAID PACKAGE --}}
+                {{-- -------------------------------------------------
+                     PAID PACKAGE
+                -------------------------------------------------- --}}
 
                 <button
                     type="button"
@@ -1429,19 +1472,20 @@
                     data-name="{{ $subscription->name }}"
                     data-price="{{ $subscription->price }}"
                 >
+
                     Pilih Paket
+
                 </button>
 
             @endif
-
 
         </div>
 
     @empty
 
-        {{-- =================================================
+        {{-- =========================================================
              NO PACKAGE
-        ================================================== --}}
+        ========================================================== --}}
 
         <div class="subscription-empty">
 
@@ -1477,220 +1521,313 @@
 </div>
 
 
+{{-- ================================================================
+     CURRENT SUBSCRIPTION
+================================================================ --}}
 
-    {{-- =====================================================
-        CURRENT SUBSCRIPTION
-    ====================================================== --}}
+@php
 
-    @php
+    /*
+    |--------------------------------------------------------------------------
+    | CURRENT PACKAGE
+    |--------------------------------------------------------------------------
+    |
+    | Kalau user belum memiliki subscription aktif,
+    | otomatis menggunakan paket DASAR.
+    |
+    */
+
+    $displaySubscription = $currentSubscription;
+
+    if (!$displaySubscription) {
+
+        $displaySubscription = $subscriptions->first(function ($item) {
+
+            return strtolower(
+                trim($item->slug ?? '')
+            ) === 'dasar';
+
+        });
+
+    }
+
+@endphp
+
+
+{{-- ================================================================
+     CURRENT PACKAGE DATA
+================================================================ --}}
+
+@php
+
+    /*
+    |--------------------------------------------------------------------------
+    | TENTUKAN PAKET YANG DITAMPILKAN
+    |--------------------------------------------------------------------------
+    */
+
+    $displaySubscription = $currentSubscription;
+
+    if (!$displaySubscription) {
+
+        $displaySubscription = $subscriptions->first(function ($subscription) {
+
+            return strtolower(
+                trim($subscription->slug ?? '')
+            ) === 'dasar';
+
+        });
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | JIKA PAKET TERSEDIA
+    |--------------------------------------------------------------------------
+    */
+
+    if ($displaySubscription) {
+
 
         /*
         |--------------------------------------------------------------------------
-        | CURRENT PACKAGE
+        | FEATURES
         |--------------------------------------------------------------------------
-        |
-        | Kalau user belum punya user_subscriptions aktif,
-        | maka otomatis dianggap menggunakan paket DASAR.
-        |
         */
 
-        $displaySubscription = $currentSubscription;
+        if ($currentSubscription) {
 
-        if (!$displaySubscription) {
+            /*
+            | Subscription aktif menggunakan snapshot limits
+            */
 
-            $displaySubscription = $subscriptions
-                ->first(function ($item) {
+            $currentFeatures = is_array($currentSubscription->limits)
+                ? $currentSubscription->limits
+                : [];
 
-                    return strtolower(
-                        trim($item->slug ?? '')
-                    ) === 'dasar';
+            $currentName =
+                $currentSubscription->subscription_name;
 
-                });
+            $currentPrice =
+                $currentSubscription->price;
 
-        }
+            $currentDescription =
+                optional($currentSubscription->subscription)->description;
 
-    @endphp
+        } else {
 
-    {{-- =====================================================
-        CURRENT PACKAGE
-    ====================================================== --}}
+            /*
+            | User belum memiliki subscription.
+            | Gunakan features paket DASAR.
+            */
 
-    @php
+            $currentFeatures = is_array($displaySubscription->features)
+                ? $displaySubscription->features
+                : [];
 
-        /*
-        |--------------------------------------------------------------------------
-        | TENTUKAN PAKET YANG DITAMPILKAN
-        |--------------------------------------------------------------------------
-        |
-        | Jika user memiliki subscription aktif:
-        |   gunakan user_subscriptions
-        |
-        | Jika belum:
-        |   gunakan paket DASAR dari master_subscriptions
-        |
-        */
+            $currentName =
+                $displaySubscription->name;
 
-        $displaySubscription = $currentSubscription;
+            $currentPrice =
+                $displaySubscription->price;
 
-        if (!$displaySubscription) {
-
-            $displaySubscription = $subscriptions->first(function ($subscription) {
-
-                return strtolower(trim($subscription->slug ?? '')) === 'dasar';
-
-            });
+            $currentDescription =
+                $displaySubscription->description;
 
         }
 
 
         /*
         |--------------------------------------------------------------------------
-        | JIKA PAKET TERSEDIA
+        | JOB VACANCY
         |--------------------------------------------------------------------------
         */
 
-        if ($displaySubscription) {
+        $currentJobVacancy =
+            $currentFeatures['job_vacancy'] ?? [];
 
-            /*
-            |--------------------------------------------------------------------------
-            | FEATURES
-            |--------------------------------------------------------------------------
-            */
+        $currentJobVacancyEnabled =
+            (bool) ($currentJobVacancy['enabled'] ?? false);
 
-            if ($currentSubscription) {
-
-                // Subscription aktif menggunakan snapshot limits
-                $currentFeatures = is_array($currentSubscription->limits)
-                    ? $currentSubscription->limits
-                    : [];
-
-                $currentName =
-                    $currentSubscription->subscription_name;
-
-                $currentPrice =
-                    $currentSubscription->price;
-
-                $currentDescription =
-                    optional($currentSubscription->subscription)->description;
-
-            } else {
-
-                // User belum punya subscription
-                // Gunakan features dari paket DASAR
-
-                $currentFeatures = is_array($displaySubscription->features)
-                    ? $displaySubscription->features
-                    : [];
-
-                $currentName =
-                    $displaySubscription->name;
-
-                $currentPrice =
-                    $displaySubscription->price;
-
-                $currentDescription =
-                    $displaySubscription->description;
-
-            }
+        $currentJobVacancyLimit =
+            $currentJobVacancy['limit'] ?? 0;
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | JOB VACANCY
-            |--------------------------------------------------------------------------
-            */
+        /*
+        |--------------------------------------------------------------------------
+        | TRAINING
+        |--------------------------------------------------------------------------
+        */
 
-            $currentJobVacancy =
-                $currentFeatures['job_vacancy'] ?? [];
+        $currentTraining =
+            $currentFeatures['training'] ?? [];
 
-            $currentJobVacancyEnabled =
-                (bool) ($currentJobVacancy['enabled'] ?? false);
+        $currentTrainingEnabled =
+            (bool) ($currentTraining['enabled'] ?? false);
 
-            $currentJobVacancyLimit =
-                $currentJobVacancy['limit'] ?? 0;
+        $currentTrainingLimit =
+            $currentTraining['limit'] ?? 0;
 
+    }
 
-            /*
-            |--------------------------------------------------------------------------
-            | TRAINING
-            |--------------------------------------------------------------------------
-            */
-
-            $currentTraining =
-                $currentFeatures['training'] ?? [];
-
-            $currentTrainingEnabled =
-                (bool) ($currentTraining['enabled'] ?? false);
-
-            $currentTrainingLimit =
-                $currentTraining['limit'] ?? 0;
-
-        }
-
-    @endphp
+@endphp
 
 
-    @if ($displaySubscription)
+@if ($displaySubscription)
 
-        <div class="current-subscription">
-
-            {{-- =================================================
-                LABEL
-            ================================================== --}}
-
-            <div class="current-subscription-label">
-
-                PAKET SAYA SAAT INI
-
-            </div>
+    <div class="current-subscription">
 
 
-            {{-- =================================================
-                TOP
-            ================================================== --}}
+        {{-- =========================================================
+             LABEL
+        ========================================================== --}}
 
-            <div class="current-subscription-top">
+        <div class="current-subscription-label">
 
-                <div>
+            PAKET SAYA SAAT INI
 
-                    <div class="current-subscription-name">
-
-                        {{ strtoupper($currentName) }}
-
-                    </div>
+        </div>
 
 
-                    @if ($currentDescription)
+        {{-- =========================================================
+             TOP
+        ========================================================== --}}
 
-                        <p class="current-subscription-description">
+        <div class="current-subscription-top">
 
-                            {{ $currentDescription }}
+            <div>
 
-                        </p>
+                <div class="current-subscription-name">
 
-                    @endif
+                    {{ strtoupper($currentName) }}
 
                 </div>
 
 
-                {{-- =================================================
-                    PRICE
-                ================================================== --}}
+                @if ($currentDescription)
 
-                <span class="current-subscription-badge">
+                    <p class="current-subscription-description">
 
-                    @if ((float) $currentPrice <= 0)
+                        {{ $currentDescription }}
 
-                        Gratis
+                    </p>
+
+                @endif
+
+            </div>
+
+
+            {{-- =====================================================
+                 PRICE
+            ====================================================== --}}
+
+            <span class="current-subscription-badge">
+
+                @if ((float) $currentPrice <= 0)
+
+                    Gratis
+
+                @else
+
+                    Rp {{ number_format(
+                        $currentPrice,
+                        0,
+                        ',',
+                        '.'
+                    ) }}
+
+                @endif
+
+            </span>
+
+        </div>
+
+
+        {{-- =========================================================
+             ACTIVE PERIOD
+             HANYA JIKA MEMILIKI SUBSCRIPTION
+        ========================================================== --}}
+
+        @if (
+            $currentSubscription &&
+            $currentSubscription->expired_at
+        )
+
+            <div class="current-subscription-period">
+
+                <i class="ki-duotone ki-calendar-8">
+
+                    <span class="path1"></span>
+                    <span class="path2"></span>
+
+                </i>
+
+                <span>
+
+                    Aktif sampai
+
+                    <strong>
+
+                        {{ $currentSubscription->expired_at->format('d M Y') }}
+
+                    </strong>
+
+                </span>
+
+            </div>
+
+        @endif
+
+
+        {{-- =========================================================
+             FEATURES
+        ========================================================== --}}
+
+        <div class="current-subscription-features">
+
+
+            {{-- =====================================================
+                 JOB VACANCY
+            ====================================================== --}}
+
+            <div class="current-feature">
+
+                <i class="ki-duotone ki-briefcase">
+
+                    <span class="path1"></span>
+                    <span class="path2"></span>
+
+                </i>
+
+
+                <span>
+
+                    Lamaran aktif:
+
+                    @if (!$currentJobVacancyEnabled)
+
+                        <strong>
+                            Tidak tersedia
+                        </strong>
+
+                    @elseif ((int) $currentJobVacancyLimit === -1)
+
+                        <strong>
+                            Tak terbatas
+                        </strong>
+
+                    @elseif ((int) $currentJobVacancyLimit === -2)
+
+                        <strong>
+                            Tidak tersedia
+                        </strong>
 
                     @else
 
-                        Rp {{ number_format(
-                            $currentPrice,
-                            0,
-                            ',',
-                            '.'
-                        ) }}
+                        <strong>
+                            {{ $currentJobVacancyLimit }}
+                        </strong>
 
                     @endif
 
@@ -1699,270 +1836,198 @@
             </div>
 
 
-            {{-- =================================================
-                ACTIVE PERIOD
-                HANYA JIKA BENAR-BENAR MEMILIKI SUBSCRIPTION
-            ================================================== --}}
+            {{-- =====================================================
+                 TRAINING
+            ====================================================== --}}
 
-            @if (
-                $currentSubscription &&
-                $currentSubscription->expired_at
-            )
+            <div class="current-feature">
 
-                <div class="current-subscription-period">
+                <i class="ki-duotone ki-teacher">
 
-                    <i class="ki-duotone ki-calendar-8">
+                    <span class="path1"></span>
+                    <span class="path2"></span>
 
-                        <span class="path1"></span>
-                        <span class="path2"></span>
+                </i>
 
-                    </i>
 
-                    <span>
+                <span>
 
-                        Aktif sampai
+                    Pelatihan aktif:
+
+                    @if (!$currentTrainingEnabled)
 
                         <strong>
-
-                            {{ $currentSubscription->expired_at->format('d M Y') }}
-
+                            Tidak tersedia
                         </strong>
 
-                    </span>
+                    @elseif ((int) $currentTrainingLimit === -1)
 
-                </div>
+                        <strong>
+                            Tak terbatas
+                        </strong>
 
-            @endif
+                    @elseif ((int) $currentTrainingLimit === -2)
 
+                        <strong>
+                            Tidak tersedia
+                        </strong>
 
-            {{-- =================================================
-                FEATURES
-            ================================================== --}}
+                    @else
 
-            <div class="current-subscription-features">
+                        <strong>
+                            {{ $currentTrainingLimit }}
+                        </strong>
 
+                    @endif
 
-                {{-- =================================================
-                    JOB VACANCY / LAMARAN
-                ================================================== --}}
-
-                <div class="current-feature">
-
-                    <i class="ki-duotone ki-briefcase">
-
-                        <span class="path1"></span>
-                        <span class="path2"></span>
-
-                    </i>
-
-                    <span>
-
-                        Lamaran aktif:
-
-                        @if (!$currentJobVacancyEnabled)
-
-                            <strong>
-                                Tidak tersedia
-                            </strong>
-
-                        @elseif ((int) $currentJobVacancyLimit === -1)
-
-                            <strong>
-                                Tak terbatas
-                            </strong>
-
-                        @else
-
-                            <strong>
-                                {{ $currentJobVacancyLimit }}
-                            </strong>
-
-                        @endif
-
-                    </span>
-
-                </div>
-
-
-                {{-- =================================================
-                    TRAINING
-                ================================================== --}}
-
-                <div class="current-feature">
-
-                    <i class="ki-duotone ki-teacher">
-
-                        <span class="path1"></span>
-                        <span class="path2"></span>
-
-                    </i>
-
-                    <span>
-
-                        Pelatihan aktif:
-
-                        @if (!$currentTrainingEnabled)
-
-                            <strong>
-                                Tidak tersedia
-                            </strong>
-
-                        @elseif ((int) $currentTrainingLimit === -1)
-
-                            <strong>
-                                Tak terbatas
-                            </strong>
-
-                        @else
-
-                            <strong>
-                                {{ $currentTrainingLimit }}
-                            </strong>
-
-                        @endif
-
-                    </span>
-
-                </div>
-
-
-            </div>
-
-
-            {{-- =================================================
-                INFO PAKET DASAR
-                HANYA JIKA BELUM ADA SUBSCRIPTION
-            ================================================== --}}
-
-            @if (!$currentSubscription)
-
-                <div class="current-subscription-note">
-
-                    <i class="ki-duotone ki-information-2">
-
-                        <span class="path1"></span>
-                        <span class="path2"></span>
-
-                    </i>
-
-                    <span>
-
-                        Anda sedang menggunakan paket dasar gratis.
-
-                    </span>
-
-                </div>
-
-            @endif
-
-
-        </div>
-
-    @else
-
-        {{-- =====================================================
-            FALLBACK JIKA MASTER PAKET DASAR JUGA BELUM ADA
-        ====================================================== --}}
-
-        <div class="current-subscription">
-
-            <div class="current-subscription-label">
-
-                PAKET SAYA SAAT INI
-
-            </div>
-
-            <div class="current-subscription-top">
-
-                <div>
-
-                    <div class="current-subscription-name">
-
-                        Belum Ada Paket
-
-                    </div>
-
-                    <p class="current-subscription-description">
-
-                        Paket dasar belum tersedia.
-
-                    </p>
-
-                </div>
+                </span>
 
             </div>
 
         </div>
 
-    @endif
 
-    <!-- =====================================================
-         FAQ
-    ====================================================== -->
+        {{-- =========================================================
+             INFO PAKET DASAR
+             HANYA JIKA BELUM ADA SUBSCRIPTION
+        ========================================================== --}}
 
-    <div class="faq-section">
+        @if (!$currentSubscription)
 
-        <div class="faq-title">
-            Pertanyaan Umum
-        </div>
+            <div class="current-subscription-note">
 
+                <i class="ki-duotone ki-information-2">
 
-        @forelse($faqs as $faq)
+                    <span class="path1"></span>
+                    <span class="path2"></span>
 
-            <div class="faq-item">
+                </i>
 
-                <button
-                    class="faq-button collapsed"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#faq-{{ $faq->uuid }}"
-                    aria-expanded="false"
-                    aria-controls="faq-{{ $faq->uuid }}">
+                <span>
 
-                    <span>
-                        {{ $faq->title }}
-                    </span>
+                    Anda sedang menggunakan paket dasar gratis.
 
-                    <i class="ki-duotone ki-down">
-
-                        <span class="path1"></span>
-                        <span class="path2"></span>
-
-                    </i>
-
-                </button>
-
-
-                <div
-                    id="faq-{{ $faq->uuid }}"
-                    class="collapse">
-
-                    <div class="faq-answer">
-
-                        {{ $faq->description }}
-
-                    </div>
-
-                </div>
+                </span>
 
             </div>
 
-        @empty
-
-            <div class="faq-item">
-
-                <div class="faq-answer text-center py-4">
-
-                    Belum ada pertanyaan umum.
-
-                </div>
-
-            </div>
-
-        @endforelse
-
+        @endif
 
     </div>
+
+
+@else
+
+    {{-- ============================================================
+         FALLBACK
+         JIKA PAKET DASAR TIDAK TERSEDIA
+    ============================================================= --}}
+
+    <div class="current-subscription">
+
+        <div class="current-subscription-label">
+
+            PAKET SAYA SAAT INI
+
+        </div>
+
+
+        <div class="current-subscription-top">
+
+            <div>
+
+                <div class="current-subscription-name">
+
+                    Belum Ada Paket
+
+                </div>
+
+                <p class="current-subscription-description">
+
+                    Paket dasar belum tersedia.
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+@endif
+
+
+{{-- ================================================================
+     FAQ
+================================================================ --}}
+
+<div class="faq-section">
+
+    <div class="faq-title">
+
+        Pertanyaan Umum
+
+    </div>
+
+
+    @forelse ($faqs as $faq)
+
+        <div class="faq-item">
+
+            <button
+                class="faq-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#faq-{{ $faq->uuid }}"
+                aria-expanded="false"
+                aria-controls="faq-{{ $faq->uuid }}"
+            >
+
+                <span>
+
+                    {{ $faq->title }}
+
+                </span>
+
+
+                <i class="ki-duotone ki-down">
+
+                    <span class="path1"></span>
+                    <span class="path2"></span>
+
+                </i>
+
+            </button>
+
+
+            <div
+                id="faq-{{ $faq->uuid }}"
+                class="collapse"
+            >
+
+                <div class="faq-answer">
+
+                    {{ $faq->description }}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    @empty
+
+        <div class="faq-item">
+
+            <div class="faq-answer text-center py-4">
+
+                Belum ada pertanyaan umum.
+
+            </div>
+
+        </div>
+
+    @endforelse
 
 </div>
 

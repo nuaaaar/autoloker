@@ -14,6 +14,11 @@ class JobApplication extends Model
         return $this->belongsTo('App\Models\Security');
     }
 
+    public function cleaning_service()
+    {
+        return $this->belongsTo('App\Models\CleaningService');
+    }
+
     public function job_vacancy()
     {
         return $this->belongsTo('App\Models\JobVacancy');

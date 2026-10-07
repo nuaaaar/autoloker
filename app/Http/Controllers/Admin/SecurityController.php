@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Security;
+use App\Models\CleaningService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\MasterResource;
+use App\Models\UserSecurity;
+use App\Models\UserCleaningService;
+use App\Models\User;
 
 class SecurityController extends Controller
 {
@@ -58,14 +62,59 @@ class SecurityController extends Controller
      */
     public function show($id)
     {
-        $data['security'] = Security::with([
-            'certificates',
-            'histories',
-        ])->where('uuid', $id)->firstOrFail();
+        $user = User::with([
+            'user_security.security.certificates',
+            'user_security.security.histories',
+            'user_cleaning_service.cleaning_service.certificates',
+            'user_cleaning_service.cleaning_service.histories',
+        ])
+        ->where('uuid', $id)
+        ->firstOrFail();
 
-        $data['profileProgress'] = $data['security']->profileProgress();
+        /*
+        |--------------------------------------------------------------------------
+        | Ambil profile Security
+        |--------------------------------------------------------------------------
+        */
 
-        return view('dashboard-admin.management-user.security.show', $data);
+        $security = optional($user->user_security)->security;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Ambil profile Cleaning Service
+        |--------------------------------------------------------------------------
+        */
+
+        $cleaningService = optional($user->user_cleaning_service)->cleaning_service;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Progress Profile
+        |--------------------------------------------------------------------------
+        */
+
+        $profileProgressSecurity = $security
+            ? $security->profileProgress()
+            : ['progress' => 0];
+
+
+        $profileProgressCleaningService = $cleaningService
+            ? $cleaningService->profileProgress()
+            : ['progress' => 0];
+
+
+        return view(
+            'dashboard-admin.management-user.security.show',
+            compact(
+                'user',
+                'security',
+                'cleaningService',
+                'profileProgressSecurity',
+                'profileProgressCleaningService'
+            )
+        );
     }
 
     /**

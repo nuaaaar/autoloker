@@ -247,6 +247,99 @@
         }
 
     }
+
+    /* =========================================================
+    EMPTY NOTIFICATION
+    ========================================================= */
+
+    .notification-empty {
+        min-height: 320px;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        padding: 40px 24px;
+
+        text-align: center;
+    }
+
+    /* =========================================================
+    ICON
+    ========================================================= */
+
+    .notification-empty-icon {
+        width: 72px;
+        height: 72px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        margin-bottom: 18px;
+
+        border-radius: 50%;
+
+        background: #f1f5f9;
+        color: #64748b;
+    }
+
+    .notification-empty-icon i {
+        color: #71809a;
+    }
+
+    /* =========================================================
+    TITLE
+    ========================================================= */
+
+    .notification-empty-title {
+        color: #182338;
+
+        font-size: 16px;
+        font-weight: 700;
+
+        margin-bottom: 6px;
+    }
+
+    /* =========================================================
+    DESCRIPTION
+    ========================================================= */
+
+    .notification-empty-text {
+        max-width: 360px;
+
+        color: #8a97a9;
+
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+
+    /* =========================================================
+    DARK MODE
+    ========================================================= */
+
+    [data-bs-theme="dark"] .notification-empty {
+        color: #d8deea;
+    }
+
+    [data-bs-theme="dark"] .notification-empty-icon {
+        background: #202a3d;
+        color: #8fa1ba;
+    }
+
+    [data-bs-theme="dark"] .notification-empty-icon i {
+        color: #91a2ba;
+    }
+
+    [data-bs-theme="dark"] .notification-empty-title {
+        color: #e7ebf3;
+    }
+
+    [data-bs-theme="dark"] .notification-empty-text {
+        color: #8997ad;
+    }
 </style>
 
 <!-- Header -->
@@ -264,7 +357,7 @@
 
 
 <!-- Notification Card -->
-<div class="card notification-card">
+{{-- <div class="card notification-card">
 
     <div class="list-group list-group-flush">
 
@@ -447,6 +540,37 @@
             </div>
 
         </a>
+
+    </div>
+
+</div> --}}
+
+<div class="card notification-card">
+
+    <div class="list-group list-group-flush">
+
+        {{-- EMPTY NOTIFICATION --}}
+        <div class="notification-empty">
+
+            <div class="notification-empty-icon">
+                <i class="ki-duotone ki-notification-on fs-1">
+                    <span class="path1"></span>
+                    <span class="path2"></span>
+                    <span class="path3"></span>
+                    <span class="path4"></span>
+                </i>
+            </div>
+
+            <div class="notification-empty-title">
+                Belum ada notifikasi
+            </div>
+
+            <div class="notification-empty-text">
+                Saat ini belum ada notifikasi untuk Anda.
+                Notifikasi baru akan muncul di sini.
+            </div>
+
+        </div>
 
     </div>
 

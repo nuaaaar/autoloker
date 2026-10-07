@@ -1134,8 +1134,8 @@
 
                         <div class="history-empty-text">
 
-                            Tambahkan riwayat penugasan atau pengalaman kerja sebagai
-                            anggota keamanan agar perusahaan dapat melihat pengalaman
+                            Tambahkan riwayat penugasan atau pengalaman kerja
+                            agar perusahaan dapat melihat pengalaman
                             dan penempatan yang pernah Anda jalani.
 
                         </div>
@@ -1317,12 +1317,27 @@
                             <option>Pilih jenis...</option>
 
                             @php
-                                $master_placements = \App\Models\MasterPlacement::orderBy('title')->get();
+                                $role = Auth::user()->role;
+
+                                $categoryMap = [
+                                    'satpam' => 'security',
+                                    'cs'     => 'cs',
+                                ];
+
+                                $category = $categoryMap[$role] ?? null;
+
+                                $master_placements = $category
+                                    ? \App\Models\MasterPlacement::where('category', $category)
+                                        ->orderBy('title')
+                                        ->get()
+                                    : collect();
                             @endphp
 
                             @foreach($master_placements as $placement)
 
-                                <option value="{{ $placement->title }}">{{ $placement->title }}</option>
+                                <option value="{{ $placement->title }}">
+                                    {{ $placement->title }}
+                                </option>
 
                             @endforeach
 

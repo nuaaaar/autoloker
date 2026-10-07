@@ -4,8 +4,8 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\JobApplication;
-use Illuminate\Http\Request;
 use App\Models\JobVacancy;
+use Illuminate\Http\Request;
 
 class JobApplicationController extends Controller
 {
@@ -16,7 +16,6 @@ class JobApplicationController extends Controller
     | Daftar seluruh pelamar dari sebuah lowongan
     |--------------------------------------------------------------------------
     */
-
     public function index(Request $request, $uuid)
     {
         /*
@@ -24,7 +23,6 @@ class JobApplicationController extends Controller
         | LOWONGAN
         |--------------------------------------------------------------------------
         */
-
         $job = JobVacancy::query()
             ->with([
                 'bujp:id,company_name',
@@ -33,52 +31,82 @@ class JobApplicationController extends Controller
             ->where('uuid', $uuid)
             ->firstOrFail();
 
-
         /*
         |--------------------------------------------------------------------------
         | QUERY PELAMAR
         |--------------------------------------------------------------------------
+        |
+        | Security:
+        |   menggunakan security_id
+        |
+        | Cleaning Service:
+        |   menggunakan cleaning_service_id
+        |
         */
+        $query = JobApplication::query();
 
-        $query = JobApplication::query()
-            ->with([
+        if ($job->category === 'security') {
+
+            $query->with([
                 'security',
-            ])
-            ->where(
-                'job_vacancy_id',
-                $job->id
-            );
+            ]);
 
+        } elseif ($job->category === 'cs') {
+
+            $query->with([
+                'cleaning_service',
+            ]);
+
+        }
+
+        $query->where(
+            'job_vacancy_id',
+            $job->id
+        );
 
         /*
         |--------------------------------------------------------------------------
         | SEARCH
         |--------------------------------------------------------------------------
         */
-
         if ($request->filled('search')) {
 
             $search = trim($request->search);
 
-            $query->whereHas(
-                'security',
-                function ($q) use ($search) {
+            if ($job->category === 'security') {
 
-                    $q->where('name', 'LIKE', "%{$search}%")
-                        ->orWhere('email', 'LIKE', "%{$search}%")
-                        ->orWhere('ktp_number', 'LIKE', "%{$search}%");
+                $query->whereHas(
+                    'security',
+                    function ($q) use ($search) {
 
-                }
-            );
+                        $q->where('name', 'LIKE', "%{$search}%")
+                            ->orWhere('email', 'LIKE', "%{$search}%")
+                            ->orWhere('ktp_number', 'LIKE', "%{$search}%");
+
+                    }
+                );
+
+            } elseif ($job->category === 'cs') {
+
+                $query->whereHas(
+                    'cleaning_service',
+                    function ($q) use ($search) {
+
+                        $q->where('name', 'LIKE', "%{$search}%")
+                            ->orWhere('email', 'LIKE', "%{$search}%")
+                            ->orWhere('ktp_number', 'LIKE', "%{$search}%");
+
+                    }
+                );
+
+            }
         }
-
 
         /*
         |--------------------------------------------------------------------------
         | STATUS
         |--------------------------------------------------------------------------
         */
-
         if ($request->filled('status')) {
 
             $query->where(
@@ -88,38 +116,31 @@ class JobApplicationController extends Controller
 
         }
 
-
         /*
         |--------------------------------------------------------------------------
         | SORTING
         |--------------------------------------------------------------------------
         */
-
         $query->latest('id');
-
 
         /*
         |--------------------------------------------------------------------------
         | PAGINATION
         |--------------------------------------------------------------------------
         */
-
         $applications = $query
             ->paginate(20)
             ->withQueryString();
-
 
         /*
         |--------------------------------------------------------------------------
         | STATISTIC
         |--------------------------------------------------------------------------
         */
-
         $total = JobApplication::where(
             'job_vacancy_id',
             $job->id
         )->count();
-
 
         $applied = JobApplication::where(
             'job_vacancy_id',
@@ -128,14 +149,12 @@ class JobApplicationController extends Controller
         ->where('status', 'applied')
         ->count();
 
-
         $reviewed = JobApplication::where(
             'job_vacancy_id',
             $job->id
         )
         ->where('status', 'reviewed')
         ->count();
-
 
         $shortlisted = JobApplication::where(
             'job_vacancy_id',
@@ -144,7 +163,6 @@ class JobApplicationController extends Controller
         ->where('status', 'shortlisted')
         ->count();
 
-
         $rejected = JobApplication::where(
             'job_vacancy_id',
             $job->id
@@ -152,17 +170,14 @@ class JobApplicationController extends Controller
         ->where('status', 'rejected')
         ->count();
 
-
         /*
         |--------------------------------------------------------------------------
         | AJAX
         |--------------------------------------------------------------------------
         */
-
         if ($request->ajax()) {
 
             return response()->json([
-
                 'success' => true,
 
                 'html' => view(
@@ -181,18 +196,14 @@ class JobApplicationController extends Controller
 
                 'total' =>
                     $applications->total(),
-
             ]);
-
         }
-
 
         /*
         |--------------------------------------------------------------------------
         | VIEW
         |--------------------------------------------------------------------------
         */
-
         return view(
             'dashboard-user.job-application.index',
             compact(
@@ -207,7 +218,6 @@ class JobApplicationController extends Controller
         );
     }
 
-
     /*
     |--------------------------------------------------------------------------
     | SHOW
@@ -215,7 +225,6 @@ class JobApplicationController extends Controller
     | Detail satu pelamar
     |--------------------------------------------------------------------------
     */
-
     public function show($uuid, $application)
     {
         /*
@@ -223,7 +232,6 @@ class JobApplicationController extends Controller
         | LOWONGAN
         |--------------------------------------------------------------------------
         */
-
         $job = JobVacancy::query()
             ->with([
                 'bujp:id,company_name',
@@ -232,17 +240,31 @@ class JobApplicationController extends Controller
             ->where('uuid', $uuid)
             ->firstOrFail();
 
-
         /*
         |--------------------------------------------------------------------------
         | PELAMAR
         |--------------------------------------------------------------------------
+        |
+        | Relasi pelamar disesuaikan dengan category lowongan.
+        |
         */
+        $query = JobApplication::query();
 
-        $application = JobApplication::query()
-            ->with([
+        if ($job->category === 'security') {
+
+            $query->with([
                 'security',
-            ])
+            ]);
+
+        } elseif ($job->category === 'cs') {
+
+            $query->with([
+                'cleaning_service',
+            ]);
+
+        }
+
+        $application = $query
             ->where(
                 'id',
                 $application
@@ -253,13 +275,11 @@ class JobApplicationController extends Controller
             )
             ->firstOrFail();
 
-
         /*
         |--------------------------------------------------------------------------
         | RETURN
         |--------------------------------------------------------------------------
         */
-
         return view(
             'dashboard-user.job-application.show',
             compact(
@@ -269,13 +289,11 @@ class JobApplicationController extends Controller
         );
     }
 
-
     /*
     |--------------------------------------------------------------------------
     | UPDATE STATUS
     |--------------------------------------------------------------------------
     */
-
     public function updateStatus(
         Request $request,
         $uuid,
@@ -286,7 +304,6 @@ class JobApplicationController extends Controller
         | VALIDASI
         |--------------------------------------------------------------------------
         */
-
         $request->validate([
             'status' => [
                 'required',
@@ -294,50 +311,45 @@ class JobApplicationController extends Controller
             ]
         ]);
 
-
         /*
         |--------------------------------------------------------------------------
         | LOWONGAN
         |--------------------------------------------------------------------------
         */
-
         $job = JobVacancy::query()
             ->where('uuid', $uuid)
             ->firstOrFail();
-
 
         /*
         |--------------------------------------------------------------------------
         | PELAMAR
         |--------------------------------------------------------------------------
         */
-
         $application = JobApplication::query()
-            ->where('id', $application)
+            ->where(
+                'id',
+                $application
+            )
             ->where(
                 'job_vacancy_id',
                 $job->id
             )
             ->firstOrFail();
 
-
         /*
         |--------------------------------------------------------------------------
         | UPDATE
         |--------------------------------------------------------------------------
         */
-
         $application->update([
             'status' => $request->status
         ]);
-
 
         /*
         |--------------------------------------------------------------------------
         | RESPONSE
         |--------------------------------------------------------------------------
         */
-
         return response()->json([
             'success' => true,
             'message' => 'Status pelamar berhasil diperbarui.',

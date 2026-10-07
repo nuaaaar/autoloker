@@ -3,100 +3,209 @@
 @section('title', 'Ditolak')
 
 @section('css')
+    <style>
+        .job-category {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            line-height: 1;
+            white-space: nowrap;
+        }
 
+        .job-category.security {
+            background: #edf5ff;
+            color: #4d86cc;
+        }
+
+        .job-category.cs {
+            background: #edf4f0;
+            color: #3b765c;
+        }
+
+        .job-category.unknown {
+            background: #f1f3f5;
+            color: #6c757d;
+        }
+    </style>
 @endsection
 
 @section('breadcrumb')
-    <h1
-        class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">
-        Manajemen Lowongan</h1>
-    <!--end::Title-->
-    <!--begin::Breadcrumb-->
+
+    <h1 class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">
+        Manajemen Lowongan
+    </h1>
+
     <ul class="breadcrumb breadcrumb-separatorless fw-semibold fs-7 my-0 pt-1">
-        <!--begin::Item-->
+
         <li class="breadcrumb-item text-muted">
-            <a href="javascript:;" class="text-muted text-hover-primary">Beranda</a>
+            <a href="javascript:;" class="text-muted text-hover-primary">
+                Beranda
+            </a>
         </li>
-        <!--end::Item-->
+
         <li class="breadcrumb-item">
             <span class="bullet bg-gray-500 w-5px h-2px"></span>
         </li>
-        <!--end::Item-->
-        <!--begin::Item-->
-        <li class="breadcrumb-item text-muted">Manajemen Lowongan</li>
-        <!--end::Item-->
+
+        <li class="breadcrumb-item text-muted">
+            Manajemen Lowongan
+        </li>
+
         <li class="breadcrumb-item">
             <span class="bullet bg-gray-500 w-5px h-2px"></span>
         </li>
-        <!--end::Item-->
-        <!--begin::Item-->
-        <li class="breadcrumb-item text-muted">Ditolak</li>
-        <!--end::Item-->
+
+        <li class="breadcrumb-item text-muted">
+            Ditolak
+        </li>
+
     </ul>
-    <!--end::Breadcrumb-->
+
 @endsection
 
 @section('content')
+
     <div class="row">
+
         <div class="col-lg-12">
+
             <div class="card">
+
                 <div class="card-header">
+
                     <div class="d-flex justify-content-between">
-                        <h5 class="card-title mb-0">List Data</h5>
+
+                        <h5 class="card-title mb-0">
+                            List Data
+                        </h5>
+
                         <div class="card-toolbar">
                             <div class="card-button"></div>
                         </div>
+
                     </div>
+
                 </div>
+
                 <div class="card-body">
-                    <table id="datatable"
+
+                    <table
+                        id="datatable"
                         class="table table-bordered dt-responsive nowrap w-100 dataTable no-footer dtr-inline"
-                        aria-describedby="datatable_info" style="width: 1090px;">
+                        aria-describedby="datatable_info"
+                        style="width: 1090px;"
+                    >
+
                         <thead>
+
                             <tr>
-                                <th width="1%">ID</th>
-                                <th>Posisi</th>
-                                <th>Perusahaan</th>
-                                <th>Lokasi</th>
-                                <th>Kuota</th>
-                                <th>Gaji</th>
-                                <th>Periode</th>
-                                <th>Status</th>
-                                <th>Dilihat</th>
-                                <th>Pelamar</th>
-                                <th>Simpan</th>
-                                <th class="text-end" width="5%">Aksi</th>
+
+                                <th width="1%">
+                                    ID
+                                </th>
+
+                                <th>
+                                    Category
+                                </th>
+
+                                <th>
+                                    Posisi
+                                </th>
+
+                                <th>
+                                    Perusahaan
+                                </th>
+
+                                <th>
+                                    Lokasi
+                                </th>
+
+                                <th>
+                                    Kuota
+                                </th>
+
+                                <th>
+                                    Gaji
+                                </th>
+
+                                <th>
+                                    Periode
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Dilihat
+                                </th>
+
+                                <th>
+                                    Pelamar
+                                </th>
+
+                                <th>
+                                    Simpan
+                                </th>
+
+                                <th class="text-end" width="5%">
+                                    Aksi
+                                </th>
+
                             </tr>
+
                         </thead>
+
                         <tbody>
                         </tbody>
+
                     </table>
+
                 </div>
+
             </div>
-        </div><!--end col-->
-    </div><!--end row-->
+
+        </div>
+
+    </div>
+
 @endsection
 
 @section('js')
+
     <script>
-        
-        
-        $(document).ready(function() {
+
+        $(document).ready(function () {
+
             let currentDraw = 1;
 
-             if ($.fn.DataTable.isDataTable('#datatable')) {
+            if ($.fn.DataTable.isDataTable('#datatable')) {
                 $('#datatable').DataTable().destroy();
             }
 
             let table = $('#datatable').DataTable({
+
                 processing: true,
+
                 serverSide: true,
+
                 scrollX: true,
+
                 responsive: false,
-                "aLengthMenu": [[10, 25, 50, 75, 999999], [10, 25, 50, 75, "All"]],
+
+                aLengthMenu: [
+                    [10, 25, 50, 75, 999999],
+                    [10, 25, 50, 75, "All"]
+                ],
+
                 ajax: {
 
                     url: '{{ route("dashboard-admin.job-vacancy.rejected.index") }}',
+
                     type: 'GET',
 
                     data: function (d) {
@@ -104,8 +213,8 @@
                         currentDraw = d.draw;
 
                         d.page = (d.start / d.length) + 1;
-                        d.length = d.length;
 
+                        d.length = d.length;
                     },
 
                     dataFilter: function (response) {
@@ -123,22 +232,75 @@
                             data: json.results.data
 
                         });
-
                     }
-
                 },
+
                 columns: [
+
+                    // =====================================================
+                    // ID
+                    // =====================================================
+
                     {
                         data: "id",
-                        render: function(data){
+
+                        render: function (data) {
+
                             return ('000000' + data).slice(-6);
                         }
                     },
+
+                    // =====================================================
+                    // CATEGORY
+                    // =====================================================
+
+                    {
+                        data: "category",
+
+                        className: "text-center",
+
+                        render: function (data) {
+
+                            if (data === "security") {
+
+                                return `
+                                    <span class="job-category security">
+                                        <i class="fas fa-shield-alt"></i>
+                                        Satpam
+                                    </span>
+                                `;
+                            }
+
+                            if (data === "cs") {
+
+                                return `
+                                    <span class="job-category cs">
+                                        <i class="fas fa-broom"></i>
+                                        Cleaning Service
+                                    </span>
+                                `;
+                            }
+
+                            return `
+                                <span class="job-category unknown">
+                                    <i class="fas fa-question-circle"></i>
+                                    -
+                                </span>
+                            `;
+                        }
+                    },
+
+                    // =====================================================
+                    // POSISI
+                    // =====================================================
+
                     {
                         data: "position",
-                        render:function(data){
 
-                            if(!data){
+                        render: function (data) {
+
+                            if (!data) {
+
                                 return `
                                     <span class="badge badge-light-warning">
                                         Belum Diisi
@@ -149,26 +311,34 @@
                             return data;
                         }
                     },
+
+                    // =====================================================
+                    // PERUSAHAAN
+                    // =====================================================
+
                     {
-                        data:null,
-                        render:function(data){
+                        data: null,
+
+                        render: function (data) {
 
                             let company = "-";
+
                             let badge = "badge-light-secondary";
+
                             let icon = "fa-building";
 
-                            if(data.bujp){
+                            if (data.bujp) {
 
                                 company = data.bujp.company_name;
-                                badge = "badge-light-primary";
 
+                                badge = "badge-light-primary";
                             }
 
-                            if(data.company){
+                            if (data.company) {
 
                                 company = data.company.company_name;
-                                badge = "badge-light-success";
 
+                                badge = "badge-light-success";
                             }
 
                             return `
@@ -177,7 +347,9 @@
                                     <div class="symbol symbol-35px me-2">
 
                                         <span class="symbol-label bg-light">
+
                                             <i class="fas ${icon} text-primary"></i>
+
                                         </span>
 
                                     </div>
@@ -198,16 +370,28 @@
                             `;
                         }
                     },
+
+                    // =====================================================
+                    // LOKASI
+                    // =====================================================
+
                     {
                         data: null,
-                        render:function(data){
+
+                        render: function (data) {
 
                             let lokasi = [];
 
-                            if(data.city) lokasi.push(data.city);
-                            if(data.province) lokasi.push(data.province);
+                            if (data.city) {
+                                lokasi.push(data.city);
+                            }
 
-                            if(lokasi.length == 0){
+                            if (data.province) {
+                                lokasi.push(data.province);
+                            }
+
+                            if (lokasi.length === 0) {
+
                                 return `
                                     <span class="badge badge-light-warning">
                                         Belum Diisi
@@ -218,23 +402,37 @@
                             return lokasi.join(", ");
                         }
                     },
+
+                    // =====================================================
+                    // KUOTA
+                    // =====================================================
+
                     {
                         data: "kuota",
-                        className:"text-center",
-                        render:function(data){
 
-                            if(!data){
+                        className: "text-center",
+
+                        render: function (data) {
+
+                            if (!data) {
                                 return "-";
                             }
 
                             return data + " Orang";
                         }
                     },
-                    {
-                        data:null,
-                        render:function(data){
 
-                            if(data.is_show_fee == 0){
+                    // =====================================================
+                    // GAJI
+                    // =====================================================
+
+                    {
+                        data: null,
+
+                        render: function (data) {
+
+                            if (data.is_show_fee == 0) {
+
                                 return `
                                     <span class="badge badge-light-secondary">
                                         Dirahasiakan
@@ -259,15 +457,23 @@
                             return `
                                 Rp ${min} - ${max}
                                 <br>
-                                <small class="text-muted">${type}</small>
+                                <small class="text-muted">
+                                    ${type}
+                                </small>
                             `;
                         }
                     },
-                    {
-                        data:null,
-                        render:function(data){
 
-                            if(!data.start_date || !data.end_date){
+                    // =====================================================
+                    // PERIODE
+                    // =====================================================
+
+                    {
+                        data: null,
+
+                        render: function (data) {
+
+                            if (!data.start_date || !data.end_date) {
 
                                 return `
                                     <span class="badge badge-light-warning">
@@ -276,46 +482,90 @@
                                 `;
                             }
 
-                            let start = moment(data.start_date).format("DD-MM-YYYY");
-                            let end   = moment(data.end_date).format("DD-MM-YYYY");
+                            let start = moment(data.start_date)
+                                .format("DD-MM-YYYY");
+
+                            let end = moment(data.end_date)
+                                .format("DD-MM-YYYY");
 
                             return `
                                 ${start}
                                 <br>
-                                <small class="text-muted">s/d ${end}</small>
+                                <small class="text-muted">
+                                    s/d ${end}
+                                </small>
                             `;
                         }
                     },
-                    {
-                        data:"status",
-                        className:"text-center",
-                        render:function(data){
 
-                            switch(data){
+                    // =====================================================
+                    // STATUS
+                    // =====================================================
+
+                    {
+                        data: "status",
+
+                        className: "text-center",
+
+                        render: function (data) {
+
+                            switch (data) {
 
                                 case "draft":
-                                    return `<span class="badge badge-light-secondary">Draft</span>`;
+
+                                    return `
+                                        <span class="badge badge-light-secondary">
+                                            Draft
+                                        </span>
+                                    `;
 
                                 case "submitted":
-                                    return `<span class="badge badge-light-warning">Submitted</span>`;
+
+                                    return `
+                                        <span class="badge badge-light-warning">
+                                            Submitted
+                                        </span>
+                                    `;
 
                                 case "published":
-                                    return `<span class="badge badge-light-success">Published</span>`;
+
+                                    return `
+                                        <span class="badge badge-light-success">
+                                            Published
+                                        </span>
+                                    `;
 
                                 case "closed":
-                                    return `<span class="badge badge-light-danger">Closed</span>`;
+
+                                    return `
+                                        <span class="badge badge-light-danger">
+                                            Closed
+                                        </span>
+                                    `;
 
                                 case "rejected":
-                                    return `<span class="badge badge-light-dark">Rejected</span>`;
+
+                                    return `
+                                        <span class="badge badge-light-dark">
+                                            Rejected
+                                        </span>
+                                    `;
 
                                 default:
+
                                     return "-";
                             }
                         }
                     },
+
+                    // =====================================================
+                    // DILIHAT
+                    // =====================================================
+
                     {
-                        data:"total_clicked",
-                        render:function(data){
+                        data: "total_clicked",
+
+                        render: function (data) {
 
                             return `
                                 <span class="badge badge-light-info">
@@ -324,9 +574,15 @@
                             `;
                         }
                     },
+
+                    // =====================================================
+                    // PELAMAR
+                    // =====================================================
+
                     {
-                        data:"applications_count",
-                        render:function(data){
+                        data: "applications_count",
+
+                        render: function (data) {
 
                             return `
                                 <span class="badge badge-light-info">
@@ -335,9 +591,15 @@
                             `;
                         }
                     },
+
+                    // =====================================================
+                    // SIMPAN
+                    // =====================================================
+
                     {
-                        data:"bookmarks_count",
-                        render:function(data){
+                        data: "bookmarks_count",
+
+                        render: function (data) {
 
                             return `
                                 <span class="badge badge-light-info">
@@ -346,48 +608,79 @@
                             `;
                         }
                     },
+
+                    // =====================================================
+                    // AKSI
+                    // =====================================================
+
                     {
-                        data:null,
-                        orderable:false,
-                        searchable:false,
-                        className:"text-end",
-                        render:function(data){
+                        data: null,
+
+                        orderable: false,
+
+                        searchable: false,
+
+                        className: "text-end",
+
+                        render: function (data) {
+
                             return `
-                                <a href="/dashboard-admin/job-vacancy/${data.uuid}"
+                                <a
+                                    href="/dashboard-admin/job-vacancy/${data.uuid}"
                                     class="btn btn-outline-info btn-sm me-1"
-                                    title="Detail">
-
+                                    title="Detail"
+                                >
                                     <i class="fas fa-eye"></i>
-
                                 </a>
                             `;
                         }
                     }
+
                 ],
+
                 dom: 'Blfrtip',
+
                 buttons: [
+
                     {
                         extend: 'colvis',
+
                         text: '<i class="fas fa-eye me-1"></i>Kolom',
+
                         className: 'btn btn-light-primary'
                     },
+
                     {
                         extend: 'copy',
+
                         text: '<i class="fas fa-copy me-1"></i>Copy',
+
                         className: 'btn btn-light-danger'
                     },
+
                     {
                         extend: 'excel',
+
                         text: '<i class="fas fa-file-excel me-1"></i>Excel',
+
                         className: 'btn btn-light-success'
                     }
+
                 ],
-                drawCallback: function() {
-                    // Inisialisasi tooltip setelah DataTables selesai merender data
+
+                drawCallback: function () {
+
                     $('[data-bs-toggle="tooltip"]').tooltip();
                 }
+
             });
-            table.buttons().container().appendTo('.card-button');
+
+            table.buttons()
+                .container()
+                .appendTo('.card-button');
+
         });
+
     </script>
+
 @endsection

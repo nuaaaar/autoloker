@@ -287,6 +287,36 @@
 
         <!-- Form -->
 
+        <div class="col-12">
+
+            {{-- <label class="form-label required">
+
+                Role
+
+            </label> --}}
+
+            <input type="hidden" name="role" id="role" value="{{ Auth::user()->role }}">
+
+            {{-- <div class="gender-group">
+
+                <button type="button"
+                        class="role-btn {{ Auth::user()->role == 'satpam' ? 'active' : '' }}" value="satpam">
+
+                    Satpam
+
+                </button>
+
+                <button type="button"
+                        class="role-btn {{ Auth::user()->role == 'cs' ? 'active' : '' }}"  value="cs">
+
+                    Cleaning Service
+
+                </button>
+
+            </div> --}}
+
+        </div>
+
         <div class="row">
 
             <div class="col-12 mb-5">
@@ -581,7 +611,7 @@
 
                 <button class="btn-next-step" data-next="2" type="button">
 
-                    Lanjut : Profil Satpam
+                    Lanjut : Profil
 
                     <i class="ki-duotone ki-right ms-2"></i>
 

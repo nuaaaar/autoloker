@@ -8,19 +8,140 @@ use Illuminate\Http\Request;
 use App\Models\JobBookmark;
 use App\Models\JobVacancy;
 use App\Models\Security;
+use App\Models\CleaningService;
 use Carbon\Carbon;
 use Auth;
 
 class JobVacancyController extends Controller
 {
+    /*
+    |--------------------------------------------------------------------------
+    | PROFILE SESUAI ROLE
+    |--------------------------------------------------------------------------
+    |
+    | Variable yang digunakan di Blade tetap $security.
+    |
+    | satpam -> Security
+    | cs     -> CleaningService
+    |
+    */
+
+    private function getProfile()
+    {
+        $user = Auth::user();
+
+        if ($user->role === 'satpam') {
+
+            return $user->user_security?->security;
+
+        }
+
+        if ($user->role === 'cs') {
+
+            return $user->user_cleaning_service?->cleaning_service;
+
+        }
+
+        abort(403, 'Role tidak valid.');
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CATEGORY JOB
+    |--------------------------------------------------------------------------
+    |
+    | satpam -> security
+    | cs     -> cs
+    |
+    */
+
+    private function getCategory()
+    {
+        $user = Auth::user();
+
+        if ($user->role === 'satpam') {
+
+            return 'security';
+
+        }
+
+        if ($user->role === 'cs') {
+
+            return 'cs';
+
+        }
+
+        abort(403, 'Role tidak valid.');
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | OWNER COLUMN
+    |--------------------------------------------------------------------------
+    |
+    | Variable $securityId tetap digunakan.
+    |
+    | satpam -> security_id
+    | cs     -> cleaning_service_id
+    |
+    */
+
+    private function getOwnerColumn()
+    {
+        $user = Auth::user();
+
+        if ($user->role === 'satpam') {
+
+            return 'security_id';
+
+        }
+
+        if ($user->role === 'cs') {
+
+            return 'cleaning_service_id';
+
+        }
+
+        abort(403, 'Role tidak valid.');
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | INDEX
+    |--------------------------------------------------------------------------
+    */
+
     public function index()
     {
-        $security = Security::with([
+        $security = $this->getProfile();
+
+        if (!$security) {
+
+            return redirect()
+                ->back()
+                ->with('swal', [
+                    'icon' => 'error',
+                    'title' => 'Profile Belum Tersedia',
+                    'text' => 'Silakan lengkapi data profile terlebih dahulu.',
+                ]);
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | LOAD PROFILE RELATION
+        |--------------------------------------------------------------------------
+        */
+
+        $security->load([
             'badgeCertificate',
             'histories',
-        ])->findOrFail(
-            Auth::user()->user_security->security->id
-        );
+        ]);
+
 
         return view(
             'user-page.job-vacancy.index',
@@ -28,11 +149,26 @@ class JobVacancyController extends Controller
         );
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | SHOW
+    |--------------------------------------------------------------------------
+    */
+
     public function show($uuid)
     {
-        $security = Auth::user()
-            ->user_security
-            ->security;
+        $security = $this->getProfile();
+
+        if (!$security) {
+            abort(403, 'Data profile belum tersedia.');
+        }
+
+        $securityId = $security->id;
+
+        $ownerColumn = $this->getOwnerColumn();
+
+        $category = $this->getCategory();
 
 
         /*
@@ -48,13 +184,31 @@ class JobVacancyController extends Controller
                 'company:id,company_name',
             ])
 
-            ->withCount(['bookmarks', 'applications'])
+            ->withCount([
+                'bookmarks',
+                'applications',
+            ])
 
-            ->where('uuid', $uuid)
+            ->where(
+                'uuid',
+                $uuid
+            )
+
+            /*
+            |--------------------------------------------------------------------------
+            | WAJIB SESUAI CATEGORY ROLE
+            |--------------------------------------------------------------------------
+            */
+
+            ->where(
+                'category',
+                $category
+            )
 
             ->firstOrFail();
 
-            $job->increment('total_clicked');
+
+        $job->increment('total_clicked');
 
 
         /*
@@ -65,9 +219,15 @@ class JobVacancyController extends Controller
 
         $application = JobApplication::query()
 
-            ->where('job_vacancy_id', $job->id)
+            ->where(
+                'job_vacancy_id',
+                $job->id
+            )
 
-            ->where('security_id', $security->id)
+            ->where(
+                $ownerColumn,
+                $securityId
+            )
 
             ->first();
 
@@ -76,13 +236,6 @@ class JobVacancyController extends Controller
         |--------------------------------------------------------------------------
         | CEK AKSES DETAIL
         |--------------------------------------------------------------------------
-        |
-        | Jika lowongan masih aktif:
-        |   Semua user boleh melihat.
-        |
-        | Jika lowongan sudah tidak aktif:
-        |   Hanya user yang sudah pernah melamar yang boleh melihat.
-        |
         */
 
         $isPublished = $job->status === 'published';
@@ -110,20 +263,26 @@ class JobVacancyController extends Controller
 
         $job->loadExists([
 
-            'bookmarks as is_bookmarked' => function ($query) use ($security) {
+            'bookmarks as is_bookmarked' => function ($query) use (
+                $ownerColumn,
+                $securityId
+            ) {
 
                 $query->where(
-                    'security_id',
-                    $security->id
+                    $ownerColumn,
+                    $securityId
                 );
 
             },
 
-            'applications as is_applied' => function ($query) use ($security) {
+            'applications as is_applied' => function ($query) use (
+                $ownerColumn,
+                $securityId
+            ) {
 
                 $query->where(
-                    'security_id',
-                    $security->id
+                    $ownerColumn,
+                    $securityId
                 );
 
             },
@@ -156,11 +315,26 @@ class JobVacancyController extends Controller
         );
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | BOOKMARK
+    |--------------------------------------------------------------------------
+    */
+
     public function bookmark(Request $request)
     {
-        $security = Auth::user()
-            ->user_security
-            ->security;
+        $security = $this->getProfile();
+
+        if (!$security) {
+            abort(403, 'Data profile belum tersedia.');
+        }
+
+        $securityId = $security->id;
+
+        $ownerColumn = $this->getOwnerColumn();
+
+        $category = $this->getCategory();
 
 
         /*
@@ -169,7 +343,10 @@ class JobVacancyController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $sort = $request->get('sort', 'latest');
+        $sort = $request->get(
+            'sort',
+            'latest'
+        );
 
         $allowedSort = [
             'latest',
@@ -177,8 +354,13 @@ class JobVacancyController extends Controller
             'applicants',
         ];
 
-        if (!in_array($sort, $allowedSort)) {
+        if (!in_array(
+            $sort,
+            $allowedSort
+        )) {
+
             $sort = 'latest';
+
         }
 
 
@@ -191,21 +373,52 @@ class JobVacancyController extends Controller
         $query = JobBookmark::query()
 
             ->where(
-                'job_bookmarks.security_id',
-                $security->id
+                'job_bookmarks.' . $ownerColumn,
+                $securityId
             )
 
-            ->whereHas('job_vacancy', function ($query) {
-                $query->where('status', 'published');
-            })
+
+            /*
+            |--------------------------------------------------------------------------
+            | LOWONGAN HARUS SESUAI CATEGORY
+            |--------------------------------------------------------------------------
+            */
+
+            ->whereHas(
+                'job_vacancy',
+                function ($query) use ($category) {
+
+                    $query
+                        ->where(
+                            'status',
+                            'published'
+                        )
+                        ->where(
+                            'category',
+                            $category
+                        );
+
+                }
+            )
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | JOB VACANCY
+            |--------------------------------------------------------------------------
+            */
 
             ->with([
-                'job_vacancy' => function ($query) use ($security) {
+                'job_vacancy' => function ($query) use (
+                    $ownerColumn,
+                    $securityId
+                ) {
 
                     $query->with([
                         'bujp:id,company_name',
                         'company:id,company_name',
                     ]);
+
 
                     /*
                     |--------------------------------------------------------------------------
@@ -213,27 +426,32 @@ class JobVacancyController extends Controller
                     |--------------------------------------------------------------------------
                     */
 
-                    $query->withCount('applications');
+                    $query->withCount(
+                        'applications'
+                    );
 
 
                     /*
                     |--------------------------------------------------------------------------
-                    | STATUS LAMARAN SECURITY
+                    | STATUS LAMARAN USER
                     |--------------------------------------------------------------------------
                     */
 
                     $query->with([
-                        'applications' => function ($query) use ($security) {
+                        'applications' => function ($query) use (
+                            $ownerColumn,
+                            $securityId
+                        ) {
 
                             $query
                                 ->where(
-                                    'security_id',
-                                    $security->id
+                                    $ownerColumn,
+                                    $securityId
                                 )
                                 ->select([
                                     'id',
                                     'job_vacancy_id',
-                                    'security_id',
+                                    $ownerColumn,
                                     'status',
                                 ]);
 
@@ -285,6 +503,11 @@ class JobVacancyController extends Controller
                         'job_bookmarks.job_vacancy_id'
                     )
 
+                    ->where(
+                        'job_vacancies.category',
+                        $category
+                    )
+
                     ->select(
                         'job_bookmarks.*'
                     )
@@ -322,10 +545,12 @@ class JobVacancyController extends Controller
                     ->selectSub(
                         JobApplication::query()
                             ->selectRaw('COUNT(*)')
+
                             ->whereColumn(
                                 'job_applications.job_vacancy_id',
                                 'job_bookmarks.job_vacancy_id'
                             ),
+
                         'applicants_count'
                     )
 
@@ -359,8 +584,20 @@ class JobVacancyController extends Controller
         $totalBookmarks = JobBookmark::query()
 
             ->where(
-                'security_id',
-                $security->id
+                $ownerColumn,
+                $securityId
+            )
+
+            ->whereHas(
+                'job_vacancy',
+                function ($query) use ($category) {
+
+                    $query->where(
+                        'category',
+                        $category
+                    );
+
+                }
             )
 
             ->count();
@@ -375,17 +612,32 @@ class JobVacancyController extends Controller
         $totalAppliedBookmarks = JobBookmark::query()
 
             ->where(
-                'security_id',
-                $security->id
+                $ownerColumn,
+                $securityId
+            )
+
+            ->whereHas(
+                'job_vacancy',
+                function ($query) use ($category) {
+
+                    $query->where(
+                        'category',
+                        $category
+                    );
+
+                }
             )
 
             ->whereHas(
                 'job_vacancy.applications',
-                function ($query) use ($security) {
+                function ($query) use (
+                    $ownerColumn,
+                    $securityId
+                ) {
 
                     $query->where(
-                        'job_applications.security_id',
-                        $security->id
+                        'job_applications.' . $ownerColumn,
+                        $securityId
                     );
 
                 }
@@ -403,18 +655,23 @@ class JobVacancyController extends Controller
         $totalUrgent = JobBookmark::query()
 
             ->where(
-                'security_id',
-                $security->id
+                $ownerColumn,
+                $securityId
             )
 
             ->whereHas(
                 'job_vacancy',
-                function ($query) {
+                function ($query) use ($category) {
 
-                    $query->where(
-                        'job_vacancies.is_urgent',
-                        1
-                    );
+                    $query
+                        ->where(
+                            'job_vacancies.category',
+                            $category
+                        )
+                        ->where(
+                            'job_vacancies.is_urgent',
+                            1
+                        );
 
                 }
             )
@@ -474,13 +731,26 @@ class JobVacancyController extends Controller
         );
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | MY JOB VACANCY
+    |--------------------------------------------------------------------------
+    */
+
     public function myJobVacancy()
     {
-        $security = Auth::user()
-            ->user_security
-            ->security;
+        $security = $this->getProfile();
+
+        if (!$security) {
+            abort(403, 'Data profile belum tersedia.');
+        }
 
         $securityId = $security->id;
+
+        $ownerColumn = $this->getOwnerColumn();
+
+        $category = $this->getCategory();
 
 
         /*
@@ -490,7 +760,24 @@ class JobVacancyController extends Controller
         */
 
         $totalApplications = JobApplication::query()
-            ->where('security_id', $securityId)
+
+            ->where(
+                $ownerColumn,
+                $securityId
+            )
+
+            ->whereHas(
+                'job_vacancy',
+                function ($query) use ($category) {
+
+                    $query->where(
+                        'category',
+                        $category
+                    );
+
+                }
+            )
+
             ->count();
 
 
@@ -501,8 +788,29 @@ class JobVacancyController extends Controller
         */
 
         $totalApplied = JobApplication::query()
-            ->where('security_id', $securityId)
-            ->where('status', 'applied')
+
+            ->where(
+                $ownerColumn,
+                $securityId
+            )
+
+            ->where(
+                'status',
+                'applied'
+            )
+
+            ->whereHas(
+                'job_vacancy',
+                function ($query) use ($category) {
+
+                    $query->where(
+                        'category',
+                        $category
+                    );
+
+                }
+            )
+
             ->count();
 
 
@@ -513,8 +821,29 @@ class JobVacancyController extends Controller
         */
 
         $totalReviewed = JobApplication::query()
-            ->where('security_id', $securityId)
-            ->where('status', 'reviewed')
+
+            ->where(
+                $ownerColumn,
+                $securityId
+            )
+
+            ->where(
+                'status',
+                'reviewed'
+            )
+
+            ->whereHas(
+                'job_vacancy',
+                function ($query) use ($category) {
+
+                    $query->where(
+                        'category',
+                        $category
+                    );
+
+                }
+            )
+
             ->count();
 
 
@@ -525,8 +854,29 @@ class JobVacancyController extends Controller
         */
 
         $totalShortlisted = JobApplication::query()
-            ->where('security_id', $securityId)
-            ->where('status', 'shortlisted')
+
+            ->where(
+                $ownerColumn,
+                $securityId
+            )
+
+            ->where(
+                'status',
+                'shortlisted'
+            )
+
+            ->whereHas(
+                'job_vacancy',
+                function ($query) use ($category) {
+
+                    $query->where(
+                        'category',
+                        $category
+                    );
+
+                }
+            )
+
             ->count();
 
 
@@ -537,8 +887,29 @@ class JobVacancyController extends Controller
         */
 
         $totalRejected = JobApplication::query()
-            ->where('security_id', $securityId)
-            ->where('status', 'rejected')
+
+            ->where(
+                $ownerColumn,
+                $securityId
+            )
+
+            ->where(
+                'status',
+                'rejected'
+            )
+
+            ->whereHas(
+                'job_vacancy',
+                function ($query) use ($category) {
+
+                    $query->where(
+                        'category',
+                        $category
+                    );
+
+                }
+            )
+
             ->count();
 
 
@@ -576,17 +947,31 @@ class JobVacancyController extends Controller
         );
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | LIST
+    |--------------------------------------------------------------------------
+    */
+
     public function list(Request $request)
     {
-        $security = Security::with([
+        $security = $this->getProfile();
+
+        if (!$security) {
+            abort(403, 'Data profile belum tersedia.');
+        }
+
+        $security->load([
             'badgeCertificate',
             'histories',
-        ])
-        ->findOrFail(
-            Auth::user()->user_security->security->id
-        );
+        ]);
 
         $securityId = $security->id;
+
+        $ownerColumn = $this->getOwnerColumn();
+
+        $category = $this->getCategory();
 
 
         /*
@@ -595,15 +980,28 @@ class JobVacancyController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $search = trim($request->get('search', ''));
+        $search = trim(
+            $request->get(
+                'search',
+                ''
+            )
+        );
 
-        $province = $request->get('province');
+        $province = $request->get(
+            'province'
+        );
 
-        $workingType = $request->get('working_type');
+        $workingType = $request->get(
+            'working_type'
+        );
 
-        $workingSystem = $request->get('working_system');
+        $workingSystem = $request->get(
+            'working_system'
+        );
 
-        $certificate = $request->get('certificate');
+        $certificate = $request->get(
+            'certificate'
+        );
 
 
         /*
@@ -625,7 +1023,17 @@ class JobVacancyController extends Controller
                 'company:id,company_name',
             ])
 
-            ->withCount(['bookmarks', 'applications'])
+
+            /*
+            |--------------------------------------------------------------------------
+            | JUMLAH BOOKMARK + APPLICATION
+            |--------------------------------------------------------------------------
+            */
+
+            ->withCount([
+                'bookmarks',
+                'applications',
+            ])
 
 
             /*
@@ -635,10 +1043,13 @@ class JobVacancyController extends Controller
             */
 
             ->withExists([
-                'bookmarks as is_bookmarked' => function ($query) use ($securityId) {
+                'bookmarks as is_bookmarked' => function ($query) use (
+                    $ownerColumn,
+                    $securityId
+                ) {
 
                     $query->where(
-                        'security_id',
+                        $ownerColumn,
                         $securityId
                     );
 
@@ -648,15 +1059,18 @@ class JobVacancyController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | APPLICATION - SUDAH MELAMAR
+            | APPLICATION
             |--------------------------------------------------------------------------
             */
 
             ->withExists([
-                'applications as is_applied' => function ($query) use ($securityId) {
+                'applications as is_applied' => function ($query) use (
+                    $ownerColumn,
+                    $securityId
+                ) {
 
                     $query->where(
-                        'security_id',
+                        $ownerColumn,
                         $securityId
                     );
 
@@ -668,20 +1082,12 @@ class JobVacancyController extends Controller
             |--------------------------------------------------------------------------
             | APPLICATION STATUS
             |--------------------------------------------------------------------------
-            |
-            | Mengambil status application milik security yang sedang login.
-            |
-            | Hasil:
-            | applied
-            | reviewed
-            | shortlisted
-            | rejected
-            | null = belum melamar
-            |
             */
 
             ->selectSub(
+
                 JobApplication::query()
+
                     ->select('status')
 
                     ->whereColumn(
@@ -690,7 +1096,7 @@ class JobVacancyController extends Controller
                     )
 
                     ->where(
-                        'job_applications.security_id',
+                        $ownerColumn,
                         $securityId
                     )
 
@@ -699,16 +1105,20 @@ class JobVacancyController extends Controller
                     ->limit(1),
 
                 'application_status'
+
             )
 
 
             /*
             |--------------------------------------------------------------------------
-            | JUMLAH PELAMAR
+            | CATEGORY SESUAI ROLE
             |--------------------------------------------------------------------------
             */
 
-            ->withCount('applications')
+            ->where(
+                'category',
+                $category
+            )
 
 
             /*
@@ -732,7 +1142,10 @@ class JobVacancyController extends Controller
             ->where(function ($query) {
 
                 $query
-                    ->whereNull('end_date')
+
+                    ->whereNull(
+                        'end_date'
+                    )
 
                     ->orWhereDate(
                         'end_date',
@@ -806,12 +1219,6 @@ class JobVacancyController extends Controller
 
         if ($province) {
 
-            /*
-            |--------------------------------------------------------------------------
-            | Kalau job_vacancies.province menyimpan CODE
-            |--------------------------------------------------------------------------
-            */
-
             $query->where(
                 'province',
                 $province
@@ -860,12 +1267,6 @@ class JobVacancyController extends Controller
 
         if ($certificate) {
 
-            /*
-            |--------------------------------------------------------------------------
-            | certificate disimpan sebagai JSON
-            |--------------------------------------------------------------------------
-            */
-
             $query->whereJsonContains(
                 'certificate',
                 $certificate
@@ -880,7 +1281,9 @@ class JobVacancyController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        if ($request->filled('min_salary')) {
+        if ($request->filled(
+            'min_salary'
+        )) {
 
             $query->where(
                 'min_price',
@@ -897,7 +1300,9 @@ class JobVacancyController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        if ($request->filled('urgent')) {
+        if ($request->filled(
+            'urgent'
+        )) {
 
             $query->where(
                 'is_urgent',
@@ -913,9 +1318,12 @@ class JobVacancyController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        if ($request->filled('experience')) {
+        if ($request->filled(
+            'experience'
+        )) {
 
             $experience = (int) $request->experience;
+
 
             /*
             |--------------------------------------------------------------------------
@@ -929,7 +1337,9 @@ class JobVacancyController extends Controller
 
                     $query
 
-                        ->whereNull('min_experience')
+                        ->whereNull(
+                            'min_experience'
+                        )
 
                         ->orWhere(
                             'min_experience',
@@ -945,6 +1355,7 @@ class JobVacancyController extends Controller
 
             }
 
+
             /*
             |--------------------------------------------------------------------------
             | DENGAN PENGALAMAN
@@ -952,15 +1363,6 @@ class JobVacancyController extends Controller
             */
 
             else {
-
-                /*
-                |--------------------------------------------------------------------------
-                | Karena min_experience berupa text seperti:
-                |
-                | "1 tahun"
-                | "Minimal 2 tahun"
-                |--------------------------------------------------------------------------
-                */
 
                 $query->whereRaw(
                     "CAST(
@@ -985,13 +1387,19 @@ class JobVacancyController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        if ($request->filled('gender')) {
+        if ($request->filled(
+            'gender'
+        )) {
 
-            $query->where(function ($query) use ($request) {
+            $query->where(function ($query) use (
+                $request
+            ) {
 
                 $query
 
-                    ->whereNull('gender')
+                    ->whereNull(
+                        'gender'
+                    )
 
                     ->orWhere(
                         'gender',
@@ -1009,7 +1417,9 @@ class JobVacancyController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $query->latest('id');
+        $query->latest(
+            'id'
+        );
 
 
         /*
@@ -1071,13 +1481,26 @@ class JobVacancyController extends Controller
         );
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | MY JOB VACANCY LIST
+    |--------------------------------------------------------------------------
+    */
+
     public function myJobVacancyList(Request $request)
     {
-        $security = Auth::user()
-            ->user_security
-            ->security;
+        $security = $this->getProfile();
+
+        if (!$security) {
+            abort(403, 'Data profile belum tersedia.');
+        }
 
         $securityId = $security->id;
+
+        $ownerColumn = $this->getOwnerColumn();
+
+        $category = $this->getCategory();
 
 
         /*
@@ -1086,10 +1509,15 @@ class JobVacancyController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $status = $request->get('status');
+        $status = $request->get(
+            'status'
+        );
 
         $search = trim(
-            $request->get('search', '')
+            $request->get(
+                'search',
+                ''
+            )
         );
 
 
@@ -1122,15 +1550,34 @@ class JobVacancyController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | QUERY
+        | QUERY APPLICATION
         |--------------------------------------------------------------------------
         */
 
         $query = JobApplication::query()
 
             ->where(
-                'security_id',
+                $ownerColumn,
                 $securityId
+            )
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | LOWONGAN HARUS SESUAI CATEGORY
+            |--------------------------------------------------------------------------
+            */
+
+            ->whereHas(
+                'job_vacancy',
+                function ($query) use ($category) {
+
+                    $query->where(
+                        'category',
+                        $category
+                    );
+
+                }
             )
 
 
@@ -1196,7 +1643,9 @@ class JobVacancyController extends Controller
                 'job_vacancy',
                 function ($query) use ($search) {
 
-                    $query->where(function ($query) use ($search) {
+                    $query->where(function ($query) use (
+                        $search
+                    ) {
 
                         $query
 
@@ -1220,7 +1669,9 @@ class JobVacancyController extends Controller
 
                             ->orWhereHas(
                                 'company',
-                                function ($query) use ($search) {
+                                function ($query) use (
+                                    $search
+                                ) {
 
                                     $query->where(
                                         'company_name',
@@ -1233,7 +1684,9 @@ class JobVacancyController extends Controller
 
                             ->orWhereHas(
                                 'bujp',
-                                function ($query) use ($search) {
+                                function ($query) use (
+                                    $search
+                                ) {
 
                                     $query->where(
                                         'company_name',
@@ -1301,11 +1754,23 @@ class JobVacancyController extends Controller
             case 'deadline':
 
                 $query
+
                     ->leftJoin(
                         'job_vacancies',
                         'job_vacancies.id',
                         '=',
                         'job_applications.job_vacancy_id'
+                    )
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | CATEGORY TETAP DIJAGA
+                    |--------------------------------------------------------------------------
+                    */
+
+                    ->where(
+                        'job_vacancies.category',
+                        $category
                     )
 
                     ->select(

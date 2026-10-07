@@ -104,68 +104,6 @@ class MasterSubscriptionController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-
-            'name' => [
-                'required',
-                'max:255',
-                'unique:master_subscriptions,name'
-            ],
-
-            'role' => [
-                'required',
-                Rule::in([
-                    'security',
-                    'bujp',
-                    'client'
-                ])
-            ],
-
-            'price' => [
-                'required',
-                'numeric',
-                'min:0'
-            ],
-
-            'duration' => [
-                'required',
-                'integer',
-                'min:1'
-            ],
-
-            'duration_type' => [
-                'required',
-                Rule::in([
-                    'day',
-                    'month',
-                    'year'
-                ])
-            ],
-
-            'description' => [
-                'nullable',
-                'string'
-            ],
-
-            'features' => [
-                'nullable',
-                'string'
-            ],
-
-            'is_active' => [
-                'nullable',
-                'boolean'
-            ],
-
-            'sort_order' => [
-                'nullable',
-                'integer',
-                'min:0'
-            ],
-
-        ]);
-
-
         /*
         |--------------------------------------------------------------------------
         | FEATURES
@@ -228,6 +166,10 @@ class MasterSubscriptionController extends Controller
                 ? (bool) $request->is_active
                 : true,
 
+            'is_highlight' => $request->has('is_highlight')
+                ? (bool) $request->is_highlight
+                : true,
+
             'sort_order' => $request->sort_order ?? 0,
 
         ]);
@@ -240,86 +182,9 @@ class MasterSubscriptionController extends Controller
     }
 
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(
-        Request $request,
-        $uuid
-    ) {
-
-        $data = MasterSubscription::where(
-            'uuid',
-            $uuid
-        )->firstOrFail();
-
-
-        $request->validate([
-
-            'name' => [
-                'required',
-                'max:255',
-                Rule::unique(
-                    'master_subscriptions',
-                    'name'
-                )->ignore(
-                    $data->id
-                )
-            ],
-
-            'role' => [
-                'required',
-                Rule::in([
-                    'security',
-                    'bujp',
-                    'client'
-                ])
-            ],
-
-            'price' => [
-                'required',
-                'numeric',
-                'min:0'
-            ],
-
-            'duration' => [
-                'required',
-                'integer',
-                'min:1'
-            ],
-
-            'duration_type' => [
-                'required',
-                Rule::in([
-                    'day',
-                    'month',
-                    'year'
-                ])
-            ],
-
-            'description' => [
-                'nullable',
-                'string'
-            ],
-
-            'features' => [
-                'nullable',
-                'string'
-            ],
-
-            'is_active' => [
-                'nullable',
-                'boolean'
-            ],
-
-            'sort_order' => [
-                'nullable',
-                'integer',
-                'min:0'
-            ],
-
-        ]);
-
+    public function update(Request $request, $uuid)
+    {
+        $data = MasterSubscription::where('uuid', $uuid)->firstOrFail();
 
         /*
         |--------------------------------------------------------------------------
@@ -340,13 +205,10 @@ class MasterSubscriptionController extends Controller
 
                 return response()->json([
                     'status' => false,
-                    'message' => 'Format Features harus berupa JSON yang valid.'
+                    'message' => 'Format Features harus berupa JSON yang valid.',
                 ], 422);
-
             }
-
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -355,37 +217,22 @@ class MasterSubscriptionController extends Controller
         */
 
         $data->update([
-
             'name' => $request->name,
-
-            'slug' => Str::slug(
-                $request->name
-            ),
-
+            'slug' => Str::slug($request->name),
             'role' => $request->role,
-
             'price' => $request->price,
-
             'duration' => $request->duration,
-
             'duration_type' => $request->duration_type,
-
             'description' => $request->description,
-
             'features' => $features,
-
-            'is_active' => $request->has('is_active')
-                ? (bool) $request->is_active
-                : false,
-
+            'is_active' => $request->is_active,
+            'is_highlight' => $request->is_highlight,
             'sort_order' => $request->sort_order ?? 0,
-
         ]);
-
 
         return response()->json([
             'status' => true,
-            'message' => 'Data berhasil diperbarui.'
+            'message' => 'Data berhasil diperbarui.',
         ]);
     }
 

@@ -43,22 +43,117 @@
 
         <!-- Skill List -->
 
-        <div class="skill-list">
+        @php
+            /*
+            |--------------------------------------------------------------------------
+            | ABILITY YANG TERSIMPAN DI DATABASE
+            |--------------------------------------------------------------------------
+            */
 
-            @php
-                $abilities = $data->ability
-                    ? explode(',', $data->ability)
-                    : [];
+            $abilities = $data->ability
+                ? array_filter(
+                    array_map('trim', explode(',', $data->ability))
+                )
+                : [];
 
-                $master_abilities = \App\Models\MasterAbility::orderBy('title')->get();
-            @endphp
 
-            <input type="hidden" name="ability" id="skills">
-            @foreach($master_abilities as $ability)
-                <button class="skill-chip {{ in_array($ability->title, $abilities) ? 'active' : '' }}" type="button" data-value="{{ $ability->title }}">{{ $ability->title }}</button>
-            @endforeach
+            /*
+            |--------------------------------------------------------------------------
+            | AMBIL SEMUA MASTER ABILITY
+            |--------------------------------------------------------------------------
+            */
+
+            $master_abilities = \App\Models\MasterAbility::orderBy('title')
+                ->get();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | PISAHKAN BERDASARKAN CATEGORY
+            |--------------------------------------------------------------------------
+            */
+
+            $securityAbilities = $master_abilities
+                ->where('category', 'security')
+                ->values();
+
+            $csAbilities = $master_abilities
+                ->where('category', 'cs')
+                ->values();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | ROLE SAAT INI
+            |--------------------------------------------------------------------------
+            */
+
+            $currentRole = Auth::user()->role;
+        @endphp
+
+
+        <div class="skill-list" id="skillList">
+
+            {{-- Hidden input --}}
+            <input
+                type="hidden"
+                name="ability"
+                id="skills"
+                value="{{ implode(',', $abilities) }}"
+            >
+
+
+            {{-- ==========================================================
+                SATPAM
+                ========================================================== --}}
+
+            <div
+                class="skill-role-list"
+                data-role="satpam"
+                style="{{ $currentRole === 'satpam' ? '' : 'display:none;' }}"
+            >
+
+                @foreach($securityAbilities as $ability)
+
+                    <button
+                        type="button"
+                        class="skill-chip {{ in_array($ability->title, $abilities) ? 'active' : '' }}"
+                        data-value="{{ $ability->title }}"
+                    >
+                        {{ $ability->title }}
+                    </button>
+
+                @endforeach
+
+            </div>
+
+
+            {{-- ==========================================================
+                CLEANING SERVICE
+                ========================================================== --}}
+
+            <div
+                class="skill-role-list"
+                data-role="cs"
+                style="{{ $currentRole === 'cs' ? '' : 'display:none;' }}"
+            >
+
+                @foreach($csAbilities as $ability)
+
+                    <button
+                        type="button"
+                        class="skill-chip"
+                        data-value="{{ $ability->title }}"
+                    >
+                        {{ $ability->title }}
+                    </button>
+
+                @endforeach
+
+            </div>
 
         </div>
+
 
         <!-- Selected -->
 

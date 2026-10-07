@@ -201,6 +201,10 @@
                             </th>
 
                             <th>
+                                Highlight
+                            </th>
+
+                            <th>
                                 Urutan
                             </th>
 
@@ -228,7 +232,6 @@
     </div>
 
 </div>
-
 
 {{-- ========================================================= --}}
 {{-- CREATE MODAL --}}
@@ -419,7 +422,7 @@
 
                         {{-- STATUS --}}
 
-                        <div class="col-md-6 mb-4">
+                        <div class="col-md-3 mb-4">
 
                             <label class="form-label">
                                 Status
@@ -436,6 +439,29 @@
 
                                 <label class="form-check-label">
                                     Aktif
+                                </label>
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-3 mb-4">
+
+                            <label class="form-label">
+                                Highlight
+                            </label>
+
+                            <div class="form-check form-switch mt-3">
+
+                                <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    name="is_highlight"
+                                    value="1"
+                                    checked>
+
+                                <label class="form-check-label">
+                                    Jadikan highlight
                                 </label>
 
                             </div>
@@ -497,7 +523,6 @@
                                             <input
                                                 type="number"
                                                 class="form-control feature-limit"
-                                                min="0"
                                                 placeholder="Contoh: 10">
 
                                         </div>
@@ -544,6 +569,7 @@
 
                                 Tambahkan fitur dan batas penggunaan
                                 untuk paket subscription.
+                                -1 = V, -2 = X
 
                             </div>
 
@@ -583,7 +609,6 @@
     </div>
 
 </div>
-
 
 {{-- ========================================================= --}}
 {{-- EDIT MODAL --}}
@@ -775,7 +800,7 @@
 
                         {{-- STATUS --}}
 
-                        <div class="col-md-6 mb-4">
+                        <div class="col-md-3 mb-4">
 
                             <label class="form-label">
                                 Status
@@ -792,6 +817,29 @@
 
                                 <label class="form-check-label">
                                     Aktif
+                                </label>
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-3 mb-4">
+
+                            <label class="form-label">
+                                Highlight
+                            </label>
+
+                            <div class="form-check form-switch mt-3">
+
+                                <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    id="edit_is_highlight"
+                                    name="is_highlight"
+                                    value="1">
+
+                                <label class="form-check-label">
+                                    Jadikan Highlight
                                 </label>
 
                             </div>
@@ -849,7 +897,7 @@
 
                                 Tambahkan fitur dan batas penggunaan
                                 untuk paket subscription.
-
+                                -1 = V, -2 = X
                             </div>
 
                         </div>
@@ -888,7 +936,6 @@
     </div>
 
 </div>
-
 
 {{-- ========================================================= --}}
 {{-- DELETE MODAL --}}
@@ -1227,6 +1274,36 @@
 
                 },
 
+                {
+                    data: "is_highlight",
+
+                    render: function (data) {
+
+                        if (
+                            data == 1 ||
+                            data === true ||
+                            data === "1"
+                        ) {
+
+                            return `
+                                <span class="badge-active">
+                                    Aktif
+                                </span>
+                            `;
+
+                        }
+
+
+                        return `
+                            <span class="badge-inactive">
+                                Non Aktif
+                            </span>
+                        `;
+
+                    }
+
+                },
+
 
                 {
                     data: "sort_order",
@@ -1420,23 +1497,18 @@
         */
 
         $("#formEdit").submit(function (e) {
-
             e.preventDefault();
 
-
-            let uuid =
-                $("#edit_uuid").val();
-
-
-            /*
-            | Build JSON Features terlebih dahulu
-            */
+            let uuid = $("#edit_uuid").val();
 
             buildEditFeatures();
 
+            let price = $("#edit_price").val();
+
+            console.log("UUID:", uuid);
+            console.log("PRICE:", price);
 
             $.ajax({
-
                 url:
                     "{{ route('dashboard-admin.master.subscription.index') }}/"
                     + uuid,
@@ -1444,82 +1516,55 @@
                 type: "POST",
 
                 data: {
+                    _token: "{{ csrf_token() }}",
+                    _method: "PUT",
 
-                    _token:
-                        "{{ csrf_token() }}",
-
-                    _method:
-                        "PUT",
-
-                    name:
-                        $("#edit_name").val(),
-
-                    role:
-                        $("#edit_role").val(),
-
-                    price:
-                        $("#edit_price").val(),
-
-                    duration:
-                        $("#edit_duration").val(),
-
-                    duration_type:
-                        $("#edit_duration_type").val(),
-
-                    description:
-                        $("#edit_description").val(),
-
-                    features:
-                        $("#edit_features").val(),
+                    name: $("#edit_name").val(),
+                    role: $("#edit_role").val(),
+                    price: price,
+                    duration: $("#edit_duration").val(),
+                    duration_type: $("#edit_duration_type").val(),
+                    description: $("#edit_description").val(),
+                    features: $("#edit_features").val(),
 
                     is_active:
-                        $("#edit_is_active").is(':checked')
+                        $("#edit_is_active").is(":checked")
                             ? 1
                             : 0,
 
-                    sort_order:
-                        $("#edit_sort_order").val()
+                    is_highlight:
+                        $("#edit_is_highlight").is(":checked")
+                            ? 1
+                            : 0,
 
+                    sort_order: $("#edit_sort_order").val()
                 },
-
 
                 success: function (res) {
 
-                    $("#editModal")
-                        .modal("hide");
+                    console.log(res);
 
+                    $("#editModal").modal("hide");
 
                     Swal.fire({
-
                         icon: "success",
-
                         title: "Berhasil",
-
                         text: res.message,
-
                         timer: 1500,
-
                         showConfirmButton: false
-
                     });
 
-
-                    $('#datatable')
+                    $("#datatable")
                         .DataTable()
                         .ajax
                         .reload(null, false);
-
                 },
 
-
                 error: function (xhr) {
-
+                    console.log(xhr.responseJSON);
                     showAjaxError(xhr);
-
                 }
-
             });
-
         });
 
 
@@ -1742,6 +1787,14 @@
                 data.is_active === "1"
             );
 
+        $("#edit_is_highlight")
+            .prop(
+                "checked",
+                data.is_highlight == 1 ||
+                data.is_highlight === true ||
+                data.is_highlight === "1"
+            );
+
 
         /*
         |--------------------------------------------------------------------------
@@ -1801,7 +1854,6 @@
                             type="number"
                             class="form-control feature-limit"
                             value="${limit}"
-                            min="0"
                             placeholder="Contoh: 10">
 
                     </div>
@@ -2054,7 +2106,6 @@
                             type="number"
                             class="form-control edit-feature-limit"
                             value="${limit}"
-                            min="0"
                             placeholder="Contoh: 10">
 
                     </div>

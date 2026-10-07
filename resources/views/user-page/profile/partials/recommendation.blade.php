@@ -379,8 +379,7 @@
                         <div class="recommend-empty-text">
 
                             Rekomendasi dari atasan, supervisor, atau rekan kerja akan
-                            meningkatkan kredibilitas profil Anda di mata perusahaan
-                            maupun BUJP.
+                            meningkatkan kredibilitas profil Anda di mata perusahaan.
 
                         </div>
 

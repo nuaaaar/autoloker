@@ -6,6 +6,9 @@
 @section('css')
 
     <style>
+        /* ============================================================
+        BASE / THEME
+        ============================================================ */
 
         .partner-logo {
             width: 90px;
@@ -53,6 +56,7 @@
         }
 
         .info-value a:hover {
+            color: var(--bs-link-hover-color);
             text-decoration: underline;
         }
 
@@ -67,6 +71,17 @@
             padding: 18px;
             height: 100%;
             background-color: var(--bs-body-bg);
+            color: var(--bs-body-color);
+
+            transition:
+                background-color 0.2s ease,
+                border-color 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+        .stat-card:hover {
+            border-color: var(--bs-primary-border-subtle);
+            box-shadow: var(--bs-box-shadow-sm);
         }
 
         .stat-title {
@@ -92,6 +107,7 @@
             object-fit: cover;
             border-radius: 8px;
             border: 1px solid var(--bs-border-color);
+            background-color: var(--bs-tertiary-bg);
         }
 
         .security-photo-placeholder {
@@ -99,9 +115,12 @@
             height: 55px;
             border-radius: 8px;
             background-color: var(--bs-tertiary-bg);
+            border: 1px solid var(--bs-border-color);
+
             display: flex;
             align-items: center;
             justify-content: center;
+
             color: var(--bs-secondary-color);
             font-size: 20px;
         }
@@ -117,6 +136,17 @@
             padding: 15px;
             height: 100%;
             background-color: var(--bs-body-bg);
+            color: var(--bs-body-color);
+
+            transition:
+                background-color 0.2s ease,
+                border-color 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+        .security-card:hover {
+            border-color: var(--bs-primary-border-subtle);
+            box-shadow: var(--bs-box-shadow-sm);
         }
 
         .security-name {
@@ -151,6 +181,60 @@
 
 
         /* ============================================================
+        DARK MODE
+        ============================================================ */
+
+        [data-bs-theme="dark"] .partner-logo {
+            background-color: var(--bs-body-bg);
+            border-color: var(--bs-border-color);
+        }
+
+        [data-bs-theme="dark"] .partner-logo-placeholder {
+            background-color: var(--bs-tertiary-bg);
+            border-color: var(--bs-border-color);
+            color: var(--bs-secondary-color);
+        }
+
+        [data-bs-theme="dark"] .stat-card,
+        [data-bs-theme="dark"] .security-card {
+            background-color: var(--bs-body-bg);
+            border-color: var(--bs-border-color);
+        }
+
+        [data-bs-theme="dark"] .security-photo {
+            background-color: var(--bs-tertiary-bg);
+            border-color: var(--bs-border-color);
+        }
+
+        [data-bs-theme="dark"] .security-photo-placeholder {
+            background-color: var(--bs-tertiary-bg);
+            border-color: var(--bs-border-color);
+        }
+
+        [data-bs-theme="dark"] .security-card hr {
+            border-color: var(--bs-border-color);
+        }
+
+
+        /* ============================================================
+        LIGHT MODE
+        ============================================================ */
+
+        [data-bs-theme="light"] .partner-logo,
+        [data-bs-theme="light"] .stat-card,
+        [data-bs-theme="light"] .security-card {
+            background-color: var(--bs-body-bg);
+            border-color: var(--bs-border-color);
+        }
+
+        [data-bs-theme="light"] .partner-logo-placeholder,
+        [data-bs-theme="light"] .security-photo-placeholder {
+            background-color: var(--bs-tertiary-bg);
+            border-color: var(--bs-border-color);
+        }
+
+
+        /* ============================================================
         RESPONSIVE
         ============================================================ */
 
@@ -169,9 +253,7 @@
             .security-card {
                 padding: 13px;
             }
-
         }
-
     </style>
 
 @endsection

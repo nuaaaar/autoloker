@@ -1,6 +1,6 @@
 @extends('layouts.dashboard-admin')
 
-@section('title', 'Satpam')
+@section('title', 'User')
 
 @section('css')
     <style>
@@ -11,7 +11,7 @@
 @section('breadcrumb')
     <h1
         class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">
-        Satpam</h1>
+        User</h1>
     <!--end::Title-->
     <!--begin::Breadcrumb-->
     <ul class="breadcrumb breadcrumb-separatorless fw-semibold fs-7 my-0 pt-1">
@@ -32,7 +32,7 @@
         </li>
         <!--end::Item-->
         <!--begin::Item-->
-        <li class="breadcrumb-item text-muted">Satpam</li>
+        <li class="breadcrumb-item text-muted">User</li>
         <!--end::Item-->
     </ul>
     <!--end::Breadcrumb-->
@@ -330,7 +330,7 @@
 
                         return `
 
-                            <a href="/dashboard-admin/management-user/security/${data.uuid}"
+                            <a href="/dashboard-admin/management-user/security/${data.user_security.user.uuid}"
                                 class="btn btn-outline-info btn-sm me-1">
 
                                 <i class="fas fa-eye"></i>
@@ -386,7 +386,7 @@
                 $('#modalTitle').text('Aktifkan Akun');
 
                 $('#modalText').text(
-                    'Apakah Anda yakin ingin mengaktifkan akun satpam ini?'
+                    'Apakah Anda yakin ingin mengaktifkan akun User ini?'
                 );
 
                 $('#modalIcon').html(
@@ -403,7 +403,7 @@
                 $('#modalTitle').text('Nonaktifkan Akun');
 
                 $('#modalText').text(
-                    'Apakah Anda yakin ingin menonaktifkan akun satpam ini?'
+                    'Apakah Anda yakin ingin menonaktifkan akun User ini?'
                 );
 
                 $('#modalIcon').html(

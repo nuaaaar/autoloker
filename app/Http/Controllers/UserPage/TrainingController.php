@@ -7,10 +7,103 @@ use App\Models\TrainingApplication;
 use Illuminate\Http\Request;
 use App\Models\Training;
 use App\Models\Security;
+use App\Models\CleaningService;
 use Auth;
 
 class TrainingController extends Controller
 {
+    /*
+    |--------------------------------------------------------------------------
+    | HELPER PROFILE
+    |--------------------------------------------------------------------------
+    |
+    | Variable tetap menggunakan nama $security.
+    |
+    | satpam -> Security
+    | cs     -> CleaningService
+    |
+    */
+
+    private function getProfile()
+    {
+        $user = Auth::user();
+
+        if ($user->role === 'satpam') {
+
+            return $user->user_security?->security;
+
+        }
+
+        if ($user->role === 'cs') {
+
+            return $user->user_cleaning_service?->cleaning_service;
+
+        }
+
+        abort(403, 'Role tidak valid.');
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CATEGORY ROLE TRAINING
+    |--------------------------------------------------------------------------
+    |
+    | satpam -> security
+    | cs     -> cs
+    |
+    */
+
+    private function getCategoryRole()
+    {
+        $user = Auth::user();
+
+        if ($user->role === 'satpam') {
+
+            return 'security';
+
+        }
+
+        if ($user->role === 'cs') {
+
+            return 'cs';
+
+        }
+
+        abort(403, 'Role tidak valid.');
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | OWNER COLUMN TRAINING APPLICATION
+    |--------------------------------------------------------------------------
+    |
+    | satpam -> security_id
+    | cs     -> cleaning_service_id
+    |
+    */
+
+    private function getOwnerColumn()
+    {
+        $user = Auth::user();
+
+        if ($user->role === 'satpam') {
+
+            return 'security_id';
+
+        }
+
+        if ($user->role === 'cs') {
+
+            return 'cleaning_service_id';
+
+        }
+
+        abort(403, 'Role tidak valid.');
+    }
+
+
     /*
     |--------------------------------------------------------------------------
     | INDEX
@@ -19,12 +112,26 @@ class TrainingController extends Controller
 
     public function index()
     {
-        $security = Security::with([
+        $security = $this->getProfile();
+
+        if (!$security) {
+
+            return redirect()
+                ->back()
+                ->with('swal', [
+                    'icon' => 'error',
+                    'title' => 'Profile Belum Tersedia',
+                    'text' => 'Silakan lengkapi data profile terlebih dahulu.',
+                ]);
+
+        }
+
+
+        $security->load([
             'badgeCertificate',
             'histories',
-        ])->findOrFail(
-            Auth::user()->user_security->security->id
-        );
+        ]);
+
 
         return view(
             'user-page.training.index',
@@ -41,14 +148,17 @@ class TrainingController extends Controller
 
     public function list(Request $request)
     {
-        $security = Security::with([
-            'badgeCertificate',
-            'histories',
-        ])->findOrFail(
-            Auth::user()->user_security->security->id
-        );
+        $security = $this->getProfile();
+
+        if (!$security) {
+            abort(403, 'Data profile belum tersedia.');
+        }
 
         $securityId = $security->id;
+
+        $categoryRole = $this->getCategoryRole();
+
+        $ownerColumn = $this->getOwnerColumn();
 
 
         /*
@@ -58,14 +168,23 @@ class TrainingController extends Controller
         */
 
         $search = trim(
-            $request->get('search', '')
+            $request->get(
+                'search',
+                ''
+            )
         );
 
-        $provider = $request->get('provider');
+        $provider = $request->get(
+            'provider'
+        );
 
-        $type = $request->get('type');
+        $type = $request->get(
+            'type'
+        );
 
-        $location = $request->get('location');
+        $location = $request->get(
+            'location'
+        );
 
 
         /*
@@ -84,23 +203,57 @@ class TrainingController extends Controller
 
             ->with([
                 // Sesuaikan dengan relasi model Anda
-                
-            ]);
+            ])
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | STATUS
-        |--------------------------------------------------------------------------
-        |
-        | Hanya pelatihan yang aktif / tersedia.
-        |
-        */
+            /*
+            |--------------------------------------------------------------------------
+            | CATEGORY ROLE
+            |--------------------------------------------------------------------------
+            */
 
-        $query->where(
-            'status',
-            'published'
-        );
+            ->where(
+                'category_role',
+                $categoryRole
+            )
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | STATUS
+            |--------------------------------------------------------------------------
+            */
+
+            ->where(
+                'status',
+                'published'
+            )
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | DEADLINE TRAINING
+            |--------------------------------------------------------------------------
+            |
+            | Jika end_date NULL -> masih tersedia.
+            | Jika ada end_date -> belum lewat.
+            |
+            */
+
+            ->where(function ($query) {
+
+                $query
+                    ->whereNull(
+                        'end_date'
+                    )
+
+                    ->orWhereDate(
+                        'end_date',
+                        '>=',
+                        now()->toDateString()
+                    );
+
+            });
 
 
         /*
@@ -193,17 +346,15 @@ class TrainingController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $query->latest('id');
+        $query->latest(
+            'id'
+        );
 
 
         /*
         |--------------------------------------------------------------------------
         | PAGINATION
         |--------------------------------------------------------------------------
-        |
-        | Pagination hanya digunakan untuk infinite scroll.
-        | Tidak akan ditampilkan sebagai pagination HTML.
-        |
         */
 
         $trainings = $query
@@ -256,13 +407,59 @@ class TrainingController extends Controller
             compact('trainings')
         );
     }
-    
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SHOW
+    |--------------------------------------------------------------------------
+    */
+
     public function show($uuid)
     {
+        $categoryRole = $this->getCategoryRole();
+
         $data = Training::query()
-            ->where('uuid', $uuid)
-            ->where('status', 'published')
+
+            ->where(
+                'uuid',
+                $uuid
+            )
+
+            /*
+            |--------------------------------------------------------------------------
+            | CATEGORY ROLE
+            |--------------------------------------------------------------------------
+            */
+
+            ->where(
+                'category_role',
+                $categoryRole
+            )
+
+            ->where(
+                'status',
+                'published'
+            )
+
             ->firstOrFail();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CEK END DATE
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $data->end_date &&
+            $data->end_date < now()->toDateString()
+        ) {
+
+            abort(404);
+
+        }
+
 
         /*
         |--------------------------------------------------------------------------
@@ -270,7 +467,10 @@ class TrainingController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $data->increment('total_clicked');
+        $data->increment(
+            'total_clicked'
+        );
+
 
         /*
         |--------------------------------------------------------------------------
@@ -278,11 +478,18 @@ class TrainingController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $data->quota = (int) ($data->quota ?? 0);
+        $data->quota = (int) (
+            $data->quota ?? 0
+        );
 
-        $data->price = (int) ($data->price ?? 0);
+        $data->price = (int) (
+            $data->price ?? 0
+        );
 
-        $data->duration_day = (int) ($data->duration_day ?? 0);
+        $data->duration_day = (int) (
+            $data->duration_day ?? 0
+        );
+
 
         /*
         |--------------------------------------------------------------------------
@@ -290,23 +497,60 @@ class TrainingController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $registered = TrainingApplication::where('training_id', $data->id)
-            ->where('status', 'approved')
+        $registered = TrainingApplication::query()
+
+            ->where(
+                'training_id',
+                $data->id
+            )
+
+            ->where(
+                'status',
+                'approved'
+            )
+
             ->count();
+
+
         /*
         |--------------------------------------------------------------------------
         | CEK PENDAFTARAN USER
         |--------------------------------------------------------------------------
         */
 
-        $security = Auth::user()
-            ->user_security
-            ->security;
+        $security = $this->getProfile();
 
-        $application = TrainingApplication::where('training_id', $data->id)
-            ->where('security_id', $security->id)
-            ->whereIn('status', ['pending', 'approved'])
+        if (!$security) {
+            abort(403, 'Data profile belum tersedia.');
+        }
+
+        $securityId = $security->id;
+
+        $ownerColumn = $this->getOwnerColumn();
+
+
+        $application = TrainingApplication::query()
+
+            ->where(
+                'training_id',
+                $data->id
+            )
+
+            ->where(
+                $ownerColumn,
+                $securityId
+            )
+
+            ->whereIn(
+                'status',
+                [
+                    'pending',
+                    'approved',
+                ]
+            )
+
             ->first();
+
 
         /*
         |--------------------------------------------------------------------------
@@ -324,13 +568,26 @@ class TrainingController extends Controller
         );
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | MY TRAINING
+    |--------------------------------------------------------------------------
+    */
+
     public function myTraining()
     {
-        $security = Auth::user()
-            ->user_security
-            ->security;
+        $security = $this->getProfile();
+
+        if (!$security) {
+            abort(403, 'Data profile belum tersedia.');
+        }
 
         $securityId = $security->id;
+
+        $categoryRole = $this->getCategoryRole();
+
+        $ownerColumn = $this->getOwnerColumn();
 
 
         /*
@@ -340,8 +597,27 @@ class TrainingController extends Controller
         */
 
         $applications = TrainingApplication::query()
-            ->where('security_id', $securityId)
-            ->with('training');
+
+            ->where(
+                $ownerColumn,
+                $securityId
+            )
+
+            ->whereHas(
+                'training',
+                function ($query) use ($categoryRole) {
+
+                    $query->where(
+                        'category_role',
+                        $categoryRole
+                    );
+
+                }
+            )
+
+            ->with(
+                'training'
+            );
 
 
         /*
@@ -350,24 +626,37 @@ class TrainingController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $totalTrainings = (clone $applications)->count();
+        $totalTrainings = (clone $applications)
+            ->count();
 
 
         /*
         |--------------------------------------------------------------------------
         | BERLANGSUNG
         |--------------------------------------------------------------------------
-        |
-        | Training sedang running
-        |
         */
 
         $totalOngoing = (clone $applications)
-            ->whereHas('training', function ($query) {
 
-                $query->where('status', 'running');
+            ->whereHas(
+                'training',
+                function ($query) use ($categoryRole) {
 
-            })
+                    $query
+
+                        ->where(
+                            'category_role',
+                            $categoryRole
+                        )
+
+                        ->where(
+                            'status',
+                            'running'
+                        );
+
+                }
+            )
+
             ->count();
 
 
@@ -375,22 +664,35 @@ class TrainingController extends Controller
         |--------------------------------------------------------------------------
         | AKAN DATANG
         |--------------------------------------------------------------------------
-        |
-        | Training sudah published dan belum mulai
-        |
         */
 
         $totalUpcoming = (clone $applications)
-            ->whereHas('training', function ($query) {
 
-                $query->where('status', 'published')
-                    ->whereDate(
-                        'start_date',
-                        '>',
-                        now()->toDateString()
-                    );
+            ->whereHas(
+                'training',
+                function ($query) use ($categoryRole) {
 
-            })
+                    $query
+
+                        ->where(
+                            'category_role',
+                            $categoryRole
+                        )
+
+                        ->where(
+                            'status',
+                            'published'
+                        )
+
+                        ->whereDate(
+                            'start_date',
+                            '>',
+                            now()->toDateString()
+                        );
+
+                }
+            )
+
             ->count();
 
 
@@ -398,28 +700,41 @@ class TrainingController extends Controller
         |--------------------------------------------------------------------------
         | SELESAI
         |--------------------------------------------------------------------------
-        |
-        | Training sudah closed
-        | ATAU tanggal selesai sudah lewat
-        |
         */
 
         $totalCompleted = (clone $applications)
-            ->whereHas('training', function ($query) {
 
-                $query->where(function ($q) {
+            ->whereHas(
+                'training',
+                function ($query) use ($categoryRole) {
 
-                    $q->where('status', 'closed')
+                    $query
 
-                        ->orWhereDate(
-                            'end_date',
-                            '<',
-                            now()->toDateString()
-                        );
+                        ->where(
+                            'category_role',
+                            $categoryRole
+                        )
 
-                });
+                        ->where(function ($q) {
 
-            })
+                            $q
+
+                                ->where(
+                                    'status',
+                                    'closed'
+                                )
+
+                                ->orWhereDate(
+                                    'end_date',
+                                    '<',
+                                    now()->toDateString()
+                                );
+
+                        });
+
+                }
+            )
+
             ->count();
 
 
@@ -430,11 +745,26 @@ class TrainingController extends Controller
         */
 
         $totalCancelled = (clone $applications)
-            ->whereHas('training', function ($query) {
 
-                $query->where('status', 'cancelled');
+            ->whereHas(
+                'training',
+                function ($query) use ($categoryRole) {
 
-            })
+                    $query
+
+                        ->where(
+                            'category_role',
+                            $categoryRole
+                        )
+
+                        ->where(
+                            'status',
+                            'cancelled'
+                        );
+
+                }
+            )
+
             ->count();
 
 
@@ -442,33 +772,60 @@ class TrainingController extends Controller
         |--------------------------------------------------------------------------
         | SERTIFIKAT
         |--------------------------------------------------------------------------
-        |
-        | Karena certificate ada di tabel trainings,
-        | bukan training_applications.
-        |
         */
 
         $totalCertificates = (clone $applications)
-            ->whereHas('training', function ($query) {
 
-                $query->where('is_certificate', 1);
+            ->whereHas(
+                'training',
+                function ($query) use ($categoryRole) {
 
-            })
-            ->whereHas('training', function ($query) {
+                    $query
 
-                $query->where(function ($q) {
+                        ->where(
+                            'category_role',
+                            $categoryRole
+                        )
 
-                    $q->where('status', 'closed')
-
-                        ->orWhereDate(
-                            'end_date',
-                            '<',
-                            now()->toDateString()
+                        ->where(
+                            'is_certificate',
+                            1
                         );
 
-                });
+                }
+            )
 
-            })
+            ->whereHas(
+                'training',
+                function ($query) use ($categoryRole) {
+
+                    $query
+
+                        ->where(
+                            'category_role',
+                            $categoryRole
+                        )
+
+                        ->where(function ($q) {
+
+                            $q
+
+                                ->where(
+                                    'status',
+                                    'closed'
+                                )
+
+                                ->orWhereDate(
+                                    'end_date',
+                                    '<',
+                                    now()->toDateString()
+                                );
+
+                        });
+
+                }
+            )
+
             ->count();
 
 
@@ -492,13 +849,26 @@ class TrainingController extends Controller
         );
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | MY TRAINING LIST
+    |--------------------------------------------------------------------------
+    */
+
     public function myTrainingList(Request $request)
     {
-        $security = Auth::user()
-            ->user_security
-            ->security;
+        $security = $this->getProfile();
+
+        if (!$security) {
+            abort(403, 'Data profile belum tersedia.');
+        }
 
         $securityId = $security->id;
+
+        $categoryRole = $this->getCategoryRole();
+
+        $ownerColumn = $this->getOwnerColumn();
 
 
         /*
@@ -507,10 +877,15 @@ class TrainingController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $status = $request->get('status');
+        $status = $request->get(
+            'status'
+        );
 
         $search = trim(
-            $request->get('search', '')
+            $request->get(
+                'search',
+                ''
+            )
         );
 
 
@@ -531,8 +906,13 @@ class TrainingController extends Controller
             'start_date',
         ];
 
-        if (!in_array($sort, $allowedSort)) {
+        if (!in_array(
+            $sort,
+            $allowedSort
+        )) {
+
             $sort = 'latest';
+
         }
 
 
@@ -543,11 +923,33 @@ class TrainingController extends Controller
         */
 
         $query = TrainingApplication::query()
+
             ->where(
-                'security_id',
+                $ownerColumn,
                 $securityId
             )
-            ->with('training');
+
+            /*
+            |--------------------------------------------------------------------------
+            | CATEGORY ROLE
+            |--------------------------------------------------------------------------
+            */
+
+            ->whereHas(
+                'training',
+                function ($query) use ($categoryRole) {
+
+                    $query->where(
+                        'category_role',
+                        $categoryRole
+                    );
+
+                }
+            )
+
+            ->with(
+                'training'
+            );
 
 
         /*
@@ -570,12 +972,19 @@ class TrainingController extends Controller
 
                     $query->whereHas(
                         'training',
-                        function ($q) {
+                        function ($q) use ($categoryRole) {
 
-                            $q->where(
-                                'status',
-                                'running'
-                            );
+                            $q
+
+                                ->where(
+                                    'category_role',
+                                    $categoryRole
+                                )
+
+                                ->where(
+                                    'status',
+                                    'running'
+                                );
 
                         }
                     );
@@ -593,17 +1002,25 @@ class TrainingController extends Controller
 
                     $query->whereHas(
                         'training',
-                        function ($q) {
+                        function ($q) use ($categoryRole) {
 
-                            $q->where(
-                                'status',
-                                'published'
-                            )
-                            ->whereDate(
-                                'start_date',
-                                '>',
-                                now()->toDateString()
-                            );
+                            $q
+
+                                ->where(
+                                    'category_role',
+                                    $categoryRole
+                                )
+
+                                ->where(
+                                    'status',
+                                    'published'
+                                )
+
+                                ->whereDate(
+                                    'start_date',
+                                    '>',
+                                    now()->toDateString()
+                                );
 
                         }
                     );
@@ -621,21 +1038,31 @@ class TrainingController extends Controller
 
                     $query->whereHas(
                         'training',
-                        function ($q) {
+                        function ($q) use ($categoryRole) {
 
-                            $q->where(function ($q) {
+                            $q
 
-                                $q->where(
-                                    'status',
-                                    'closed'
+                                ->where(
+                                    'category_role',
+                                    $categoryRole
                                 )
-                                ->orWhereDate(
-                                    'end_date',
-                                    '<',
-                                    now()->toDateString()
-                                );
 
-                            });
+                                ->where(function ($q) {
+
+                                    $q
+
+                                        ->where(
+                                            'status',
+                                            'closed'
+                                        )
+
+                                        ->orWhereDate(
+                                            'end_date',
+                                            '<',
+                                            now()->toDateString()
+                                        );
+
+                                });
 
                         }
                     );
@@ -653,12 +1080,19 @@ class TrainingController extends Controller
 
                     $query->whereHas(
                         'training',
-                        function ($q) {
+                        function ($q) use ($categoryRole) {
 
-                            $q->where(
-                                'status',
-                                'cancelled'
-                            );
+                            $q
+
+                                ->where(
+                                    'category_role',
+                                    $categoryRole
+                                )
+
+                                ->where(
+                                    'status',
+                                    'cancelled'
+                                );
 
                         }
                     );
@@ -679,32 +1113,44 @@ class TrainingController extends Controller
 
             $query->whereHas(
                 'training',
-                function ($q) use ($search) {
+                function ($q) use ($search, $categoryRole) {
 
-                    $q->where(function ($q) use ($search) {
+                    $q
 
-                        $q->where(
-                            'title',
-                            'LIKE',
-                            "%{$search}%"
+                        ->where(
+                            'category_role',
+                            $categoryRole
                         )
-                        ->orWhere(
-                            'provider',
-                            'LIKE',
-                            "%{$search}%"
-                        )
-                        ->orWhere(
-                            'description',
-                            'LIKE',
-                            "%{$search}%"
-                        )
-                        ->orWhere(
-                            'category',
-                            'LIKE',
-                            "%{$search}%"
-                        );
 
-                    });
+                        ->where(function ($q) use ($search) {
+
+                            $q
+
+                                ->where(
+                                    'title',
+                                    'LIKE',
+                                    "%{$search}%"
+                                )
+
+                                ->orWhere(
+                                    'provider',
+                                    'LIKE',
+                                    "%{$search}%"
+                                )
+
+                                ->orWhere(
+                                    'description',
+                                    'LIKE',
+                                    "%{$search}%"
+                                )
+
+                                ->orWhere(
+                                    'category',
+                                    'LIKE',
+                                    "%{$search}%"
+                                );
+
+                        });
 
                 }
             );
@@ -761,15 +1207,23 @@ class TrainingController extends Controller
             case 'start_date':
 
                 $query
+
                     ->leftJoin(
                         'trainings',
                         'trainings.id',
                         '=',
                         'training_applications.training_id'
                     )
+
+                    ->where(
+                        'trainings.category_role',
+                        $categoryRole
+                    )
+
                     ->select(
                         'training_applications.*'
                     )
+
                     ->orderByRaw("
                         CASE
                             WHEN trainings.start_date IS NULL
@@ -777,6 +1231,7 @@ class TrainingController extends Controller
                             ELSE 0
                         END ASC
                     ")
+
                     ->orderBy(
                         'trainings.start_date',
                         'asc'
@@ -794,7 +1249,9 @@ class TrainingController extends Controller
         */
 
         $applications = $query
+
             ->paginate(5)
+
             ->withQueryString();
 
 
@@ -843,5 +1300,4 @@ class TrainingController extends Controller
             compact('applications')
         );
     }
-
 }

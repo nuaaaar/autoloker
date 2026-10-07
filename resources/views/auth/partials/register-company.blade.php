@@ -28,7 +28,7 @@
     </h2>
 
     <p class="text-muted mb-8 fs-7">
-        Daftarkan perusahaan Anda dan temukan personil satpam tersertifikasi dengan cepat.
+        Daftarkan perusahaan Anda dan temukan personil tersertifikasi dengan cepat.
     </p>
 
     <!-- Nama BUJP -->

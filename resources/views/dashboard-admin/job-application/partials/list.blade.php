@@ -1,164 +1,168 @@
 @forelse($applications as $application)
 
-<div class="card border mb-4">
+    @php
+        $applicant = $job->category === 'cs'
+            ? $application->cleaning_service
+            : $application->security;
+    @endphp
 
-    <div class="card-body">
+    <div class="card border mb-4">
 
-        <div class="d-flex justify-content-between align-items-start">
+        <div class="card-body">
 
-            <div class="d-flex align-items-center">
+            <div class="d-flex justify-content-between align-items-start">
 
-                <div class="symbol symbol-50px symbol-circle me-4 overflow-hidden">
+                {{-- PROFILE --}}
+                <div class="d-flex align-items-center">
 
-                    @if($application->security?->formal_photo)
+                    <div class="symbol symbol-50px symbol-circle me-4 overflow-hidden">
 
-                        <img
-                            src="{{ asset('storage/' . $application->security->formal_photo) }}"
-                            alt="{{ $application->security->name }}"
-                            style="width:50px;height:50px;object-fit:cover;"
-                        >
+                        @if($applicant?->formal_photo)
 
-                    @else
+                            <img
+                                src="{{ asset('storage/' . $applicant->formal_photo) }}"
+                                alt="{{ $applicant->name }}"
+                                style="width:50px;height:50px;object-fit:cover;"
+                            >
 
-                        <div class="symbol-label bg-light-primary">
+                        @else
 
-                            <i class="fas fa-user text-primary"></i>
+                            <div class="symbol-label bg-light-primary">
+
+                                <i class="fas fa-user text-primary"></i>
+
+                            </div>
+
+                        @endif
+
+                    </div>
+
+                    <div>
+
+                        <h4 class="fw-bold mb-1">
+                            {{ $applicant?->name ?? '-' }}
+                        </h4>
+
+                        <div class="text-muted">
+                            {{ $applicant?->email ?? '-' }}
+                        </div>
+
+                        <div class="text-muted fs-7 mt-1">
+
+                            Melamar:
+
+                            {{ $application->created_at?->translatedFormat('d F Y H:i') }}
 
                         </div>
 
-                    @endif
+                    </div>
 
                 </div>
 
 
+                {{-- STATUS --}}
                 <div>
 
-                    <h4 class="fw-bold mb-1">
+                    @switch(strtolower($application->status))
 
-                        {{ $application->security?->name ?? '-' }}
+                        @case('applied')
 
-                    </h4>
+                            <span class="badge badge-light-primary">
+                                Applied
+                            </span>
 
-                    <div class="text-muted">
+                        @break
 
-                        {{ $application->security?->email ?? '-' }}
+                        @case('reviewed')
 
-                    </div>
+                            <span class="badge badge-light-warning">
+                                Reviewed
+                            </span>
 
-                    <div class="text-muted fs-7 mt-1">
+                        @break
 
-                        Melamar:
-                        {{ $application->created_at?->translatedFormat('d F Y H:i') }}
+                        @case('shortlisted')
 
-                    </div>
+                            <span class="badge badge-light-success">
+                                Shortlisted
+                            </span>
+
+                        @break
+
+                        @case('rejected')
+
+                            <span class="badge badge-light-danger">
+                                Rejected
+                            </span>
+
+                        @break
+
+                        @default
+
+                            <span class="badge badge-light-secondary">
+                                {{ $application->status }}
+                            </span>
+
+                    @endswitch
 
                 </div>
 
             </div>
 
 
-            {{-- STATUS --}}
+            <div class="separator my-4"></div>
 
-            <div>
 
-                @switch($application->status)
+            <div class="d-flex justify-content-between align-items-center">
 
-                    @case('APPLIED')
+                {{-- KTP --}}
+                <div class="text-muted">
 
-                        <span class="badge badge-light-primary">
-                            Applied
-                        </span>
+                    <i class="fas fa-id-card me-1"></i>
 
-                        @break
+                    {{ $applicant?->ktp_number ?? '-' }}
 
-                    @case('REVIEWED')
+                </div>
 
-                        <span class="badge badge-light-warning">
-                            Reviewed
-                        </span>
 
-                        @break
+                {{-- DETAIL --}}
+                <a
+                    href="{{ route(
+                        'dashboard-admin.job-application.show',
+                        [
+                            'uuid' => $job->uuid ?? request()->route('uuid'),
+                            'application' => $application->id
+                        ]
+                    ) }}"
+                    class="btn btn-sm btn-light-primary"
+                >
 
-                    @case('SHORTLISTED')
+                    <i class="fas fa-eye me-1"></i>
 
-                        <span class="badge badge-light-success">
-                            Shortlisted
-                        </span>
+                    Lihat Detail
 
-                        @break
-
-                    @case('REJECTED')
-
-                        <span class="badge badge-light-danger">
-                            Rejected
-                        </span>
-
-                        @break
-
-                    @default
-
-                        <span class="badge badge-light-secondary">
-                            {{ $application->status }}
-                        </span>
-
-                @endswitch
+                </a>
 
             </div>
-
-        </div>
-
-
-        <div class="separator my-4"></div>
-
-
-        <div class="d-flex justify-content-between align-items-center">
-
-            <div class="text-muted">
-
-                <i class="fas fa-id-card me-1"></i>
-
-                {{ $application->security?->ktp_number ?? '-' }}
-
-            </div>
-
-
-            <a
-                href="{{ route(
-                    'dashboard-admin.job-application.show',
-                    [
-                        'uuid' => $job->uuid ?? request()->route('uuid'),
-                        'application' => $application->id
-                    ]
-                ) }}"
-                class="btn btn-sm btn-light-primary"
-            >
-
-                <i class="fas fa-eye me-1"></i>
-
-                Lihat Detail
-
-            </a>
 
         </div>
 
     </div>
-
-</div>
 
 @empty
 
-<div class="text-center py-10">
+    <div class="text-center py-10">
 
-    <i class="fas fa-users fs-3x text-muted mb-4"></i>
+        <i class="fas fa-users fs-3x text-muted mb-4"></i>
 
-    <h4 class="fw-bold">
-        Belum Ada Pelamar
-    </h4>
+        <h4 class="fw-bold">
+            Belum Ada Pelamar
+        </h4>
 
-    <div class="text-muted">
-        Belum ada pelamar untuk lowongan ini.
+        <div class="text-muted">
+            Belum ada pelamar untuk lowongan ini.
+        </div>
+
     </div>
-
-</div>
 
 @endforelse

@@ -3,35 +3,166 @@
 namespace App\Http\Controllers\UserPage;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\JobVacancy;
 use App\Models\Security;
+use App\Models\CleaningService;
+use App\Models\JobVacancy;
 use App\Models\Training;
-use Auth;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
+    /*
+    |--------------------------------------------------------------------------
+    | PROFILE BERDASARKAN ROLE
+    |--------------------------------------------------------------------------
+    */
+
+    private function getProfile()
+    {
+        $user = Auth::user();
+
+        if ($user->role === 'satpam') {
+            return $user->user_security?->security;
+        }
+
+        if ($user->role === 'cs') {
+            return $user->user_cleaning_service?->cleaning_service;
+        }
+
+        abort(403, 'Role tidak valid.');
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CATEGORY BERDASARKAN ROLE
+    |--------------------------------------------------------------------------
+    */
+
+    private function getCategory()
+    {
+        $user = Auth::user();
+
+        if ($user->role === 'satpam') {
+            return 'security';
+        }
+
+        if ($user->role === 'cs') {
+            return 'cs';
+        }
+
+        abort(403, 'Role tidak valid.');
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | OWNER COLUMN
+    |--------------------------------------------------------------------------
+    |
+    | Digunakan untuk bookmark / application.
+    |
+    */
+
+    private function getOwnerColumn()
+    {
+        $user = Auth::user();
+
+        if ($user->role === 'satpam') {
+            return 'security_id';
+        }
+
+        if ($user->role === 'cs') {
+            return 'cleaning_service_id';
+        }
+
+        abort(403, 'Role tidak valid.');
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | INDEX
+    |--------------------------------------------------------------------------
+    */
+
     public function index()
     {
-        $data['security'] = Security::with([
-            'badgeCertificate',
-            'reminderCertificate:id,security_id,title,expired_date'
-        ])->find(
-            Auth::user()->user_security->security->id
-        );
+        $profile = $this->getProfile();
 
-        $data['profile_progress'] = $data['security']->profileProgress();
-
-        $data['security']->reminderCertificate;
+        if (!$profile) {
+            return redirect()
+                ->back()
+                ->with('swal', [
+                    'icon' => 'error',
+                    'title' => 'Profile Belum Tersedia',
+                    'text' => 'Silakan lengkapi data profile terlebih dahulu.',
+                ]);
+        }
 
 
         /*
         |--------------------------------------------------------------------------
-        | SECURITY ID
+        | PROFILE
         |--------------------------------------------------------------------------
         */
 
-        $securityId = $data['security']->id;
+        $data['profile'] = $profile;
+
+        $data['profile_progress'] = $profile->profileProgress();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | PROFILE CERTIFICATE
+        |--------------------------------------------------------------------------
+        |
+        | Relasi badgeCertificate harus tersedia pada masing-masing model:
+        |
+        | Security
+        | CleaningService
+        |
+        */
+
+        $profile->load([
+            'badgeCertificate',
+            'reminderCertificate:id,' .
+                (
+                    Auth::user()->role === 'satpam'
+                        ? 'security_id'
+                        : 'cleaning_service_id'
+                ) .
+                ',title,expired_date',
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | PROFILE ID
+        |--------------------------------------------------------------------------
+        */
+
+        $profileId = $profile->id;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | JOB CATEGORY
+        |--------------------------------------------------------------------------
+        */
+
+        $category = $this->getCategory();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | OWNER COLUMN
+        |--------------------------------------------------------------------------
+        */
+
+        $ownerColumn = $this->getOwnerColumn();
 
 
         /*
@@ -47,6 +178,7 @@ class HomeController extends Controller
                 'company:id,company_name',
             ])
 
+
             /*
             |--------------------------------------------------------------------------
             | CEK BOOKMARK
@@ -54,15 +186,19 @@ class HomeController extends Controller
             */
 
             ->withExists([
-                'bookmarks as is_bookmarked' => function ($query) use ($securityId) {
+                'bookmarks as is_bookmarked' => function ($query) use (
+                    $ownerColumn,
+                    $profileId
+                ) {
 
                     $query->where(
-                        'security_id',
-                        $securityId
+                        $ownerColumn,
+                        $profileId
                     );
 
                 }
             ])
+
 
             /*
             |--------------------------------------------------------------------------
@@ -71,17 +207,43 @@ class HomeController extends Controller
             */
 
             ->withExists([
-                'applications as is_applied' => function ($query) use ($securityId) {
+                'applications as is_applied' => function ($query) use (
+                    $ownerColumn,
+                    $profileId
+                ) {
 
                     $query->where(
-                        'security_id',
-                        $securityId
+                        $ownerColumn,
+                        $profileId
                     );
 
                 }
             ])
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | CATEGORY SESUAI ROLE
+            |--------------------------------------------------------------------------
+            */
+
+            ->where('category', $category)
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | STATUS
+            |--------------------------------------------------------------------------
+            */
+
             ->where('status', 'published')
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | LOWONGAN BELUM BERAKHIR
+            |--------------------------------------------------------------------------
+            */
 
             ->where(function ($query) {
 
@@ -93,6 +255,7 @@ class HomeController extends Controller
                     );
 
             })
+
 
             ->latest('id')
 
@@ -106,28 +269,69 @@ class HomeController extends Controller
         */
 
         $data['recommendedJobs'] = $this->getRecommendedJobs(
-            $data['security']
+            $profile
         );
+
+        /*
+        |--------------------------------------------------------------------------
+        | CATEGORY ROLE TRAINING
+        |--------------------------------------------------------------------------
+        |
+        | satpam -> security
+        | cs     -> cs
+        |
+        */
+
+        $categoryRole = match (Auth::user()->role) {
+
+            'satpam' => 'security',
+
+            'cs' => 'cs',
+
+            default => null,
+
+        };
 
 
         /*
         |--------------------------------------------------------------------------
-        | PELATIHAN UNGGULAN
+        | FEATURED TRAININGS
         |--------------------------------------------------------------------------
-        |
-        | Maksimal 3 pelatihan
-        | Hanya yang sudah published
-        | Belum melewati tanggal selesai
-        |
         */
 
         $data['featuredTrainings'] = Training::query()
 
             ->where('status', 'published')
 
+            /*
+            |--------------------------------------------------------------------------
+            | FILTER CATEGORY ROLE
+            |--------------------------------------------------------------------------
+            */
+
+            ->when(
+                $categoryRole,
+                function ($query) use ($categoryRole) {
+
+                    $query->where(
+                        'category_role',
+                        $categoryRole
+                    );
+
+                }
+            )
+
+            /*
+            |--------------------------------------------------------------------------
+            | BELUM BERAKHIR
+            |--------------------------------------------------------------------------
+            */
+
             ->where(function ($query) {
 
-                $query->whereNull('end_date')
+                $query
+                    ->whereNull('end_date')
+
                     ->orWhereDate(
                         'end_date',
                         '>=',
@@ -141,30 +345,31 @@ class HomeController extends Controller
             | URUTAN UNGGULAN
             |--------------------------------------------------------------------------
             |
-            | Prioritas:
             | 1. Banyak dilihat
             | 2. Banyak peserta
             | 3. Tanggal pelatihan terdekat
             |
             */
 
-            ->orderByDesc('total_clicked')
-            ->orderByDesc('registered')
-            ->orderBy('start_date')
+            ->orderByDesc(
+                'total_clicked'
+            )
+
+            ->orderByDesc(
+                'registered'
+            )
+
+            ->orderBy(
+                'start_date'
+            )
 
             /*
             |--------------------------------------------------------------------------
-            | HANYA 3
+            | LIMIT
             |--------------------------------------------------------------------------
             */
 
             ->limit(3)
-
-            /*
-            |--------------------------------------------------------------------------
-            | HANYA AMBIL KOLOM YANG DIPERLUKAN
-            |--------------------------------------------------------------------------
-            */
 
             ->get([
                 'uuid',
@@ -174,7 +379,8 @@ class HomeController extends Controller
                 'end_date',
                 'is_certificate',
                 'certificate_name',
-            ]);
+        ]);
+
 
 
         return view(
@@ -183,16 +389,37 @@ class HomeController extends Controller
         );
     }
 
-    private function getRecommendedJobs(Security $security)
+
+    /*
+    |--------------------------------------------------------------------------
+    | RECOMMENDED JOBS
+    |--------------------------------------------------------------------------
+    */
+
+    private function getRecommendedJobs($profile)
     {
         $minimumScore = 65;
 
+        $category = $this->getCategory();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | AMBIL LOWONGAN SESUAI CATEGORY
+        |--------------------------------------------------------------------------
+        */
+
         $jobs = JobVacancy::query()
+
             ->with([
                 'bujp:id,company_name',
                 'company:id,company_name',
             ])
+
+            ->where('category', $category)
+
             ->where('status', 'published')
+
             ->where(function ($query) {
 
                 $query->whereNull('end_date')
@@ -203,14 +430,24 @@ class HomeController extends Controller
                     );
 
             })
+
             ->latest('id')
+
             ->limit(30)
+
             ->get();
 
 
-        $jobs = $jobs->map(function ($job) use ($security) {
+        /*
+        |--------------------------------------------------------------------------
+        | HITUNG MATCHING SCORE
+        |--------------------------------------------------------------------------
+        */
+
+        $jobs = $jobs->map(function ($job) use ($profile) {
 
             $score = 0;
+
 
             /*
             |--------------------------------------------------------------------------
@@ -220,8 +457,8 @@ class HomeController extends Controller
 
             if (
                 !$job->gender ||
-                !$security->gender ||
-                $job->gender === $security->gender
+                !$profile->gender ||
+                $job->gender === $profile->gender
             ) {
                 $score += 10;
             }
@@ -233,19 +470,19 @@ class HomeController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            if ($security->city && $job->city) {
+            if ($profile->city && $job->city) {
 
                 if (
-                    strtolower(trim($security->city)) ===
+                    strtolower(trim($profile->city)) ===
                     strtolower(trim($job->city))
                 ) {
 
                     $score += 20;
 
                 } elseif (
-                    $security->province &&
+                    $profile->province &&
                     $job->province &&
-                    strtolower(trim($security->province)) ===
+                    strtolower(trim($profile->province)) ===
                     strtolower(trim($job->province))
                 ) {
 
@@ -264,7 +501,7 @@ class HomeController extends Controller
 
             if ($job->working_system === 'shift') {
 
-                if ($security->is_shift_agree) {
+                if ($profile->is_shift_agree) {
                     $score += 15;
                 }
 
@@ -282,18 +519,19 @@ class HomeController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            if ($security->is_out_of_town_agree) {
+            if ($profile->is_out_of_town_agree) {
 
                 $score += 10;
 
             } else {
 
-                // Jika tidak mau luar kota,
-                // bonus diberikan jika kota sama
+                // Tidak mau luar kota.
+                // Bonus jika kota sama.
+
                 if (
-                    $security->city &&
+                    $profile->city &&
                     $job->city &&
-                    strtolower(trim($security->city)) ===
+                    strtolower(trim($profile->city)) ===
                     strtolower(trim($job->city))
                 ) {
                     $score += 10;
@@ -308,41 +546,67 @@ class HomeController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $securityCertificates = collect($security->badgeCertificate)
-            ->pluck('title')
-            ->map(fn ($item) => strtolower(trim($item)))
-            ->toArray();
+            $profileCertificates = collect(
+                $profile->badgeCertificate
+            )
+                ->pluck('title')
+                ->map(function ($item) {
+
+                    return strtolower(
+                        trim($item)
+                    );
+
+                })
+                ->toArray();
 
 
             $jobCertificates = [];
 
+
             if ($job->certificate) {
 
-                $decoded = json_decode($job->certificate, true);
+                $decoded = json_decode(
+                    $job->certificate,
+                    true
+                );
 
                 if (is_array($decoded)) {
+
                     $jobCertificates = $decoded;
+
                 } else {
-                    $jobCertificates = [$job->certificate];
+
+                    $jobCertificates = [
+                        $job->certificate
+                    ];
+
                 }
 
             }
 
 
-            $jobCertificates = collect($jobCertificates)
-                ->map(fn ($item) => strtolower(trim($item)))
+            $jobCertificates = collect(
+                $jobCertificates
+            )
+                ->map(function ($item) {
+
+                    return strtolower(
+                        trim($item)
+                    );
+
+                })
                 ->toArray();
 
 
             if (count($jobCertificates) === 0) {
 
-                // Lowongan tidak mensyaratkan sertifikat
+                // Lowongan tidak membutuhkan sertifikat.
                 $score += 25;
 
             } else {
 
                 $certificateMatch = array_intersect(
-                    $securityCertificates,
+                    $profileCertificates,
                     $jobCertificates
                 );
 
@@ -367,41 +631,72 @@ class HomeController extends Controller
             $positionMatched = false;
 
 
-            // Posisi sekarang
-            if ($security->position) {
+            /*
+            |--------------------------------------------------------------------------
+            | POSISI SEKARANG
+            |--------------------------------------------------------------------------
+            */
 
-                $securityPosition = strtolower(
-                    trim($security->position)
+            if ($profile->position) {
+
+                $profilePosition = strtolower(
+                    trim($profile->position)
                 );
 
                 if (
-                    str_contains($jobPosition, $securityPosition) ||
-                    str_contains($securityPosition, $jobPosition)
+                    str_contains(
+                        $jobPosition,
+                        $profilePosition
+                    ) ||
+                    str_contains(
+                        $profilePosition,
+                        $jobPosition
+                    )
                 ) {
+
                     $positionMatched = true;
+
                 }
 
             }
 
 
-            // Riwayat pekerjaan
-            if (!$positionMatched && $security->histories) {
+            /*
+            |--------------------------------------------------------------------------
+            | RIWAYAT PEKERJAAN
+            |--------------------------------------------------------------------------
+            */
 
-                foreach ($security->histories as $history) {
+            if (
+                !$positionMatched &&
+                $profile->histories
+            ) {
+
+                foreach (
+                    $profile->histories as $history
+                ) {
 
                     $historyPosition = strtolower(
                         trim($history->position ?? '')
                     );
 
+
                     if (
                         $historyPosition &&
                         (
-                            str_contains($jobPosition, $historyPosition) ||
-                            str_contains($historyPosition, $jobPosition)
+                            str_contains(
+                                $jobPosition,
+                                $historyPosition
+                            ) ||
+                            str_contains(
+                                $historyPosition,
+                                $jobPosition
+                            )
                         )
                     ) {
 
                         $positionMatched = true;
+
                         break;
 
                     }
@@ -423,20 +718,24 @@ class HomeController extends Controller
             */
 
             if (
-                $security->birth_date &&
-                ($job->min_age || $job->max_age)
+                $profile->birth_date &&
+                (
+                    $job->min_age ||
+                    $job->max_age
+                )
             ) {
 
                 try {
 
-                    $age = \Carbon\Carbon::parse(
-                        $security->birth_date
+                    $age = Carbon::parse(
+                        $profile->birth_date
                     )->age;
 
 
                     $minAge = $job->min_age
                         ? (int) $job->min_age
                         : null;
+
 
                     $maxAge = $job->max_age
                         ? (int) $job->max_age
@@ -446,11 +745,18 @@ class HomeController extends Controller
                     $ageMatch = true;
 
 
-                    if ($minAge && $age < $minAge) {
+                    if (
+                        $minAge &&
+                        $age < $minAge
+                    ) {
                         $ageMatch = false;
                     }
 
-                    if ($maxAge && $age > $maxAge) {
+
+                    if (
+                        $maxAge &&
+                        $age > $maxAge
+                    ) {
                         $ageMatch = false;
                     }
 
@@ -460,16 +766,24 @@ class HomeController extends Controller
                     }
 
                 } catch (\Throwable $e) {
-                    // abaikan jika format tanggal tidak valid
+
+                    // Abaikan jika format tanggal tidak valid.
+
                 }
 
             } else {
 
-                // Tidak ada batas usia
+                // Tidak ada batas usia.
                 $score += 5;
 
             }
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | SIMPAN MATCH SCORE
+            |--------------------------------------------------------------------------
+            */
 
             $job->match_score = $score;
 
@@ -478,36 +792,137 @@ class HomeController extends Controller
         });
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | HASIL AKHIR
+        |--------------------------------------------------------------------------
+        */
+
         return $jobs
+
             ->sortByDesc('match_score')
-            ->filter(fn ($job) => $job->match_score >= $minimumScore)
+
+            ->filter(
+                fn ($job) =>
+                    $job->match_score >= $minimumScore
+            )
+
             ->take(3)
+
             ->values();
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | LOAD JOBS
+    |--------------------------------------------------------------------------
+    */
+
     public function loadJobs(Request $request)
     {
-        $securityId = Auth::user()
-            ->user_security
-            ->security
-            ->id;
+        $profile = $this->getProfile();
+
+        if (!$profile) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Data profile belum tersedia.',
+            ], 422);
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | PROFILE ID
+        |--------------------------------------------------------------------------
+        */
+
+        $profileId = $profile->id;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CATEGORY
+        |--------------------------------------------------------------------------
+        */
+
+        $category = $this->getCategory();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | OWNER COLUMN
+        |--------------------------------------------------------------------------
+        */
+
+        $ownerColumn = $this->getOwnerColumn();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | JOB
+        |--------------------------------------------------------------------------
+        */
 
         $jobs = JobVacancy::query()
+
             ->with([
                 'bujp:id,company_name',
                 'company:id,company_name',
             ])
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CEK BOOKMARK
+            |--------------------------------------------------------------------------
+            */
+
             ->withExists([
-                'bookmarks as is_bookmarked' => function ($query) use ($securityId) {
+                'bookmarks as is_bookmarked' => function ($query) use (
+                    $ownerColumn,
+                    $profileId
+                ) {
 
                     $query->where(
-                        'security_id',
-                        $securityId
+                        $ownerColumn,
+                        $profileId
                     );
 
                 }
             ])
-            ->where('status', 'published')
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CATEGORY
+            |--------------------------------------------------------------------------
+            */
+
+            ->where(
+                'category',
+                $category
+            )
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | STATUS
+            |--------------------------------------------------------------------------
+            */
+
+            ->where(
+                'status',
+                'published'
+            )
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | BELUM BERAKHIR
+            |--------------------------------------------------------------------------
+            */
+
             ->where(function ($query) {
 
                 $query->whereNull('end_date')
@@ -518,10 +933,21 @@ class HomeController extends Controller
                     );
 
             })
+
+
             ->latest('id')
+
             ->paginate(5);
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | RENDER CARD
+        |--------------------------------------------------------------------------
+        */
+
         $html = '';
+
 
         foreach ($jobs as $job) {
 
@@ -531,6 +957,7 @@ class HomeController extends Controller
             )->render();
 
         }
+
 
         return response()->json([
             'html' => $html,

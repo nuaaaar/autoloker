@@ -4,210 +4,383 @@
 
 @section('css')
     <style>
-        .company-wrapper{
+        /* =========================================================
+        THEME VARIABLES
+        ========================================================= */
 
-            background:#11192d;
+        :root,
+        [data-bs-theme="light"] {
+            --company-bg: #ffffff;
+            --company-surface: #ffffff;
+            --company-surface-soft: #f8fafc;
 
-            border:1px solid rgba(255,255,255,.06);
+            --company-text: #182338;
+            --company-text-secondary: #64748b;
+            --company-text-muted: #94a3b8;
 
-            border-radius:20px;
+            --company-border: #e2e8f0;
+            --company-border-soft: rgba(15, 23, 42, .07);
 
-            overflow:hidden;
+            --company-gold: #f7b003;
+            --company-gold-hover: #ffc928;
+            --company-gold-soft: rgba(247, 176, 3, .10);
+            --company-gold-border: rgba(247, 176, 3, .35);
 
+            --company-logo-border: #ffffff;
+
+            --company-cover-start: #f7b003;
+            --company-cover-end: #dfe6f1;
+
+            --company-table-text: #64748b;
+            --company-table-border: #e5e7eb;
+
+            --company-empty: #64748b;
+
+            --company-shadow: 0 6px 20px rgba(15, 23, 42, .06);
         }
 
-        .company-cover{
 
-            height:170px;
+        [data-bs-theme="dark"] {
+            --company-bg: #11192d;
+            --company-surface: #11192d;
+            --company-surface-soft: #18233d;
 
-            background:linear-gradient(135deg,#f7b003,#1c2848);
+            --company-text: #ffffff;
+            --company-text-secondary: #91a0bc;
+            --company-text-muted: #73819d;
 
+            --company-border: rgba(255, 255, 255, .06);
+            --company-border-soft: rgba(255, 255, 255, .05);
+
+            --company-gold: #f7b003;
+            --company-gold-hover: #ffc928;
+            --company-gold-soft: rgba(247, 176, 3, .12);
+            --company-gold-border: rgba(247, 176, 3, .35);
+
+            --company-logo-border: #11192d;
+
+            --company-cover-start: #f7b003;
+            --company-cover-end: #1c2848;
+
+            --company-table-text: #9ca9c5;
+            --company-table-border: rgba(255, 255, 255, .05);
+
+            --company-empty: #90a0be;
+
+            --company-shadow: 0 6px 20px rgba(0, 0, 0, .18);
         }
 
-        .company-header{
 
-            display:flex;
+        /* =========================================================
+        COMPANY WRAPPER
+        ========================================================= */
 
-            gap:25px;
+        .company-wrapper {
+            background: var(--company-surface);
 
-            padding:0 24px 24px;
+            border: 1px solid var(--company-border);
+            border-radius: 20px;
 
-            margin-top:-55px;
+            overflow: hidden;
 
+            box-shadow: var(--company-shadow);
         }
 
-        .company-logo{
 
-            width:110px;
+        /* =========================================================
+        COMPANY COVER
+        ========================================================= */
 
-            height:110px;
+        .company-cover {
+            height: 170px;
 
-            object-fit:cover;
-
-            border-radius:18px;
-
-            background:#fff;
-
-            border:4px solid #11192d;
-
+            background: linear-gradient(
+                135deg,
+                var(--company-cover-start),
+                var(--company-cover-end)
+            );
         }
 
-        .company-name{
 
-            color:#fff;
+        /* =========================================================
+        COMPANY HEADER
+        ========================================================= */
 
-            font-size:22px;
+        .company-header {
+            display: flex;
+            gap: 25px;
 
-            font-weight:700;
+            padding: 0 24px 24px;
 
-            margin-top:55px;
-
+            margin-top: -55px;
         }
 
-        .company-industry{
 
-            color:#f7b003;
+        /* =========================================================
+        COMPANY LOGO
+        ========================================================= */
 
-            font-size:13px;
+        .company-logo {
+            width: 110px;
+            height: 110px;
 
-            margin-top:4px;
+            object-fit: cover;
 
+            border-radius: 18px;
+
+            background: #fff;
+
+            border: 4px solid var(--company-logo-border);
+
+            box-shadow: 0 4px 12px rgba(15, 23, 42, .12);
         }
 
-        .company-location{
 
-            color:#91a0bc;
+        /* =========================================================
+        COMPANY NAME
+        ========================================================= */
 
-            font-size:12px;
+        .company-name {
+            color: var(--company-text);
 
-            margin-top:6px;
+            font-size: 22px;
+            font-weight: 700;
 
+            margin-top: 55px;
         }
 
-        .company-title{
 
-            padding:14px 24px;
+        /* =========================================================
+        COMPANY INDUSTRY
+        ========================================================= */
 
-            font-size:14px;
+        .company-industry {
+            color: var(--company-gold);
 
-            font-weight:700;
+            font-size: 13px;
 
-            color:#fff;
-
-            border-bottom:1px solid rgba(255,255,255,.05);
-
+            margin-top: 4px;
         }
 
-        .company-body{
 
-            padding:24px;
+        /* =========================================================
+        COMPANY LOCATION
+        ========================================================= */
 
-            color:#9ca9c5;
+        .company-location {
+            color: var(--company-text-secondary);
 
-            font-size:13px;
+            font-size: 12px;
 
-            line-height:1.8;
-
+            margin-top: 6px;
         }
 
-        .company-item{
 
-            margin-bottom:18px;
+        /* =========================================================
+        COMPANY TITLE
+        ========================================================= */
 
+        .company-title {
+            padding: 14px 24px;
+
+            font-size: 14px;
+            font-weight: 700;
+
+            color: var(--company-text);
+
+            border-bottom: 1px solid var(--company-border-soft);
+
+            background: transparent;
         }
 
-        .company-item:last-child{
 
-            margin-bottom:0;
+        /* =========================================================
+        COMPANY BODY
+        ========================================================= */
 
+        .company-body {
+            padding: 24px;
+
+            color: var(--company-text-secondary);
+
+            font-size: 13px;
+
+            line-height: 1.8;
         }
 
-        .table-dark{
 
-            --bs-table-bg:transparent;
+        /* =========================================================
+        COMPANY ITEM
+        ========================================================= */
 
+        .company-item {
+            margin-bottom: 18px;
         }
 
-        .table-dark td{
-
-            color:#9ca9c5;
-
-            border-color:rgba(255,255,255,.05);
-
+        .company-item:last-child {
+            margin-bottom: 0;
         }
 
-        .company-edit-btn{
 
-            width:100%;
+        /* =========================================================
+        TABLE
+        ========================================================= */
 
-            border-radius:12px;
+        .company-wrapper .table-dark {
+            --bs-table-bg: transparent;
+            --bs-table-color: var(--company-table-text);
+        }
 
-            font-size:11px;
 
-            font-weight:600;
+        .company-wrapper .table-dark td {
+            color: var(--company-table-text);
+
+            border-color: var(--company-table-border);
+
+            background: transparent;
+        }
+
+
+        .company-wrapper .table-dark th {
+            color: var(--company-text);
+
+            border-color: var(--company-table-border);
+
+            background: transparent;
+        }
+
+
+        /* =========================================================
+        EDIT BUTTON
+        ========================================================= */
+
+        .company-edit-btn {
+            width: 100%;
+
+            border-radius: 12px;
+
+            font-size: 11px;
+            font-weight: 600;
 
             padding: 5px 16px;
 
-            transition:.25s;
-
+            transition: .25s;
         }
 
-        .company-edit-btn:hover{
 
-            transform:translateY(-2px);
+        .company-edit-btn:hover {
+            transform: translateY(-2px);
 
-            box-shadow:0 8px 20px rgba(247,176,3,.25);
-
+            box-shadow: 0 8px 20px rgba(247, 176, 3, .25);
         }
 
-        .company-empty{
 
-            display:inline-flex;
-            align-items:center;
-            gap:6px;
+        /* =========================================================
+        EMPTY STATE
+        ========================================================= */
 
-            color:#90a0be;
+        .company-empty {
+            display: inline-flex;
 
-            font-size:12px;
+            align-items: center;
 
-            font-style:italic;
+            gap: 6px;
 
+            color: var(--company-empty);
+
+            font-size: 12px;
+
+            font-style: italic;
         }
 
-        .company-empty i{
 
-            color:#f7b003;
-
+        .company-empty i {
+            color: var(--company-gold);
         }
 
-        .company-empty-badge{
 
-            display:inline-block;
+        /* =========================================================
+        EMPTY BADGE
+        ========================================================= */
 
-            margin-left:8px;
+        .company-empty-badge {
+            display: inline-block;
 
-            padding:3px 8px;
+            margin-left: 8px;
 
-            border-radius:999px;
+            padding: 3px 8px;
 
-            background:rgba(247,176,3,.12);
+            border-radius: 999px;
 
-            border:1px solid rgba(247,176,3,.35);
+            background: var(--company-gold-soft);
 
-            color:#f7b003;
+            border: 1px solid var(--company-gold-border);
 
-            font-size:10px;
+            color: var(--company-gold);
 
-            font-weight:600;
+            font-size: 10px;
 
+            font-weight: 600;
         }
 
-        .company-social-disabled{
 
-            opacity:.45;
+        /* =========================================================
+        SOCIAL DISABLED
+        ========================================================= */
 
-            pointer-events:none;
+        .company-social-disabled {
+            opacity: .45;
 
+            pointer-events: none;
+        }
+
+
+        /* =========================================================
+        RESPONSIVE
+        ========================================================= */
+
+        @media (max-width: 768px) {
+
+            .company-cover {
+                height: 140px;
+            }
+
+            .company-header {
+                gap: 16px;
+
+                padding: 0 18px 20px;
+
+                margin-top: -45px;
+            }
+
+            .company-logo {
+                width: 85px;
+                height: 85px;
+
+                border-radius: 15px;
+            }
+
+            .company-name {
+                font-size: 19px;
+
+                margin-top: 45px;
+            }
+
+            .company-industry {
+                font-size: 12px;
+            }
+
+            .company-location {
+                font-size: 11px;
+            }
+
+            .company-title {
+                padding: 13px 18px;
+            }
+
+            .company-body {
+                padding: 18px;
+            }
         }
     </style>
 

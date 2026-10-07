@@ -3,33 +3,133 @@
 namespace App\Http\Controllers\UserPage;
 
 use App\Models\TrainingApplication;
+
 use App\Http\Controllers\Controller;
+
 use Illuminate\Http\Request;
+
 use App\Models\Training;
+
 use App\Models\Security;
+
+use App\Models\CleaningService;
+
 use Auth;
 
 class TrainingApplicationController extends Controller
 {
+    /**
+     * Get profile berdasarkan role user.
+     */
+    private function getProfile()
+    {
+        $user = Auth::user();
+
+        if ($user->role === 'satpam') {
+            return $user->user_security?->security;
+        }
+
+        if ($user->role === 'cs') {
+            return $user->user_cleaning_service?->cleaning_service;
+        }
+
+        abort(403, 'Role tidak valid.');
+    }
+
+    /**
+     * Get category_role berdasarkan role user.
+     */
+    private function getCategoryRole()
+    {
+        $user = Auth::user();
+
+        if ($user->role === 'satpam') {
+            return 'security';
+        }
+
+        if ($user->role === 'cs') {
+            return 'cs';
+        }
+
+        abort(403, 'Role tidak valid.');
+    }
+
+    /**
+     * Get owner column berdasarkan role user.
+     */
+    private function getOwnerColumn()
+    {
+        $user = Auth::user();
+
+        if ($user->role === 'satpam') {
+            return 'security_id';
+        }
+
+        if ($user->role === 'cs') {
+            return 'cleaning_service_id';
+        }
+
+        abort(403, 'Role tidak valid.');
+    }
 
     public function applyTraining($uuid)
     {
-        $security = Auth::user()
-            ->user_security
-            ->security;
+        /*
+        |--------------------------------------------------------------------------
+        | PROFILE
+        |--------------------------------------------------------------------------
+        */
+
+        $security = $this->getProfile();
+
+        if (!$security) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data profile belum tersedia.'
+            ], 403);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | CATEGORY ROLE & OWNER
+        |--------------------------------------------------------------------------
+        */
+
+        $categoryRole = $this->getCategoryRole();
+
+        $ownerColumn = $this->getOwnerColumn();
+
+        /*
+        |--------------------------------------------------------------------------
+        | TRAINING
+        |--------------------------------------------------------------------------
+        */
 
         $training = Training::where('uuid', $uuid)
+            ->where('category_role', $categoryRole)
             ->firstOrFail();
 
-        // Cek apakah sudah memiliki pendaftaran aktif
-        $application = TrainingApplication::where('security_id', $security->id)
+        /*
+        |--------------------------------------------------------------------------
+        | CEK APAKAH SUDAH MEMILIKI PENDAFTARAN AKTIF
+        |--------------------------------------------------------------------------
+        */
+
+        $application = TrainingApplication::where(
+            $ownerColumn,
+            $security->id
+        )
             ->where('training_id', $training->id)
-            ->whereIn('status', ['pending', 'approved'])
+            ->whereIn('status', [
+                'pending',
+                'approved'
+            ])
             ->first();
 
         if ($application) {
 
             if ($application->status === 'approved') {
+
                 return response()->json([
                     'success' => false,
                     'message' => 'Anda sudah terdaftar pada pelatihan ini.'
@@ -42,21 +142,28 @@ class TrainingApplicationController extends Controller
             ], 422);
         }
 
-        // Cek tanggal mulai
+        /*
+        |--------------------------------------------------------------------------
+        | CEK TANGGAL MULAI
+        |--------------------------------------------------------------------------
+        */
+
         if (
             $training->start_date &&
             now()->startOfDay()->gt($training->start_date)
         ) {
-
             return response()->json([
                 'success' => false,
                 'message' => 'Pendaftaran pelatihan sudah ditutup.'
             ], 422);
         }
 
-        // =====================================================
-        // CEK KUOTA - HANYA YANG APPROVED
-        // =====================================================
+        /*
+        |--------------------------------------------------------------------------
+        | CEK KUOTA
+        | HANYA YANG APPROVED
+        |--------------------------------------------------------------------------
+        */
 
         if ($training->quota > 0) {
 
@@ -64,8 +171,8 @@ class TrainingApplicationController extends Controller
                 'training_id',
                 $training->id
             )
-            ->where('status', 'approved')
-            ->count();
+                ->where('status', 'approved')
+                ->count();
 
             if ($totalApproved >= $training->quota) {
 
@@ -76,12 +183,14 @@ class TrainingApplicationController extends Controller
             }
         }
 
-        // =====================================================
-        // BUAT PENDAFTARAN
-        // =====================================================
+        /*
+        |--------------------------------------------------------------------------
+        | BUAT PENDAFTARAN
+        |--------------------------------------------------------------------------
+        */
 
         TrainingApplication::create([
-            'security_id' => $security->id,
+            $ownerColumn => $security->id,
             'training_id' => $training->id,
             'status' => 'pending',
         ]);
@@ -94,19 +203,53 @@ class TrainingApplicationController extends Controller
 
     public function cancelTrainingApplication($uuid)
     {
-        $security = Auth::user()
-            ->user_security
-            ->security;
+        /*
+        |--------------------------------------------------------------------------
+        | PROFILE
+        |--------------------------------------------------------------------------
+        */
+
+        $security = $this->getProfile();
+
+        if (!$security) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data profile belum tersedia.'
+            ], 403);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | CATEGORY ROLE & OWNER
+        |--------------------------------------------------------------------------
+        */
+
+        $categoryRole = $this->getCategoryRole();
+
+        $ownerColumn = $this->getOwnerColumn();
+
+        /*
+        |--------------------------------------------------------------------------
+        | TRAINING
+        |--------------------------------------------------------------------------
+        */
 
         $training = Training::where('uuid', $uuid)
+            ->where('category_role', $categoryRole)
             ->firstOrFail();
 
+        /*
+        |--------------------------------------------------------------------------
+        | CARI PENDAFTARAN
+        |--------------------------------------------------------------------------
+        */
+
         $application = TrainingApplication::where(
-            'security_id',
+            $ownerColumn,
             $security->id
         )
-        ->where('training_id', $training->id)
-        ->first();
+            ->where('training_id', $training->id)
+            ->first();
 
         if (!$application) {
 
@@ -116,7 +259,12 @@ class TrainingApplicationController extends Controller
             ], 404);
         }
 
-        // HANYA PENDING YANG BOLEH DIBATALKAN
+        /*
+        |--------------------------------------------------------------------------
+        | HANYA PENDING YANG BOLEH DIBATALKAN
+        |--------------------------------------------------------------------------
+        */
+
         if ($application->status !== 'pending') {
 
             if ($application->status === 'approved') {
@@ -134,6 +282,12 @@ class TrainingApplicationController extends Controller
             ], 422);
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | DELETE APPLICATION
+        |--------------------------------------------------------------------------
+        */
+
         $application->delete();
 
         return response()->json([
@@ -141,7 +295,7 @@ class TrainingApplicationController extends Controller
             'message' => 'Pendaftaran pelatihan berhasil dibatalkan.'
         ]);
     }
-    
+
     /**
      * Display a listing of the resource.
      */
@@ -185,16 +339,19 @@ class TrainingApplicationController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, TrainingApplication $trainingApplication)
-    {
+    public function update(
+        Request $request,
+        TrainingApplication $trainingApplication
+    ) {
         //
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(TrainingApplication $trainingApplication)
-    {
+    public function destroy(
+        TrainingApplication $trainingApplication
+    ) {
         //
     }
 }

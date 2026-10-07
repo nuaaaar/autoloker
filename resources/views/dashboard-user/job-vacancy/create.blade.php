@@ -4,687 +4,691 @@
 
 @section('css')
     <style>
-        /* ==============================
+        /* =========================================================
+        THEME VARIABLES
+        ========================================================= */
+
+        :root,
+        [data-bs-theme="light"] {
+            --vacancy-bg: #ffffff;
+            --vacancy-surface: #ffffff;
+            --vacancy-surface-soft: #f8fafc;
+
+            --vacancy-text: #182338;
+            --vacancy-text-secondary: #64748b;
+            --vacancy-text-muted: #94a3b8;
+
+            --vacancy-border: #e2e8f0;
+            --vacancy-border-soft: rgba(15, 23, 42, .07);
+
+            --vacancy-step-bg: #f8fafc;
+            --vacancy-step-text: #64748b;
+            --vacancy-step-hover: #eef2f7;
+
+            --vacancy-gold: #e8a801;
+            --vacancy-gold-hover: #f2b600;
+            --vacancy-gold-text: #111827;
+            --vacancy-gold-soft: rgba(232, 168, 1, .10);
+            --vacancy-gold-border: rgba(232, 168, 1, .40);
+
+            --vacancy-footer-bg: #f8fafc;
+
+            --builder-bg: #ffffff;
+            --builder-input-bg: #f8fafc;
+            --builder-item-bg: #f8fafc;
+            --builder-action-bg: #eef2f7;
+
+            --builder-text: #182338;
+            --builder-text-secondary: #64748b;
+            --builder-text-muted: #94a3b8;
+
+            --builder-border: #e2e8f0;
+            --builder-border-soft: rgba(15, 23, 42, .07);
+
+            --builder-gold: #c7932b;
+            --builder-gold-light: #f5b942;
+            --builder-gold-soft: rgba(199, 147, 43, .10);
+
+            --option-bg: #f8fafc;
+            --option-text: #64748b;
+            --option-border: #e2e8f0;
+
+            --certificate-bg: #f8fafc;
+            --certificate-text: #64748b;
+            --certificate-border: #e2e8f0;
+
+            --danger: #dc3545;
+        }
+
+
+        [data-bs-theme="dark"] {
+            --vacancy-bg: #11192c;
+            --vacancy-surface: #11192c;
+            --vacancy-surface-soft: #0b1020;
+
+            --vacancy-text: #ffffff;
+            --vacancy-text-secondary: #95a2bd;
+            --vacancy-text-muted: #73819d;
+
+            --vacancy-border: rgba(255, 255, 255, .06);
+            --vacancy-border-soft: rgba(255, 255, 255, .05);
+
+            --vacancy-step-bg: #182338;
+            --vacancy-step-text: #94a3b8;
+            --vacancy-step-hover: #182338;
+
+            --vacancy-gold: #e8a801;
+            --vacancy-gold-hover: #f2b600;
+            --vacancy-gold-text: #121212;
+            --vacancy-gold-soft: rgba(232, 168, 1, .12);
+            --vacancy-gold-border: rgba(232, 168, 1, .45);
+
+            --vacancy-footer-bg: #121c33;
+
+            --builder-bg: #11192c;
+            --builder-input-bg: #0b1020;
+            --builder-item-bg: #0b1020;
+            --builder-action-bg: #18243d;
+
+            --builder-text: #ffffff;
+            --builder-text-secondary: #8c98b3;
+            --builder-text-muted: #73819d;
+
+            --builder-border: rgba(255, 255, 255, .06);
+            --builder-border-soft: rgba(255, 255, 255, .05);
+
+            --builder-gold: #c7932b;
+            --builder-gold-light: #f5b942;
+            --builder-gold-soft: rgba(199, 147, 43, .15);
+
+            --option-bg: #0b1020;
+            --option-text: #93a3be;
+            --option-border: rgba(255, 255, 255, .08);
+
+            --certificate-bg: #0d1426;
+            --certificate-text: #97a5bf;
+            --certificate-border: rgba(255, 255, 255, .10);
+
+            --danger: #dc3545;
+        }
+
+
+        /* =========================================================
         STEP WRAPPER
-        ================================= */
+        ========================================================= */
 
-        .vacancy-step-wrapper{
+        .vacancy-step-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 20px 24px;
 
-            display:flex;
-            align-items:center;
-            gap:12px;
+            border-top: 1px solid var(--vacancy-border-soft);
+            border-bottom: 1px solid var(--vacancy-border-soft);
 
-            padding:20px 24px;
+            background: var(--vacancy-surface);
 
-            border-top:1px solid rgba(255,255,255,.05);
-            border-bottom:1px solid rgba(255,255,255,.05);
+            overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
 
-            overflow-x:auto;
-            overflow-y:hidden;
-
-            white-space:nowrap;
-
-            scrollbar-width:none;
-
+            scrollbar-width: none;
         }
 
-        .vacancy-step-wrapper::-webkit-scrollbar{
-
-            display:none;
-
+        .vacancy-step-wrapper::-webkit-scrollbar {
+            display: none;
         }
 
 
-        /* ==============================
+        /* =========================================================
         STEP BUTTON
-        ================================= */
+        ========================================================= */
 
-        .vacancy-step{
+        .vacancy-step {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
 
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            gap:10px;
+            min-width: max-content;
+            height: 52px;
+            padding: 0 22px;
 
-            min-width:max-content;
+            border-radius: 14px;
+            border: 1px solid transparent;
 
-            height:52px;
+            cursor: pointer;
+            transition: .25s;
 
-            padding:0 22px;
+            color: var(--vacancy-step-text);
+            background: transparent;
 
-            border-radius:14px;
-
-            cursor:pointer;
-
-            transition:.25s;
-
-            color:#94A3B8;
-
-            border:1px solid transparent;
-
-            font-size:15px;
-
-            font-weight:600;
-
+            font-size: 15px;
+            font-weight: 600;
         }
 
-        .vacancy-step i{
-
-            font-size:18px;
-
-            color:inherit;
-
+        .vacancy-step i {
+            font-size: 18px;
+            color: inherit;
         }
 
-        .vacancy-step:hover{
-
-            background:#182338;
-
-            color:#fff;
-
+        .vacancy-step:hover {
+            background: var(--vacancy-step-hover);
+            color: var(--vacancy-text);
         }
 
 
-        /* ==============================
-        ACTIVE
-        ================================= */
+        /* =========================================================
+        ACTIVE STEP
+        ========================================================= */
 
-        .vacancy-step.active{
-
-            background:rgba(232,168,1,.12);
-
-            border:1px solid rgba(232,168,1,.45);
-
-            color:#E8A801;
-
+        .vacancy-step.active {
+            background: var(--vacancy-gold-soft);
+            border-color: var(--vacancy-gold-border);
+            color: var(--vacancy-gold);
         }
 
-        .vacancy-step.active i{
-
-            color:#E8A801;
-
+        .vacancy-step.active i {
+            color: var(--vacancy-gold);
         }
 
 
-        /* ==============================
+        /* =========================================================
         BODY
-        ================================= */
+        ========================================================= */
 
-        .vacancy-section{
-
-            animation:fadeSection .25s ease;
-
+        .vacancy-section {
+            animation: fadeSection .25s ease;
         }
 
-        @keyframes fadeSection{
-
-            from{
-
-                opacity:0;
-                transform:translateY(8px);
-
+        @keyframes fadeSection {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
             }
 
-            to{
-
-                opacity:1;
-                transform:translateY(0);
-
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
-
         }
 
 
-        /* ==============================
+        /* =========================================================
         FOOTER
-        ================================= */
+        ========================================================= */
 
-        .card-footer{
-
-            border-top:1px solid rgba(255,255,255,.05);
-
-            background:#121C33;
-
+        .card-footer {
+            border-top: 1px solid var(--vacancy-border-soft);
+            background: var(--vacancy-footer-bg);
         }
 
 
-        /* ==============================
+        /* =========================================================
         BUTTON
-        ================================= */
+        ========================================================= */
 
         #btnBack,
         #btnDraft,
         #btnNext,
-        #btnSubmit{
-
-            min-width:170px;
-
-            height:48px;
-
-            border-radius:12px;
-
-            font-weight:600;
-
+        #btnSubmit {
+            min-width: 170px;
+            height: 48px;
+            border-radius: 12px;
+            font-weight: 600;
         }
 
-        #btnDraft{
 
-            background:#1B2438;
+        /* Draft */
 
-            color:#fff;
-
-            border:1px solid rgba(255,255,255,.08);
-
+        #btnDraft {
+            background: var(--builder-action-bg);
+            color: var(--vacancy-text);
+            border: 1px solid var(--vacancy-border);
         }
 
-        #btnDraft:hover{
-
-            background:#24314C;
-
+        #btnDraft:hover {
+            background: var(--vacancy-step-hover);
         }
+
+
+        /* Next / Submit */
 
         #btnNext,
-        #btnSubmit{
-
-            background:#E8A801;
-
-            border:none;
-
-            color:#121212;
-
+        #btnSubmit {
+            background: var(--vacancy-gold);
+            border: none;
+            color: var(--vacancy-gold-text);
         }
 
         #btnNext:hover,
-        #btnSubmit:hover{
-
-            background:#F2B600;
-
+        #btnSubmit:hover {
+            background: var(--vacancy-gold-hover);
         }
 
-        @media(max-width:768px){
 
-            .vacancy-step{
+        /* =========================================================
+        JOB BUILDER
+        ========================================================= */
 
-                padding:0 16px;
-
-                height:46px;
-
-                font-size:14px;
-
-            }
-
-            .vacancy-step i{
-
-                font-size:16px;
-
-            }
-
-            #btnBack,
-            #btnDraft,
-            #btnNext,
-            #btnSubmit{
-
-                min-width:auto;
-
-                flex:1;
-
-            }
-
-            .card-footer{
-
-                display:flex;
-
-                gap:10px;
-
-                flex-wrap:wrap;
-
-            }
-
+        .job-builder {
+            background: var(--builder-bg);
+            border: 1px solid var(--builder-border);
+            border-radius: 16px;
+            padding: 24px;
         }
 
-        .job-builder{
 
-            background:#11192c;
+        /* =========================================================
+        BUILDER HEADER
+        ========================================================= */
 
-            border:1px solid rgba(255,255,255,.06);
-
-            border-radius:16px;
-
-            padding:24px;
-
+        .builder-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
         }
 
-        .builder-header{
-
-            display:flex;
-
-            justify-content:space-between;
-
-            align-items:center;
-
-            margin-bottom:20px;
-
+        .builder-title {
+            color: var(--builder-text);
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
         }
 
-        .builder-title{
-
-            color:#fff;
-
-            font-size:18px;
-
-            font-weight:700;
-
-            margin-bottom:4px;
-
+        .builder-subtitle {
+            color: var(--builder-text-secondary);
+            font-size: 13px;
         }
 
-        .builder-subtitle{
 
-            color:#8c98b3;
+        /* =========================================================
+        BUILDER INPUT
+        ========================================================= */
 
-            font-size:13px;
-
+        .builder-input {
+            margin-bottom: 20px;
         }
 
-        .builder-input{
-
-            margin-bottom:20px;
-
+        .builder-input .input-group {
+            background: var(--builder-input-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--builder-border);
         }
 
-        .builder-input .input-group{
-
-            background:#0b1020;
-
-            border-radius:12px;
-
-            overflow:hidden;
-
-            border:1px solid rgba(255,255,255,.07);
-
+        .builder-input .input-group-text {
+            background: var(--builder-input-bg);
+            border: none;
+            color: var(--builder-text-secondary);
         }
 
-        .builder-input .input-group-text{
-
-            background:#0b1020;
-
-            border:none;
-
-            color:#8fa7c6;
-
+        .builder-input input {
+            background: var(--builder-input-bg);
+            border: none;
+            color: var(--builder-text);
+            height: 54px;
         }
 
-        .builder-input input{
-
-            background:#0b1020;
-
-            border:none;
-
-            color:#fff;
-
-            height:54px;
-
+        .builder-input input::placeholder {
+            color: var(--builder-text-muted);
         }
 
-        .builder-input input:focus{
-
-            background:#0b1020;
-
-            color:#fff;
-
-            box-shadow:none;
-
+        .builder-input input:focus {
+            background: var(--builder-input-bg);
+            color: var(--builder-text);
+            box-shadow: none;
         }
 
-        .builder-input .btn{
-
-            border-radius:0;
-
-            padding:0 24px;
-
-            font-weight:600;
-
+        .builder-input .btn {
+            border-radius: 0;
+            padding: 0 24px;
+            font-weight: 600;
         }
 
-        .builder-list{
 
-            display:flex;
+        /* =========================================================
+        BUILDER LIST
+        ========================================================= */
 
-            flex-direction:column;
-
-            gap:14px;
-
+        .builder-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
         }
 
-        .builder-item{
 
-            display:flex;
+        /* =========================================================
+        BUILDER ITEM
+        ========================================================= */
 
-            align-items:center;
+        .builder-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
 
-            justify-content:space-between;
+            background: var(--builder-item-bg);
+            border: 1px solid var(--builder-border-soft);
+            border-radius: 14px;
 
-            background:#0b1020;
-
-            border:1px solid rgba(255,255,255,.05);
-
-            border-radius:14px;
-
-            padding:16px 18px;
-
-            transition:.25s;
-
+            padding: 16px 18px;
+            transition: .25s;
         }
 
-        .builder-item:hover{
-
-            border-color:#c7932b;
-
+        .builder-item:hover {
+            border-color: var(--builder-gold);
         }
 
-        .builder-left{
 
-            display:flex;
+        /* =========================================================
+        BUILDER LEFT
+        ========================================================= */
 
-            align-items:center;
-
-            gap:15px;
-
+        .builder-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
 
-        .builder-number{
 
-            width:34px;
+        /* =========================================================
+        BUILDER NUMBER
+        ========================================================= */
 
-            height:34px;
+        .builder-number {
+            width: 34px;
+            height: 34px;
 
-            border-radius:50%;
+            border-radius: 50%;
 
-            background:rgba(199,147,43,.15);
+            background: var(--builder-gold-soft);
+            border: 1px solid rgba(199, 147, 43, .40);
 
-            border:1px solid rgba(199,147,43,.4);
+            color: var(--builder-gold-light);
 
-            color:#f5b942;
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
-            display:flex;
-
-            align-items:center;
-
-            justify-content:center;
-
-            font-weight:700;
-
-            flex-shrink:0;
-
+            font-weight: 700;
+            flex-shrink: 0;
         }
 
-        .builder-text{
 
-            color:#fff;
+        /* =========================================================
+        BUILDER TEXT
+        ========================================================= */
 
-            font-size:15px;
-
-            line-height:1.5;
-
+        .builder-text {
+            color: var(--builder-text);
+            font-size: 15px;
+            line-height: 1.5;
         }
 
-        .builder-action{
 
-            display:flex;
+        /* =========================================================
+        BUILDER ACTION
+        ========================================================= */
 
-            gap:8px;
-
+        .builder-action {
+            display: flex;
+            gap: 8px;
         }
 
-        .builder-action button{
+        .builder-action button {
+            width: 38px;
+            height: 38px;
 
-            width:38px;
+            border: none;
+            border-radius: 10px;
 
-            height:38px;
+            background: var(--builder-action-bg);
+            color: var(--builder-text-secondary);
 
-            border:none;
-
-            border-radius:10px;
-
-            background:#18243d;
-
-            color:#8fa7c6;
-
-            transition:.25s;
-
+            transition: .25s;
         }
 
-        .builder-action button:hover{
-
-            background:#c7932b;
-
-            color:#fff;
-
+        .builder-action button:hover {
+            background: var(--builder-gold);
+            color: #fff;
         }
 
-        .builder-empty{
 
-            text-align:center;
+        /* =========================================================
+        BUILDER EMPTY
+        ========================================================= */
 
-            padding:50px 20px;
+        .builder-empty {
+            text-align: center;
+            padding: 50px 20px;
 
-            border:2px dashed rgba(255,255,255,.08);
+            border: 2px dashed var(--builder-border);
+            border-radius: 14px;
 
-            border-radius:14px;
-
-            color:#73819d;
-
+            color: var(--builder-text-muted);
         }
 
-        .builder-empty h6{
-
-            color:#fff;
-
-            margin-top:10px;
-
+        .builder-empty h6 {
+            color: var(--builder-text);
+            margin-top: 10px;
         }
 
-        @media(max-width:768px){
 
-            .builder-item{
+        /* =========================================================
+        SECTION CARD
+        ========================================================= */
 
-                flex-direction:column;
-
-                align-items:flex-start;
-
-                gap:15px;
-
-            }
-
-            .builder-action{
-
-                width:100%;
-
-                justify-content:flex-end;
-
-            }
-
+        .section-card {
+            padding: 30px;
         }
 
-        .section-card{
-
-            padding:30px;
-
+        .section-title {
+            color: var(--vacancy-text);
+            font-size: 24px;
+            font-weight: 700;
         }
 
-        .section-title{
-
-            color:#fff;
-
-            font-size:24px;
-
-            font-weight:700;
-
+        .section-subtitle {
+            color: var(--vacancy-text-secondary);
+            margin-top: 5px;
+            margin-bottom: 35px;
         }
 
-        .section-subtitle{
 
-            color:#95a2bd;
+        /* =========================================================
+        OPTION GROUP
+        ========================================================= */
 
-            margin-top:5px;
-
-            margin-bottom:35px;
-
+        .option-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
         }
 
-        .option-group{
 
-            display:flex;
+        /* =========================================================
+        OPTION CARD
+        ========================================================= */
 
-            gap:15px;
+        .option-card {
+            min-width: 140px;
+            height: 52px;
 
-            flex-wrap:wrap;
+            border-radius: 14px;
+            border: 1px solid var(--option-border);
 
+            background: var(--option-bg);
+            color: var(--option-text);
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            cursor: pointer;
+            transition: .25s;
+
+            font-size: 15px;
+            font-weight: 600;
         }
 
-        .option-card{
-
-            min-width:140px;
-
-            height:52px;
-
-            border-radius:14px;
-
-            border:1px solid rgba(255,255,255,.08);
-
-            background:#0b1020;
-
-            color:#93a3be;
-
-            display:flex;
-
-            justify-content:center;
-
-            align-items:center;
-
-            cursor:pointer;
-
-            transition:.25s;
-
-            font-size:15px;
-
-            font-weight:600;
-
+        .option-card input {
+            display: none;
         }
 
-        .option-card input{
-
-            display:none;
-
+        .option-card:hover {
+            border-color: var(--builder-gold);
+            color: var(--vacancy-text);
         }
 
-        .option-card:hover{
-
-            border-color:#d39c32;
-
-            color:#fff;
-
+        .option-card.active {
+            background: var(--builder-gold-soft);
+            color: var(--builder-gold-light);
+            border-color: var(--builder-gold);
         }
 
-        .option-card.active{
 
-            background:rgba(211,156,50,.15);
-
-            color:#ffc24c;
-
-            border-color:#d39c32;
-
-        }
+        /* =========================================================
+        CERTIFICATE / COMPETENCY SCHEME
+        ========================================================= */
 
         .certificate-group,
         .competency-scheme-group {
-
             display: flex;
-
             flex-wrap: wrap;
-
             gap: 10px;
-
         }
+
+
+        /* =========================================================
+        CERTIFICATE ITEM
+        ========================================================= */
 
         .certificate-item,
         .competency-scheme-item {
-
             padding: 14px 22px;
 
-            border: 1px solid rgba(255,255,255,.10);
-
+            border: 1px solid var(--certificate-border);
             border-radius: 14px;
 
-            background: #0d1426;
-
-            color: #97a5bf;
+            background: var(--certificate-bg);
+            color: var(--certificate-text);
 
             cursor: pointer;
-
             transition: .25s;
 
             font-weight: 600;
 
             display: flex;
-
             align-items: center;
-
             gap: 10px;
 
             user-select: none;
-
         }
-
 
         .certificate-item i,
         .competency-scheme-item i {
-
             font-size: 15px;
-
         }
-
 
         .certificate-item:hover,
         .competency-scheme-item:hover {
-
             border-color: #d6a13b;
-
-            color: #fff;
-
+            color: var(--vacancy-text);
         }
-
 
         .certificate-item.active,
         .competency-scheme-item.active {
-
-            background: rgba(214,161,59,.12);
-
+            background: rgba(214, 161, 59, .12);
             border-color: #d6a13b;
-
             color: #ffc84d;
-
-            box-shadow: 0 0 15px rgba(214,161,59,.20);
-
+            box-shadow: 0 0 15px rgba(214, 161, 59, .12);
         }
 
-        .invalid-feedback{
 
-            display:block;
+        /* =========================================================
+        VALIDATION
+        ========================================================= */
 
-            margin-top:6px;
-
-            font-size:13px;
-
+        .invalid-feedback {
+            display: block;
+            margin-top: 6px;
+            font-size: 13px;
+            color: var(--danger);
         }
 
-        .is-invalid{
-
-            border-color:#dc3545 !important;
-
+        .is-invalid {
+            border-color: var(--danger) !important;
         }
 
-        
+
+        /* =========================================================
+        RESPONSIVE
+        ========================================================= */
+
+        @media (max-width: 768px) {
+
+            .vacancy-step {
+                padding: 0 16px;
+                height: 46px;
+                font-size: 14px;
+            }
+
+            .vacancy-step i {
+                font-size: 16px;
+            }
+
+            #btnBack,
+            #btnDraft,
+            #btnNext,
+            #btnSubmit {
+                min-width: auto;
+                flex: 1;
+            }
+
+            .card-footer {
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+
+
+            .builder-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .builder-action {
+                width: 100%;
+                justify-content: flex-end;
+            }
+
+
+            .section-card {
+                padding: 20px;
+            }
+
+            .section-title {
+                font-size: 21px;
+            }
+
+            .section-subtitle {
+                margin-bottom: 25px;
+            }
+
+
+            .option-card {
+                min-width: 120px;
+                flex: 1;
+            }
+
+
+            .certificate-item,
+            .competency-scheme-item {
+                padding: 12px 16px;
+            }
+        }
     </style>
 @endsection
 
@@ -814,6 +818,45 @@
 
                     <div class="row">
 
+                        <div class="col-md-12 mb-7">
+
+                            <label class="form-label required">
+                                Lowongan Untuk
+                            </label>
+
+                            <select
+                                name="category"
+                                id="category"
+                                class="form-select form-control-dark"
+                                required
+                            >
+
+                                <option value="">
+                                    Pilih Kategori Lowongan
+                                </option>
+
+                                <option
+                                    value="security"
+                                    {{ old('category') == 'security' ? 'selected' : '' }}
+                                >
+                                    Satpam
+                                </option>
+
+                                <option
+                                    value="cs"
+                                    {{ old('category') == 'cs' ? 'selected' : '' }}
+                                >
+                                    Cleaning Service
+                                </option>
+
+                            </select>
+
+                            <small class="text-muted">
+                                Pilih kategori lowongan terlebih dahulu.
+                            </small>
+
+                        </div>
+
                         <!-- Posisi -->
                         <div class="col-md-12 mb-7">
 
@@ -824,17 +867,20 @@
                             <select
                                 name="position"
                                 id="position"
-                                class="form-select form-control-dark">
+                                class="form-select form-control-dark"
+                                disabled
+                            >
 
                                 <option value="">
-                                    Pilih Posisi Pekerjaan
+                                    Pilih Kategori Lowongan Terlebih Dahulu
                                 </option>
 
                                 @foreach($positions as $position)
 
                                     <option
                                         value="{{ $position->title }}"
-                                        data-uuid="{{ $position->uuid }}">
+                                        data-uuid="{{ $position->uuid }}"
+                                    >
 
                                         {{ $position->title }}
 
@@ -1927,7 +1973,9 @@
                 <section id="step5"
                     class="vacancy-section d-none">
 
+
                     <!-- SERTIFIKASI -->
+
                     <div class="row">
 
                         <div class="col-lg-12">
@@ -1944,31 +1992,30 @@
 
                             </div>
 
+
                             <div class="certificate-group">
-                                @php
-                                    $master_certificates = \App\Models\MasterCertificate::all();
-                                @endphp
 
-                                @foreach ($master_certificates as $certificate)
-                                    <div class="certificate-item" data-value="{{ $certificate->title }}">
+                                {{-- Data certificate akan dimuat berdasarkan category --}}
 
-                                        <i class="fas fa-shield-alt"></i>
+                                <div class="text-muted">
 
-                                        {{ $certificate->title }}
+                                    Pilih kategori lowongan terlebih dahulu.
 
-                                    </div>
-                                @endforeach
+                                </div>
 
                             </div>
+
 
                             <input
                                 type="hidden"
                                 id="certificate_json"
-                                name="certificate">
+                                name="certificate"
+                            >
 
                         </div>
 
                     </div>
+
 
                     {{-- =====================================================
                         KOMPETENSI SKEMA
@@ -1979,36 +2026,30 @@
                         <div class="col-lg-12">
 
                             <label class="form-label required">
+
                                 Kompetensi Skema
+
                             </label>
 
                             <div class="text-muted mb-5">
+
                                 Pilih kompetensi skema yang wajib dimiliki pelamar.
+
                             </div>
+
 
                             <div class="competency-scheme-group">
 
-                                @php
-                                    $master_competency_schemes =
-                                        \App\Models\MasterCompetencyScheme::all();
-                                @endphp
+                                {{-- Data competency akan dimuat berdasarkan category --}}
 
-                                @foreach ($master_competency_schemes as $scheme)
+                                <div class="text-muted">
 
-                                    <div
-                                        class="competency-scheme-item"
-                                        data-value="{{ $scheme->title }}"
-                                    >
+                                    Pilih kategori lowongan terlebih dahulu.
 
-                                        <i class="fas fa-award"></i>
-
-                                        {{ $scheme->title }}
-
-                                    </div>
-
-                                @endforeach
+                                </div>
 
                             </div>
+
 
                             <input
                                 type="hidden"
@@ -2019,6 +2060,7 @@
                         </div>
 
                     </div>
+
 
                 </section>
 
@@ -2331,6 +2373,10 @@
                         "{{ url('dashboard-user/job-vacancy/position') }}/" + uuid,
 
                     type: "GET",
+
+                    data: {
+                        category: $("#category").val()
+                    },
 
                     success: function (response) {
 
@@ -3771,6 +3817,408 @@
                     }
 
                 });
+
+            }
+
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | CATEGORY LOWONGAN
+        |--------------------------------------------------------------------------
+        */
+
+        $(document).ready(function () {
+
+            $("#category").on("change", function () {
+
+                let category = $(this).val();
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | RESET POSITION
+                |--------------------------------------------------------------------------
+                */
+
+                $("#position")
+                    .prop("disabled", true)
+                    .html(`
+                        <option value="">
+                            Memuat Posisi Pekerjaan...
+                        </option>
+                    `);
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | RESET CERTIFICATE
+                |--------------------------------------------------------------------------
+                */
+
+                $(".certificate-group").html(`
+                    <div class="text-muted">
+                        Memuat sertifikat...
+                    </div>
+                `);
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | RESET COMPETENCY
+                |--------------------------------------------------------------------------
+                */
+
+                $(".competency-scheme-group").html(`
+                    <div class="text-muted">
+                        Memuat kompetensi skema...
+                    </div>
+                `);
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | RESET JSON
+                |--------------------------------------------------------------------------
+                */
+
+                $("#certificate_json").val("");
+
+                $("#competency_scheme_json").val("");
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | JIKA CATEGORY KOSONG
+                |--------------------------------------------------------------------------
+                */
+
+                if (!category) {
+
+                    $("#position")
+                        .prop("disabled", true)
+                        .html(`
+                            <option value="">
+                                Pilih Kategori Lowongan Terlebih Dahulu
+                            </option>
+                        `);
+
+
+                    $(".certificate-group").html(`
+                        <div class="text-muted">
+                            Pilih kategori lowongan terlebih dahulu.
+                        </div>
+                    `);
+
+
+                    $(".competency-scheme-group").html(`
+                        <div class="text-muted">
+                            Pilih kategori lowongan terlebih dahulu.
+                        </div>
+                    `);
+
+
+                    return;
+
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | GET MASTER DATA
+                |--------------------------------------------------------------------------
+                */
+
+                $.ajax({
+
+                    url:
+                        "{{ route('dashboard-user.job-vacancy.master-data') }}",
+
+                    type: "GET",
+
+                    data: {
+                        category: category
+                    },
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | SUCCESS
+                    |--------------------------------------------------------------------------
+                    */
+
+                    success: function (response) {
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | POSITION
+                        |--------------------------------------------------------------------------
+                        */
+
+                        let positionHtml = `
+                            <option value="">
+                                Pilih Posisi Pekerjaan
+                            </option>
+                        `;
+
+
+                        if (
+                            response.positions &&
+                            response.positions.length > 0
+                        ) {
+
+                            $.each(
+                                response.positions,
+                                function (index, position) {
+
+                                    positionHtml += `
+
+                                        <option
+                                            value="${escapeHtml(position.title)}"
+                                            data-uuid="${escapeHtml(position.uuid)}"
+                                        >
+
+                                            ${escapeHtml(position.title)}
+
+                                        </option>
+
+                                    `;
+
+                                }
+                            );
+
+                        } else {
+
+                            positionHtml = `
+                                <option value="">
+                                    Belum ada posisi untuk kategori ini
+                                </option>
+                            `;
+
+                        }
+
+
+                        $("#position")
+                            .html(positionHtml)
+                            .prop("disabled", false);
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | CERTIFICATE
+                        |--------------------------------------------------------------------------
+                        */
+
+                        let certificateHtml = "";
+
+
+                        if (
+                            response.master_certificates &&
+                            response.master_certificates.length > 0
+                        ) {
+
+                            $.each(
+                                response.master_certificates,
+                                function (index, certificate) {
+
+                                    certificateHtml += `
+
+                                        <div
+                                            class="certificate-item"
+                                            data-value="${escapeHtml(certificate.title)}"
+                                        >
+
+                                            <i class="fas fa-shield-alt"></i>
+
+                                            ${escapeHtml(certificate.title)}
+
+                                        </div>
+
+                                    `;
+
+                                }
+                            );
+
+                        } else {
+
+                            certificateHtml = `
+
+                                <div class="text-muted">
+
+                                    Belum ada sertifikat
+                                    untuk kategori ini.
+
+                                </div>
+
+                            `;
+
+                        }
+
+
+                        $(".certificate-group")
+                            .html(certificateHtml);
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | COMPETENCY SCHEME
+                        |--------------------------------------------------------------------------
+                        */
+
+                        let competencyHtml = "";
+
+
+                        if (
+                            response.master_competency_schemes &&
+                            response.master_competency_schemes.length > 0
+                        ) {
+
+                            $.each(
+                                response.master_competency_schemes,
+                                function (index, scheme) {
+
+                                    competencyHtml += `
+
+                                        <div
+                                            class="competency-scheme-item"
+                                            data-value="${escapeHtml(scheme.title)}"
+                                        >
+
+                                            <i class="fas fa-award"></i>
+
+                                            ${escapeHtml(scheme.title)}
+
+                                        </div>
+
+                                    `;
+
+                                }
+                            );
+
+                        } else {
+
+                            competencyHtml = `
+
+                                <div class="text-muted">
+
+                                    Belum ada kompetensi skema
+                                    untuk kategori ini.
+
+                                </div>
+
+                            `;
+
+                        }
+
+
+                        $(".competency-scheme-group")
+                            .html(competencyHtml);
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | RESET JSON
+                        |--------------------------------------------------------------------------
+                        */
+
+                        generateCertificateJSON();
+
+                        generateCompetencySchemeJSON();
+
+                    },
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | ERROR
+                    |--------------------------------------------------------------------------
+                    */
+
+                    error: function (xhr) {
+
+                        console.error(
+                            "Master Data Error:",
+                            xhr.responseText
+                        );
+
+
+                        $("#position")
+                            .prop("disabled", true)
+                            .html(`
+                                <option value="">
+                                    Gagal memuat posisi
+                                </option>
+                            `);
+
+
+                        $(".certificate-group").html(`
+
+                            <div class="text-danger">
+
+                                Gagal memuat sertifikat.
+
+                            </div>
+
+                        `);
+
+
+                        $(".competency-scheme-group").html(`
+
+                            <div class="text-danger">
+
+                                Gagal memuat kompetensi skema.
+
+                            </div>
+
+                        `);
+
+                    }
+
+                });
+
+            });
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | ESCAPE HTML
+            |--------------------------------------------------------------------------
+            */
+
+            function escapeHtml(value) {
+
+                if (
+                    value === null ||
+                    value === undefined
+                ) {
+
+                    return "";
+
+                }
+
+                return $("<div>")
+                    .text(value)
+                    .html();
+
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | OLD CATEGORY
+            |--------------------------------------------------------------------------
+            */
+
+            let oldCategory =
+                "{{ old('category') }}";
+
+
+            if (oldCategory !== "") {
+
+                $("#category")
+                    .val(oldCategory)
+                    .trigger("change");
 
             }
 

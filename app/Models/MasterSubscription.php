@@ -12,13 +12,6 @@ class MasterSubscription extends Model
 
     protected $guarded = ['id'];
 
-    protected $casts = [
-        'price' => 'decimal:2',
-        'duration' => 'integer',
-        'features' => 'array',
-        'is_active' => 'boolean',
-    ];
-
     protected static function boot()
     {
         parent::boot();

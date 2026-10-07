@@ -14,13 +14,13 @@
         <button
             id=""
             class="btn btn-warning rounded-pill fw-bold flex-fill text-dark role-btn btnSatpam active">
-            🛡️ Satpam / Anggota
+            👤 Satpam / Cleaning Service
         </button>
 
         <button
             id=""
             class="btn rounded-pill fw-bold flex-fill role-btn text-muted btnPerusahaan">
-            🏢 Perusahaan / BUJP
+            🏢 Perusahaan
         </button>
 
     </div>
@@ -37,13 +37,13 @@
                 </a>
             </li>
 
-            <li class="nav-item">
+            {{-- <li class="nav-item">
                 <a class="nav-link fw-bold fs-8 px-0"
                 data-bs-toggle="tab"
                 href="#login-otp">
                     WhatsApp OTP
                 </a>
-            </li>
+            </li> --}}
         </ul>
 
         <div class="tab-content">

@@ -1,4 +1,5 @@
 <!-- Profile Card -->
+
 <div class="card profile-card mb-5">
 
     <div class="profile-cover"></div>
@@ -9,7 +10,12 @@
 
             <div class="profile-avatar">
 
-                <img src="{{ $security->formal_photo ? Storage::url($security->formal_photo) : asset('assets/media/avatars/300-3.jpg') }}" alt="">
+                <img
+                    src="{{ $profile?->formal_photo
+                        ? Storage::url($profile->formal_photo)
+                        : asset('assets/media/avatars/300-3.jpg') }}"
+                    alt="Profile"
+                >
 
                 <span class="online-badge">
                     <i class="ki-duotone ki-check-circle fs-7 text-white"></i>
@@ -17,28 +23,39 @@
 
             </div>
 
+
             <h5 class="profile-name">
-                {{ $security->name ?? 'Nama Belum diisi' }}
+                {{ $profile?->name ?? 'Nama Belum diisi' }}
             </h5>
 
+
             <div class="profile-job">
-                {{ $security->position }}
+                {{ $profile?->position ?? 'Jabatan Belum diisi' }}
             </div>
+
 
             <div class="profile-company">
-                {{ $security->company_name }}
+                {{ $profile?->company_name ?? 'Perusahaan Belum diisi' }}
             </div>
 
-            @if($security->badgeCertificate)
+
+            @if($profile?->badgeCertificate)
+
                 <span class="badge-gada">
+
                     <i class="ki-duotone ki-shield-tick fs-8 me-1 text-warning"></i>
-                    {{ $security->badgeCertificate->title }}
+
+                    {{ $profile->badgeCertificate->title }}
+
                 </span>
+
             @endif
 
         </div>
 
+
         <div class="separator my-5"></div>
+
 
         <div class="profile-stat">
 

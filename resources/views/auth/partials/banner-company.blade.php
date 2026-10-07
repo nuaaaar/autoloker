@@ -26,36 +26,37 @@
         <!-- Logo -->
         <div class="mb-5">
             <img src="{{ asset('/assets/media/logos/autoloker-logo.png') }}"
-                height="80" style="background: white; border-radius: 8px;">
+                height="80"
+                style="background: white; border-radius: 8px;">
         </div>
 
         <!-- Badge -->
         <div class="mb-5">
             <span class="badge border border-warning rounded-pill px-4 py-3 text-warning fw-normal fs-5">
-                ● Rekrutmen Keamanan Profesional
+                ● Solusi Tenaga Operasional Profesional
             </span>
         </div>
 
         <!-- Title -->
         <h1 class="display-5 fw-bold lh-sm mb-4">
-
             <span class="text-white d-block">
                 Temukan
             </span>
 
             <span class="text-warning">
-                Garda Terdepan
-            </span>
-            <span class="text-white d-block">
-                Anda.
+                Talenta Terbaik
             </span>
 
+            <span class="text-white d-block">
+                untuk Bisnis Anda.
+            </span>
         </h1>
 
         <!-- Description -->
         <p class="fs-3 text-white w-75 mb-8">
-            Selamat datang kembali. 
-            Siapa profesional keamanan yang akan menjaga bisnis Anda hari ini?
+            Temukan tenaga profesional yang tepat untuk mendukung
+            operasional bisnis Anda, mulai dari keamanan hingga
+            kebersihan dan pelayanan fasilitas.
         </p>
 
         <hr class="border-secondary opacity-25 mb-7">
@@ -79,7 +80,7 @@
                 </h2>
 
                 <div class="fs-4 text-white">
-                    Sertifikat Terverifikasi
+                    Tenaga Terverifikasi
                 </div>
             </div>
 
@@ -96,5 +97,4 @@
         </div>
 
     </div>
-
 </div>

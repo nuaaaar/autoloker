@@ -40,28 +40,117 @@
 
 
         <!-- LIST -->
-
         @php
+            /*
+            |--------------------------------------------------------------------------
+            | PLACEMENT YANG TERSIMPAN DI DATABASE
+            |--------------------------------------------------------------------------
+            */
+
             $placements = $data->placements
-                ? explode(',', $data->placements)
+                ? array_filter(
+                    array_map('trim', explode(',', $data->placements))
+                )
                 : [];
 
-            $master_placements = \App\Models\MasterPlacement::orderBy('title')->get();
+
+            /*
+            |--------------------------------------------------------------------------
+            | AMBIL SEMUA MASTER PLACEMENT
+            |--------------------------------------------------------------------------
+            */
+
+            $master_placements = \App\Models\MasterPlacement::orderBy('title')
+                ->get();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | PISAHKAN BERDASARKAN CATEGORY
+            |--------------------------------------------------------------------------
+            */
+
+            $securityPlacements = $master_placements
+                ->where('category', 'security')
+                ->values();
+
+            $csPlacements = $master_placements
+                ->where('category', 'cs')
+                ->values();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | ROLE SAAT INI
+            |--------------------------------------------------------------------------
+            */
+
+            $currentRole = Auth::user()->role;
         @endphp
 
-        <input type="hidden" name="placements" id="placements">
 
-        <div class="placement-list">
-            @foreach($master_placements as $placement)
-                <button
-                    type="button"
-                    class="placement-site-item {{ in_array($placement->title, $placements) ? 'active' : '' }}"
-                    data-value="{{ $placement->title }}">
-                    {{ $placement->title }}
-                </button>
-            @endforeach
+        <div class="placement-list" id="placementList">
+
+            {{-- Hidden input --}}
+            <input
+                type="hidden"
+                name="placements"
+                id="placements"
+                value="{{ implode(',', $placements) }}"
+            >
+
+
+            {{-- ==========================================================
+                SATPAM
+                ========================================================== --}}
+
+            <div
+                class="placement-role-list"
+                data-role="satpam"
+                style="{{ $currentRole === 'satpam' ? '' : 'display:none;' }}"
+            >
+
+                @foreach($securityPlacements as $placement)
+
+                    <button
+                        type="button"
+                        class="placement-site-item {{ in_array($placement->title, $placements) ? 'active' : '' }}"
+                        data-value="{{ $placement->title }}"
+                    >
+                        {{ $placement->title }}
+                    </button>
+
+                @endforeach
+
+            </div>
+
+
+            {{-- ==========================================================
+                CLEANING SERVICE
+                ========================================================== --}}
+
+            <div
+                class="placement-role-list"
+                data-role="cs"
+                style="{{ $currentRole === 'cs' ? '' : 'display:none;' }}"
+            >
+
+                @foreach($csPlacements as $placement)
+
+                    <button
+                        type="button"
+                        class="placement-site-item"
+                        data-value="{{ $placement->title }}"
+                    >
+                        {{ $placement->title }}
+                    </button>
+
+                @endforeach
+
+            </div>
 
         </div>
+
         <!-- Selected -->
 
         <div class="placement-selected-box mt-8">

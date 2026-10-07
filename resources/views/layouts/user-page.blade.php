@@ -1736,6 +1736,123 @@
         [data-bs-theme="light"] .right-footer a:hover {
             color: #111827 !important;
         }
+
+        /* ==========================================================
+        ROLE SELECTOR
+        ========================================================== */
+
+        .role-selector-icon {
+            color: #7e8da3;
+        }
+
+        .role-selector-label {
+            color: #ffffff;
+        }
+
+
+        /* ==========================================================
+        ROLE SWITCH BUTTON
+        ========================================================== */
+
+        .role-switch-btn {
+            width: 34px;
+            height: 34px;
+
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 0;
+
+            border-radius: 7px;
+
+            background: #f1f3f6;
+            border: 1px solid #e0e4ea;
+
+            color: #68778f;
+
+            transition:
+                background-color .2s ease,
+                border-color .2s ease,
+                color .2s ease,
+                transform .15s ease;
+        }
+
+
+        /* ==========================================================
+        HOVER
+        ========================================================== */
+
+        .role-switch-btn:hover {
+            background: #e8edf1;
+            border-color: #cbd3dc;
+            color: #356b54;
+
+            transform: translateY(-1px);
+        }
+
+
+        /* ==========================================================
+        ACTIVE ROLE
+        ========================================================== */
+
+        .role-switch-btn.active {
+            background: #3e765e;
+            border-color: #3e765e;
+            color: #ffffff;
+
+            box-shadow: 0 2px 6px rgba(62, 118, 94, 0.25);
+        }
+
+
+        /* ==========================================================
+        ACTIVE HOVER
+        ========================================================== */
+
+        .role-switch-btn.active:hover {
+            background: #356b54;
+            border-color: #356b54;
+            color: #ffffff;
+        }
+
+
+        /* ==========================================================
+        DARK MODE
+        ========================================================== */
+
+        [data-bs-theme="dark"] .role-selector-icon {
+            color: #8796aa;
+        }
+
+        [data-bs-theme="dark"] .role-selector-label {
+            color: #e5e9f0;
+        }
+
+        [data-bs-theme="dark"] .role-switch-btn {
+            background: #252f3e;
+            border-color: #364254;
+            color: #a5b1c2;
+        }
+
+        [data-bs-theme="dark"] .role-switch-btn:hover {
+            background: #303b4c;
+            border-color: #4c5b70;
+            color: #9ed0b2;
+        }
+
+        [data-bs-theme="dark"] .role-switch-btn.active {
+            background: #3f775b;
+            border-color: #3f775b;
+            color: #ffffff;
+
+            box-shadow: 0 2px 7px rgba(0, 0, 0, 0.2);
+        }
+
+        [data-bs-theme="dark"] .role-switch-btn.active:hover {
+            background: #4b8967;
+            border-color: #4b8967;
+            color: #ffffff;
+        }
     </style>
 
     @yield('style')
@@ -1858,16 +1975,51 @@
                                 data-kt-menu-placement="bottom-end">
 
                                 @php
-                                    $security = \App\Models\UserSecurity::with('security')->where('user_id', Auth::user()->id)->first();
-                                    $userName = $security->security->name ?? 'Nama Belum diisi';
-                                    $userPosition = $security->security->position ?? 'jabatan Belum diisi';
-                                    $userAvatar = $security->security->formal_photo ?  Storage::url($security->security->formal_photo) : asset('assets/media/avatars/300-3.jpg');
+                                    $user = Auth::user();
+
+                                    $userName = 'Nama Belum diisi';
+                                    $userPosition = 'Jabatan Belum diisi';
+                                    $userAvatar = asset('assets/media/avatars/300-3.jpg');
+
+                                    if ($user->role === 'satpam') {
+
+                                        $security = \App\Models\UserSecurity::with('security')
+                                            ->where('user_id', $user->id)
+                                            ->first();
+
+                                        $profile = $security?->security;
+
+                                        $userName = $profile?->name ?? 'Nama Belum diisi';
+                                        $userPosition = $profile?->position ?? 'Jabatan Belum diisi';
+
+                                        if ($profile?->formal_photo) {
+                                            $userAvatar = Storage::url($profile->formal_photo);
+                                        }
+
+                                    } elseif ($user->role === 'cs') {
+
+                                        $cleaningService = \App\Models\UserCleaningService::with('cleaning_service')
+                                            ->where('user_id', $user->id)
+                                            ->first();
+
+                                        $profile = $cleaningService?->cleaning_service;
+
+                                        $userName = $profile?->name ?? 'Nama Belum diisi';
+                                        $userPosition = $profile?->position ?? 'Jabatan Belum diisi';
+
+                                        if ($profile?->formal_photo) {
+                                            $userAvatar = Storage::url($profile->formal_photo);
+                                        }
+                                    }
                                 @endphp
 
                                 <div class="profile-trigger">
 
-                                    <img src="{{ $userAvatar }}"
-                                        class="nav-avatar rounded-circle">
+                                    <img
+                                        src="{{ $userAvatar }}"
+                                        class="nav-avatar rounded-circle"
+                                        alt="Profile"
+                                    >
 
                                     <div class="profile-info">
                                         <span>Profil</span>
@@ -1926,34 +2078,118 @@
                                     {{-- <div class="separator my-5"></div> --}}
 
                                     <div class="menu-item px-5">
-                                    <div class="menu-link px-3 text-white d-flex align-items-center justify-content-between">
+                                        <div class="menu-link px-3 text-white d-flex align-items-center justify-content-between">
 
-                                        <div class="d-flex align-items-center">
-                                            <i class="ki-duotone ki-moon fs-2 me-3 theme-icon"></i>
+                                            <div class="d-flex align-items-center">
+                                                <i class="ki-duotone ki-moon fs-2 me-3 theme-icon"></i>
 
-                                            <span>Tampilan</span>
+                                                <span>Tampilan</span>
+                                            </div>
+
+                                            <div class="d-flex align-items-center gap-2">
+
+                                                <button type="button"
+                                                    class="btn btn-sm btn-icon btn-light"
+                                                    id="btnThemeLight"
+                                                    title="Light Mode">
+                                                    <i class="ki-duotone ki-sun fs-3"></i>
+                                                </button>
+
+                                                <button type="button"
+                                                    class="btn btn-sm btn-icon btn-dark"
+                                                    id="btnThemeDark"
+                                                    title="Dark Mode">
+                                                    <i class="ki-duotone ki-moon fs-3"></i>
+                                                </button>
+
+                                            </div>
+
                                         </div>
+                                    </div>
 
-                                        <div class="d-flex align-items-center gap-2">
+                                    <div class="menu-item px-5">
 
-                                            <button type="button"
-                                                class="btn btn-sm btn-icon btn-light"
-                                                id="btnThemeLight"
-                                                title="Light Mode">
-                                                <i class="ki-duotone ki-sun fs-3"></i>
-                                            </button>
+                                        <div class="px-3 d-flex align-items-center justify-content-between">
 
-                                            <button type="button"
-                                                class="btn btn-sm btn-icon btn-dark"
-                                                id="btnThemeDark"
-                                                title="Dark Mode">
-                                                <i class="ki-duotone ki-moon fs-3"></i>
-                                            </button>
+                                            {{-- LABEL --}}
+                                            <div class="d-flex align-items-center">
+                                                <i class="ki-duotone ki-user-tick fs-2 me-3 role-selector-icon">
+                                                    <span class="path1"></span>
+                                                    <span class="path2"></span>
+                                                    <span class="path3"></span>
+                                                </i>
+
+                                                <span class="role-selector-label">
+                                                    Role
+                                                </span>
+                                            </div>
+
+
+                                            {{-- ROLE --}}
+                                            <div class="d-flex align-items-center gap-2">
+
+                                                {{-- FORM SATPAM --}}
+                                                <form
+                                                    id="formChangeRoleSatpam"
+                                                    action="{{ route('user-page.profile.change-role') }}"
+                                                    method="POST"
+                                                    class="role-form"
+                                                >
+                                                    @csrf
+
+                                                    <input
+                                                        type="hidden"
+                                                        name="role"
+                                                        value="satpam"
+                                                    >
+
+                                                    <button
+                                                        type="submit"
+                                                        class="btn btn-sm btn-icon role-switch-btn {{ Auth::user()->role === 'satpam' ? 'active' : '' }}"
+                                                        title="Satpam"
+                                                        onclick="event.stopPropagation();"
+                                                    >
+                                                        <i class="ki-duotone ki-shield-tick fs-3">
+                                                            <span class="path1"></span>
+                                                            <span class="path2"></span>
+                                                        </i>
+                                                    </button>
+                                                </form>
+
+
+                                                {{-- FORM CLEANING SERVICE --}}
+                                                <form
+                                                    id="formChangeRoleCs"
+                                                    action="{{ route('user-page.profile.change-role') }}"
+                                                    method="POST"
+                                                    class="role-form"
+                                                >
+                                                    @csrf
+
+                                                    <input
+                                                        type="hidden"
+                                                        name="role"
+                                                        value="cs"
+                                                    >
+
+                                                    <button
+                                                        type="submit"
+                                                        class="btn btn-sm btn-icon role-switch-btn {{ Auth::user()->role === 'cs' ? 'active' : '' }}"
+                                                        title="Cleaning Service"
+                                                        onclick="event.stopPropagation();"
+                                                    >
+                                                        <i class="ki-duotone ki-brush fs-3">
+                                                            <span class="path1"></span>
+                                                            <span class="path2"></span>
+                                                        </i>
+                                                    </button>
+                                                </form>
+
+                                            </div>
 
                                         </div>
 
                                     </div>
-                                </div>
 
                                     {{-- <div class="menu-item px-5">
                                         <a href="javascript:;" class="menu-link px-3 text-white">

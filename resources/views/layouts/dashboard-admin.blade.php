@@ -500,6 +500,20 @@
                                                         </a>
                                                     </div>
 
+                                                    <div class="menu-item">
+                                                        <a class="menu-link {{ Route::is('dashboard-admin.master.competency-scheme.category.index') && request()->route('category') === 'cs' ? 'active' : '' }}"
+                                                            href="{{ route('dashboard-admin.master.competency-scheme.category.index', ['category' => 'cs']) }}">
+
+                                                            <span class="menu-bullet">
+                                                                <span class="bullet bullet-dot"></span>
+                                                            </span>
+
+                                                            <span class="menu-title">
+                                                                Kompetensi Skema
+                                                            </span>
+                                                        </a>
+                                                    </div>
+
                                                 </div>
                                                 <!--end:Cleaning Service sub-->
 
@@ -626,6 +640,21 @@
                                                         </a>
                                                     </div>
 
+                                                    <!-- Sertifikasi -->
+                                                    <div class="menu-item">
+                                                        <a class="menu-link {{ Route::is('dashboard-admin.master.competency-scheme.category.index') && request()->route('category') === 'security' ? 'active' : '' }}"
+                                                            href="{{ route('dashboard-admin.master.competency-scheme.category.index', ['category' => 'security']) }}">
+
+                                                            <span class="menu-bullet">
+                                                                <span class="bullet bullet-dot"></span>
+                                                            </span>
+
+                                                            <span class="menu-title">
+                                                                Kompetensi Skema
+                                                            </span>
+                                                        </a>
+                                                    </div>
+
                                                 </div>
                                                 <!--end:Satpam sub-->
 
@@ -638,7 +667,7 @@
 
 
                                             <!-- Kompetensi Skema -->
-                                            <div class="menu-item">
+                                            {{-- <div class="menu-item">
                                                 <a class="menu-link {{ Route::is('dashboard-admin.master.competency-scheme.*') ? 'active' : '' }}"
                                                     href="{{ route('dashboard-admin.master.competency-scheme.index') }}">
 
@@ -650,7 +679,7 @@
                                                         Kompetensi Skema
                                                     </span>
                                                 </a>
-                                            </div>
+                                            </div> --}}
 
 
                                             <!-- Bidang Usaha -->
@@ -763,7 +792,7 @@
                                                     <span class="menu-bullet">
                                                         <span class="bullet bullet-dot"></span>
                                                     </span>
-                                                    <span class="menu-title">Satpam</span>
+                                                    <span class="menu-title">User</span>
                                                 </a>
                                                 <a class="menu-link {{ Route::is('dashboard-admin.management-user.bujp.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.management-user.bujp.index') }}">
                                                     <span class="menu-bullet">

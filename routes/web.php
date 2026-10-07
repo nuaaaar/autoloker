@@ -120,6 +120,35 @@ Route::middleware(['auth'])->group(function () {
                     ->name('placement.category.destroy');
 
             });
+
+            Route::prefix('competency-scheme/{category}')->group(function () {
+
+                Route::get('/', [
+                    ADMMasterCompetencyScheme::class,
+                    'index'
+                ])->name('competency-scheme.category.index');
+
+                Route::post('/', [
+                    ADMMasterCompetencyScheme::class,
+                    'store'
+                ])->name('competency-scheme.category.store');
+
+                Route::get('/{uuid}', [
+                    ADMMasterCompetencyScheme::class,
+                    'show'
+                ])->name('competency-scheme.category.show');
+
+                Route::put('/{uuid}', [
+                    ADMMasterCompetencyScheme::class,
+                    'update'
+                ])->name('competency-scheme.category.update');
+
+                Route::delete('/{uuid}', [
+                    ADMMasterCompetencyScheme::class,
+                    'destroy'
+                ])->name('competency-scheme.category.destroy');
+
+            });
  
             Route::prefix('position/{category}')->group(function () {
                 Route::get('/', [ADMMasterPosition::class, 'index'])
@@ -343,6 +372,11 @@ Route::middleware(['auth'])->group(function () {
 
             Route::get('job-vacancy/statistic',[USRJobVacancy::class, 'statistic'])->name('job-vacancy.statistic');
 
+            Route::get(
+                'job-vacancy/master-data',
+                [USRJobVacancy::class, 'masterData']
+            )->name('job-vacancy.master-data');
+
             Route::resource('job-vacancy', USRJobVacancy::class);
 
             Route::get(
@@ -517,9 +551,15 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [UPProfile::class,'index'])->name('profile');
         Route::prefix('profile')->name('profile.')->group(function () {
 
+            Route::get('/master-abilities/{category}', [UPProfile::class, 'getAbilities'])->name('master-abilities');
+
+            Route::get('/master-placements/{category}', [UPProfile::class, 'getPlacements'])->name('master-placements');
+
             Route::get('/{id}/edit-personal-data', [UPProfile::class,'editPersonalData'])->name('edit-personal-data');
             
             Route::post('/{id}/update-personal-data', [UPProfile::class,'updatePersonalData'])->name('update-personal-data');
+
+            Route::post('/change-role', [UPProfile::class, 'changeRole'])->name('change-role');
 
             Route::prefix('certificate')->name('certificate.')->group(function () {
                 Route::post('/store', [UPSecurityCertificate::class,'store'])->name('store'); 
