@@ -3,17 +3,11 @@
 namespace App\Http\Controllers\UserPage;
 
 use App\Http\Controllers\Controller;
-
 use App\Models\JobApplication;
-
-use Illuminate\Http\Request;
-
 use App\Models\JobVacancy;
-
+use Illuminate\Http\Request;
 use App\Models\Security;
-
 use App\Models\CleaningService;
-
 use Auth;
 
 class JobApplicationController extends Controller
@@ -130,6 +124,9 @@ class JobApplicationController extends Controller
         //
     }
 
+    /**
+     * Apply job vacancy.
+     */
     public function apply($uuid)
     {
         /*
@@ -138,13 +135,32 @@ class JobApplicationController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $security = $this->getProfile();
+        $profile = $this->getProfile();
 
-        if (!$security) {
+        if (!$profile) {
             return response()->json([
                 'success' => false,
                 'message' => 'Data profile belum tersedia.'
             ], 403);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | CEK PROFILE 100%
+        |--------------------------------------------------------------------------
+        */
+
+        $profileProgress = $profile->profileProgress();
+
+        if ($profileProgress['progress'] < 100) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lengkapi profile terlebih dahulu sebelum melamar pekerjaan.',
+                'progress' => $profileProgress['progress'],
+                'completed' => $profileProgress['completed'],
+                'total' => $profileProgress['total'],
+                'missing' => $profileProgress['missing'],
+            ], 422);
         }
 
         /*
@@ -154,7 +170,6 @@ class JobApplicationController extends Controller
         */
 
         $category = $this->getCategory();
-
         $ownerColumn = $this->getOwnerColumn();
 
         /*
@@ -176,7 +191,7 @@ class JobApplicationController extends Controller
 
         $application = JobApplication::where(
                 $ownerColumn,
-                $security->id
+                $profile->id
             )
             ->where(
                 'job_vacancy_id',
@@ -235,9 +250,15 @@ class JobApplicationController extends Controller
         */
 
         JobApplication::create([
-            $ownerColumn => $security->id,
+            $ownerColumn => $profile->id,
             'job_vacancy_id' => $job->id,
         ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | SUCCESS
+        |--------------------------------------------------------------------------
+        */
 
         return response()->json([
             'success' => true,
@@ -245,6 +266,9 @@ class JobApplicationController extends Controller
         ]);
     }
 
+    /**
+     * Cancel job application.
+     */
     public function cancelApplication($uuid)
     {
         /*
@@ -253,9 +277,9 @@ class JobApplicationController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $security = $this->getProfile();
+        $profile = $this->getProfile();
 
-        if (!$security) {
+        if (!$profile) {
             return response()->json([
                 'success' => false,
                 'message' => 'Data profile belum tersedia.'
@@ -269,7 +293,6 @@ class JobApplicationController extends Controller
         */
 
         $category = $this->getCategory();
-
         $ownerColumn = $this->getOwnerColumn();
 
         /*
@@ -290,7 +313,7 @@ class JobApplicationController extends Controller
 
         $application = JobApplication::where(
                 $ownerColumn,
-                $security->id
+                $profile->id
             )
             ->where(
                 'job_vacancy_id',
@@ -312,6 +335,12 @@ class JobApplicationController extends Controller
         */
 
         $application->delete();
+
+        /*
+        |--------------------------------------------------------------------------
+        | SUCCESS
+        |--------------------------------------------------------------------------
+        */
 
         return response()->json([
             'success' => true,

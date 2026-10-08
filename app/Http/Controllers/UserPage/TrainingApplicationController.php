@@ -79,10 +79,9 @@ class TrainingApplicationController extends Controller
         | PROFILE
         |--------------------------------------------------------------------------
         */
+        $profile = $this->getProfile();
 
-        $security = $this->getProfile();
-
-        if (!$security) {
+        if (!$profile) {
             return response()->json([
                 'success' => false,
                 'message' => 'Data profile belum tersedia.'
@@ -91,12 +90,26 @@ class TrainingApplicationController extends Controller
 
         /*
         |--------------------------------------------------------------------------
+        | CEK PROFILE 100%
+        |--------------------------------------------------------------------------
+        */
+        $profileProgress = $profile->profileProgress();
+
+        if ($profileProgress['progress'] < 100) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lengkapi profile terlebih dahulu sebelum mendaftar pelatihan.',
+                'progress' => $profileProgress['progress'],
+                'missing' => $profileProgress['missing'],
+            ], 422);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
         | CATEGORY ROLE & OWNER
         |--------------------------------------------------------------------------
         */
-
         $categoryRole = $this->getCategoryRole();
-
         $ownerColumn = $this->getOwnerColumn();
 
         /*
@@ -104,7 +117,6 @@ class TrainingApplicationController extends Controller
         | TRAINING
         |--------------------------------------------------------------------------
         */
-
         $training = Training::where('uuid', $uuid)
             ->where('category_role', $categoryRole)
             ->firstOrFail();
@@ -114,10 +126,9 @@ class TrainingApplicationController extends Controller
         | CEK APAKAH SUDAH MEMILIKI PENDAFTARAN AKTIF
         |--------------------------------------------------------------------------
         */
-
         $application = TrainingApplication::where(
             $ownerColumn,
-            $security->id
+            $profile->id
         )
             ->where('training_id', $training->id)
             ->whereIn('status', [
@@ -129,7 +140,6 @@ class TrainingApplicationController extends Controller
         if ($application) {
 
             if ($application->status === 'approved') {
-
                 return response()->json([
                     'success' => false,
                     'message' => 'Anda sudah terdaftar pada pelatihan ini.'
@@ -147,7 +157,6 @@ class TrainingApplicationController extends Controller
         | CEK TANGGAL MULAI
         |--------------------------------------------------------------------------
         */
-
         if (
             $training->start_date &&
             now()->startOfDay()->gt($training->start_date)
@@ -161,10 +170,10 @@ class TrainingApplicationController extends Controller
         /*
         |--------------------------------------------------------------------------
         | CEK KUOTA
+        |--------------------------------------------------------------------------
         | HANYA YANG APPROVED
         |--------------------------------------------------------------------------
         */
-
         if ($training->quota > 0) {
 
             $totalApproved = TrainingApplication::where(
@@ -175,7 +184,6 @@ class TrainingApplicationController extends Controller
                 ->count();
 
             if ($totalApproved >= $training->quota) {
-
                 return response()->json([
                     'success' => false,
                     'message' => 'Kuota peserta pelatihan sudah penuh.'
@@ -188,9 +196,8 @@ class TrainingApplicationController extends Controller
         | BUAT PENDAFTARAN
         |--------------------------------------------------------------------------
         */
-
         TrainingApplication::create([
-            $ownerColumn => $security->id,
+            $ownerColumn => $profile->id,
             'training_id' => $training->id,
             'status' => 'pending',
         ]);
