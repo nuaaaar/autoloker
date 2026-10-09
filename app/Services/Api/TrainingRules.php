@@ -14,6 +14,7 @@ final class TrainingRules
         return array_merge([
             'title' => ['required', 'string', 'min:3', 'max:200'],
             'category' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'category_role' => ['required', Rule::in(self::categoryRoles())],
             'level' => ['sometimes', 'nullable', 'string', 'max:255'],
             'is_certificate' => ['sometimes', 'boolean'],
             'tags' => ['sometimes', 'nullable', 'array'],
@@ -46,11 +47,23 @@ final class TrainingRules
         return $rules;
     }
 
+    /**
+     * Rules for PATCH requests: category and audience are fixed at creation.
+     */
+    public static function patch(bool $hasPosterFile = false): array
+    {
+        $rules = self::update($hasPosterFile);
+        $rules['category_role'] = ['prohibited'];
+
+        return $rules;
+    }
+
     public static function complete(bool $hasPosterFile = false): array
     {
         return [
             'title' => ['required', 'string', 'min:3', 'max:200'],
             'category' => ['required', 'string', 'max:255'],
+            'category_role' => ['required', Rule::in(self::categoryRoles())],
             'level' => ['required', 'string', 'max:255'],
             'is_certificate' => ['sometimes', 'boolean'],
             'tags' => ['sometimes', 'nullable', 'array'],
@@ -120,6 +133,12 @@ final class TrainingRules
     public static function trainingModes(): array
     {
         return ['online', 'offline', 'hybrid'];
+    }
+
+    /** @return list<string> */
+    public static function categoryRoles(): array
+    {
+        return ['security', 'cs'];
     }
 
     public static function normalizeArrayInputs(array $data): array

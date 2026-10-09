@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\Api\ChangePasswordController;
+use App\Http\Controllers\Api\ChangeRoleController;
+use App\Http\Controllers\Api\CleaningServiceCertificateController;
+use App\Http\Controllers\Api\CleaningServiceHistoryController;
 use App\Http\Controllers\Api\JobApplicationController;
 use App\Http\Controllers\Api\JobVacancyController;
 use App\Http\Controllers\Api\LoginController;
@@ -27,6 +30,7 @@ Route::post('/refresh-token', RefreshTokenController::class)->name('api.refresh-
 Route::middleware('api.token')->group(function () {
     Route::get('/company/job-vacancies', [OwnedJobVacancyController::class, 'index'])->name('api.company.job-vacancies.index');
     Route::post('/company/job-vacancies', [OwnedJobVacancyController::class, 'store'])->name('api.company.job-vacancies.store');
+    Route::get('/company/job-vacancies/master-data', [OwnedJobVacancyController::class, 'masterData'])->name('api.company.job-vacancies.master-data');
     Route::get('/company/job-vacancies/{uuid}', [OwnedJobVacancyController::class, 'show'])->name('api.company.job-vacancies.show');
     Route::patch('/company/job-vacancies/{uuid}', [OwnedJobVacancyController::class, 'update'])->name('api.company.job-vacancies.update');
     Route::post('/company/job-vacancies/{uuid}/submit', [OwnedJobVacancyController::class, 'submit'])->name('api.company.job-vacancies.submit');
@@ -49,6 +53,7 @@ Route::middleware('api.token')->group(function () {
     Route::delete('/training-applications/{uuid}', [TrainingApplicationController::class, 'destroy'])->name('api.training-applications.destroy');
     Route::get('/profile', [ProfileController::class, 'show'])->name('api.profile.show');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('api.profile.update');
+    Route::post('/profile/change-role', ChangeRoleController::class)->name('api.profile.change-role');
     Route::patch('/password', ChangePasswordController::class)->name('api.password.update');
     Route::get('/me', MeController::class)->name('api.me');
     Route::get('/user-order-manuals', [UserOrderManualController::class, 'index'])->name('api.user-order-manuals.index');
@@ -66,6 +71,14 @@ Route::middleware('api.token')->group(function () {
         ->except(['create', 'edit']);
     Route::get('/security/{uuid}/histories', [SecurityHistoryController::class, 'indexBySecurity'])->name('api.security.histories.index');
     Route::get('/security/{uuid}/certificates', [SecurityCertificateController::class, 'indexBySecurity'])->name('api.security.certificates.index');
+    Route::apiResource('cleaning-service-certificates', CleaningServiceCertificateController::class)
+        ->parameters(['cleaning-service-certificates' => 'uuid'])
+        ->except(['create', 'edit']);
+    Route::apiResource('cleaning-service-histories', CleaningServiceHistoryController::class)
+        ->parameters(['cleaning-service-histories' => 'uuid'])
+        ->except(['create', 'edit']);
+    Route::get('/cleaning-service/{uuid}/histories', [CleaningServiceHistoryController::class, 'indexByCleaningService'])->name('api.cleaning-service.histories.index');
+    Route::get('/cleaning-service/{uuid}/certificates', [CleaningServiceCertificateController::class, 'indexByCleaningService'])->name('api.cleaning-service.certificates.index');
 
     Route::prefix('masters')->group(function () {
         Route::get('/positions', [ReferenceDataController::class, 'positions'])->name('api.masters.positions');

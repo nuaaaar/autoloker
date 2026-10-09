@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Api;
 
-use App\Models\BUJP;
+use App\Models\Company;
 use App\Models\User;
-use App\Models\UserBUJP;
+use App\Models\UserCompany;
 use App\Services\Api\TokenService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +22,7 @@ class JobVacancyManagementTest extends TestCase
 
     public function test_post_creates_draft_with_canonical_envelope_and_location_header(): void
     {
-        [$user, $bujp, $token] = $this->bujpAccount('create@example.com', 'Create BUJP');
+        [$user, $company, $token] = $this->companyAccount('create@example.com', 'Create Company');
 
         $response = $this->withToken($token)->postJson('/api/company/job-vacancies', $this->payload());
 
@@ -37,7 +37,7 @@ class JobVacancyManagementTest extends TestCase
                         'uuid',
                         'position',
                         'status',
-                        'bujp' => ['uuid', 'name'],
+                        'company' => ['uuid', 'name'],
                         'province',
                         'city',
                         'address',
@@ -69,8 +69,8 @@ class JobVacancyManagementTest extends TestCase
             ])
             ->assertJsonPath('data.job_vacancy.position', 'Satpam Pabrik')
             ->assertJsonPath('data.job_vacancy.status', 'draft')
-            ->assertJsonPath('data.job_vacancy.bujp.uuid', (string) $bujp->uuid)
-            ->assertJsonPath('data.job_vacancy.bujp.name', 'Create BUJP')
+            ->assertJsonPath('data.job_vacancy.company.uuid', (string) $company->uuid)
+            ->assertJsonPath('data.job_vacancy.company.name', 'Create Company')
             ->assertJsonPath('data.job_vacancy.province', 'KALIMANTAN TIMUR')
             ->assertJsonPath('data.job_vacancy.city', 'BALIKPAPAN');
 
@@ -79,8 +79,8 @@ class JobVacancyManagementTest extends TestCase
 
         $this->assertDatabaseHas('job_vacancies', [
             'uuid' => $uuid,
-            'b_u_j_p_id' => $bujp->id,
-            'company_id' => null,
+            'company_id' => $company->id,
+            'b_u_j_p_id' => null,
             'status' => 'draft',
         ]);
 
@@ -88,7 +88,7 @@ class JobVacancyManagementTest extends TestCase
 
     public function test_patch_updates_only_submitted_fields_and_replaces_arrays(): void
     {
-        [, $bujp, $token] = $this->bujpAccount('patch@example.com', 'Patch BUJP');
+        [, $company, $token] = $this->companyAccount('patch@example.com', 'Patch Company');
         $created = $this->withToken($token)->postJson('/api/company/job-vacancies', $this->payload())
             ->assertCreated();
         $uuid = $created->json('data.job_vacancy.uuid');
@@ -108,7 +108,7 @@ class JobVacancyManagementTest extends TestCase
             ->assertJsonPath('data.job_vacancy.facility', null)
             ->assertJsonPath('data.job_vacancy.is_urgent', true)
             ->assertJsonPath('data.job_vacancy.status', 'draft')
-            ->assertJsonPath('data.job_vacancy.bujp.uuid', (string) $bujp->uuid);
+            ->assertJsonPath('data.job_vacancy.company.uuid', (string) $company->uuid);
 
         $this->withToken($token)
             ->getJson("/api/company/job-vacancies/{$uuid}")
@@ -129,7 +129,7 @@ class JobVacancyManagementTest extends TestCase
 
     public function test_post_returns_per_field_validation_errors(): void
     {
-        [, , $token] = $this->bujpAccount('validation@example.com', 'Validation BUJP');
+        [, , $token] = $this->companyAccount('validation@example.com', 'Validation Company');
 
         $response = $this->withToken($token)->postJson('/api/company/job-vacancies', [
             'position' => 'No',
@@ -164,8 +164,8 @@ class JobVacancyManagementTest extends TestCase
 
     public function test_vacancy_ownership_isolation_returns_not_found(): void
     {
-        [, , $ownerToken] = $this->bujpAccount('owner@example.com', 'Owner BUJP');
-        [, , $otherToken] = $this->bujpAccount('other@example.com', 'Other BUJP');
+        [, , $ownerToken] = $this->companyAccount('owner@example.com', 'Owner Company');
+        [, , $otherToken] = $this->companyAccount('other@example.com', 'Other Company');
 
         $created = $this->withToken($ownerToken)->postJson('/api/company/job-vacancies', $this->payload())
             ->assertCreated();
@@ -187,7 +187,7 @@ class JobVacancyManagementTest extends TestCase
 
     public function test_post_submit_action_creates_submitted_vacancy(): void
     {
-        [, , $token] = $this->bujpAccount('submit-create@example.com', 'Submit Create BUJP');
+        [, , $token] = $this->companyAccount('submit-create@example.com', 'Submit Create Company');
 
         $this->withToken($token)
             ->postJson('/api/company/job-vacancies', $this->payload(['workflow_action' => 'submit']))
@@ -199,9 +199,10 @@ class JobVacancyManagementTest extends TestCase
 
     public function test_submit_rejects_incomplete_draft_without_changing_status(): void
     {
-        [, , $token] = $this->bujpAccount('submit-invalid@example.com', 'Submit Invalid BUJP');
+        [, , $token] = $this->companyAccount('submit-invalid@example.com', 'Submit Invalid Company');
         $created = $this->withToken($token)->postJson('/api/company/job-vacancies', [
             'position' => 'Satpam Pabrik',
+            'category' => 'security',
             'workflow_action' => 'save_draft',
         ])->assertCreated();
         $uuid = $created->json('data.job_vacancy.uuid');
@@ -228,7 +229,7 @@ class JobVacancyManagementTest extends TestCase
 
     public function test_submit_changes_owned_complete_draft_to_submitted(): void
     {
-        [, , $token] = $this->bujpAccount('submit@example.com', 'Submit BUJP');
+        [, , $token] = $this->companyAccount('submit@example.com', 'Submit Company');
         $created = $this->withToken($token)->postJson('/api/company/job-vacancies', $this->payload())
             ->assertCreated();
         $uuid = $created->json('data.job_vacancy.uuid');
@@ -247,7 +248,7 @@ class JobVacancyManagementTest extends TestCase
 
     public function test_patch_rejects_immutable_owner_status_timestamp_and_counter_fields(): void
     {
-        [, , $token] = $this->bujpAccount('immutable@example.com', 'Immutable BUJP');
+        [, , $token] = $this->companyAccount('immutable@example.com', 'Immutable Company');
         $created = $this->withToken($token)->postJson('/api/company/job-vacancies', $this->payload())
             ->assertCreated();
         $uuid = $created->json('data.job_vacancy.uuid');
@@ -255,7 +256,7 @@ class JobVacancyManagementTest extends TestCase
         $this->withToken($token)
             ->patchJson("/api/company/job-vacancies/{$uuid}", [
                 'uuid' => 'forged-uuid',
-                'b_u_j_p_id' => 999999,
+                'company_id' => 999999,
                 'status' => 'submitted',
                 'created_at' => '2026-01-01 00:00:00',
                 'total_clicked' => 999,
@@ -263,7 +264,7 @@ class JobVacancyManagementTest extends TestCase
             ->assertUnprocessable()
             ->assertJsonValidationErrors([
                 'uuid',
-                'b_u_j_p_id',
+                'company_id',
                 'status',
                 'created_at',
                 'total_clicked',
@@ -276,27 +277,30 @@ class JobVacancyManagementTest extends TestCase
         ]);
     }
 
-    public function test_non_bujp_role_cannot_use_vacancy_management_endpoints(): void
+    public function test_worker_and_bujp_roles_cannot_use_vacancy_management_endpoints(): void
     {
-        $user = User::create([
-            'name' => 'Security User',
-            'email' => 'security-vacancy@example.com',
-            'google_id' => null,
-            'password' => 'password',
-            'role' => 'satpam',
-            'status' => 'active',
-        ]);
-        $token = app(TokenService::class)->issue($user)['access_token'];
+        foreach (['satpam', 'cs', 'bujp'] as $role) {
+            $user = User::create([
+                'name' => 'Non Company User',
+                'email' => "non-company-{$role}@example.com",
+                'google_id' => null,
+                'password' => 'password',
+                'role' => $role,
+                'status' => 'active',
+            ]);
+            $token = app(TokenService::class)->issue($user)['access_token'];
 
-        $this->withToken($token)
-            ->postJson('/api/company/job-vacancies', $this->payload())
-            ->assertNotFound();
+            $this->withToken($token)
+                ->postJson('/api/company/job-vacancies', $this->payload())
+                ->assertNotFound();
+        }
     }
 
     private function payload(array $overrides = []): array
     {
         return array_merge([
             'position' => 'Satpam Pabrik',
+            'category' => 'security',
             'description_work' => 'Menjaga keamanan area pabrik.',
             'province' => 'KALIMANTAN TIMUR',
             'city' => 'BALIKPAPAN',
@@ -325,25 +329,25 @@ class JobVacancyManagementTest extends TestCase
         ], $overrides);
     }
 
-    /** @return array{0: User, 1: BUJP, 2: string} */
-    private function bujpAccount(string $email, string $name): array
+    /** @return array{0: User, 1: Company, 2: string} */
+    private function companyAccount(string $email, string $name): array
     {
         $user = User::create([
             'name' => $name.' User',
             'email' => $email,
             'google_id' => null,
             'password' => 'password',
-            'role' => 'bujp',
+            'role' => 'company',
             'status' => 'active',
         ]);
-        $userBujp = UserBUJP::create(['user_id' => $user->id]);
-        $bujp = BUJP::create([
-            'user_b_u_j_p_id' => $userBujp->id,
+        $userCompany = UserCompany::create(['user_id' => $user->id]);
+        $company = Company::create([
+            'user_company_id' => $userCompany->id,
             'company_name' => $name,
         ]);
         $token = app(TokenService::class)->issue($user)['access_token'];
 
-        return [$user, $bujp, $token];
+        return [$user, $company, $token];
     }
 
     private function seedLocations(): void

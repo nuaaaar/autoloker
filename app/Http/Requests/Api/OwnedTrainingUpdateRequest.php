@@ -20,7 +20,7 @@ class OwnedTrainingUpdateRequest extends ApiFormRequest
     public function rules(): array
     {
         return array_merge(
-            TrainingRules::update($this->hasFile('poster')),
+            TrainingRules::patch($this->hasFile('poster')),
             TrainingRules::immutable(),
             ['workflow_action' => ['prohibited']],
         );

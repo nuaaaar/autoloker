@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Api;
 
+use App\Http\Resources\Api\CleaningServiceProfileResource;
 use App\Http\Resources\Api\SecurityProfileResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -22,6 +23,13 @@ class TrainingParticipantResource extends JsonResource
 
                 return $security
                     ? (new SecurityProfileResource($security))->resolve()
+                    : null;
+            }),
+            'cleaning_service' => $this->whenLoaded('cleaning_service', function (): ?array {
+                $cleaningService = $this->getRelation('cleaning_service');
+
+                return $cleaningService
+                    ? (new CleaningServiceProfileResource($cleaningService))->resolve()
                     : null;
             }),
         ];

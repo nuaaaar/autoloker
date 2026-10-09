@@ -39,6 +39,7 @@ class OwnedTrainingResource extends JsonResource
             'reason_rejected' => $this->reason_rejected,
             'poster' => $this->poster,
             'category' => $this->category,
+            'category_role' => $this->category_role,
             'level' => $this->level,
             'is_certificate' => (bool) $this->is_certificate,
             'tags' => $this->arrayValue($this->tags),

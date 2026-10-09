@@ -10,21 +10,16 @@ use App\Models\TrainingApplication;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class OwnedTrainingParticipantController extends OwnedOrganizationController
 {
     private const PER_PAGE = 5;
 
     /**
-     * List participants for a training owned by the authenticated BUJP.
+     * List participants for a training owned by the authenticated company.
      */
     public function index(OwnedTrainingParticipantIndexRequest $request, string $uuid): JsonResponse
     {
-        if ($request->user()?->role !== 'bujp') {
-            throw new NotFoundHttpException('Profil BUJP tidak ditemukan.');
-        }
-
         $owner = $this->owner($request);
         $training = Training::query()
             ->where('uuid', $uuid)
@@ -33,7 +28,10 @@ class OwnedTrainingParticipantController extends OwnedOrganizationController
 
         $filters = $request->validated();
         $query = TrainingApplication::query()
-            ->with('security.user_security.user')
+            ->with([
+                'security.user_security.user',
+                'cleaning_service.user_cleaning_service.user',
+            ])
             ->where('training_id', $training->id);
 
         if (($status = $filters['status'] ?? null) && $status !== 'all') {
@@ -43,13 +41,23 @@ class OwnedTrainingParticipantController extends OwnedOrganizationController
         if (filled($filters['search'] ?? null)) {
             $search = trim($filters['search']);
 
-            $query->whereHas('security', function (Builder $query) use ($search): void {
-                $query->where(function (Builder $query) use ($search): void {
-                    $query->where('name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%")
-                        ->orWhere('phone_number', 'like', "%{$search}%")
-                        ->orWhere('ktp_number', 'like', "%{$search}%")
-                        ->orWhere('registration_number', 'like', "%{$search}%");
+            $query->where(function (Builder $query) use ($search): void {
+                $query->whereHas('security', function (Builder $query) use ($search): void {
+                    $query->where(function (Builder $query) use ($search): void {
+                        $query->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('phone_number', 'like', "%{$search}%")
+                            ->orWhere('ktp_number', 'like', "%{$search}%")
+                            ->orWhere('registration_number', 'like', "%{$search}%");
+                    });
+                })->orWhereHas('cleaning_service', function (Builder $query) use ($search): void {
+                    $query->where(function (Builder $query) use ($search): void {
+                        $query->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('phone_number', 'like', "%{$search}%")
+                            ->orWhere('ktp_number', 'like', "%{$search}%")
+                            ->orWhere('registration_number', 'like', "%{$search}%");
+                    });
                 });
             });
         }
@@ -73,14 +81,10 @@ class OwnedTrainingParticipantController extends OwnedOrganizationController
         string $uuid,
         string $applicationUuid,
     ): JsonResponse {
-        if ($request->user()?->role !== 'bujp') {
-            throw new NotFoundHttpException('Profil BUJP tidak ditemukan.');
-        }
-
         $owner = $this->owner($request);
         $training = Training::query()
             ->where('uuid', $uuid)
-            ->where('b_u_j_p_id', $owner['id'])
+            ->where($owner['column'], $owner['id'])
             ->firstOrFail();
         $status = $request->validated('status');
 

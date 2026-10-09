@@ -57,7 +57,6 @@ use App\Http\Controllers\User\NotificationController as USRNotification;
 
 use App\Http\Controllers\RegisterSecurityController;
 use App\Http\Controllers\RegisterCompanyController;
-use App\Http\Controllers\RegisterBUJPController;
 use App\Http\Controllers\AuthController;
 
 use Laravolt\Indonesia\Models\Province;
@@ -86,9 +85,6 @@ Route::post('/register/security', [RegisterSecurityController::class,'registerSe
 
 Route::post('/register/company', [RegisterCompanyController::class, 'registerCompany'])
         ->name('register.company');
-
-Route::post('/register/bujp', [RegisterBUJPController::class, 'registerBUJP'])
-->name('register.bujp');
 
 Route::get('/lgn-admn', function () {
     return view('auth.admin.index');

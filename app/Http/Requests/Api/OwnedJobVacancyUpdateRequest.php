@@ -15,7 +15,7 @@ class OwnedJobVacancyUpdateRequest extends ApiFormRequest
     public function rules(): array
     {
         return array_merge(
-            JobVacancyRules::update(),
+            JobVacancyRules::patch(),
             JobVacancyRules::immutable(),
             ['workflow_action' => ['prohibited']],
         );

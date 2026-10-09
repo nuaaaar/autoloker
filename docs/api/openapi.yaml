@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Autoloker API
   version: 1.0.0
-  description: API documentation for mobile authentication, profile editing, security work history CRUD, security certificate CRUD, public job vacancy and training listings, company- and BUJP-owned job vacancy and training management, job vacancy and training applications, paginated vacancy, published training, registered training listings, owned application status follow-up, active subscription plans, manual subscription order payments and proof uploads, bank references, and hierarchical location references.
+  description: API documentation for mobile authentication, profile editing, security work history CRUD, security certificate CRUD, public job vacancy and training listings, company- and company-owned job vacancy and training management, job vacancy and training applications, paginated vacancy, published training, registered training listings, owned application status follow-up, active subscription plans, manual subscription order payments and proof uploads, bank references, and hierarchical location references.
   license:
     name: Proprietary
 
@@ -14,7 +14,7 @@ paths:
   /api/login:
     post:
       summary: Log in to a mobile account
-      description: Authenticates a security, company, or BUJP user with an email or phone number.
+      description: Authenticates a security, cleaning service (cs), or company user with an email or phone number. BUJP self-service accounts can no longer log in to the mobile API.
       operationId: loginUser
       requestBody:
         required: true
@@ -44,7 +44,13 @@ paths:
   /api/job-vacancies:
     get:
       summary: List published job vacancies
-      description: Returns published vacancies that have not expired. The search parameter matches the position, company name, or BUJP name. Each vacancy includes `is_applied`, which is true when the authenticated security user has an application for that vacancy. Results are ordered by newest vacancy ID and paginated with five vacancies per page.
+      description: |
+        Returns published, non-expired vacancies whose `category` matches the category derived from
+        the authenticated account's active role (satpam to security, cs to cs). The client cannot
+        select another category through a query parameter. The search parameter matches the position
+        or company name. Each vacancy includes `is_applied`, which is true when the profile backing
+        the active role has an application for that vacancy. Results are ordered by newest vacancy ID
+        and paginated with five vacancies per page.
       operationId: listJobVacancies
       security:
         - bearerAuth: []
@@ -52,7 +58,7 @@ paths:
         - name: search
           in: query
           required: false
-          description: Partial search across the vacancy position, company name, and BUJP name.
+          description: Partial search across the vacancy position and company name.
           schema:
             type: string
             maxLength: 255
@@ -156,8 +162,8 @@ paths:
 
   /api/company/job-vacancies:
     get:
-      summary: List the authenticated company's or BUJP's job vacancies
-      description: Returns only job vacancies owned by the authenticated company or BUJP account. Results include every vacancy status, are ordered by newest vacancy ID, and are paginated with five vacancies per page. The optional search parameter matches the position or location fields.
+      summary: List the authenticated company's job vacancies
+      description: Returns only job vacancies owned by the authenticated company account. Results include every vacancy status, are ordered by newest vacancy ID, and are paginated with five vacancies per page. The optional search parameter matches the position or location fields.
       operationId: listOwnedJobVacancies
       security:
         - bearerAuth: []
@@ -204,9 +210,9 @@ paths:
         '422':
           $ref: '#/components/responses/ValidationError'
     post:
-      summary: Create a job vacancy for the authenticated company or BUJP
+      summary: Create a job vacancy for the authenticated company
       description: >-
-        Creates a company- or BUJP-owned job vacancy as a draft by default. For save_draft, only
+        Creates a company-owned job vacancy as a draft by default. For save_draft, only
         position is required. Set workflow_action to submit to validate and submit the vacancy directly
         for review; submit requires every field listed in the complete request example. Ownership,
         status, timestamps, provider, and application counters are server-managed. The request uses
@@ -326,13 +332,13 @@ paths:
       - name: uuid
         in: path
         required: true
-        description: UUID of a job vacancy owned by the authenticated company or BUJP.
+        description: UUID of a job vacancy owned by the authenticated company.
         schema:
           type: string
           format: uuid
     get:
       summary: Get an owned job vacancy
-      description: Returns a job vacancy only when it belongs to the authenticated company or BUJP.
+      description: Returns a job vacancy only when it belongs to the authenticated company.
       operationId: getOwnedJobVacancy
       security:
         - bearerAuth: []
@@ -350,7 +356,7 @@ paths:
     patch:
       summary: Update an owned job vacancy
       description: >-
-        Partially updates a job vacancy owned by the authenticated company or BUJP. Omitted fields
+        Partially updates a job vacancy owned by the authenticated company. Omitted fields
         remain unchanged and null clears nullable fields. responsibilities, certificate,
         competency_scheme, and facility replace their complete existing arrays. For every
         minimum/maximum pair, the minimum must be less than or equal to the maximum. Province and
@@ -427,13 +433,13 @@ paths:
       - name: uuid
         in: path
         required: true
-        description: UUID of a draft or rejected job vacancy owned by the authenticated company or BUJP.
+        description: UUID of a draft or rejected job vacancy owned by the authenticated company.
         schema:
           type: string
           format: uuid
     post:
       summary: Submit an owned job vacancy for review
-      description: Submits a draft or rejected job vacancy owned by the authenticated company or BUJP for review. The complete vacancy payload is validated before the status changes to `submitted`.
+      description: Submits a draft or rejected job vacancy owned by the authenticated company for review. The complete vacancy payload is validated before the status changes to `submitted`.
       operationId: submitOwnedJobVacancy
       security:
         - bearerAuth: []
@@ -457,13 +463,13 @@ paths:
       - name: uuid
         in: path
         required: true
-        description: UUID of a job vacancy owned by the authenticated company or BUJP.
+        description: UUID of a job vacancy owned by the authenticated company.
         schema:
           type: string
           format: uuid
     get:
       summary: List applicants for an owned job vacancy
-      description: Returns applicants for the selected job vacancy when it is owned by the authenticated company or BUJP. Results are ordered by newest application first and paginated with five applicants per page. The optional search parameter matches the applicant name, email, phone number, KTP number, or registration number. The status parameter filters the application status.
+      description: Returns applicants for the selected job vacancy when it is owned by the authenticated company. Results are ordered by newest application first and paginated with five applicants per page. The optional search parameter matches the applicant name, email, phone number, KTP number, or registration number. The status parameter filters the application status.
       operationId: listOwnedJobApplicants
       security:
         - bearerAuth: []
@@ -515,7 +521,7 @@ paths:
       - name: uuid
         in: path
         required: true
-        description: UUID of a job vacancy owned by the authenticated company or BUJP.
+        description: UUID of a job vacancy owned by the authenticated company.
         schema:
           type: string
           format: uuid
@@ -528,7 +534,7 @@ paths:
           format: uuid
     patch:
       summary: Update an owned job applicant status
-      description: Updates the application status for an applicant belonging to a job vacancy owned by the authenticated company or BUJP.
+      description: Updates the application status for an applicant belonging to a job vacancy owned by the authenticated company.
       operationId: updateOwnedJobApplicantStatus
       security:
         - bearerAuth: []
@@ -557,13 +563,13 @@ paths:
       - name: uuid
         in: path
         required: true
-        description: UUID of a training owned by the authenticated BUJP.
+        description: UUID of a training owned by the authenticated company.
         schema:
           type: string
           format: uuid
     get:
       summary: Retrieve an owned training
-      description: Returns the complete canonical training resource when it belongs to the authenticated BUJP. Trainings owned by another BUJP are returned as not found.
+      description: Returns the complete canonical training resource when it belongs to the authenticated company. Trainings owned by another company are returned as not found.
       operationId: getOwnedTraining
       security:
         - bearerAuth: []
@@ -698,7 +704,7 @@ paths:
       - name: uuid
         in: path
         required: true
-        description: UUID of a training owned by the authenticated BUJP.
+        description: UUID of a training owned by the authenticated company.
         schema:
           type: string
           format: uuid
@@ -727,13 +733,13 @@ paths:
       - name: uuid
         in: path
         required: true
-        description: UUID of a training owned by the authenticated BUJP.
+        description: UUID of a training owned by the authenticated company.
         schema:
           type: string
           format: uuid
     get:
       summary: List participants for an owned training
-      description: Returns registrants for the selected training when it is owned by the authenticated BUJP. Companies cannot use this endpoint because only BUJPs can post trainings. Results are ordered by newest registration first and paginated with five participants per page. The optional search parameter matches the participant name, email, phone number, KTP number, or registration number. The status parameter filters the registration status.
+      description: Returns registrants for the selected training when it is owned by the authenticated company. Results are ordered by newest registration first and paginated with five participants per page. The optional search parameter matches the participant name, email, phone number, KTP number, or registration number. The status parameter filters the registration status.
       operationId: listOwnedTrainingParticipants
       security:
         - bearerAuth: []
@@ -785,7 +791,7 @@ paths:
       - name: uuid
         in: path
         required: true
-        description: UUID of a training owned by the authenticated BUJP.
+        description: UUID of a training owned by the authenticated company.
         schema:
           type: string
           format: uuid
@@ -798,7 +804,7 @@ paths:
           format: uuid
     patch:
       summary: Update an owned training participant status
-      description: Updates the registration status for a participant belonging to a training owned by the authenticated BUJP. Approving a participant is rejected when the training quota is full.
+      description: Updates the registration status for a participant belonging to a training owned by the authenticated company. Approving a participant is rejected when the training quota is full.
       operationId: updateOwnedTrainingParticipantStatus
       security:
         - bearerAuth: []
@@ -824,8 +830,8 @@ paths:
 
   /api/company/trainings:
     get:
-      summary: List the authenticated company's or BUJP's trainings
-      description: Returns only trainings owned by the authenticated company or BUJP account. Results include every training status, are ordered by newest training ID, and are paginated with five trainings per page. The optional search parameter matches the title, provider, category, level, or location.
+      summary: List the authenticated company's trainings
+      description: Returns only trainings owned by the authenticated company account. Results include every training status, are ordered by newest training ID, and are paginated with five trainings per page. The optional search parameter matches the title, provider, category, level, or location.
       operationId: listOwnedTrainings
       security:
         - bearerAuth: []
@@ -874,12 +880,12 @@ paths:
     post:
       summary: Create an owned training
       description: >-
-        Creates a BUJP-owned training as a draft by default. For save_draft, only title is required.
+        Creates a company-owned training as a draft by default. For save_draft, only title is required.
         Set workflow_action to submit to validate and submit the new training directly for review;
         submit requires category, level, description, start_date, end_date, total_jp, training_mode,
         province, city, address, at least one syllabus item, at least one requirement, and quota.
         is_certificate, tags, instructor, price, and poster are optional. Provider and ownership are
-        derived from the authenticated BUJP and must not be sent. Send multipart/form-data with a
+        derived from the authenticated company and must not be sent. Send multipart/form-data with a
         poster file to upload a new poster; poster files must be JPG, JPEG, PNG, or WEBP and no
         larger than 5 MB. JSON requests may send an existing public poster storage path. For
         multipart/form-data, arrays may be sent as JSON-encoded array strings.
@@ -1124,10 +1130,13 @@ paths:
     post:
       summary: Apply for a training
       description: |
-        Creates one application for the authenticated security user's profile.
-        The training must be published, its start date must not have passed,
-        and its approved application count must be below its quota. Repeated
-        applications while pending or approved are rejected.
+        Creates one application for the profile backing the authenticated account's active role.
+        The training must be published for the active role's audience (`trainings.category_role`),
+        its start date must not have passed, and its approved application count must be below its
+        quota. Repeated applications while pending or approved are rejected. The applicant profile
+        must be complete: 21 of 21 fields. An incomplete profile returns 422 with `progress`,
+        `completed`, `total`, and `missing` under `data`. Training from another audience
+        returns 404.
       operationId: applyForTraining
       security:
         - bearerAuth: []
@@ -1146,7 +1155,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
         '422':
-          description: The training registration is closed, already submitted, or has reached its approved quota
+          description: The profile is incomplete (21 fields required), or the training registration is closed, already submitted, or has reached its approved quota
           content:
             application/json:
               schema:
@@ -1263,10 +1272,12 @@ paths:
     post:
       summary: Apply for a job vacancy
       description: |
-        Creates one application for the authenticated security user's profile.
-        The vacancy must be published, its application deadline must not have
-        passed, and its applicant quota must not be full. Repeated applications
-        for the same vacancy are rejected.
+        Creates one application for the profile backing the authenticated account's active role.
+        The vacancy must be published for that role's category and must not have expired, and the
+        vacancy quota must not be full. Repeated applications are rejected. A vacancy whose
+        `category` differs from the active role returns 404. The applicant profile must be
+        complete: 21 of 21 fields. An incomplete profile returns 422 with `progress`,
+        `completed`, `total`, and `missing` under `data`.
       operationId: applyForJobVacancy
       security:
         - bearerAuth: []
@@ -1331,10 +1342,19 @@ paths:
 
   /api/masters/positions:
     get:
-      summary: List security positions
+      summary: List security and cleaning service positions
       operationId: listMasterPositions
       security:
         - bearerAuth: []
+      parameters:
+        - name: category
+          in: query
+          required: false
+          description: Optional worker category filter (security or cs). Unsupported values are rejected with 422.
+          schema:
+            type: string
+            enum: [security, cs]
+          example: security
       responses:
         '200':
           description: Active positions
@@ -1394,6 +1414,15 @@ paths:
       operationId: listCertificateCategories
       security:
         - bearerAuth: []
+      parameters:
+        - name: category
+          in: query
+          required: false
+          description: Optional worker category filter (security or cs). Unsupported values are rejected with 422.
+          schema:
+            type: string
+            enum: [security, cs]
+          example: security
       responses:
         '200':
           description: Active certificate categories
@@ -1412,10 +1441,19 @@ paths:
           $ref: '#/components/responses/Unauthenticated'
   /api/masters/abilities:
     get:
-      summary: List security abilities
+      summary: List security and cleaning service abilities
       operationId: listMasterAbilities
       security:
         - bearerAuth: []
+      parameters:
+        - name: category
+          in: query
+          required: false
+          description: Optional worker category filter (security or cs). Unsupported values are rejected with 422.
+          schema:
+            type: string
+            enum: [security, cs]
+          example: security
       responses:
         '200':
           description: Active abilities
@@ -1427,10 +1465,19 @@ paths:
           $ref: '#/components/responses/Unauthenticated'
   /api/masters/placements:
     get:
-      summary: List security placements
+      summary: List security and cleaning service placements
       operationId: listMasterPlacements
       security:
         - bearerAuth: []
+      parameters:
+        - name: category
+          in: query
+          required: false
+          description: Optional worker category filter (security or cs). Unsupported values are rejected with 422.
+          schema:
+            type: string
+            enum: [security, cs]
+          example: security
       responses:
         '200':
           description: Active placements
@@ -1460,7 +1507,7 @@ paths:
       summary: List active subscription plans for the authenticated user's role
       description: >-
         Returns active master_subscriptions matching the authenticated user's role. User roles map to
-        subscription roles as follows: satpam to security, bujp to bujp, and company or perusahaan to
+        subscription roles as follows: satpam and cs to security, and company or perusahaan to
         client. Results are ordered by sort_order and id. The features field is returned as a decoded
         JSON object containing feature limits.
       operationId: listMasterSubscriptions
@@ -1609,27 +1656,21 @@ paths:
               anyOf:
                 - $ref: '#/components/schemas/UpdateSecurityProfileRequest'
                 - $ref: '#/components/schemas/UpdateCompanyProfileRequest'
-                - $ref: '#/components/schemas/UpdateBujpProfileRequest'
             examples:
               security:
                 $ref: '#/components/examples/UpdateSecurityProfileRequest'
               company:
                 $ref: '#/components/examples/UpdateCompanyProfileRequest'
-              bujp:
-                $ref: '#/components/examples/UpdateBujpProfileRequest'
           application/json:
             schema:
               anyOf:
                 - $ref: '#/components/schemas/UpdateSecurityProfileRequest'
                 - $ref: '#/components/schemas/UpdateCompanyProfileRequest'
-                - $ref: '#/components/schemas/UpdateBujpProfileRequest'
             examples:
               security:
                 $ref: '#/components/examples/UpdateSecurityProfileRequest'
               company:
                 $ref: '#/components/examples/UpdateCompanyProfileRequest'
-              bujp:
-                $ref: '#/components/examples/UpdateBujpProfileRequest'
       responses:
         '200':
           description: Profile updated successfully
@@ -1718,13 +1759,15 @@ paths:
     get:
       summary: Get the authenticated user's active subscription or default plan
       description: >-
-        Returns the authenticated user's active subscription for the user's mapped role. When no
-        active subscription exists, returns the active price-zero default plan for that same role.
-        It returns `user_subscription: null` only when the role is unsupported or no matching
-        active default plan is configured. The `limit_usage` counters are role-specific: security
-        users' applications must belong to published jobs or trainings; BUJP users' job and training
-        posts and company users' job posts count when their status is `submitted` or `published`.
-        Company training usage is zero.
+        Returns the authenticated user's active subscription for the user's mapped role. satpam and
+        cs both map to the security plan, so a role switch keeps the same entitlement. When no active
+        subscription exists, returns the active price-zero default plan for that same role. It
+        returns `user_subscription: null` only when the role is unsupported or no matching active
+        default plan is configured. The `limit_usage` counters are role-specific: security counters
+        combine applications from the account's security and cleaning service profiles, counted when
+        they belong to published jobs or trainings, so switching role does not reset quota usage;
+        BUJP legacy accounts' job and training posts and company users' job and training posts count
+        when their status is `submitted` or `published`.
       operationId: getActiveUserSubscription
       security:
         - bearerAuth: []
@@ -2129,8 +2172,10 @@ paths:
     post:
       summary: Register a user
       description: |
-        Registers a security, company, or BUJP account using the existing
-        users, user_*, and role-specific profile models.
+        Registers a security or company account using the existing
+        users, user_*, and role-specific profile models. BUJP self-service
+        registration is no longer accepted; cleaning service accounts are
+        created by switching role from an existing security profile.
       operationId: registerUser
       security: []
       requestBody:
@@ -2151,14 +2196,11 @@ paths:
               oneOf:
                 - $ref: '#/components/schemas/RegisterSecurityRequest'
                 - $ref: '#/components/schemas/RegisterCompanyRequest'
-                - $ref: '#/components/schemas/RegisterBujpRequest'
             examples:
               security:
                 $ref: '#/components/examples/SecurityRequest'
               company:
                 $ref: '#/components/examples/CompanyRequest'
-              bujp:
-                $ref: '#/components/examples/BujpRequest'
       responses:
         '201':
           description: Registration successful
@@ -2172,7 +2214,7 @@ paths:
                 company:
                   $ref: '#/components/examples/CompanyResponse'
                 bujp:
-                  $ref: '#/components/examples/BujpResponse'
+                  $ref: '#/components/examples/CompanyResponse'
         '422':
           description: Validation failed
           content:
@@ -2609,8 +2651,692 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
+  /api/profile/change-role:
+    post:
+      summary: Switch the authenticated worker account between security and cleaning service
+      description: |
+        Switches a worker account between the security and cleaning service roles. On the first
+        switch to a role the matching profile pair (user_* row plus profile row) is created
+        idempotently inside a transaction and seeded from the account name, email, and phone
+        number. The inactive profile, its files, certificates, histories, and applications are
+        left untouched, so switching back restores the previous state. The response carries the
+        same envelope as `GET /api/me`.
+      operationId: changeProfileRole
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role]
+              properties:
+                role:
+                  type: string
+                  enum: [security, cs]
+                  description: Target API role. `security` maps to the satpam profile, `cs` to the cleaning service profile.
+                  example: cs
+      responses:
+        '200':
+          description: Role switched and the refreshed account envelope returned
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, message, data]
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Role akun berhasil diganti.
+                  data:
+                    type: object
+                    required: [me]
+                    properties:
+                      me:
+                        $ref: '#/components/schemas/AuthenticatedUser'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          description: The account role is company or BUJP and cannot switch to a worker profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The target worker profile could not be created or found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /api/company/job-vacancies/master-data:
+    get:
+      summary: Category-scoped master data for the vacancy create form
+      description: |
+        Returns the position, certificate, and competency scheme references for one vacancy
+        category. Positions are read from master_position_securities for `security` and from
+        master_position_cleaning_services for `cs`; certificates and competency schemes are
+        filtered by the `category` column of their master tables. Company accounts only.
+      operationId: listCompanyJobVacancyMasterData
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: category
+          in: query
+          required: true
+          description: Vacancy category whose master data is returned.
+          schema:
+            type: string
+            enum: [security, cs]
+          example: security
+      responses:
+        '200':
+          description: Master data for the requested category
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, data]
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    required: [category, positions, certificates, competency_schemes]
+                    properties:
+                      category:
+                        type: string
+                        enum: [security, cs]
+                        example: security
+                      positions:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/MasterPosition'
+                      certificates:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/MasterTitle'
+                      competency_schemes:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/MasterTitle'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          description: The authenticated account has no company profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Missing or unsupported category value
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
+  /api/cleaning-service-certificates:
+    get:
+      summary: List the authenticated cleaning service user's certificates
+      description: Returns only certificates belonging to the authenticated cs user's cleaning service profile, ordered by expiration date ascending.
+      operationId: listCleaningServiceCertificates
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Cleaning service certificates
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CleaningServiceCertificateListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          description: The authenticated account has no cleaning service profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      summary: Create a certificate for the authenticated cleaning service profile
+      description: Creates a certificate for the authenticated cs profile. The category must be an active master_category_certificates.title. Send the request as multipart/form-data when uploading a file.
+      operationId: createCleaningServiceCertificate
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CleaningServiceCertificateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CleaningServiceCertificateRequest'
+      responses:
+        '201':
+          description: Certificate created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CleaningServiceCertificateResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          description: The authenticated account has no cleaning service profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /api/cleaning-service-certificates/{uuid}:
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: Certificate UUID scoped to the authenticated cleaning service profile.
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: Show one of the authenticated cleaning service user's certificates
+      operationId: showCleaningServiceCertificate
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Cleaning service certificate
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CleaningServiceCertificateResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      summary: Update one of the authenticated cleaning service user's certificates
+      operationId: updateCleaningServiceCertificate
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CleaningServiceCertificateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CleaningServiceCertificateRequest'
+      responses:
+        '200':
+          description: Certificate updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CleaningServiceCertificateResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    delete:
+      summary: Delete one of the authenticated cleaning service user's certificates
+      operationId: deleteCleaningServiceCertificate
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Cleaning service certificate deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/cleaning-service-histories:
+    get:
+      summary: List the authenticated cleaning service user's work histories
+      description: Returns the cleaning service work histories ordered by start date descending.
+      operationId: listCleaningServiceHistories
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Cleaning service work histories
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CleaningServiceHistoryListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          description: The authenticated account has no cleaning service profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      summary: Create a work history for the authenticated cleaning service profile
+      description: An end date may only be omitted when the history is marked as current.
+      operationId: createCleaningServiceHistory
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CleaningServiceHistoryRequest'
+      responses:
+        '201':
+          description: Work history created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CleaningServiceHistoryResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          description: The authenticated account has no cleaning service profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /api/cleaning-service-histories/{uuid}:
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: Work history UUID scoped to the authenticated cleaning service profile.
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: Show one of the authenticated cleaning service user's work histories
+      operationId: showCleaningServiceHistory
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Cleaning service work history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CleaningServiceHistoryResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      summary: Update one of the authenticated cleaning service user's work histories
+      operationId: updateCleaningServiceHistory
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CleaningServiceHistoryRequest'
+      responses:
+        '200':
+          description: Work history updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CleaningServiceHistoryResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    delete:
+      summary: Delete one of the authenticated cleaning service user's work histories
+      operationId: deleteCleaningServiceHistory
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Cleaning service work history deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/cleaning-service/{uuid}/certificates:
+    get:
+      summary: List certificates of a cleaning service profile
+      description: Public-by-uuid lookup used by company applicant and participant views. Certificates are ordered by expiration date ascending.
+      operationId: listCertificatesByCleaningService
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          description: Cleaning service profile UUID.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Cleaning service certificates
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CleaningServiceCertificateListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/cleaning-service/{uuid}/histories:
+    get:
+      summary: List work histories of a cleaning service profile
+      description: Public-by-uuid lookup used by company applicant and participant views. Histories are ordered by start date descending.
+      operationId: listHistoriesByCleaningService
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          description: Cleaning service profile UUID.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Cleaning service work histories
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CleaningServiceHistoryListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
 components:
   schemas:
+    MasterPosition:
+      type: object
+      required: [id, uuid, title, description, responsibility]
+      properties:
+        id:
+          type: integer
+          example: 12
+        uuid:
+          type: [string, 'null']
+          format: uuid
+          example: 4d1e8f60-6d1e-4b8f-9d0e-3f2c9a51b7aa
+        title:
+          type: [string, 'null']
+          example: Satpam Pabrik
+        description:
+          type: [string, 'null']
+          example: Menjaga keamanan area pabrik.
+        responsibility:
+          type: array
+          items:
+            type: string
+          example: [Menjaga akses masuk dan keluar]
+
+    MasterTitle:
+      type: object
+      required: [id, uuid, title]
+      properties:
+        id:
+          type: integer
+          example: 5
+        uuid:
+          type: [string, 'null']
+          format: uuid
+          example: 9f2b1d70-5a44-4f2b-8c31-6e0d5b7a1c22
+        title:
+          type: [string, 'null']
+          example: Gada Pratama
+
+    CleaningServiceCertificate:
+      type: object
+      required: [uuid, title, publisher, certificate_number, category, publish_date, expired_date, file, is_badge]
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          example: 3c8f2b41-1a2b-4c5d-9e6f-708192a3b4c5
+        title:
+          type: [string, 'null']
+          example: Pelatihan Kebersihan Gedung
+        publisher:
+          type: [string, 'null']
+          example: BNSP
+        certificate_number:
+          type: [string, 'null']
+          example: CS-XXX-000
+        category:
+          type: [string, 'null']
+          example: Teknis Operasional
+        publish_date:
+          type: [string, 'null']
+          format: date
+          example: '2026-09-18'
+        expired_date:
+          type: [string, 'null']
+          format: date
+          example: '2030-12-18'
+        file:
+          type: [string, 'null']
+          example: certificate/3c8f2b41.pdf
+        is_badge:
+          type: integer
+          enum: [0, 1]
+          example: 1
+
+    CleaningServiceCertificateRequest:
+      type: object
+      description: Certificate payload for a cleaning service profile.
+      properties:
+        title:
+          type: [string, 'null']
+          maxLength: 255
+        publisher:
+          type: [string, 'null']
+          maxLength: 255
+        certificate_number:
+          type: [string, 'null']
+          maxLength: 255
+        category:
+          type: [string, 'null']
+          description: Must match an active master_category_certificates.title.
+        publish_date:
+          type: [string, 'null']
+          format: date
+        expired_date:
+          type: [string, 'null']
+          format: date
+        file:
+          type: string
+          format: binary
+          description: PDF, JPG, JPEG, or PNG up to 10 MB.
+        is_badge:
+          type: boolean
+
+    CleaningServiceCertificateListResponse:
+      type: object
+      required: [status, data]
+      properties:
+        status:
+          type: boolean
+          example: true
+        data:
+          type: object
+          required: [cleaning_service_certificates]
+          properties:
+            cleaning_service_certificates:
+              type: array
+              items:
+                $ref: '#/components/schemas/CleaningServiceCertificate'
+
+    CleaningServiceCertificateResponse:
+      type: object
+      required: [status, data]
+      properties:
+        status:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Sertifikat cleaning service berhasil dibuat.
+        data:
+          type: object
+          required: [cleaning_service_certificate]
+          properties:
+            cleaning_service_certificate:
+              $ref: '#/components/schemas/CleaningServiceCertificate'
+
+    CleaningServiceHistory:
+      type: object
+      required: [uuid, position, company_name, location, category, start_date, end_date, description, is_current]
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          example: 7b1c9e02-8d33-4a5b-9c1d-2e3f4a5b6c7d
+        position:
+          type: [string, 'null']
+          example: Cleaning Service
+        company_name:
+          type: [string, 'null']
+          example: PT Bersih Sejahtera
+        location:
+          type: [string, 'null']
+          example: Balikpapan
+        category:
+          type: [string, 'null']
+          example: Indoor
+        start_date:
+          type: [string, 'null']
+          format: date
+          example: '2025-01-01'
+        end_date:
+          type: [string, 'null']
+          format: date
+          example: '2025-12-31'
+        description:
+          type: [string, 'null']
+          example: Bertanggung jawab atas kebersihan lantai 1–5.
+        is_current:
+          type: boolean
+          example: false
+
+    CleaningServiceHistoryRequest:
+      type: object
+      description: Work history payload for a cleaning service profile. An end date may only be omitted when is_current is true.
+      properties:
+        position:
+          type: [string, 'null']
+        company_name:
+          type: [string, 'null']
+        location:
+          type: [string, 'null']
+        category:
+          type: [string, 'null']
+          description: Must match an active master_placements.title.
+        start_date:
+          type: [string, 'null']
+          format: date
+        end_date:
+          type: [string, 'null']
+          format: date
+        description:
+          type: [string, 'null']
+        is_current:
+          type: boolean
+
+    CleaningServiceHistoryListResponse:
+      type: object
+      required: [status, data]
+      properties:
+        status:
+          type: boolean
+          example: true
+        data:
+          type: object
+          required: [cleaning_service_histories]
+          properties:
+            cleaning_service_histories:
+              type: array
+              items:
+                $ref: '#/components/schemas/CleaningServiceHistory'
+
+    CleaningServiceHistoryResponse:
+      type: object
+      required: [status, data]
+      properties:
+        status:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Riwayat cleaning service berhasil dibuat.
+        data:
+          type: object
+          required: [cleaning_service_history]
+          properties:
+            cleaning_service_history:
+              $ref: '#/components/schemas/CleaningServiceHistory'
+
+    CleaningServiceProfileState:
+      type: object
+      description: Cleaning service applicant profile embedded in company applicant and participant payloads. Shares the worker field set with the security profile.
+      required: [type, id, uuid, data, profile_completion, is_verified, is_active]
+      properties:
+        type:
+          type: string
+          enum: [cs]
+          example: cs
+        id:
+          type: integer
+          example: 8
+        uuid:
+          type: string
+          format: uuid
+          example: 7b1c9e02-8d33-4a5b-9c1d-2e3f4a5b6c7d
+        data:
+          $ref: '#/components/schemas/ProfileData'
+        profile_completion:
+          $ref: '#/components/schemas/ProfileCompletion'
+        is_verified:
+          type: 'null'
+          description: Cleaning service profiles have no verification column, so this is always null.
+          example: null
+        is_active:
+          type: boolean
+          description: Derived from the owning account status.
+          example: true
+
     Training:
       type: object
       required:
@@ -2622,6 +3348,7 @@ components:
         - provider
         - instructor
         - category
+        - category_role
         - level
         - price
         - is_free
@@ -2680,6 +3407,11 @@ components:
         category:
           type: [string, 'null']
           example: Security
+        category_role:
+          type: string
+          enum: [security, cs]
+          description: Audience of the training. security targets satpam profiles, cs targets cleaning service profiles.
+          example: security
         level:
           type: [string, 'null']
           example: Basic
@@ -2894,7 +3626,7 @@ components:
               $ref: '#/components/schemas/TrainingPagination'
     OwnedTraining:
       type: object
-      description: Canonical BUJP-owned training resource returned by create, update, submit, and show operations.
+      description: Canonical company-owned training resource returned by create, update, submit, and show operations. The `category_role` audience is fixed at creation and cannot be changed through PATCH.
       required:
         - uuid
         - title
@@ -2964,6 +3696,11 @@ components:
         category:
           type: [string, 'null']
           example: Keamanan
+        category_role:
+          type: string
+          enum: [security, cs]
+          description: Audience fixed at creation. PATCH rejects any attempt to change it.
+          example: security
         level:
           type: [string, 'null']
           example: Dasar
@@ -3080,10 +3817,11 @@ components:
     CreateOwnedTrainingRequest:
       type: object
       description: >-
-        Accepted request fields for a BUJP-owned training. Drafts require title; using
-        workflow_action submit additionally requires category, level, description, start_date,
-        end_date, total_jp, training_mode, province, city, address, at least one syllabus item,
-        at least one requirement, and quota. Do not send provider or ownership fields.
+        Accepted request fields for a company-owned training. Drafts require title and
+        category_role (security or cs audience); using workflow_action submit additionally requires
+        category, level, description, start_date, end_date, total_jp, training_mode, province, city,
+        address, at least one syllabus item, at least one requirement, and quota. category_role is
+        immutable after creation. Do not send provider or ownership fields.
       additionalProperties: false
       required: [title]
       properties:
@@ -3096,8 +3834,13 @@ components:
         category:
           type: [string, 'null']
           maxLength: 255
-          description: Training category. Required when workflow_action is submit.
+          description: Training topic category. Required when workflow_action is submit.
           example: Keamanan / Satpam
+        category_role:
+          type: string
+          enum: [security, cs]
+          description: Audience of the training. Required on create; prohibited on PATCH.
+          example: security
         level:
           type: [string, 'null']
           maxLength: 255
@@ -3225,8 +3968,12 @@ components:
         category:
           type: [string, 'null']
           maxLength: 255
-          description: Training category.
+          description: Training topic category.
           example: Keamanan / Satpam
+        category_role:
+          description: Audience cannot be changed after creation; sending it fails validation with a prohibited rule.
+          not: {}
+          example: null
         level:
           type: [string, 'null']
           maxLength: 255
@@ -3358,7 +4105,7 @@ components:
 
     JobApplicant:
       type: object
-      required: [id, uuid, job_vacancy_id, status, created_at, updated_at, security]
+      required: [id, uuid, job_vacancy_id, status, created_at, updated_at, security, cleaning_service]
       properties:
         id:
           type: integer
@@ -3380,8 +4127,14 @@ components:
           type: [string, 'null']
           format: date-time
         security:
+          description: Security profile of the applicant. Null when the application belongs to a cleaning service profile.
           oneOf:
             - $ref: '#/components/schemas/ApplicantSecurity'
+            - type: 'null'
+        cleaning_service:
+          description: Cleaning service profile of the applicant. Null when the application belongs to a security profile.
+          oneOf:
+            - $ref: '#/components/schemas/CleaningServiceProfileState'
             - type: 'null'
 
     OwnedJobApplicantListResponse:
@@ -3404,7 +4157,7 @@ components:
 
     TrainingParticipant:
       type: object
-      required: [id, uuid, training_id, status, created_at, updated_at, security]
+      required: [id, uuid, training_id, status, created_at, updated_at, security, cleaning_service]
       properties:
         id:
           type: integer
@@ -3426,8 +4179,14 @@ components:
           type: [string, 'null']
           format: date-time
         security:
+          description: Security profile of the applicant. Null when the application belongs to a cleaning service profile.
           oneOf:
             - $ref: '#/components/schemas/ApplicantSecurity'
+            - type: 'null'
+        cleaning_service:
+          description: Cleaning service profile of the applicant. Null when the application belongs to a security profile.
+          oneOf:
+            - $ref: '#/components/schemas/CleaningServiceProfileState'
             - type: 'null'
 
     OwnedTrainingParticipantListResponse:
@@ -3573,6 +4332,7 @@ components:
         - b_u_j_p_id
         - company_id
         - position
+        - category
         - description_work
         - responsibility
         - facility
@@ -3626,6 +4386,11 @@ components:
         position:
           type: [string, 'null']
           example: Satpam Objek Vital (Obvit)
+        category:
+          type: string
+          enum: [security, cs]
+          description: Applicant category the vacancy targets. Fixed at creation.
+          example: security
         description_work:
           type: [string, 'null']
           example: Pengamanan pada objek vital seperti pembangkit listrik, pelabuhan, bandara dan kilang minyak.
@@ -3793,12 +4558,13 @@ components:
 
     CreateOwnedJobVacancyRequest:
       type: object
-      required: [position]
+      required: [position, category]
       additionalProperties: false
       description: >-
-        Accepted request fields for a company- or BUJP-owned vacancy. Drafts require position; using
-        workflow_action submit additionally requires description_work, province, city, address,
-        working_type, working_system, at least one responsibility, all age/height/weight ranges,
+        Accepted request fields for a company-owned vacancy. Drafts require position and category
+        (security or cs); category is immutable after creation. Using workflow_action submit
+        additionally requires description_work, province, city, address, working_type,
+        working_system, at least one responsibility, all age/height/weight ranges,
         last_education, min_experience, at least one certificate, competency scheme, facility,
         min_price, max_price, is_show_fee, is_urgent, quota, and end_date. Do not send ownership,
         status, provider, counters, start_date, fee_type, or other response-only fields.
@@ -3807,6 +4573,11 @@ components:
           type: string
           minLength: 3
           maxLength: 150
+        category:
+          type: string
+          enum: [security, cs]
+          description: Applicant category the vacancy targets. Required on create; prohibited on PATCH.
+          example: security
           description: Vacancy position title.
           example: Satpam Objek Vital (Obvit) - Test 10
         description_work:
@@ -3954,7 +4725,7 @@ components:
         null clears nullable fields. responsibilities, certificate, competency_scheme, and facility
         replace their complete existing arrays. Minimum/maximum pairs must remain ordered, and a
         supplied province and city must identify a valid location pair. workflow_action, ownership,
-        status, timestamps, counters, start_date, fee_type, and gender are not accepted.
+        status, timestamps, counters, start_date, fee_type, gender, and category are not accepted.
       properties:
         position:
           type: string
@@ -3962,6 +4733,10 @@ components:
           maxLength: 150
           description: Vacancy position title.
           example: Satpam Objek Vital (Obvit) - Test 10
+        category:
+          description: Vacancy category cannot be changed after creation; sending it fails validation with a prohibited rule.
+          not: {}
+          example: null
         description_work:
           type: [string, 'null']
           description: Work description.
@@ -4492,7 +5267,7 @@ components:
       properties:
         role:
           type: string
-          enum: [security, company, bujp]
+          enum: [security, cs, company]
           description: security maps to the stored satpam role.
         identifier:
           type: string
@@ -4675,11 +5450,11 @@ components:
             total_active_job_posts:
               type: integer
               minimum: 0
-              description: BUJP or company job posts with submitted or published status; zero for other roles.
+              description: Company job posts with submitted or published status; zero for other roles.
             total_active_training_posts:
               type: integer
               minimum: 0
-              description: BUJP training posts with submitted or published status; zero for company and security roles.
+              description: Company training posts with submitted or published status; zero for worker roles.
         created_at:
           type: [string, 'null']
           format: date-time
@@ -4753,8 +5528,11 @@ components:
 
     UserOrderManualSubscription:
       type: object
-      description: Subscription plan snapshot embedded in a manual order.
-      required: [id, uuid, name, slug, role, price, duration, duration_type, description, features, is_active, sort_order]
+      description: |
+        Subscription plan snapshot embedded in a manual order. Uses the same normalized shape as the
+        plan listing endpoint: `features` is a JSON object or null (never a JSON string), `price` is
+        numeric, and `is_active` and `is_highlight` are booleans.
+      required: [id, uuid, name, slug, role, price, duration, duration_type, description, features, is_active, is_highlight, sort_order]
       properties:
         id:
           type: integer
@@ -4773,9 +5551,10 @@ components:
           type: [string, 'null']
           enum: [security, bujp, client, null]
         price:
-          type: string
-          description: Subscription price snapshot as a decimal string with two fractional digits.
-          example: '49000.00'
+          type: number
+          format: double
+          description: Subscription price snapshot as a JSON number.
+          example: 49000.0
         duration:
           type: integer
           example: 1
@@ -4909,7 +5688,7 @@ components:
         uuid: {type: string, format: uuid}
         role:
           type: string
-          enum: [satpam, company, bujp]
+          enum: [satpam, cs, company, bujp]
         name: {type: string}
         email: {type: string, format: email}
         phone_number: {type: [string, 'null']}
@@ -4989,7 +5768,7 @@ components:
 
     MasterSubscription:
       type: object
-      required: [id, uuid, name, slug, role, price, duration, duration_type, description, features, is_active, sort_order]
+      required: [id, uuid, name, slug, role, price, duration, duration_type, description, features, is_active, is_highlight, sort_order]
       properties:
         id:
           type: integer
@@ -5036,6 +5815,10 @@ components:
         is_active:
           type: boolean
           example: true
+        is_highlight:
+          type: boolean
+          description: Whether the plan is highlighted in the mobile plan list.
+          example: false
         sort_order:
           type: integer
           minimum: 0
@@ -5198,38 +5981,6 @@ components:
         description: {type: [string, 'null']}
         npwp: {type: [string, 'null'], maxLength: 50}
         nib: {type: [string, 'null'], maxLength: 50}
-        business_license: {type: [string, 'null'], maxLength: 100}
-        email: {type: [string, 'null'], format: email, maxLength: 100}
-        phone: {type: [string, 'null'], maxLength: 30}
-        website: {type: [string, 'null'], format: uri, maxLength: 255}
-        province: {type: [string, 'null'], description: Province code}
-        city: {type: [string, 'null'], description: City code}
-        district: {type: [string, 'null'], description: District code}
-        village: {type: [string, 'null'], description: Village code}
-        postal_code: {type: [string, 'null'], maxLength: 10}
-        address: {type: [string, 'null']}
-        instagram: {type: [string, 'null'], format: uri, maxLength: 255}
-        facebook: {type: [string, 'null'], format: uri, maxLength: 255}
-        linkedin: {type: [string, 'null'], format: uri, maxLength: 255}
-        youtube: {type: [string, 'null'], format: uri, maxLength: 255}
-
-    UpdateBujpProfileRequest:
-      type: object
-      description: >-
-        Partial BUJP profile update. Location fields use master location codes. When `company_name`
-        is provided, the authenticated BUJP account name is synchronized to the same value.
-      additionalProperties: false
-      properties:
-        company_name: {type: string, maxLength: 255}
-        industry: {type: [string, 'null'], maxLength: 255}
-        logo: {type: string, format: binary}
-        description: {type: [string, 'null']}
-        npwp: {type: [string, 'null'], maxLength: 50}
-        nib: {type: [string, 'null'], maxLength: 50}
-        business_license: {type: [string, 'null'], maxLength: 100}
-        sio_number: {type: [string, 'null'], maxLength: 100}
-        sio_expired_date: {type: [string, 'null'], format: date}
-        sio_file: {type: string, format: binary}
         email: {type: [string, 'null'], format: email, maxLength: 100}
         phone: {type: [string, 'null'], maxLength: 30}
         website: {type: [string, 'null'], format: uri, maxLength: 255}
@@ -5256,7 +6007,7 @@ components:
       properties:
         type:
           type: string
-          enum: [security, company, bujp]
+          enum: [security, cs, company]
         id:
           type: integer
         uuid:
@@ -5377,52 +6128,6 @@ components:
           type: string
           maxLength: 50
           description: Optional NIB stored on the company profile.
-
-    RegisterBujpRequest:
-      type: object
-      required:
-        - role
-        - name
-        - email
-        - password
-        - password_confirmation
-        - agree
-        - sio_number
-        - sio_expired_date
-        - sio_file
-      properties:
-        role:
-          type: string
-          const: bujp
-        name:
-          type: string
-          maxLength: 150
-        email:
-          type: string
-          format: email
-        password:
-          $ref: '#/components/schemas/Password'
-        password_confirmation:
-          type: string
-          format: password
-        agree:
-          type: boolean
-          const: true
-        nib:
-          type: string
-          maxLength: 50
-          description: Optional NIB stored on the BUJP profile.
-        sio_number:
-          type: string
-          maxLength: 100
-        sio_expired_date:
-          type: string
-          format: date
-          description: Must be after today.
-        sio_file:
-          type: string
-          format: binary
-          description: PDF, JPG, JPEG, or PNG; maximum 5 MB.
 
     Password:
       type: string
@@ -5783,19 +6488,6 @@ components:
         password: Secret123
         password_confirmation: Secret123
         agree: true
-    BujpRequest:
-      summary: BUJP registration request
-      value:
-        role: bujp
-        name: PT Security Services
-        email: admin@security.example
-        nib: '1234567890123'
-        sio_number: SIO-001
-        sio_expired_date: '2027-08-27'
-        sio_file: '[binary file: sio.pdf]'
-        password: Secret123
-        password_confirmation: Secret123
-        agree: true
     UpdateSecurityProfileRequest:
       summary: Partial security profile update
       description: Omit fields for partial updates. Location fields use master location codes. The response returns both location names and codes.
@@ -5853,32 +6545,6 @@ components:
         facebook: https://facebook.com/example
         linkedin: https://linkedin.com/company/example
         youtube: https://youtube.com/@example
-    UpdateBujpProfileRequest:
-      summary: Partial BUJP profile update
-      description: Omit fields for partial updates. Location fields use master location codes. The response returns both location names and codes.
-      value:
-        company_name: PT Security Services
-        industry: Jasa Keamanan
-        description: Penyedia jasa keamanan profesional.
-        npwp: '012345678901234'
-        nib: '9123456789012'
-        business_license: SIU-2026-001
-        sio_number: SIO-2026-001
-        sio_expired_date: '2027-08-27'
-        sio_file: '[binary file: sio.pdf]'
-        email: admin@security.example
-        phone: '0215551234'
-        website: https://security.example
-        province: '31'
-        city: '3174'
-        district: '317401'
-        village: '3174011001'
-        postal_code: '12190'
-        address: Jalan Asia Afrika No. 8
-        instagram: https://instagram.com/security
-        facebook: https://facebook.com/security
-        linkedin: https://linkedin.com/company/security
-        youtube: https://youtube.com/@security
     SecurityResponse:
       summary: Security registration response
       value:
@@ -5901,17 +6567,6 @@ components:
           role: company
           name: PT Example
           email: admin@example.com
-    BujpResponse:
-      summary: BUJP registration response
-      value:
-        status: true
-        message: Pendaftaran berhasil.
-        data:
-          id: 44
-          uuid: 550e8400-e29b-41d4-a716-446655440002
-          role: bujp
-          name: PT Security Services
-          email: admin@security.example
     SecurityCertificateRequest:
       summary: Security certificate create request
       description: Use multipart/form-data when sending the optional file.

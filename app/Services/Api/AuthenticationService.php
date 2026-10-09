@@ -34,7 +34,10 @@ class AuthenticationService
             throw ValidationException::withMessages(['identifier' => 'Akun tidak aktif.']);
         }
 
-        $expectedRole = $data['role'] === 'security' ? 'satpam' : $data['role'];
+        $expectedRole = match ($data['role']) {
+            'security' => 'satpam',
+            default => $data['role'],
+        };
         if ($user->role !== $expectedRole) {
             throw ValidationException::withMessages(['role' => 'Peran akun tidak sesuai.']);
         }
@@ -63,6 +66,7 @@ class AuthenticationService
     {
         $profile = match ($user->role) {
             'satpam' => $user->user_security?->security,
+            'cs' => $user->user_cleaning_service?->cleaning_service,
             'company' => $user->user_company?->company,
             'bujp' => $user->user_bujp?->bujp,
             default => null,
@@ -70,13 +74,14 @@ class AuthenticationService
 
         $profileData = null;
         if ($profile) {
+            $worker = in_array($user->role, ['satpam', 'cs'], true);
             $profileData = [
                 'type' => $user->role === 'satpam' ? 'security' : $user->role,
                 'id' => $profile->id,
                 'uuid' => $profile->uuid,
                 'profile_completion' => $profile->profileProgress(),
-                'is_verified' => $user->role === 'satpam' ? null : (bool) $profile->is_verified,
-                'is_active' => $user->role === 'satpam' ? $user->status === 'active' : (bool) $profile->is_active,
+                'is_verified' => $worker ? null : (bool) $profile->is_verified,
+                'is_active' => $worker ? $user->status === 'active' : (bool) $profile->is_active,
             ];
         }
 

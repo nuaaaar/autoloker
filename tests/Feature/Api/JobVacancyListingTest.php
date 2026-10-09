@@ -158,6 +158,11 @@ class JobVacancyListingTest extends TestCase
             'role' => 'satpam',
             'status' => 'active',
         ]);
+        $userSecurity = UserSecurity::create(['user_id' => $user->id]);
+        Security::create([
+            'user_security_id' => $userSecurity->id,
+            'name' => 'API User',
+        ]);
 
         return app(TokenService::class)->issue($user)['access_token'];
     }
@@ -166,6 +171,7 @@ class JobVacancyListingTest extends TestCase
     {
         return array_merge([
             'position' => 'Security Officer',
+            'category' => 'security',
             'status' => 'published',
             'end_date' => now()->addDays(7)->toDateString(),
             'province' => 'Jawa Barat',

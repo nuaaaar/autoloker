@@ -7,27 +7,27 @@ use App\Http\Requests\Api\TrainingIndexRequest;
 use App\Http\Resources\Api\TrainingResource;
 use App\Models\Training;
 use App\Models\TrainingApplication;
+use App\Services\Api\ApplicantProfileResolver;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class TrainingController extends Controller
 {
     private const PER_PAGE = 5;
 
+    public function __construct(private readonly ApplicantProfileResolver $applicants) {}
+
     /**
-     * List published trainings for security mobile apps.
+     * List published trainings targeted at the active applicant role.
      */
     public function index(TrainingIndexRequest $request): JsonResponse
     {
-        if ($request->user()?->role !== 'satpam') {
-            throw new NotFoundHttpException('Profil satpam tidak ditemukan.');
-        }
-
         $filters = $request->validated();
-        $securityId = $request->user()?->user_security?->security?->id;
+        $applicant = $this->applicants->resolve($request->user());
+        $column = $applicant['column'];
+        $profileId = $applicant['profile_id'];
 
         $query = Training::query()
             ->with([
@@ -40,11 +40,12 @@ class TrainingController extends Controller
                 },
             ])
             ->withExists([
-                'applications as is_applied' => function (Builder $query) use ($securityId): void {
-                    $query->whereNotNull('security_id')
-                        ->where('security_id', $securityId);
+                'applications as is_applied' => function (Builder $query) use ($column, $profileId): void {
+                    $query->whereNotNull($column)
+                        ->where($column, $profileId);
                 },
             ])
+            ->where('category_role', $applicant['category'])
             ->where('status', 'published');
 
         if (filled($filters['search'] ?? null)) {
@@ -83,13 +84,33 @@ class TrainingController extends Controller
 
     public function store(Request $request, string $uuid): JsonResponse
     {
-        $security = $this->security($request);
+        $applicant = $this->applicants->resolve($request->user());
         $training = Training::query()
             ->where('uuid', $uuid)
+            ->where('category_role', $applicant['category'])
             ->where('status', 'published')
             ->firstOrFail();
 
-        $result = DB::transaction(function () use ($security, $training): array {
+        $profile = $applicant['profile'];
+        $progress = $profile->profileProgress();
+
+        if ($progress['completed'] < $progress['total']) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Lengkapi profil Anda sebelum mendaftar pelatihan.',
+                'data' => [
+                    'progress' => $progress['progress'],
+                    'completed' => $progress['completed'],
+                    'total' => $progress['total'],
+                    'missing' => $progress['missing'],
+                ],
+            ], 422);
+        }
+
+        $column = $applicant['column'];
+        $profileId = $applicant['profile_id'];
+
+        $result = DB::transaction(function () use ($training, $column, $profileId): array {
             $training = Training::query()
                 ->lockForUpdate()
                 ->findOrFail($training->id);
@@ -102,7 +123,7 @@ class TrainingController extends Controller
             }
 
             $application = TrainingApplication::query()
-                ->where('security_id', $security->id)
+                ->where($column, $profileId)
                 ->where('training_id', $training->id)
                 ->whereIn('status', ['pending', 'approved'])
                 ->first();
@@ -141,7 +162,7 @@ class TrainingController extends Controller
 
             return [
                 'application' => TrainingApplication::create([
-                    'security_id' => $security->id,
+                    $column => $profileId,
                     'training_id' => $training->id,
                     'status' => 'pending',
                 ]),
@@ -171,20 +192,5 @@ class TrainingController extends Controller
                 ],
             ],
         ], 201);
-    }
-
-    private function security(Request $request)
-    {
-        if ($request->user()?->role !== 'satpam') {
-            throw new NotFoundHttpException('Profil satpam tidak ditemukan.');
-        }
-
-        $security = $request->user()->user_security?->security;
-
-        if (! $security) {
-            throw new NotFoundHttpException('Profil satpam tidak ditemukan.');
-        }
-
-        return $security;
     }
 }

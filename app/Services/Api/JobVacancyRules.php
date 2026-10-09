@@ -12,6 +12,7 @@ final class JobVacancyRules
     {
         $rules = self::shared();
         $rules['position'] = ['required', 'string', 'min:3', 'max:150'];
+        $rules['category'] = ['required', Rule::in(self::categories())];
         $rules['workflow_action'] = ['sometimes', Rule::in(['save_draft', 'submit'])];
 
         return $rules;
@@ -22,10 +23,22 @@ final class JobVacancyRules
         return self::shared();
     }
 
+    /**
+     * Rules for PATCH requests: category and audience are fixed at creation.
+     */
+    public static function patch(): array
+    {
+        $rules = self::shared();
+        $rules['category'] = ['prohibited'];
+
+        return $rules;
+    }
+
     public static function complete(): array
     {
         return [
             'position' => ['required', 'string', 'min:3', 'max:150'],
+            'category' => ['required', Rule::in(self::categories())],
             'description_work' => ['required', 'string'],
             'province' => ['required', 'string', 'max:255'],
             'city' => ['required', 'string', 'max:255'],
@@ -93,7 +106,6 @@ final class JobVacancyRules
             'workflow_action' => ['prohibited'],
         ]);
     }
-
     public static function locationErrors(array $data): array
     {
         $provinceName = $data['province'] ?? null;
@@ -158,6 +170,12 @@ final class JobVacancyRules
     public static function workingTypes(): array
     {
         return ['permanent', 'contract', 'intenrship', 'freelance'];
+    }
+
+    /** @return list<string> */
+    public static function categories(): array
+    {
+        return ['security', 'cs'];
     }
 
     public static function workingSystems(): array

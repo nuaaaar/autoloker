@@ -19,6 +19,7 @@ class OwnedJobVacancyResource extends JsonResource
         $data = [
             'uuid' => $this->uuid,
             'position' => $this->position,
+            'category' => $this->category,
             'status' => $this->status,
             'bujp' => $bujp ? [
                 'uuid' => $bujp->uuid,

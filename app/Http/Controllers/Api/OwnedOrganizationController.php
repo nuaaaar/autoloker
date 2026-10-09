@@ -10,7 +10,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 abstract class OwnedOrganizationController extends Controller
 {
     /**
-     * Resolve the authenticated company or BUJP profile and its foreign key.
+     * Resolve the authenticated company profile and its foreign key column.
      *
      * @return array{column: string, id: int}
      */
@@ -18,25 +18,13 @@ abstract class OwnedOrganizationController extends Controller
     {
         $user = $request->user();
 
-        $owner = match ($user?->role) {
-            'bujp' => [
-                'column' => 'b_u_j_p_id',
-                'profile' => $user->user_bujp?->bujp,
-            ],
-            'company' => [
-                'column' => 'company_id',
-                'profile' => $user->user_company?->company,
-            ],
-            default => null,
-        };
-
-        if (! $owner || ! $owner['profile']) {
-            throw new NotFoundHttpException('Profil perusahaan atau BUJP tidak ditemukan.');
+        if ($user?->role !== 'company' || ! $user->user_company?->company) {
+            throw new NotFoundHttpException('Profil perusahaan tidak ditemukan.');
         }
 
         return [
-            'column' => $owner['column'],
-            'id' => $owner['profile']->id,
+            'column' => 'company_id',
+            'id' => $user->user_company->company->id,
         ];
     }
 

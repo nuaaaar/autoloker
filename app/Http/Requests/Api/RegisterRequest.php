@@ -42,7 +42,7 @@ class RegisterRequest extends FormRequest
         return [
             'role' => [
                 'required',
-                Rule::in(['security', 'company', 'bujp']),
+                Rule::in(['security', 'company']),
             ],
             'name' => [
                 'required',
@@ -78,22 +78,6 @@ class RegisterRequest extends FormRequest
                 'string',
                 'max:50',
             ],
-            'sio_number' => [
-                'required_if:role,bujp',
-                'string',
-                'max:100',
-            ],
-            'sio_expired_date' => [
-                'required_if:role,bujp',
-                'date',
-                'after:today',
-            ],
-            'sio_file' => [
-                'required_if:role,bujp',
-                'file',
-                'mimes:pdf,jpg,jpeg,png',
-                'max:5120',
-            ],
         ];
     }
 
@@ -101,7 +85,7 @@ class RegisterRequest extends FormRequest
     {
         return [
             'role.required' => 'Role wajib diisi.',
-            'role.in' => 'Role harus security, company, atau bujp.',
+            'role.in' => 'Role harus security atau company.',
             'name.required' => 'Nama wajib diisi.',
             'email.required' => 'Email wajib diisi.',
             'email.email' => 'Format email tidak valid.',
@@ -113,12 +97,6 @@ class RegisterRequest extends FormRequest
             'password.regex' => 'Password harus mengandung huruf besar, huruf kecil, dan angka.',
             'agree.accepted' => 'Anda harus menyetujui syarat dan ketentuan.',
             'nib.required_if' => 'NIB wajib diisi untuk company.',
-            'sio_number.required_if' => 'Nomor SIO wajib diisi untuk bujp.',
-            'sio_expired_date.required_if' => 'Tanggal berlaku SIO wajib diisi untuk bujp.',
-            'sio_expired_date.after' => 'Tanggal berlaku SIO harus setelah hari ini.',
-            'sio_file.required_if' => 'File SIO wajib diunggah untuk bujp.',
-            'sio_file.mimes' => 'File SIO harus PDF, JPG, JPEG, atau PNG.',
-            'sio_file.max' => 'Ukuran file SIO maksimal 5 MB.',
         ];
     }
 }

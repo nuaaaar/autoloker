@@ -7,18 +7,20 @@ use App\Http\Requests\Api\JobApplicationIndexRequest;
 use App\Http\Resources\Api\JobVacancyResource;
 use App\Models\JobApplication;
 use App\Models\JobVacancy;
+use App\Services\Api\ApplicantProfileResolver;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class JobApplicationController extends Controller
 {
     private const PER_PAGE = 5;
 
+    public function __construct(private readonly ApplicantProfileResolver $applicants) {}
+
     public function index(JobApplicationIndexRequest $request): JsonResponse
     {
-        $security = $this->security($request);
+        $applicant = $this->applicants->resolve($request->user());
 
         $applications = JobApplication::query()
             ->with([
@@ -29,7 +31,7 @@ class JobApplicationController extends Controller
                     ]);
                 },
             ])
-            ->where('security_id', $security->id)
+            ->where($applicant['column'], $applicant['profile_id'])
             ->whereHas('job_vacancy')
             ->latest('id')
             ->paginate(self::PER_PAGE)
@@ -65,13 +67,33 @@ class JobApplicationController extends Controller
 
     public function store(Request $request, string $uuid): JsonResponse
     {
-        $security = $this->security($request);
+        $applicant = $this->applicants->resolve($request->user());
         $vacancy = JobVacancy::query()
             ->where('uuid', $uuid)
+            ->where('category', $applicant['category'])
             ->where('status', 'published')
             ->firstOrFail();
 
-        $result = DB::transaction(function () use ($security, $vacancy): array {
+        $profile = $applicant['profile'];
+        $progress = $profile->profileProgress();
+
+        if ($progress['completed'] < $progress['total']) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Lengkapi profil Anda sebelum melamar lowongan kerja.',
+                'data' => [
+                    'progress' => $progress['progress'],
+                    'completed' => $progress['completed'],
+                    'total' => $progress['total'],
+                    'missing' => $progress['missing'],
+                ],
+            ], 422);
+        }
+
+        $column = $applicant['column'];
+        $profileId = $applicant['profile_id'];
+
+        $result = DB::transaction(function () use ($vacancy, $column, $profileId): array {
             $vacancy = JobVacancy::query()
                 ->lockForUpdate()
                 ->findOrFail($vacancy->id);
@@ -91,7 +113,7 @@ class JobApplicationController extends Controller
             }
 
             $application = JobApplication::query()
-                ->where('security_id', $security->id)
+                ->where($column, $profileId)
                 ->where('job_vacancy_id', $vacancy->id)
                 ->first();
 
@@ -117,7 +139,7 @@ class JobApplicationController extends Controller
 
             return [
                 'application' => JobApplication::create([
-                    'security_id' => $security->id,
+                    $column => $profileId,
                     'job_vacancy_id' => $vacancy->id,
                 ]),
             ];
@@ -150,9 +172,11 @@ class JobApplicationController extends Controller
 
     public function destroy(Request $request, string $uuid): JsonResponse
     {
+        $applicant = $this->applicants->resolve($request->user());
+
         $application = JobApplication::query()
             ->where('uuid', $uuid)
-            ->where('security_id', $this->security($request)->id)
+            ->where($applicant['column'], $applicant['profile_id'])
             ->firstOrFail();
 
         $application->delete();
@@ -161,21 +185,6 @@ class JobApplicationController extends Controller
             'status' => true,
             'message' => 'Lamaran kerja berhasil dibatalkan.',
         ]);
-    }
-
-    private function security(Request $request)
-    {
-        if ($request->user()?->role !== 'satpam') {
-            throw new NotFoundHttpException('Profil satpam tidak ditemukan.');
-        }
-
-        $security = $request->user()->user_security?->security;
-
-        if (! $security) {
-            throw new NotFoundHttpException('Profil satpam tidak ditemukan.');
-        }
-
-        return $security;
     }
 
     private function pagination($paginator): array

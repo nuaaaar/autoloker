@@ -2,11 +2,11 @@
 
 namespace Tests\Feature\Api;
 
-use App\Models\BUJP;
+use App\Models\CleaningService;
 use App\Models\Company;
 use App\Models\Security;
 use App\Models\User;
-use App\Models\UserBUJP;
+use App\Models\UserCleaningService;
 use App\Models\UserCompany;
 use App\Models\UserSecurity;
 use App\Services\Api\TokenService;
@@ -24,8 +24,8 @@ class ProfileAndLocationTest extends TestCase
 
         foreach ([
             ['satpam', 'security@example.com', 'security', 'Aceh Security', UserSecurity::class, Security::class, 'user_security_id'],
+            ['cs', 'cs@example.com', 'cs', 'Aceh Cleaning', UserCleaningService::class, CleaningService::class, 'user_cleaning_service_id'],
             ['company', 'company@example.com', 'company', 'Aceh Company', UserCompany::class, Company::class, 'user_company_id'],
-            ['bujp', 'bujp@example.com', 'bujp', 'Aceh BUJP', UserBUJP::class, BUJP::class, 'user_b_u_j_p_id'],
         ] as [$role, $email, $apiType, $companyName, $relationClass, $profileClass, $foreignKey]) {
             $user = User::create([
                 'name' => $apiType.' user',
@@ -36,7 +36,9 @@ class ProfileAndLocationTest extends TestCase
                 'status' => 'active',
             ]);
             $relation = $relationClass::create(['user_id' => $user->id]);
-            $profileClass::create([$foreignKey => $relation->id, 'company_name' => $companyName]);
+            $profileClass::create($role === 'company'
+                ? [$foreignKey => $relation->id, 'company_name' => $companyName]
+                : [$foreignKey => $relation->id, 'name' => $companyName]);
             $token = app(TokenService::class)->issue($user)['access_token'];
 
             $payload = [
@@ -45,22 +47,24 @@ class ProfileAndLocationTest extends TestCase
                 'district' => '110101',
                 'village' => '1101012001',
             ];
-            if ($role === 'satpam') {
+            if (in_array($role, ['satpam', 'cs'], true)) {
                 $payload['birth_place'] = 'Banda Aceh';
                 $payload['height'] = '170';
-            } elseif ($role === 'company') {
-                $payload['description'] = 'Updated company description';
-                $payload['postal_code'] = '23111';
             } else {
-                $payload['sio_number'] = 'SIO-2026-001';
+                $payload['description'] = 'Updated company description';
                 $payload['postal_code'] = '23111';
             }
 
             $response = $this->withToken($token)->patchJson('/api/profile', $payload);
 
             $response->assertOk()
-                ->assertJsonPath('data.profile.type', $apiType)
-                ->assertJsonPath('data.profile.data.company_name', $companyName)
+                ->assertJsonPath('data.profile.type', $apiType);
+            if ($role === 'company') {
+                $response->assertJsonPath('data.profile.data.company_name', $companyName);
+            } else {
+                $response->assertJsonPath('data.profile.data.name', $companyName);
+            }
+            $response
                 ->assertJsonPath('data.profile.data.province', 'Aceh')
                 ->assertJsonPath('data.profile.data.province_code', '11')
                 ->assertJsonPath('data.profile.data.city', 'Banda Aceh')
@@ -70,14 +74,11 @@ class ProfileAndLocationTest extends TestCase
                 ->assertJsonPath('data.profile.data.village', 'Ateuk Pahlawan')
                 ->assertJsonPath('data.profile.data.village_code', '1101012001');
 
-            if ($role === 'satpam') {
+            if (in_array($role, ['satpam', 'cs'], true)) {
                 $response->assertJsonPath('data.profile.data.birth_place', 'Banda Aceh')
                     ->assertJsonPath('data.profile.data.height', '170');
-            } elseif ($role === 'company') {
-                $response->assertJsonPath('data.profile.data.description', 'Updated company description')
-                    ->assertJsonPath('data.profile.data.postal_code', '23111');
             } else {
-                $response->assertJsonPath('data.profile.data.sio_number', 'SIO-2026-001')
+                $response->assertJsonPath('data.profile.data.description', 'Updated company description')
                     ->assertJsonPath('data.profile.data.postal_code', '23111');
             }
         }

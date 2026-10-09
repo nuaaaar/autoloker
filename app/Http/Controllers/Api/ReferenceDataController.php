@@ -7,11 +7,13 @@ use App\Models\MasterAbility;
 use App\Models\MasterBank;
 use App\Models\MasterCategoryCertificate;
 use App\Models\MasterIndustry;
+use App\Http\Resources\Api\MasterSubscriptionResource;
 use App\Models\MasterSubscription;
 use App\Models\MasterPlacement;
 use App\Models\MasterPosition;
 use App\Models\MasterPositionSecurity;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Laravolt\Indonesia\Models\City;
 use Laravolt\Indonesia\Models\District;
@@ -22,14 +24,15 @@ class ReferenceDataController extends Controller
 {
     private const SUBSCRIPTION_ROLE_MAPPING = [
         'satpam' => 'security',
+        'cs' => 'security',
         'bujp' => 'bujp',
         'company' => 'client',
         'perusahaan' => 'client',
     ];
 
-    public function positions(): JsonResponse
+    public function positions(Request $request): JsonResponse
     {
-        return $this->master(MasterPosition::query());
+        return $this->master(MasterPosition::query(), $this->category($request));
     }
 
     public function positionSecurities(): JsonResponse
@@ -42,9 +45,9 @@ class ReferenceDataController extends Controller
         ]);
     }
 
-    public function abilities(): JsonResponse
+    public function abilities(Request $request): JsonResponse
     {
-        return $this->master(MasterAbility::query());
+        return $this->master(MasterAbility::query(), $this->category($request));
     }
 
     public function banks(): JsonResponse
@@ -58,14 +61,14 @@ class ReferenceDataController extends Controller
         ]);
     }
 
-    public function categoryCertificates(): JsonResponse
+    public function categoryCertificates(Request $request): JsonResponse
     {
-        return $this->master(MasterCategoryCertificate::query());
+        return $this->master(MasterCategoryCertificate::query(), $this->category($request));
     }
 
-    public function placements(): JsonResponse
+    public function placements(Request $request): JsonResponse
     {
-        return $this->master(MasterPlacement::query());
+        return $this->master(MasterPlacement::query(), $this->category($request));
     }
 
     public function industries(): JsonResponse
@@ -98,53 +101,16 @@ class ReferenceDataController extends Controller
                 'description',
                 'features',
                 'is_active',
+                'is_highlight',
                 'sort_order',
             ])
-            ->map(function (MasterSubscription $subscription): array {
-                return [
-                    'id' => $subscription->id,
-                    'uuid' => $subscription->uuid,
-                    'name' => $subscription->name,
-                    'slug' => $subscription->slug,
-                    'role' => $subscription->role,
-                    'price' => (float) $subscription->price,
-                    'duration' => $subscription->duration,
-                    'duration_type' => $subscription->duration_type,
-                    'description' => $subscription->description,
-                    'features' => $this->decodeFeatures($subscription->features),
-                    'is_active' => (bool) $subscription->is_active,
-                    'sort_order' => $subscription->sort_order,
-                ];
-            })
+            ->map(fn (MasterSubscription $subscription): array => MasterSubscriptionResource::shape($subscription))
             ->values();
 
         return response()->json([
             'status' => true,
             'data' => $subscriptions,
         ]);
-    }
-
-    private function decodeFeatures(mixed $features): ?object
-    {
-        if ($features === null) {
-            return null;
-        }
-
-        if (is_object($features)) {
-            return $features;
-        }
-
-        if (is_array($features)) {
-            return (object) $features;
-        }
-
-        if (! is_string($features) || trim($features) === '') {
-            return (object) [];
-        }
-
-        $decoded = json_decode($features);
-
-        return is_object($decoded) ? $decoded : (object) [];
     }
 
     public function provinces(): JsonResponse
@@ -170,8 +136,40 @@ class ReferenceDataController extends Controller
         return response()->json(['status' => true, 'data' => Village::where('district_code', $request->district_code)->orderBy('name')->get(['code', 'name'])]);
     }
 
-    private function master($query): JsonResponse
+    private function master($query, ?string $category = null): JsonResponse
     {
+        if ($category !== null) {
+            $query->where('category', $category);
+        }
+
         return response()->json(['status' => true, 'data' => $query->orderBy('title')->get(['title'])]);
+    }
+
+    /**
+     * Resolve the optional category filter, defaulting to security so existing
+     * consumers keep the previous payload.
+     */
+    private function category(Request $request): ?string
+    {
+        if (! $request->has('category') || $request->input('category') === null) {
+            return null;
+        }
+
+        $category = strtolower(trim((string) $request->input('category')));
+
+        if ($category === '') {
+            return null;
+        }
+
+        if (! in_array($category, ['security', 'cs'], true)) {
+            throw new HttpResponseException(response()->json([
+                'status' => false,
+                'message' => 'Kategori harus security atau cs.',
+                'data' => null,
+                'errors' => ['category' => ['Kategori harus security atau cs.']],
+            ], 422));
+        }
+
+        return $category;
     }
 }

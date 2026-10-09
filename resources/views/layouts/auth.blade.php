@@ -506,26 +506,6 @@
 
             });
 
-            $(document).on('click', '#btnRegisterBUJP', function(e){
-
-                e.preventDefault();
-
-                $('#registerPage').fadeOut(200, function(){
-
-                    $(this).hide();
-
-                    $('#registerBUJPPage')
-                        .removeClass('d-none')
-                        .hide()
-                        .fadeIn(200);
-
-                    $('.leftPerusahaan').fadeIn(200);
-                    $('.leftSatpam').hide();
-
-                });
-
-            });
-
             $(document).on('click', '#btnRegisterSecurity', function(e){
 
                 e.preventDefault();
@@ -561,23 +541,6 @@
 
                     $('.leftPerusahaan').fadeIn(200);
                     $('.leftSatpam').hide();
-
-                });
-
-            });
-
-            $(document).on('click', '#backToRegisterFromBUPJ', function(e){
-
-                e.preventDefault();
-
-                $('#registerBUJPPage').fadeOut(200, function(){
-
-                    $(this).hide();
-
-                    $('#registerPage')
-                        .removeClass('d-none')
-                        .hide()
-                        .fadeIn(200);
 
                 });
 
@@ -623,7 +586,6 @@
 
                 // Sembunyikan semua halaman register
                 $('#registerPage').hide();
-                $('#registerBUJPPage').hide();
                 $('#registerSecurityPage').hide();
                 $('#registerCompanyPage').hide();
 

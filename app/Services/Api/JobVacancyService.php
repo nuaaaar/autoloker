@@ -141,6 +141,7 @@ class JobVacancyService
     {
         $mapping = [
             'position' => 'position',
+            'category' => 'category',
             'description_work' => 'description_work',
             'province' => 'province',
             'city' => 'city',
@@ -186,6 +187,7 @@ class JobVacancyService
     {
         return [
             'position' => $vacancy->position,
+            'category' => $vacancy->category,
             'description_work' => $vacancy->description_work,
             'province' => $vacancy->province,
             'city' => $vacancy->city,

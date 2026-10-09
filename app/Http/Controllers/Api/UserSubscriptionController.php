@@ -18,6 +18,7 @@ class UserSubscriptionController extends Controller
 {
     private const ROLE_MAPPING = [
         'satpam' => 'security',
+        'cs' => 'security',
         'bujp' => 'bujp',
         'company' => 'client',
         'perusahaan' => 'client',
@@ -65,20 +66,27 @@ class UserSubscriptionController extends Controller
         $user = $request->user();
 
         if ($role === 'security') {
-            $security = $user?->user_security?->security;
+            $securityId = $user?->user_security?->security?->getKey();
+            $cleaningServiceId = $user?->user_cleaning_service?->cleaning_service?->getKey();
 
-            if (! $security) {
+            if ($securityId === null && $cleaningServiceId === null) {
                 return $usage;
             }
 
             $usage['total_active_job_applications'] = JobApplication::query()
-                ->where('security_id', $security->getKey())
+                ->where(function (Builder $query) use ($securityId, $cleaningServiceId): void {
+                    $query->when($securityId !== null, fn (Builder $query) => $query->orWhere('security_id', $securityId))
+                        ->when($cleaningServiceId !== null, fn (Builder $query) => $query->orWhere('cleaning_service_id', $cleaningServiceId));
+                })
                 ->whereHas('job_vacancy', function (Builder $query): void {
                     $query->where('status', 'published');
                 })
                 ->count();
             $usage['total_active_training_applications'] = TrainingApplication::query()
-                ->where('security_id', $security->getKey())
+                ->where(function (Builder $query) use ($securityId, $cleaningServiceId): void {
+                    $query->when($securityId !== null, fn (Builder $query) => $query->orWhere('security_id', $securityId))
+                        ->when($cleaningServiceId !== null, fn (Builder $query) => $query->orWhere('cleaning_service_id', $cleaningServiceId));
+                })
                 ->whereHas('training', function (Builder $query): void {
                     $query->where('status', 'published');
                 })
@@ -108,12 +116,10 @@ class UserSubscriptionController extends Controller
             ->whereIn('status', ['submitted', 'published'])
             ->count();
 
-        if ($role === 'bujp') {
-            $usage['total_active_training_posts'] = Training::query()
-                ->where('b_u_j_p_id', $owner['id'])
-                ->whereIn('status', ['submitted', 'published'])
-                ->count();
-        }
+        $usage['total_active_training_posts'] = Training::query()
+            ->where($owner['column'], $owner['id'])
+            ->whereIn('status', ['submitted', 'published'])
+            ->count();
 
         return $usage;
     }

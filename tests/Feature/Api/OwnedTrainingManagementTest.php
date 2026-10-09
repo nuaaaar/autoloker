@@ -2,11 +2,11 @@
 
 namespace Tests\Feature\Api;
 
-use App\Models\BUJP;
+use App\Models\Company;
 use App\Models\Training;
 use App\Models\TrainingApplication;
 use App\Models\User;
-use App\Models\UserBUJP;
+use App\Models\UserCompany;
 use App\Services\Api\TokenService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -25,7 +25,7 @@ class OwnedTrainingManagementTest extends TestCase
 
     public function test_post_creates_draft_with_canonical_body_and_location_header(): void
     {
-        [, $bujp, $token] = $this->bujpAccount('training-create@example.com', 'Aman Training');
+        [$user, $company, $token] = $this->companyAccount('training-create@example.com', 'Aman Training');
 
         $response = $this->withToken($token)
             ->postJson('/api/company/trainings', $this->payload());
@@ -41,7 +41,7 @@ class OwnedTrainingManagementTest extends TestCase
                         'uuid',
                         'title',
                         'provider',
-                        'bujp' => ['id', 'company_name'],
+                        'company' => ['id', 'company_name'],
                         'company',
                         'status',
                         'poster',
@@ -73,9 +73,9 @@ class OwnedTrainingManagementTest extends TestCase
             ])
             ->assertJsonPath('data.training.title', 'Pelatihan Dasar Satpam')
             ->assertJsonPath('data.training.provider', 'Aman Training')
-            ->assertJsonPath('data.training.bujp.id', $bujp->id)
-            ->assertJsonPath('data.training.bujp.company_name', 'Aman Training')
-            ->assertJsonPath('data.training.company', null)
+            ->assertJsonPath('data.training.company.id', $company->id)
+            ->assertJsonPath('data.training.company.company_name', 'Aman Training')
+            ->assertJsonPath('data.training.bujp', null)
             ->assertJsonPath('data.training.status', 'draft')
             ->assertJsonPath('data.training.province', 'KALIMANTAN TIMUR')
             ->assertJsonPath('data.training.city', 'BALIKPAPAN')
@@ -86,8 +86,8 @@ class OwnedTrainingManagementTest extends TestCase
         $response->assertHeader('Location', route('api.company.trainings.show', ['uuid' => $uuid]));
         $this->assertDatabaseHas('trainings', [
             'uuid' => $uuid,
-            'b_u_j_p_id' => $bujp->id,
-            'company_id' => null,
+            'company_id' => $company->id,
+            'b_u_j_p_id' => null,
             'status' => 'draft',
             'duration_day' => 3,
         ]);
@@ -95,7 +95,7 @@ class OwnedTrainingManagementTest extends TestCase
 
     public function test_patch_updates_only_submitted_fields_and_replaces_arrays(): void
     {
-        [, , $token] = $this->bujpAccount('training-patch@example.com', 'Patch Training');
+        [, , $token] = $this->companyAccount('training-patch@example.com', 'Patch Training');
         $created = $this->withToken($token)
             ->postJson('/api/company/trainings', $this->payload())
             ->assertCreated();
@@ -127,7 +127,7 @@ class OwnedTrainingManagementTest extends TestCase
 
     public function test_duration_day_is_calculated_inclusively_from_dates(): void
     {
-        [, , $token] = $this->bujpAccount('training-duration@example.com', 'Duration Training');
+        [, , $token] = $this->companyAccount('training-duration@example.com', 'Duration Training');
 
         $response = $this->withToken($token)
             ->postJson('/api/company/trainings', $this->payload([
@@ -142,7 +142,7 @@ class OwnedTrainingManagementTest extends TestCase
 
     public function test_post_returns_per_field_validation_errors(): void
     {
-        [, , $token] = $this->bujpAccount('training-validation@example.com', 'Validation Training');
+        [, , $token] = $this->companyAccount('training-validation@example.com', 'Validation Training');
 
         $response = $this->withToken($token)->postJson('/api/company/trainings', [
             'title' => 'No',
@@ -178,7 +178,7 @@ class OwnedTrainingManagementTest extends TestCase
 
     public function test_patch_rejects_quota_below_active_participants(): void
     {
-        [, , $token] = $this->bujpAccount('training-quota@example.com', 'Quota Training');
+        [, , $token] = $this->companyAccount('training-quota@example.com', 'Quota Training');
         $created = $this->withToken($token)
             ->postJson('/api/company/trainings', $this->payload(['quota' => 3]))
             ->assertCreated();
@@ -205,8 +205,8 @@ class OwnedTrainingManagementTest extends TestCase
 
     public function test_training_ownership_isolation_returns_not_found(): void
     {
-        [, , $ownerToken] = $this->bujpAccount('training-owner@example.com', 'Owner Training');
-        [, , $otherToken] = $this->bujpAccount('training-other@example.com', 'Other Training');
+        [, , $ownerToken] = $this->companyAccount('training-owner@example.com', 'Owner Training');
+        [, , $otherToken] = $this->companyAccount('training-other@example.com', 'Other Training');
         $created = $this->withToken($ownerToken)
             ->postJson('/api/company/trainings', $this->payload())
             ->assertCreated();
@@ -225,7 +225,7 @@ class OwnedTrainingManagementTest extends TestCase
 
     public function test_response_uses_training_resource_key_after_submit_action(): void
     {
-        [, , $token] = $this->bujpAccount('training-submit@example.com', 'Submit Training');
+        [, , $token] = $this->companyAccount('training-submit@example.com', 'Submit Training');
 
         $this->withToken($token)
             ->postJson('/api/company/trainings', $this->payload(['workflow_action' => 'submit']))
@@ -237,7 +237,7 @@ class OwnedTrainingManagementTest extends TestCase
 
     public function test_patch_rejects_immutable_owner_status_timestamp_and_counter_fields(): void
     {
-        [, , $token] = $this->bujpAccount('training-immutable@example.com', 'Immutable Training');
+        [, , $token] = $this->companyAccount('training-immutable@example.com', 'Immutable Training');
         $created = $this->withToken($token)
             ->postJson('/api/company/trainings', $this->payload())
             ->assertCreated();
@@ -274,7 +274,7 @@ class OwnedTrainingManagementTest extends TestCase
 
     public function test_poster_accepts_public_storage_key_and_multipart_file_without_internal_path(): void
     {
-        [, , $token] = $this->bujpAccount('training-poster@example.com', 'Poster Training');
+        [, , $token] = $this->companyAccount('training-poster@example.com', 'Poster Training');
 
         $pathResponse = $this->withToken($token)
             ->postJson('/api/company/trainings', $this->payload([
@@ -299,28 +299,30 @@ class OwnedTrainingManagementTest extends TestCase
         $this->assertFalse(str_contains($storedPoster, 'storage/app'));
     }
 
-    public function test_non_bujp_role_cannot_use_training_management_endpoints(): void
+    public function test_worker_and_bujp_roles_cannot_use_training_management_endpoints(): void
     {
-        $user = User::create([
-            'name' => 'Security User',
-            'email' => 'training-security@example.com',
-            'google_id' => null,
-            'password' => 'password',
-            'role' => 'satpam',
-            'status' => 'active',
-        ]);
-        $token = app(TokenService::class)->issue($user)['access_token'];
+        foreach (['satpam', 'cs', 'bujp'] as $role) {
+            $user = User::create([
+                'name' => 'Non Company User',
+                'email' => "non-company-training-{$role}@example.com",
+                'google_id' => null,
+                'password' => 'password',
+                'role' => $role,
+                'status' => 'active',
+            ]);
+            $token = app(TokenService::class)->issue($user)['access_token'];
 
-        $this->withToken($token)
-            ->postJson('/api/company/trainings', $this->payload())
-            ->assertNotFound();
+            $this->withToken($token)
+                ->postJson('/api/company/trainings', $this->payload())
+                ->assertNotFound();
+        }
     }
 
     public function test_submit_endpoint_preserves_draft_when_completion_validation_fails(): void
     {
-        [, , $token] = $this->bujpAccount('training-submit-invalid@example.com', 'Incomplete Training');
+        [, , $token] = $this->companyAccount('training-submit-invalid@example.com', 'Incomplete Training');
         $created = $this->withToken($token)
-            ->postJson('/api/company/trainings', ['title' => 'Draft Only'])
+            ->postJson('/api/company/trainings', ['title' => 'Draft Only', 'category_role' => 'security'])
             ->assertCreated();
         $uuid = $created->json('data.training.uuid');
 
@@ -355,6 +357,7 @@ class OwnedTrainingManagementTest extends TestCase
         return array_merge([
             'title' => 'Pelatihan Dasar Satpam',
             'category' => 'Keamanan',
+            'category_role' => 'security',
             'level' => 'Dasar',
             'is_certificate' => true,
             'tags' => ['K3', 'Patroli'],
@@ -365,7 +368,7 @@ class OwnedTrainingManagementTest extends TestCase
             'training_mode' => 'online',
             'province' => 'KALIMANTAN TIMUR',
             'city' => 'BALIKPAPAN',
-            'address' => 'Platform pembelajaran BUJP Aman',
+            'address' => 'Platform pembelajaran Company Aman',
             'syllabus' => ['Pengenalan keamanan', 'Teknik patroli'],
             'requirements' => ['Memiliki KTP', 'Sehat jasmani'],
             'instructor' => 'Budi Santoso',
@@ -376,25 +379,25 @@ class OwnedTrainingManagementTest extends TestCase
         ], $overrides);
     }
 
-    /** @return array{0: User, 1: BUJP, 2: string} */
-    private function bujpAccount(string $email, string $name): array
+    /** @return array{0: User, 1: Company, 2: string} */
+    private function companyAccount(string $email, string $name): array
     {
         $user = User::create([
             'name' => $name.' User',
             'email' => $email,
             'google_id' => null,
             'password' => 'password',
-            'role' => 'bujp',
+            'role' => 'company',
             'status' => 'active',
         ]);
-        $userBujp = UserBUJP::create(['user_id' => $user->id]);
-        $bujp = BUJP::create([
-            'user_b_u_j_p_id' => $userBujp->id,
+        $userCompany = UserCompany::create(['user_id' => $user->id]);
+        $company = Company::create([
+            'user_company_id' => $userCompany->getKey(),
             'company_name' => $name,
         ]);
         $token = app(TokenService::class)->issue($user)['access_token'];
 
-        return [$user, $bujp, $token];
+        return [$user, $company, $token];
     }
 
     private function seedLocations(): void

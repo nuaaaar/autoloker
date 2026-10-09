@@ -13,14 +13,13 @@ use App\Services\Api\TrainingService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class OwnedTrainingController extends OwnedOrganizationController
 {
     private const PER_PAGE = 5;
 
     /**
-     * List trainings created by the authenticated company or BUJP.
+     * List trainings created by the authenticated company.
      */
     public function index(OwnedTrainingIndexRequest $request): JsonResponse
     {
@@ -77,8 +76,7 @@ class OwnedTrainingController extends OwnedOrganizationController
         TrainingService $service,
     ): JsonResponse {
         $owner = $this->owner($request);
-        $this->ensureBujp($request);
-        $training = $service->create($owner['id'], $request->validated());
+        $training = $service->create($owner, $request->validated());
 
         return $this->mutationResponse(
             $training,
@@ -90,7 +88,7 @@ class OwnedTrainingController extends OwnedOrganizationController
 
     public function show(Request $request, string $uuid): JsonResponse
     {
-        $training = $this->ownedBujpTraining($request, $uuid);
+        $training = $this->ownedTraining($request, $uuid);
 
         return response()->json([
             'status' => true,
@@ -106,7 +104,7 @@ class OwnedTrainingController extends OwnedOrganizationController
         TrainingService $service,
         string $uuid,
     ): JsonResponse {
-        $training = $this->ownedBujpTraining($request, $uuid);
+        $training = $this->ownedTraining($request, $uuid);
         $training = $service->update($training, $request->validated());
 
         return $this->mutationResponse(
@@ -120,7 +118,7 @@ class OwnedTrainingController extends OwnedOrganizationController
         TrainingService $service,
         string $uuid,
     ): JsonResponse {
-        $training = $this->ownedBujpTraining($request, $uuid);
+        $training = $this->ownedTraining($request, $uuid);
         $training = $service->submit($training);
 
         return $this->mutationResponse(
@@ -129,22 +127,14 @@ class OwnedTrainingController extends OwnedOrganizationController
         );
     }
 
-    private function ownedBujpTraining(Request $request, string $uuid): Training
+    private function ownedTraining(Request $request, string $uuid): Training
     {
         $owner = $this->owner($request);
-        $this->ensureBujp($request);
 
         return Training::query()
             ->where('uuid', $uuid)
-            ->where('b_u_j_p_id', $owner['id'])
+            ->where($owner['column'], $owner['id'])
             ->firstOrFail();
-    }
-
-    private function ensureBujp(Request $request): void
-    {
-        if ($request->user()?->role !== 'bujp') {
-            throw new NotFoundHttpException('Profil BUJP tidak ditemukan.');
-        }
     }
 
     private function mutationResponse(

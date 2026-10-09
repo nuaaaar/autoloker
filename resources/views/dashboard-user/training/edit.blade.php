@@ -1139,6 +1139,23 @@
 
                         </div>
 
+                        <div class="col-md-6 mb-7">
+
+                            <label class="form-label">
+                                Sasaran Peserta
+                            </label>
+
+                            <input
+                                type="text"
+                                class="form-control form-control-dark"
+                                value="{{ $data->category_role === 'cs' ? 'Cleaning Service' : 'Security (Satpam)' }}"
+                                disabled
+                                readonly>
+
+                            <small class="text-muted">Sasaran peserta tidak dapat diubah setelah pelatihan dibuat.</small>
+
+                        </div>
+
                         <!-- Biaya Pelatihan -->
                         <div class="col-md-12 mb-7">
 

@@ -1119,6 +1119,26 @@
 
                         </div>
 
+                        <div class="col-md-6 mb-7">
+
+                            <label class="form-label required">
+                                Sasaran Peserta
+                            </label>
+
+                            <select
+                                class="form-select form-select-dark"
+                                name="category_role">
+
+                                <option value="">Pilih Sasaran Peserta</option>
+                                <option value="security" {{ old('category_role') === 'security' ? 'selected' : '' }}>Security (Satpam)</option>
+                                <option value="cs" {{ old('category_role') === 'cs' ? 'selected' : '' }}>Cleaning Service</option>
+
+                            </select>
+
+                            <small class="text-muted">Sasaran peserta tidak dapat diubah setelah pelatihan dibuat.</small>
+
+                        </div>
+
                         <!-- Biaya Pelatihan -->
                         <div class="col-md-12 mb-7">
 

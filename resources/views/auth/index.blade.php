@@ -9,6 +9,5 @@
     @include('auth.partials.login')
     @include('auth.partials.register')
     @include('auth.partials.register-security')
-    @include('auth.partials.register-bujp')
     @include('auth.partials.register-company')
 @endsection

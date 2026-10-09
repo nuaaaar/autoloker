@@ -36,20 +36,7 @@ class UserOrderManualResource extends JsonResource
                     return null;
                 }
 
-                return [
-                    'id' => $subscription->id,
-                    'uuid' => $subscription->uuid,
-                    'name' => $subscription->name,
-                    'slug' => $subscription->slug,
-                    'role' => $subscription->role,
-                    'price' => $subscription->price,
-                    'duration' => $subscription->duration,
-                    'duration_type' => $subscription->duration_type,
-                    'description' => $subscription->description,
-                    'features' => $subscription->features,
-                    'is_active' => (bool) $subscription->is_active,
-                    'sort_order' => $subscription->sort_order,
-                ];
+                return MasterSubscriptionResource::shape($subscription);
             }),
         ];
     }

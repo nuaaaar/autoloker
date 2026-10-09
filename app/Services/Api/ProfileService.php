@@ -3,6 +3,7 @@
 namespace App\Services\Api;
 
 use App\Models\BUJP;
+use App\Models\CleaningService;
 use App\Models\Company;
 use App\Models\User;
 use App\Models\Security;
@@ -27,21 +28,36 @@ class ProfileService
             'is_shift_agree', 'ability', 'placements', 'self_description',
             'additional_note', 'work_status', 'company_name', 'position', 'sim',
         ],
+        'cs' => [
+            'formal_photo', 'name', 'birth_place', 'birth_date', 'gender',
+            'address', 'phone_number', 'email', 'ktp_number',
+            'registration_number', 'work_experience', 'province',
+            'province_code', 'city', 'city_code', 'district', 'district_code',
+            'village', 'village_code', 'height', 'width', 'is_out_of_town_agree',
+            'is_shift_agree', 'ability', 'placements', 'self_description',
+            'additional_note', 'work_status', 'company_name', 'position', 'sim',
+        ],
         'company' => [
             'company_name', 'industry', 'logo', 'description', 'npwp', 'nib',
-            'business_license', 'email', 'phone', 'website', 'province',
+            'email', 'phone', 'website', 'province',
             'province_code', 'city', 'city_code', 'district', 'district_code',
             'village', 'village_code', 'postal_code', 'address', 'instagram',
             'facebook', 'linkedin', 'youtube',
         ],
         'bujp' => [
             'company_name', 'industry', 'logo', 'description', 'npwp', 'nib',
-            'business_license', 'sio_number', 'sio_expired_date', 'sio_file',
             'email', 'phone', 'website', 'province', 'province_code', 'city',
             'city_code', 'district', 'district_code', 'village', 'village_code',
             'postal_code', 'address', 'instagram', 'facebook', 'linkedin',
             'youtube',
         ],
+    ];
+
+    /**
+     * Worker profile fields shared by the Security and Cleaning Service roles.
+     */
+    public const WORKER_FIELDS = [
+        'formal_photo' => 'formal-photo',
     ];
 
     public function show(User $user): array
@@ -54,6 +70,10 @@ class ProfileService
 
         if ($user->role === 'satpam') {
             return $this->securityProfile($profile, $user);
+        }
+
+        if ($user->role === 'cs') {
+            return $this->cleaningServiceProfile($profile, $user);
         }
 
         $this->populateMissingLocationCodes($profile);
@@ -94,8 +114,32 @@ class ProfileService
         );
     }
 
+    public function showCleaning(CleaningService $cleaningService): array
+    {
+        $cleaningService->loadMissing('user_cleaning_service.user');
+
+        return $this->cleaningServiceProfile(
+            $cleaningService,
+            $cleaningService->user_cleaning_service?->user,
+        );
+    }
+
     private function securityProfile(Security $profile, ?User $user): array
     {
+        return $this->workerProfile($profile, $user, 'security', null);
+    }
+
+    private function cleaningServiceProfile(CleaningService $profile, ?User $user): array
+    {
+        return $this->workerProfile($profile, $user, 'cs', $user);
+    }
+
+    private function workerProfile(
+        Security|CleaningService $profile,
+        ?User $user,
+        string $type,
+        ?User $accountStatusSource,
+    ): array {
         $this->populateMissingLocationCodes($profile);
 
         $profileValues = $profile->only(self::FIELDS['satpam']);
@@ -114,13 +158,13 @@ class ProfileService
         }
 
         return [
-            'type' => 'security',
+            'type' => $type,
             'id' => $profile->id,
             'uuid' => $profile->uuid,
             'data' => $profileValues,
             'profile_completion' => $profile->profileProgress(),
             'is_verified' => null,
-            'is_active' => $user?->status === 'active',
+            'is_active' => $accountStatusSource?->status === 'active',
         ];
     }
 
@@ -205,7 +249,7 @@ class ProfileService
         return $data;
     }
 
-    private function populateMissingLocationCodes(Security|Company|BUJP $profile): void
+    private function populateMissingLocationCodes(Security|Company|BUJP|CleaningService $profile): void
     {
         $values = $profile->only([
             'province', 'province_code', 'city', 'city_code',
@@ -291,10 +335,11 @@ class ProfileService
     }
 
 
-    private function profileFor(User $user): Security|Company|BUJP|null
+    private function profileFor(User $user): Security|Company|BUJP|CleaningService|null
     {
         return match ($user->role) {
             'satpam' => $user->user_security?->security,
+            'cs' => $user->user_cleaning_service?->cleaning_service,
             'company' => $user->user_company?->company,
             'bujp' => $user->user_bujp?->bujp,
             default => null,
@@ -309,7 +354,7 @@ class ProfileService
     private function fileFields(User $user): array
     {
         return match ($user->role) {
-            'satpam' => ['formal_photo' => 'formal-photo'],
+            'satpam', 'cs' => ['formal_photo' => 'formal-photo'],
             'company' => ['logo' => 'company-logo'],
             'bujp' => ['logo' => 'company-logo', 'sio_file' => 'sio-file'],
             default => [],

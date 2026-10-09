@@ -49,7 +49,7 @@ class ProfileRequest extends FormRequest
             'phone_number' => ['sometimes', 'nullable', 'digits_between:10,15', Rule::unique('users', 'phone_number')->ignore($this->user()?->id)],
         ];
 
-        if ($role === 'satpam') {
+        if (in_array($role, ['satpam', 'cs'], true)) {
             return array_merge($common, [
                 'formal_photo' => ['sometimes', 'file', 'mimes:jpg,jpeg,png', 'max:5120'],
                 'birth_place' => ['sometimes', 'nullable', 'string', 'max:150'],
@@ -68,14 +68,14 @@ class ProfileRequest extends FormRequest
                 'is_out_of_town_agree' => ['sometimes', 'boolean'],
                 'is_shift_agree' => ['sometimes', 'boolean'],
                 'ability' => ['sometimes', 'nullable', 'array'],
-                'ability.*' => ['string', 'max:255', Rule::exists('master_abilities', 'title')->whereNull('deleted_at')],
+                'ability.*' => ['string', 'max:255', $this->masterTitleRule('master_abilities')],
                 'placements' => ['sometimes', 'nullable', 'array'],
-                'placements.*' => ['string', 'max:255', Rule::exists('master_placements', 'title')->whereNull('deleted_at')],
+                'placements.*' => ['string', 'max:255', $this->masterTitleRule('master_placements')],
                 'self_description' => ['sometimes', 'nullable', 'string'],
                 'additional_note' => ['sometimes', 'nullable', 'string', 'max:500'],
                 'work_status' => ['sometimes', 'nullable', 'string', 'max:100'],
                 'company_name' => ['sometimes', 'nullable', 'string', 'max:255'],
-                'position' => ['sometimes', 'nullable', 'string', 'max:150', Rule::exists('master_positions', 'title')->whereNull('deleted_at')],
+                'position' => ['sometimes', 'nullable', 'string', 'max:150', $this->masterTitleRule('master_positions')],
                 'sim' => ['sometimes', 'nullable', 'string', 'max:50'],
             ]);
         }
@@ -87,7 +87,6 @@ class ProfileRequest extends FormRequest
             'description' => ['sometimes', 'nullable', 'string'],
             'npwp' => ['sometimes', 'nullable', 'string', 'max:50'],
             'nib' => ['sometimes', 'nullable', 'string', 'max:50'],
-            'business_license' => ['sometimes', 'nullable', 'string', 'max:100'],
             'email' => ['sometimes', 'nullable', 'email:rfc,dns', 'max:100'],
             'phone' => ['sometimes', 'nullable', 'string', 'max:30'],
             'website' => ['sometimes', 'nullable', 'url', 'max:255'],
@@ -103,13 +102,18 @@ class ProfileRequest extends FormRequest
             $business[$social] = ['sometimes', 'nullable', 'url', 'max:255'];
         }
 
-        if ($role === 'bujp') {
-            $business['sio_number'] = ['sometimes', 'nullable', 'string', 'max:100'];
-            $business['sio_expired_date'] = ['sometimes', 'nullable', 'date'];
-            $business['sio_file'] = ['sometimes', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'];
-        }
-
         return array_merge($common, $business);
+    }
+
+    /**
+     * Master reference titles are scoped to the active role category so Company
+     * search/projection rules follow the role-owned master data.
+     */
+    private function masterTitleRule(string $table): object
+    {
+        return Rule::exists($table, 'title')
+            ->where('category', $this->user()?->role === 'cs' ? 'cs' : 'security')
+            ->whereNull('deleted_at');
     }
 
     protected function failedValidation(Validator $validator): void

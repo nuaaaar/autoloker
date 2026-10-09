@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\JobVacancyIndexRequest;
 use App\Http\Resources\Api\JobVacancyResource;
 use App\Models\JobVacancy;
+use App\Services\Api\ApplicantProfileResolver;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 
@@ -13,14 +14,18 @@ class JobVacancyController extends Controller
 {
     private const PER_PAGE = 5;
 
+    public function __construct(private readonly ApplicantProfileResolver $applicants) {}
+
     /**
-     * List published, non-expired vacancies for mobile infinite scrolling.
+     * List published, non-expired vacancies for the active applicant category.
      */
     public function index(JobVacancyIndexRequest $request): JsonResponse
     {
         $filters = $request->validated();
-
-        $securityId = $request->user()?->user_security?->security?->id;
+        $applicant = $this->applicants->resolve($request->user());
+        $category = $applicant['category'];
+        $column = $applicant['column'];
+        $profileId = $applicant['profile_id'];
 
         $query = JobVacancy::query()
             ->with([
@@ -29,11 +34,12 @@ class JobVacancyController extends Controller
             ])
             ->withCount('applications as total_applications')
             ->withExists([
-                'applications as is_applied' => function (Builder $query) use ($securityId): void {
-                    $query->whereNotNull('security_id')
-                        ->where('security_id', $securityId);
+                'applications as is_applied' => function (Builder $query) use ($column, $profileId): void {
+                    $query->whereNotNull($column)
+                        ->where($column, $profileId);
                 },
             ])
+            ->where('category', $category)
             ->where('status', 'published')
             ->where(function (Builder $query): void {
                 $query->whereNull('end_date')

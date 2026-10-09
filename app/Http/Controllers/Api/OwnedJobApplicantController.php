@@ -15,7 +15,7 @@ class OwnedJobApplicantController extends OwnedOrganizationController
     private const PER_PAGE = 5;
 
     /**
-     * List applicants for a vacancy owned by the authenticated company or BUJP.
+     * List applicants for a vacancy owned by the authenticated company.
      */
     public function index(OwnedJobApplicantIndexRequest $request, string $uuid): JsonResponse
     {
@@ -27,7 +27,10 @@ class OwnedJobApplicantController extends OwnedOrganizationController
 
         $filters = $request->validated();
         $query = JobApplication::query()
-            ->with('security.user_security.user')
+            ->with([
+                'security.user_security.user',
+                'cleaning_service.user_cleaning_service.user',
+            ])
             ->where('job_vacancy_id', $vacancy->id);
 
         if (($status = $filters['status'] ?? null) && $status !== 'all') {
@@ -37,13 +40,23 @@ class OwnedJobApplicantController extends OwnedOrganizationController
         if (filled($filters['search'] ?? null)) {
             $search = trim($filters['search']);
 
-            $query->whereHas('security', function (Builder $query) use ($search): void {
-                $query->where(function (Builder $query) use ($search): void {
-                    $query->where('name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%")
-                        ->orWhere('phone_number', 'like', "%{$search}%")
-                        ->orWhere('ktp_number', 'like', "%{$search}%")
-                        ->orWhere('registration_number', 'like', "%{$search}%");
+            $query->where(function (Builder $query) use ($search): void {
+                $query->whereHas('security', function (Builder $query) use ($search): void {
+                    $query->where(function (Builder $query) use ($search): void {
+                        $query->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('phone_number', 'like', "%{$search}%")
+                            ->orWhere('ktp_number', 'like', "%{$search}%")
+                            ->orWhere('registration_number', 'like', "%{$search}%");
+                    });
+                })->orWhereHas('cleaning_service', function (Builder $query) use ($search): void {
+                    $query->where(function (Builder $query) use ($search): void {
+                        $query->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('phone_number', 'like', "%{$search}%")
+                            ->orWhere('ktp_number', 'like', "%{$search}%")
+                            ->orWhere('registration_number', 'like', "%{$search}%");
+                    });
                 });
             });
         }
@@ -74,7 +87,10 @@ class OwnedJobApplicantController extends OwnedOrganizationController
             ->firstOrFail();
 
         $application = JobApplication::query()
-            ->with('security.user_security.user')
+            ->with([
+                'security.user_security.user',
+                'cleaning_service.user_cleaning_service.user',
+            ])
             ->where('uuid', $applicationUuid)
             ->where('job_vacancy_id', $vacancy->id)
             ->firstOrFail();

@@ -7,18 +7,19 @@ use App\Http\Requests\Api\TrainingApplicationIndexRequest;
 use App\Http\Resources\Api\TrainingResource;
 use App\Models\Training;
 use App\Models\TrainingApplication;
-use Illuminate\Database\Eloquent\Builder;
+use App\Services\Api\ApplicantProfileResolver;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class TrainingApplicationController extends Controller
 {
     private const PER_PAGE = 5;
 
+    public function __construct(private readonly ApplicantProfileResolver $applicants) {}
+
     public function index(TrainingApplicationIndexRequest $request): JsonResponse
     {
-        $security = $this->security($request);
+        $applicant = $this->applicants->resolve($request->user());
 
         $applications = TrainingApplication::query()
             ->with([
@@ -29,13 +30,13 @@ class TrainingApplicationController extends Controller
                             'company:id,company_name',
                         ])
                         ->withCount([
-                            'applications as approved_applications_count' => function (Builder $query): void {
+                            'applications as approved_applications_count' => function ($query): void {
                                 $query->where('status', 'approved');
                             },
                         ]);
                 },
             ])
-            ->where('security_id', $security->id)
+            ->where($applicant['column'], $applicant['profile_id'])
             ->whereHas('training')
             ->latest('id')
             ->paginate(self::PER_PAGE)
@@ -71,9 +72,11 @@ class TrainingApplicationController extends Controller
 
     public function destroy(Request $request, string $uuid): JsonResponse
     {
+        $applicant = $this->applicants->resolve($request->user());
+
         $application = TrainingApplication::query()
             ->where('uuid', $uuid)
-            ->where('security_id', $this->security($request)->id)
+            ->where($applicant['column'], $applicant['profile_id'])
             ->firstOrFail();
 
         $application->delete();
@@ -82,21 +85,6 @@ class TrainingApplicationController extends Controller
             'status' => true,
             'message' => 'Pendaftaran pelatihan berhasil dibatalkan.',
         ]);
-    }
-
-    private function security(Request $request)
-    {
-        if ($request->user()?->role !== 'satpam') {
-            throw new NotFoundHttpException('Profil satpam tidak ditemukan.');
-        }
-
-        $security = $request->user()->user_security?->security;
-
-        if (! $security) {
-            throw new NotFoundHttpException('Profil satpam tidak ditemukan.');
-        }
-
-        return $security;
     }
 
     private function pagination($paginator): array

@@ -54,7 +54,7 @@ class UserSubscriptionLimitUsageTest extends TestCase
             ->assertJsonPath('data.user_subscription.limit_usage.total_active_training_posts', 2);
     }
 
-    public function test_company_usage_counts_its_submitted_and_published_job_posts_only(): void
+    public function test_company_usage_counts_its_submitted_and_published_job_and_training_posts(): void
     {
         $this->defaultPlan('client');
         [$company, $token] = $this->companyAccount('company@example.com', 'Aman Company');
@@ -83,7 +83,7 @@ class UserSubscriptionLimitUsageTest extends TestCase
             ->assertJsonPath('data.user_subscription.limit_usage.total_active_job_applications', 0)
             ->assertJsonPath('data.user_subscription.limit_usage.total_active_training_applications', 0)
             ->assertJsonPath('data.user_subscription.limit_usage.total_active_job_posts', 2)
-            ->assertJsonPath('data.user_subscription.limit_usage.total_active_training_posts', 0);
+            ->assertJsonPath('data.user_subscription.limit_usage.total_active_training_posts', 1);
     }
 
     private function defaultPlan(string $role): void

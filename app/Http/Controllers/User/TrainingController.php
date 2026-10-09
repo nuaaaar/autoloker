@@ -580,6 +580,7 @@ class TrainingController extends Controller
             'title'                 => 'required|max:255',
             'provider'              => 'required|max:255',
             'category'              => 'required',
+            'category_role'         => 'required|in:security,cs',
             'level'                 => 'required',
 
             'description'           => 'required',
@@ -666,6 +667,8 @@ class TrainingController extends Controller
             'provider.max'                      => 'Nama penyelenggara maksimal 255 karakter.',
 
             'category.required'                 => 'Kategori pelatihan wajib dipilih.',
+            'category_role.required'            => 'Sasaran peserta wajib dipilih.',
+            'category_role.in'                  => 'Sasaran peserta harus Security atau Cleaning Service.',
             'level.required'                    => 'Level pelatihan wajib dipilih.',
 
             'description.required'              => 'Deskripsi pelatihan wajib diisi.',
@@ -890,6 +893,7 @@ class TrainingController extends Controller
             'instructor'            => $request->instructor,
 
             'category'              => $request->category,
+            'category_role'         => $request->category_role,
             'level'                 => $request->level,
 
             /*
@@ -1072,6 +1076,7 @@ class TrainingController extends Controller
             'title'                 => 'required|max:255',
             'provider'              => 'required|max:255',
             'category'              => 'required',
+            'category_role'         => 'prohibited',
             'level'                 => 'required',
 
             'description'           => 'required',
@@ -1126,6 +1131,7 @@ class TrainingController extends Controller
             'provider.max'                      => 'Nama penyelenggara maksimal 255 karakter.',
 
             'category.required'                 => 'Kategori pelatihan wajib dipilih.',
+            'category_role.prohibited'          => 'Sasaran peserta tidak dapat diubah setelah pelatihan dibuat.',
 
             'level.required'                    => 'Level pelatihan wajib dipilih.',
 

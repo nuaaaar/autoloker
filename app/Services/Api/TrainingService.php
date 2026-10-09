@@ -2,7 +2,7 @@
 
 namespace App\Services\Api;
 
-use App\Models\BUJP;
+use App\Models\Company;
 use App\Models\Training;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\UploadedFile;
@@ -13,7 +13,7 @@ use Laravolt\Indonesia\Models\Province;
 
 class TrainingService
 {
-    public function create(int $ownerId, array $data): Training
+    public function create(array $owner, array $data): Training
     {
         $action = $data['workflow_action'] ?? 'save_draft';
         unset($data['workflow_action']);
@@ -21,11 +21,11 @@ class TrainingService
         [$data, $locationErrors] = $this->normalizeLocation($data);
         $this->validatePayload($data, $action === 'submit', $locationErrors);
 
-        $bujp = BUJP::query()->findOrFail($ownerId);
+        $company = Company::query()->findOrFail($owner['id']);
         $attributes = $this->attributes($data);
-        $attributes['b_u_j_p_id'] = $ownerId;
-        $attributes['company_id'] = null;
-        $attributes['provider'] = $bujp->company_name;
+        $attributes['b_u_j_p_id'] = null;
+        $attributes['company_id'] = $owner['id'];
+        $attributes['provider'] = $company->company_name;
         $attributes['registered'] = 0;
         $attributes['total_clicked'] = 0;
         $attributes['duration_day'] = $this->durationDay($data['start_date'] ?? null, $data['end_date'] ?? null);
@@ -162,6 +162,7 @@ class TrainingService
         $fields = [
             'title',
             'category',
+            'category_role',
             'level',
             'description',
             'start_date',
@@ -248,6 +249,7 @@ class TrainingService
         return [
             'title' => $training->title,
             'category' => $training->category,
+            'category_role' => $training->category_role,
             'level' => $training->level,
             'is_certificate' => $training->is_certificate,
             'tags' => $this->decodeArray($training->tags),

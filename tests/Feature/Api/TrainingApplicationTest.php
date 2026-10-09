@@ -152,7 +152,27 @@ class TrainingApplicationTest extends TestCase
         $userSecurity = UserSecurity::create(['user_id' => $user->id]);
         $security = Security::create([
             'user_security_id' => $userSecurity->id,
+            'formal_photo' => 'formal-photo/api-security.jpg',
             'name' => 'API Security',
+            'birth_place' => 'Bandung',
+            'birth_date' => '1995-01-01',
+            'gender' => 'laki-laki',
+            'address' => 'Jl. Merdeka 1',
+            'phone_number' => '081234567890',
+            'email' => $email,
+            'ktp_number' => '3273010101950001',
+            'registration_number' => 'REG-001',
+            'work_experience' => '3 tahun',
+            'province' => 'Jawa Barat',
+            'city' => 'Bandung',
+            'district' => 'Coblong',
+            'village' => 'Dago',
+            'height' => '170',
+            'width' => '65',
+            'is_out_of_town_agree' => true,
+            'is_shift_agree' => true,
+            'ability' => 'Patroli',
+            'work_status' => 'Siap kerja',
         ]);
 
         return [$user, $security];
@@ -163,6 +183,7 @@ class TrainingApplicationTest extends TestCase
         return array_merge([
             'title' => 'Security Training',
             'provider' => 'Training Provider',
+            'category_role' => 'security',
             'status' => 'published',
             'quota' => 10,
             'start_date' => now()->addDays(7)->toDateString(),
