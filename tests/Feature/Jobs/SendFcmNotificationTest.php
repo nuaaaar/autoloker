@@ -16,7 +16,27 @@ class SendFcmNotificationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_job_sends_notification_to_enabled_mobile_tokens(): void
+    public function test_job_sends_persisted_autoloker_url_to_enabled_mobile_tokens(): void
+    {
+        $user = $this->user();
+        $master = $this->master(['push_enabled' => true, 'mobile_enabled' => true, 'web_enabled' => true]);
+        $url = 'autoloker://job-vacancies/550e8400-e29b-41d4-a716-446655440000';
+        $notification = $this->notification($user, $master, ['url' => $url]);
+        $this->token($user, 'mobile-token', 'mobile');
+        $sender = Mockery::mock(FcmSender::class);
+        $sender->shouldReceive('send')
+            ->once()
+            ->with($notification->title, $notification->description, [
+                'code' => $master->code,
+                'notification_uuid' => $notification->uuid,
+                'url' => $url,
+            ], ['mobile-token']);
+        $this->app->instance(FcmSender::class, $sender);
+
+        (new SendFcmNotification($notification->id))->handle();
+    }
+
+    public function test_job_sends_empty_url_when_persisted_url_is_null(): void
     {
         $user = $this->user();
         $master = $this->master(['push_enabled' => true, 'mobile_enabled' => true, 'web_enabled' => true]);
@@ -101,15 +121,15 @@ class SendFcmNotificationTest extends TestCase
         ], $overrides));
     }
 
-    private function notification(User $user, MasterNotification $master): Notification
+    private function notification(User $user, MasterNotification $master, array $overrides = []): Notification
     {
-        return Notification::create([
+        return Notification::create(array_merge([
             'user_id' => $user->id,
             'notification_id' => $master->id,
             'title' => 'Title',
             'description' => 'Body',
             'is_read' => false,
-        ]);
+        ], $overrides));
     }
 
     private function token(User $user, string $token, string $platform): void

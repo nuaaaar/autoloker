@@ -106,6 +106,7 @@ class OwnedJobApplicantController extends OwnedOrganizationController
             app(NotificationService::class)->send($applicant->id, 'job_application_status_changed', [
                 'position' => $vacancy->position,
                 'status' => NotificationService::JOB_STATUS_LABELS[$request->validated('status')],
+                'vacancy_uuid' => rawurlencode((string) $vacancy->uuid),
             ]);
         }
 

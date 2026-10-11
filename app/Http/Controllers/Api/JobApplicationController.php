@@ -163,6 +163,7 @@ class JobApplicationController extends Controller
             app(NotificationService::class)->send($owner->id, 'job_application_created', [
                 'position' => $vacancy->position,
                 'applicant' => $request->user()->name,
+                'vacancy_uuid' => rawurlencode((string) $vacancy->uuid),
             ]);
         }
 

@@ -23,6 +23,7 @@ class MasterNotificationSeeder extends Seeder
                 'category' => 'lowongan',
                 'title_template' => 'Lamaran baru untuk :position',
                 'message_template' => ':applicant melamar lowongan :position.',
+                'flutter_route' => 'autoloker://company/job-vacancies/:vacancy_uuid',
             ],
             [
                 'code' => 'job_application_status_changed',
@@ -30,6 +31,7 @@ class MasterNotificationSeeder extends Seeder
                 'category' => 'lowongan',
                 'title_template' => 'Status lamaran :position berubah',
                 'message_template' => 'Status lamaran Anda untuk :position sekarang :status.',
+                'flutter_route' => 'autoloker://job-vacancies/:vacancy_uuid',
             ],
             [
                 'code' => 'training_application_created',
@@ -37,6 +39,7 @@ class MasterNotificationSeeder extends Seeder
                 'category' => 'pelatihan',
                 'title_template' => 'Pendaftaran pelatihan baru',
                 'message_template' => ':participant mendaftar pelatihan :training.',
+                'flutter_route' => 'autoloker://company/trainings/:training_uuid',
             ],
             [
                 'code' => 'training_application_status_changed',
@@ -44,6 +47,7 @@ class MasterNotificationSeeder extends Seeder
                 'category' => 'pelatihan',
                 'title_template' => 'Status pendaftaran :training',
                 'message_template' => 'Status pendaftaran Anda untuk :training sekarang :status.',
+                'flutter_route' => 'autoloker://trainings/:training_uuid',
             ],
             [
                 'code' => 'job_vacancy_published',
@@ -51,6 +55,7 @@ class MasterNotificationSeeder extends Seeder
                 'category' => 'lowongan',
                 'title_template' => 'Lowongan :position disetujui',
                 'message_template' => 'Lowongan :position telah disetujui dan dipublikasikan.',
+                'flutter_route' => 'autoloker://company/job-vacancies/:vacancy_uuid',
             ],
             [
                 'code' => 'job_vacancy_rejected',
@@ -58,6 +63,7 @@ class MasterNotificationSeeder extends Seeder
                 'category' => 'lowongan',
                 'title_template' => 'Lowongan :position ditolak',
                 'message_template' => 'Lowongan :position ditolak admin. Alasan: :reason.',
+                'flutter_route' => 'autoloker://company/job-vacancies/:vacancy_uuid',
             ],
             [
                 'code' => 'training_published',
@@ -65,6 +71,7 @@ class MasterNotificationSeeder extends Seeder
                 'category' => 'pelatihan',
                 'title_template' => 'Pelatihan :training disetujui',
                 'message_template' => 'Pelatihan :training telah disetujui dan dipublikasikan.',
+                'flutter_route' => 'autoloker://company/trainings/:training_uuid',
             ],
             [
                 'code' => 'training_rejected',
@@ -72,6 +79,7 @@ class MasterNotificationSeeder extends Seeder
                 'category' => 'pelatihan',
                 'title_template' => 'Pelatihan :training ditolak',
                 'message_template' => 'Pelatihan :training ditolak admin. Alasan: :reason.',
+                'flutter_route' => 'autoloker://company/trainings/:training_uuid',
             ],
             [
                 'code' => 'order_subscription_approved',
@@ -79,6 +87,7 @@ class MasterNotificationSeeder extends Seeder
                 'category' => 'langganan',
                 'title_template' => 'Pembayaran langganan disetujui',
                 'message_template' => 'Pembayaran langganan :package telah disetujui. Langganan Anda aktif.',
+                'flutter_route' => 'autoloker://subscription-orders/:order_uuid',
             ],
             [
                 'code' => 'order_subscription_rejected',
@@ -86,6 +95,7 @@ class MasterNotificationSeeder extends Seeder
                 'category' => 'langganan',
                 'title_template' => 'Pembayaran langganan ditolak',
                 'message_template' => 'Pembayaran langganan :package ditolak. Alasan: :reason.',
+                'flutter_route' => 'autoloker://subscription-orders/:order_uuid',
             ],
             [
                 'code' => 'company_verified',
@@ -93,6 +103,7 @@ class MasterNotificationSeeder extends Seeder
                 'category' => 'akun',
                 'title_template' => 'Perusahaan :company terverifikasi',
                 'message_template' => 'Verifikasi perusahaan :company telah disetujui.',
+                'flutter_route' => 'autoloker://notifications',
             ],
             [
                 'code' => 'company_status_changed',
@@ -100,6 +111,7 @@ class MasterNotificationSeeder extends Seeder
                 'category' => 'akun',
                 'title_template' => 'Status perusahaan :company berubah',
                 'message_template' => 'Status perusahaan :company sekarang :status.',
+                'flutter_route' => 'autoloker://notifications',
             ],
             [
                 'code' => 'security_status_changed',
@@ -107,6 +119,7 @@ class MasterNotificationSeeder extends Seeder
                 'category' => 'akun',
                 'title_template' => 'Status akun Anda berubah',
                 'message_template' => 'Status akun Anda sekarang :status.',
+                'flutter_route' => 'autoloker://notifications',
             ],
         ];
 
@@ -124,7 +137,6 @@ class MasterNotificationSeeder extends Seeder
                     'email_enabled' => false,
                     'push_enabled' => true,
                     'is_active' => true,
-                    'flutter_route' => null,
                     'dashboard_route' => null,
                 ]),
             );

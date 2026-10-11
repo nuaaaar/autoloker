@@ -44,6 +44,7 @@ class JobVacancyController extends Controller
         if ($owner) {
             app(NotificationService::class)->send($owner->id, 'job_vacancy_published', [
                 'position' => $job->position,
+                'vacancy_uuid' => rawurlencode((string) $job->uuid),
             ]);
         }
 
@@ -105,6 +106,7 @@ class JobVacancyController extends Controller
             app(NotificationService::class)->send($owner->id, 'job_vacancy_rejected', [
                 'position' => $job->position,
                 'reason' => $request->reason_rejected,
+                'vacancy_uuid' => rawurlencode((string) $job->uuid),
             ]);
         }
 

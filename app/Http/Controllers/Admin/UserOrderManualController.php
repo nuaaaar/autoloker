@@ -629,6 +629,7 @@ class UserOrderManualController extends Controller
 
             app(NotificationService::class)->send($order->user_id, 'order_subscription_approved', [
                 'package' => $order->subscription->name,
+                'order_uuid' => rawurlencode((string) $order->uuid),
             ]);
 
 
@@ -767,6 +768,7 @@ class UserOrderManualController extends Controller
             app(NotificationService::class)->send($payment->user_id, 'order_subscription_rejected', [
                 'package' => $payment->subscription?->name ?? '',
                 'reason' => $payment->rejected_reason ?? '',
+                'order_uuid' => rawurlencode((string) $payment->uuid),
             ]);
 
             return response()->json([

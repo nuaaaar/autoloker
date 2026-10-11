@@ -42,6 +42,21 @@ class NotificationServiceTest extends TestCase
         Queue::assertPushed(SendFcmNotification::class, fn ($job) => $job->notificationId === $notification->id);
     }
 
+    public function test_send_interpolates_encoded_destination_uuid_into_mobile_route(): void
+    {
+        Queue::fake();
+        $user = $this->user();
+        $master = $this->master([
+            'flutter_route' => 'autoloker://job-vacancies/:vacancy_uuid',
+        ]);
+
+        $notification = app(NotificationService::class)->send($user->id, $master->code, [
+            'vacancy_uuid' => rawurlencode('123e4567-e89b-12d3-a456-426614174000'),
+        ]);
+
+        $this->assertSame('autoloker://job-vacancies/123e4567-e89b-12d3-a456-426614174000', $notification->url);
+    }
+
     public function test_dashboard_route_is_used_when_flutter_route_is_empty(): void
     {
         Queue::fake();

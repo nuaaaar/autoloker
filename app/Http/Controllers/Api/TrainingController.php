@@ -186,6 +186,7 @@ class TrainingController extends Controller
             app(NotificationService::class)->send($owner->id, 'training_application_created', [
                 'training' => $training->title,
                 'participant' => $request->user()->name,
+                'training_uuid' => rawurlencode((string) $training->uuid),
             ]);
         }
 

@@ -2274,6 +2274,7 @@ class TrainingController extends Controller
             app(NotificationService::class)->send($participant->id, 'training_application_status_changed', [
                 'training' => $training->title,
                 'status' => NotificationService::TRAINING_STATUS_LABELS[$status],
+                'training_uuid' => rawurlencode((string) $training->uuid),
             ]);
         }
     }

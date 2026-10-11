@@ -44,6 +44,7 @@ class TrainingController extends Controller
         if ($owner) {
             app(NotificationService::class)->send($owner->id, 'training_published', [
                 'training' => $job->title,
+                'training_uuid' => rawurlencode((string) $job->uuid),
             ]);
         }
 
@@ -105,6 +106,7 @@ class TrainingController extends Controller
             app(NotificationService::class)->send($owner->id, 'training_rejected', [
                 'training' => $job->title,
                 'reason' => $request->reason_rejected,
+                'training_uuid' => rawurlencode((string) $job->uuid),
             ]);
         }
 

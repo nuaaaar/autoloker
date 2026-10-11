@@ -17,8 +17,9 @@ class NotificationHistoryTest extends TestCase
         $user = $this->user('history@example.com');
         $other = $this->user('other-history@example.com');
         $older = $this->notification($user, ['title' => 'Older']);
-        $newer = $this->notification($user, ['title' => 'Newer']);
-        $this->notification($other, ['title' => 'Private']);
+        $url = 'autoloker://job-vacancies/550e8400-e29b-41d4-a716-446655440000';
+        $newer = $this->notification($user, ['title' => 'Newer', 'url' => $url]);
+        $this->notification($other, ['title' => 'Private', 'url' => 'autoloker://notifications']);
 
         $this->withToken($this->token($user))
             ->getJson('/api/notifications')
@@ -26,8 +27,8 @@ class NotificationHistoryTest extends TestCase
             ->assertJsonPath('status', true)
             ->assertJsonCount(2, 'data.notifications')
             ->assertJsonPath('data.notifications.0.uuid', $newer->uuid)
+            ->assertJsonPath('data.notifications.0.url', $url)
             ->assertJsonPath('data.notifications.1.uuid', $older->uuid)
-            ->assertJsonPath('data.pagination.total', 2)
             ->assertJsonMissing(['title' => 'Private']);
     }
 

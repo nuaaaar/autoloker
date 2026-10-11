@@ -354,6 +354,7 @@ class JobApplicationController extends Controller
             app(NotificationService::class)->send($applicant->id, 'job_application_status_changed', [
                 'position' => $job->position,
                 'status' => NotificationService::JOB_STATUS_LABELS[$request->status],
+                'vacancy_uuid' => rawurlencode((string) $job->uuid),
             ]);
         }
 

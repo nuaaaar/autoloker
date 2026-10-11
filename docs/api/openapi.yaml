@@ -6259,7 +6259,10 @@ components:
         uuid: {type: string, format: uuid}
         title: {type: string}
         description: {type: [string, 'null']}
-        url: {type: [string, 'null']}
+        url:
+          type: [string, 'null']
+          description: Nullable destination URL; when present, an external HTTP(S) URL or a supported autoloker:// destination.
+          example: autoloker://notifications
         type: {type: [string, 'null']}
         is_read: {type: boolean}
         read_at: {type: [string, 'null'], format: date-time}
