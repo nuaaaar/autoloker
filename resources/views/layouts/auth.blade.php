@@ -786,16 +786,14 @@
 
             }
 
-            $('.btnSatpam').click(function(){
-
+            $(document).on('click', '.btnSatpam', function (event) {
+                event.preventDefault();
                 changeRole('satpam');
-
             });
 
-            $('.btnPerusahaan').click(function(){
-
+            $(document).on('click', '.btnPerusahaan', function (event) {
+                event.preventDefault();
                 changeRole('perusahaan');
-
             });
 
             function validateForm(form){

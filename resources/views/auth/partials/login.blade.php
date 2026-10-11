@@ -12,13 +12,13 @@
     <div class="rounded-pill p-1 d-flex mb-3 mt-3" style="background:#152040;">
 
         <button
-            id=""
+            type="button"
             class="btn btn-warning rounded-pill fw-bold flex-fill text-dark role-btn btnSatpam active">
             👤 Satpam / Cleaning Service
         </button>
 
         <button
-            id=""
+            type="button"
             class="btn rounded-pill fw-bold flex-fill role-btn text-muted btnPerusahaan">
             🏢 Perusahaan
         </button>
