@@ -41,7 +41,7 @@ class NotificationHistoryTest extends TestCase
             'is_read' => false,
             'created_at' => '2026-10-05 10:00:00',
         ]);
-        $this->notification($user, [
+        $read = $this->notification($user, [
             'title' => 'Read',
             'type' => 'lowongan',
             'is_read' => true,
@@ -65,7 +65,13 @@ class NotificationHistoryTest extends TestCase
             ->assertOk()
             ->assertJsonCount(1, 'data.notifications')
             ->assertJsonPath('data.notifications.0.uuid', $match->uuid);
+        $this->withToken($this->token($user))
+            ->getJson('/api/notifications?is_read=true&type=lowongan&date_from=2026-10-05&date_to=2026-10-05')
+            ->assertOk()
+            ->assertJsonCount(1, 'data.notifications')
+            ->assertJsonPath('data.notifications.0.uuid', $read->uuid);
     }
+
 
     public function test_unread_count_and_read_actions_are_scoped_to_the_authenticated_user(): void
     {

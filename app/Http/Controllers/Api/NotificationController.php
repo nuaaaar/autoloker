@@ -13,12 +13,15 @@ class NotificationController extends Controller
     public function index(Request $request, NotificationService $notifications): JsonResponse
     {
         $filters = $request->validate([
-            'is_read' => ['nullable', 'boolean'],
+            'is_read' => ['nullable', 'in:true,false,1,0'],
             'type' => ['nullable', 'string'],
             'date_from' => ['nullable', 'date'],
             'date_to' => ['nullable', 'date'],
             'page' => ['nullable', 'integer', 'min:1'],
         ]);
+        if (isset($filters['is_read'])) {
+            $filters['is_read'] = filter_var($filters['is_read'], FILTER_VALIDATE_BOOLEAN);
+        }
 
         $paginator = $notifications->userNotifications($request->user()->id, 10, $filters);
 
