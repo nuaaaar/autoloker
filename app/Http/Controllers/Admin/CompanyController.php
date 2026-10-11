@@ -6,6 +6,7 @@ use App\Models\Company;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\MasterResource;
+use App\Services\NotificationService;
 
 class CompanyController extends Controller
 {
@@ -115,6 +116,14 @@ class CompanyController extends Controller
 
         ]);
 
+        $owner = $company->userCompany?->user;
+
+        if ($owner) {
+            app(NotificationService::class)->send($owner->id, 'company_verified', [
+                'company' => $company->company_name,
+            ]);
+        }
+
         return response()->json([
 
             'status'=>true,
@@ -136,6 +145,15 @@ class CompanyController extends Controller
         $company->update([
             'is_active' => $request->status
         ]);
+
+        $owner = $company->userCompany?->user;
+
+        if ($owner) {
+            app(NotificationService::class)->send($owner->id, 'company_status_changed', [
+                'company' => $company->company_name,
+                'status' => $request->status ? 'aktif' : 'nonaktif',
+            ]);
+        }
 
         return response()->json([
             'status' => true,

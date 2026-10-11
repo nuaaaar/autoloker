@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\MasterResource;
 use Illuminate\Support\Facades\Validator;
+use App\Services\NotificationService;
 
 class JobVacancyController extends Controller
 {
@@ -37,6 +38,14 @@ class JobVacancyController extends Controller
             'reason_rejected' => null,
 
         ]);
+
+        $owner = $job->company?->userCompany?->user ?? $job->bujp?->userBujp?->user;
+
+        if ($owner) {
+            app(NotificationService::class)->send($owner->id, 'job_vacancy_published', [
+                'position' => $job->position,
+            ]);
+        }
 
         return response()->json([
 
@@ -89,6 +98,15 @@ class JobVacancyController extends Controller
             'reason_rejected' => $request->reason_rejected
 
         ]);
+
+        $owner = $job->company?->userCompany?->user ?? $job->bujp?->userBujp?->user;
+
+        if ($owner) {
+            app(NotificationService::class)->send($owner->id, 'job_vacancy_rejected', [
+                'position' => $job->position,
+                'reason' => $request->reason_rejected,
+            ]);
+        }
 
         return response()->json([
 

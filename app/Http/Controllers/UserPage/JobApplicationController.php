@@ -8,6 +8,7 @@ use App\Models\JobVacancy;
 use Illuminate\Http\Request;
 use App\Models\Security;
 use App\Models\CleaningService;
+use App\Services\NotificationService;
 use Auth;
 
 class JobApplicationController extends Controller
@@ -253,6 +254,15 @@ class JobApplicationController extends Controller
             $ownerColumn => $profile->id,
             'job_vacancy_id' => $job->id,
         ]);
+
+        $owner = $job->company?->userCompany?->user ?? $job->bujp?->userBujp?->user;
+
+        if ($owner) {
+            app(NotificationService::class)->send($owner->id, 'job_application_created', [
+                'position' => $job->position,
+                'applicant' => Auth::user()->name,
+            ]);
+        }
 
         /*
         |--------------------------------------------------------------------------

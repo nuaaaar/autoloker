@@ -2,22 +2,44 @@
 
 namespace App\Services;
 
+use App\Jobs\SendFcmNotification;
 use App\Models\MasterNotification;
 use App\Models\Notification;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Log;
 
 class NotificationService
 {
     /**
-     * Create notification.
+     * Indonesian display labels for job application statuses.
+     */
+    public const JOB_STATUS_LABELS = [
+        'applied' => 'dikirim',
+        'reviewed' => 'sedang direview',
+        'shortlisted' => 'lolos seleksi',
+        'rejected' => 'ditolak',
+    ];
+
+    /**
+     * Indonesian display labels for training application statuses.
+     */
+    public const TRAINING_STATUS_LABELS = [
+        'pending' => 'menunggu konfirmasi',
+        'approved' => 'disetujui',
+        'rejected' => 'ditolak',
+    ];
+
+    /**
+     * Create a notification history row from the master template.
+     *
+     * Templates interpolate ":placeholder" params. Returns null (no row,
+     * no push) when the master code is missing or inactive.
      */
     public function send(
         int $userId,
         string $code,
-        ?string $type = null,
-        ?string $title = null,
-        ?string $description = null,
-        ?string $url = null
-    ): Notification {
+        array $params = []
+    ): ?Notification {
         /*
         |--------------------------------------------------------------------------
         | GET MASTER NOTIFICATION
@@ -29,22 +51,21 @@ class NotificationService
             ->where('is_active', true)
             ->first();
 
+        if (!$master) {
+            Log::warning("Master notification [{$code}] not found or inactive.");
+
+            return null;
+        }
 
         /*
         |--------------------------------------------------------------------------
-        | USE MASTER DATA
+        | INTERPOLATE TEMPLATES
         |--------------------------------------------------------------------------
         */
 
-        if ($master) {
-
-            $title = $title ?? $master->title;
-
-            $description = $description ?? $master->description;
-
-            $type = $type ?? $master->type;
-        }
-
+        $replacements = collect($params)
+            ->mapWithKeys(fn ($value, $key) => [":{$key}" => (string) $value])
+            ->all();
 
         /*
         |--------------------------------------------------------------------------
@@ -52,27 +73,38 @@ class NotificationService
         |--------------------------------------------------------------------------
         */
 
-        return Notification::create([
+        $routeTemplate = $master->flutter_route ?: $master->dashboard_route;
 
+        $notification = Notification::create([
             'user_id' => $userId,
 
-            'notification_id' => $master?->id,
+            'notification_id' => $master->id,
 
-            'title' => $title,
+            'title' => strtr($master->title_template, $replacements),
 
-            'description' => $description,
+            'description' => strtr($master->message_template, $replacements),
 
-            'url' => $url,
+            'url' => $routeTemplate ? strtr($routeTemplate, $replacements) : null,
 
-            'type' => $type,
+            'type' => $master->category,
 
             'is_read' => false,
 
             'read_at' => null,
-
         ]);
-    }
 
+        /*
+        |--------------------------------------------------------------------------
+        | QUEUE FCM PUSH
+        |--------------------------------------------------------------------------
+        */
+
+        if ($master->push_enabled) {
+            SendFcmNotification::dispatch($notification->id);
+        }
+
+        return $notification;
+    }
 
     /**
      * Mark notification as read.
@@ -98,7 +130,6 @@ class NotificationService
         return $notification;
     }
 
-
     /**
      * Mark all notifications as read.
      */
@@ -113,7 +144,6 @@ class NotificationService
             ]);
     }
 
-
     /**
      * Get unread notification count.
      */
@@ -125,49 +155,34 @@ class NotificationService
             ->count();
     }
 
-
     /**
-     * Get user notifications.
+     * Get the user's notification history, newest first.
      */
-    public function getUserNotifications(
+    public function userNotifications(
         int $userId,
-        int $limit = 20
-    ) {
-        return Notification::query()
+        int $perPage = 10,
+        array $filters = []
+    ): LengthAwarePaginator {
+        $query = Notification::query()
             ->where('user_id', $userId)
-            ->latest()
-            ->limit($limit)
-            ->get();
-    }
+            ->orderByDesc('id');
 
-
-    /**
-     * Delete notification.
-     */
-    public function delete(
-        string $uuid,
-        int $userId
-    ): bool {
-        $notification = Notification::query()
-            ->where('uuid', $uuid)
-            ->where('user_id', $userId)
-            ->first();
-
-        if (!$notification) {
-            return false;
+        if (isset($filters['is_read']) && $filters['is_read'] !== null) {
+            $query->where('is_read', (bool) $filters['is_read']);
         }
 
-        return (bool) $notification->delete();
-    }
+        if (isset($filters['type']) && $filters['type'] !== null) {
+            $query->where('type', $filters['type']);
+        }
 
+        if (isset($filters['date_from']) && $filters['date_from'] !== null) {
+            $query->whereDate('created_at', '>=', $filters['date_from']);
+        }
 
-    /**
-     * Delete all notifications.
-     */
-    public function deleteAll(int $userId): int
-    {
-        return Notification::query()
-            ->where('user_id', $userId)
-            ->delete();
+        if (isset($filters['date_to']) && $filters['date_to'] !== null) {
+            $query->whereDate('created_at', '<=', $filters['date_to']);
+        }
+
+        return $query->paginate($perPage);
     }
 }

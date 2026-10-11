@@ -15,7 +15,11 @@ class DeviceTokenController extends Controller
 
         UserDeviceToken::updateOrCreate(
             ['fcm_token_hash' => hash('sha256', $token)],
-            ['user_id' => $request->user()->id, 'fcm_token' => $token],
+            [
+                'user_id' => $request->user()->id,
+                'fcm_token' => $token,
+                'platform' => $request->validated('platform') ?? 'mobile',
+            ],
         );
 
         return response()->json([

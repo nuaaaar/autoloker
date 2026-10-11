@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\JobApplication;
 use App\Models\JobVacancy;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 
 class JobApplicationController extends Controller
@@ -344,6 +345,17 @@ class JobApplicationController extends Controller
         $application->update([
             'status' => $request->status
         ]);
+
+        $application->load(['security.user_security.user', 'cleaning_service.user_cleaning_service.user']);
+
+        $applicant = $application->security?->user_security?->user ?? $application->cleaning_service?->user_cleaning_service?->user;
+
+        if ($applicant) {
+            app(NotificationService::class)->send($applicant->id, 'job_application_status_changed', [
+                'position' => $job->position,
+                'status' => NotificationService::JOB_STATUS_LABELS[$request->status],
+            ]);
+        }
 
         /*
         |--------------------------------------------------------------------------

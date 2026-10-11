@@ -8,6 +8,7 @@ use App\Http\Resources\Api\JobApplicantResource;
 use App\Models\JobApplication;
 use App\Models\JobVacancy;
 use Illuminate\Database\Eloquent\Builder;
+use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 
 class OwnedJobApplicantController extends OwnedOrganizationController
@@ -98,6 +99,15 @@ class OwnedJobApplicantController extends OwnedOrganizationController
         $application->update([
             'status' => $request->validated('status'),
         ]);
+
+        $applicant = $application->security?->user_security?->user ?? $application->cleaning_service?->user_cleaning_service?->user;
+
+        if ($applicant) {
+            app(NotificationService::class)->send($applicant->id, 'job_application_status_changed', [
+                'position' => $vacancy->position,
+                'status' => NotificationService::JOB_STATUS_LABELS[$request->validated('status')],
+            ]);
+        }
 
         return response()->json([
             'status' => true,

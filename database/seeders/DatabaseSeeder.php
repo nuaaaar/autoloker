@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             JobVacancySeeder::class,
             TrainingSeeder::class,
+            MasterNotificationSeeder::class,
         ]);
     }
 }

@@ -12,6 +12,11 @@ class BUJP extends Model
 
     protected $guarded = ['id'];
 
+    public function userBujp()
+    {
+        return $this->belongsTo('App\Models\UserBUJP', 'user_b_u_j_p_id');
+    }
+
     public function profileProgress()
     {
         $fields = [

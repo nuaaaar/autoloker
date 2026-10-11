@@ -13,6 +13,7 @@ class DeviceTokenRequest extends ApiFormRequest
     {
         return [
             'fcm_token' => ['required', 'string', 'max:4096'],
+            'platform' => ['nullable', 'in:mobile,web'],
         ];
     }
 }

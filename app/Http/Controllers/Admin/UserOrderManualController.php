@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\UserSubscription;
 use Illuminate\Support\Str;
+use App\Services\NotificationService;
 
 class UserOrderManualController extends Controller
 {
@@ -626,6 +627,10 @@ class UserOrderManualController extends Controller
 
             DB::commit();
 
+            app(NotificationService::class)->send($order->user_id, 'order_subscription_approved', [
+                'package' => $order->subscription->name,
+            ]);
+
 
             /*
             |--------------------------------------------------------------------------
@@ -758,6 +763,11 @@ class UserOrderManualController extends Controller
 
 
             DB::commit();
+
+            app(NotificationService::class)->send($payment->user_id, 'order_subscription_rejected', [
+                'package' => $payment->subscription?->name ?? '',
+                'reason' => $payment->rejected_reason ?? '',
+            ]);
 
             return response()->json([
                 'success' => true,

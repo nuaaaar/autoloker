@@ -118,7 +118,7 @@
 
     .notification-filter-input{
 
-        height:38px;
+        min-height:44px;
 
         background:#151f36;
 
@@ -145,6 +145,15 @@
 
     }
 
+    .notification-filter-input:focus-visible,
+    .notification-filter-select:focus-visible,
+    .btn-notification-filter:focus-visible,
+    .btn-notification-reset:focus-visible,
+    .notification-mark-all:focus-visible{
+        outline:2px solid #f7b003;
+        outline-offset:2px;
+    }
+
 
     .notification-filter-input::placeholder{
 
@@ -155,7 +164,7 @@
 
     .notification-filter-select{
 
-        height:38px;
+        min-height:44px;
 
         background:#151f36;
 
@@ -183,7 +192,7 @@
 
     .btn-notification-filter{
 
-        height:38px;
+        min-height:44px;
 
         padding:0 17px;
 
@@ -213,7 +222,7 @@
 
     .btn-notification-reset{
 
-        height:38px;
+        min-height:44px;
 
         padding:0 14px;
 
@@ -352,8 +361,15 @@
 
         text-decoration:none;
 
-    }
+        min-height:44px;
 
+        padding:0 10px;
+
+        display:inline-flex;
+
+        align-items:center;
+
+    }
 
     .notification-mark-all:hover{
 
@@ -1351,959 +1367,109 @@
 
 
 @section('content')
-
     <div class="row">
-
         <div class="col-xl-9">
-
-
-            <!-- =================================================
-                 NOTIFICATION CARD
-            ================================================== -->
-
             <div class="notification-page-card">
-
-
-                <!-- HEADER -->
-
-                <div class="notification-page-header">
-
-                    <div class="d-flex align-items-center justify-content-between">
-
+                <header class="notification-page-header">
+                    <div class="d-flex align-items-center justify-content-between gap-3">
                         <div>
-
-                            <h3 class="notification-page-title">
-
-                                Semua Notifikasi
-
-                            </h3>
-
-                            <div class="notification-page-subtitle">
-
-                                Riwayat pemberitahuan dan aktivitas akun Anda
-
-                            </div>
-
+                            <h2 class="notification-page-title">Semua Notifikasi</h2>
+                            <div class="notification-page-subtitle">Riwayat pemberitahuan dan aktivitas akun Anda</div>
                         </div>
-
-
-                        <div class="notification-unread-info">
-
-                            <span class="dot"></span>
-
-                            <span>
-                                3 belum dibaca
-                            </span>
-
+                        <div class="notification-unread-info" aria-live="polite">
+                            @if ($unreadCount > 0)
+                                <span class="dot" aria-hidden="true"></span>
+                            @endif
+                            <span>{{ $unreadCount }} belum dibaca</span>
                         </div>
-
                     </div>
+                </header>
 
-                </div>
-
-
-
-                <!-- =================================================
-                     FILTER PERIODE
-                ================================================== -->
-
-                <div class="notification-filter">
-
-
+                <form class="notification-filter" method="GET" action="{{ route('dashboard-user.notification.index') }}">
                     <div class="row notification-filter-row align-items-end g-2">
-
-
-                        <!-- FROM -->
-
                         <div class="col-12 col-md-4">
-
-                            <div class="notification-filter-label">
-
-                                Tanggal Mulai
-
-                            </div>
-
-                            <input
-                                type="date"
-                                class="form-control notification-filter-input"
-                                value="{{ date('Y-m-01') }}">
-
+                            <label class="notification-filter-label" for="date-from">Tanggal Mulai</label>
+                            <input id="date-from" type="date" name="date_from" class="form-control notification-filter-input" value="{{ request('date_from') }}">
                         </div>
-
-
-                        <!-- TO -->
-
                         <div class="col-12 col-md-4">
-
-                            <div class="notification-filter-label">
-
-                                Tanggal Selesai
-
-                            </div>
-
-                            <input
-                                type="date"
-                                class="form-control notification-filter-input"
-                                value="{{ date('Y-m-d') }}">
-
+                            <label class="notification-filter-label" for="date-to">Tanggal Selesai</label>
+                            <input id="date-to" type="date" name="date_to" class="form-control notification-filter-input" value="{{ request('date_to') }}">
                         </div>
-
-
-                        <!-- TYPE -->
-
                         <div class="col-12 col-md-4">
-
-                            <div class="notification-filter-label">
-
-                                Jenis Notifikasi
-
-                            </div>
-
-                            <select class="form-select notification-filter-select">
-
-                                <option value="">
-                                    Semua Notifikasi
-                                </option>
-
-                                <option value="job">
-                                    Lowongan
-                                </option>
-
-                                <option value="training">
-                                    Pelatihan
-                                </option>
-
-                                <option value="connection">
-                                    Jejaring
-                                </option>
-
-                                <option value="system">
-                                    Sistem
-                                </option>
-
+                            <label class="notification-filter-label" for="notification-type">Jenis Notifikasi</label>
+                            <select id="notification-type" name="type" class="form-select notification-filter-select">
+                                <option value="">Semua Notifikasi</option>
+                                @foreach (['lowongan' => 'Lowongan', 'pelatihan' => 'Pelatihan', 'langganan' => 'Langganan', 'akun' => 'Akun'] as $value => $label)
+                                    <option value="{{ $value }}" @selected(request('type') === $value)>{{ $label }}</option>
+                                @endforeach
                             </select>
-
                         </div>
-
-
+                        <div class="col-12 col-md-4">
+                            <label class="notification-filter-label" for="notification-read-state">Status</label>
+                            <select id="notification-read-state" name="is_read" class="form-select notification-filter-select">
+                                <option value="">Semua Status</option>
+                                <option value="0" @selected(request('is_read') === '0')>Belum dibaca</option>
+                                <option value="1" @selected(request('is_read') === '1')>Sudah dibaca</option>
+                            </select>
+                        </div>
                     </div>
-
-
-
-                    <!-- BUTTON -->
-
-                    <div class="d-flex align-items-center gap-2 mt-3">
-
-                        <button
-                            type="button"
-                            class="btn-notification-filter">
-
-                            <i class="ki-duotone ki-filter fs-7 me-1">
-
-                                <span class="path1"></span>
-                                <span class="path2"></span>
-
-                            </i>
-
-                            Terapkan Filter
-
-                        </button>
-
-
-                        <button
-                            type="button"
-                            class="btn-notification-reset">
-
-                            Reset
-
-                        </button>
-
+                    <div class="d-flex flex-wrap align-items-center gap-2 mt-3">
+                        <button type="submit" class="btn-notification-filter">Terapkan Filter</button>
+                        <a href="{{ route('dashboard-user.notification.index') }}" class="btn-notification-reset d-inline-flex align-items-center">Reset</a>
                     </div>
-
-
-
-                    <!-- QUICK PERIOD -->
-
-                    <div class="notification-period">
-
-                        <span class="notification-period-label">
-
-                            Periode cepat:
-
-                        </span>
-
-
-                        <a href="javascript:;"
-                            class="notification-period-btn">
-
-                            Hari Ini
-
-                        </a>
-
-
-                        <a href="javascript:;"
-                            class="notification-period-btn active">
-
-                            7 Hari
-
-                        </a>
-
-
-                        <a href="javascript:;"
-                            class="notification-period-btn">
-
-                            30 Hari
-
-                        </a>
-
-
-                        <a href="javascript:;"
-                            class="notification-period-btn">
-
-                            Bulan Ini
-
-                        </a>
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- =================================================
-                     LIST HEADER
-                ================================================== -->
+                </form>
 
                 <div class="notification-list-header">
-
-                    <div class="notification-list-title">
-
-                        Notifikasi
-
-                    </div>
-
-
-                    <a href="javascript:;"
-                        class="notification-mark-all">
-
-                        Tandai semua dibaca
-
-                    </a>
-
+                    <div class="notification-list-title">Notifikasi</div>
+                    @if ($unreadCount > 0)
+                        <form method="POST" action="{{ route('dashboard-user.notification.mark-all') }}">
+                            @csrf
+                            <button type="submit" class="notification-mark-all border-0 bg-transparent">Tandai semua dibaca</button>
+                        </form>
+                    @endif
                 </div>
-
-
-
-                <!-- =================================================
-                     NOTIFICATION LIST
-                ================================================== -->
 
                 <div>
-
-
-                    <!-- =================================================
-                         ITEM 1
-                    ================================================== -->
-
-                    <a href="javascript:;"
-                        class="notification-item unread">
-
-
-                        <div class="notification-item-icon warning">
-
-                            <i class="ki-duotone ki-briefcase">
-
-                                <span class="path1"></span>
-                                <span class="path2"></span>
-
-                            </i>
-
-                        </div>
-
-
-                        <div class="notification-item-content">
-
-
-                            <div class="notification-item-top">
-
-                                <div class="notification-item-title">
-
-                                    Lowongan baru tersedia
-
+                    @forelse ($notifications as $notification)
+                        <article class="notification-item {{ $notification->is_read ? '' : 'unread' }}">
+                            <div class="notification-item-content">
+                                <div class="notification-item-top">
+                                    <h3 class="notification-item-title">{{ $notification->title }}</h3>
+                                    <time class="notification-item-date" datetime="{{ $notification->created_at->toIso8601String() }}">
+                                        {{ $notification->created_at->format('d M Y H:i') }}
+                                    </time>
                                 </div>
-
-                                <div class="notification-item-date">
-
-                                    20 Sep 2026
-
+                                @if ($notification->description)
+                                    <p class="notification-item-description">{{ $notification->description }}</p>
+                                @endif
+                                <div class="notification-item-footer">
+                                    <span class="notification-category">{{ $notification->type ? ucfirst($notification->type) : 'Notifikasi' }}</span>
+                                    @if (! $notification->is_read)
+                                        <form method="POST" action="{{ route('dashboard-user.notification.mark-read', $notification->uuid) }}">
+                                            @csrf
+                                            <button type="submit" class="notification-mark-all border-0 bg-transparent">Tandai dibaca</button>
+                                        </form>
+                                    @else
+                                        <span class="notification-item-time">Dibaca</span>
+                                    @endif
                                 </div>
-
                             </div>
-
-
-                            <div class="notification-item-description">
-
-                                Terdapat lowongan Satpam baru yang
-                                sesuai dengan profil dan kualifikasi
-                                Anda.
-
-                            </div>
-
-
-                            <div class="notification-item-footer">
-
-                                <span class="notification-category warning">
-
-                                    Lowongan
-
-                                </span>
-
-                                <span class="notification-item-time">
-
-                                    5 menit lalu
-
-                                </span>
-
-                            </div>
-
-                        </div>
-
-
-                        <span class="notification-unread-dot"></span>
-
-                    </a>
-
-
-
-                    <!-- =================================================
-                         ITEM 2
-                    ================================================== -->
-
-                    <a href="javascript:;"
-                        class="notification-item unread">
-
-
-                        <div class="notification-item-icon danger">
-
-                            <i class="ki-duotone ki-information-5">
-
-                                <span class="path1"></span>
-                                <span class="path2"></span>
-
-                            </i>
-
-                        </div>
-
-
-                        <div class="notification-item-content">
-
-
-                            <div class="notification-item-top">
-
-                                <div class="notification-item-title">
-
-                                    Sertifikat akan segera berakhir
-
-                                </div>
-
-                                <div class="notification-item-date">
-
-                                    20 Sep 2026
-
-                                </div>
-
-                            </div>
-
-
-                            <div class="notification-item-description">
-
-                                Sertifikat Gada Pratama Anda akan
-                                berakhir dalam 30 hari. Segera lakukan
-                                perpanjangan jika diperlukan.
-
-                            </div>
-
-
-                            <div class="notification-item-footer">
-
-                                <span class="notification-category danger">
-
-                                    Sistem
-
-                                </span>
-
-                                <span class="notification-item-time">
-
-                                    2 jam lalu
-
-                                </span>
-
-                            </div>
-
-                        </div>
-
-
-                        <span class="notification-unread-dot"></span>
-
-                    </a>
-
-
-
-                    <!-- =================================================
-                         ITEM 3
-                    ================================================== -->
-
-                    <a href="javascript:;"
-                        class="notification-item unread">
-
-
-                        <div class="notification-item-icon purple">
-
-                            <i class="ki-duotone ki-book-open">
-
-                                <span class="path1"></span>
-                                <span class="path2"></span>
-
-                            </i>
-
-                        </div>
-
-
-                        <div class="notification-item-content">
-
-
-                            <div class="notification-item-top">
-
-                                <div class="notification-item-title">
-
-                                    Pelatihan K3 Dasar akan dimulai
-
-                                </div>
-
-                                <div class="notification-item-date">
-
-                                    19 Sep 2026
-
-                                </div>
-
-                            </div>
-
-
-                            <div class="notification-item-description">
-
-                                Pelatihan K3 Dasar - LSP Sekuriti
-                                akan dimulai dalam 3 hari. Anda
-                                terdaftar sebagai peserta.
-
-                            </div>
-
-
-                            <div class="notification-item-footer">
-
-                                <span class="notification-category info">
-
-                                    Pelatihan
-
-                                </span>
-
-                                <span class="notification-item-time">
-
-                                    5 jam lalu
-
-                                </span>
-
-                            </div>
-
-                        </div>
-
-
-                        <span class="notification-unread-dot"></span>
-
-                    </a>
-
-
-
-                    <!-- =================================================
-                         ITEM 4
-                    ================================================== -->
-
-                    <a href="javascript:;"
-                        class="notification-item">
-
-
-                        <div class="notification-item-icon success">
-
-                            <i class="ki-duotone ki-user-tick">
-
-                                <span class="path1"></span>
-                                <span class="path2"></span>
-
-                            </i>
-
-                        </div>
-
-
-                        <div class="notification-item-content">
-
-
-                            <div class="notification-item-top">
-
-                                <div class="notification-item-title">
-
-                                    Permintaan koneksi diterima
-
-                                </div>
-
-                                <div class="notification-item-date">
-
-                                    19 Sep 2026
-
-                                </div>
-
-                            </div>
-
-
-                            <div class="notification-item-description">
-
-                                Irwan Prasetyo menerima permintaan
-                                koneksi Anda.
-
-                            </div>
-
-
-                            <div class="notification-item-footer">
-
-                                <span class="notification-category success">
-
-                                    Jejaring
-
-                                </span>
-
-                                <span class="notification-item-time">
-
-                                    1 hari lalu
-
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                    </a>
-
-
-
-                    <!-- =================================================
-                         ITEM 5
-                    ================================================== -->
-
-                    <a href="javascript:;"
-                        class="notification-item">
-
-
-                        <div class="notification-item-icon warning">
-
-                            <i class="ki-duotone ki-bookmark">
-
-                                <span class="path1"></span>
-                                <span class="path2"></span>
-
-                            </i>
-
-                        </div>
-
-
-                        <div class="notification-item-content">
-
-
-                            <div class="notification-item-top">
-
-                                <div class="notification-item-title">
-
-                                    Lowongan disimpan
-
-                                </div>
-
-                                <div class="notification-item-date">
-
-                                    18 Sep 2026
-
-                                </div>
-
-                            </div>
-
-
-                            <div class="notification-item-description">
-
-                                Lowongan Security Officer di PT ABC
-                                berhasil ditambahkan ke daftar
-                                lowongan tersimpan.
-
-                            </div>
-
-
-                            <div class="notification-item-footer">
-
-                                <span class="notification-category warning">
-
-                                    Lowongan
-
-                                </span>
-
-                                <span class="notification-item-time">
-
-                                    2 hari lalu
-
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                    </a>
-
-
-
-                    <!-- =================================================
-                         ITEM 6
-                    ================================================== -->
-
-                    <a href="javascript:;"
-                        class="notification-item">
-
-
-                        <div class="notification-item-icon info">
-
-                            <i class="ki-duotone ki-check-circle">
-
-                                <span class="path1"></span>
-                                <span class="path2"></span>
-
-                            </i>
-
-                        </div>
-
-
-                        <div class="notification-item-content">
-
-
-                            <div class="notification-item-top">
-
-                                <div class="notification-item-title">
-
-                                    Profil berhasil diperbarui
-
-                                </div>
-
-                                <div class="notification-item-date">
-
-                                    17 Sep 2026
-
-                                </div>
-
-                            </div>
-
-
-                            <div class="notification-item-description">
-
-                                Data profil Anda berhasil diperbarui
-                                dan tersimpan di sistem.
-
-                            </div>
-
-
-                            <div class="notification-item-footer">
-
-                                <span class="notification-category info">
-
-                                    Sistem
-
-                                </span>
-
-                                <span class="notification-item-time">
-
-                                    3 hari lalu
-
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                    </a>
-
-
+                            @if (! $notification->is_read)
+                                <span class="notification-unread-dot" aria-label="Belum dibaca"></span>
+                            @endif
+                        </article>
+                    @empty
+                        <p class="notification-empty p-4 mb-0" role="status">Belum ada notifikasi.</p>
+                    @endforelse
                 </div>
 
-
-
-                <!-- =================================================
-                     PAGINATION
-                ================================================== -->
-
-                <div class="notification-pagination">
-
-
-                    <div class="notification-pagination-info">
-
-                        Menampilkan 1 - 6 dari 24 notifikasi
-
+                @if ($notifications->hasPages())
+                    <div class="notification-pagination">
+                        {{ $notifications->appends(request()->query())->links() }}
                     </div>
-
-
-                    <div class="notification-pagination-links">
-
-                        <a href="javascript:;"
-                            class="notification-pagination-link">
-
-                            <i class="ki-duotone ki-left fs-8">
-
-                                <span class="path1"></span>
-                                <span class="path2"></span>
-
-                            </i>
-
-                        </a>
-
-
-                        <a href="javascript:;"
-                            class="notification-pagination-link active">
-
-                            1
-
-                        </a>
-
-
-                        <a href="javascript:;"
-                            class="notification-pagination-link">
-
-                            2
-
-                        </a>
-
-
-                        <a href="javascript:;"
-                            class="notification-pagination-link">
-
-                            3
-
-                        </a>
-
-
-                        <a href="javascript:;"
-                            class="notification-pagination-link">
-
-                            4
-
-                        </a>
-
-
-                        <a href="javascript:;"
-                            class="notification-pagination-link">
-
-                            <i class="ki-duotone ki-right fs-8">
-
-                                <span class="path1"></span>
-                                <span class="path2"></span>
-
-                            </i>
-
-                        </a>
-
-                    </div>
-
-                </div>
-
-
+                @endif
             </div>
-
-
         </div>
-
-
-        <!-- =================================================
-             RIGHT SIDE
-        ================================================== -->
-
-        <div class="col-xl-3">
-
-
-            {{-- <div class="quick-card"
-                style="
-                    background:#11192d;
-                    border-radius:18px;
-                    border:1px solid rgba(255,255,255,.06);
-                ">
-
-
-                <div style="
-                    padding:16px;
-                    border-bottom:1px solid rgba(255,255,255,.05);
-                ">
-
-                    <div style="
-                        color:#fff;
-                        font-size:13px;
-                        font-weight:700;
-                    ">
-
-                        Ringkasan
-
-                    </div>
-
-                    <div style="
-                        color:#8796b5;
-                        font-size:10px;
-                        margin-top:3px;
-                    ">
-
-                        Status notifikasi Anda
-
-                    </div>
-
-                </div>
-
-
-                <div style="padding:10px;">
-
-
-                    <div class="quick-item">
-
-                        <span>
-
-                            Belum dibaca
-
-                        </span>
-
-                        <strong style="
-                            color:#f7b003;
-                            font-size:13px;
-                        ">
-
-                            3
-
-                        </strong>
-
-                    </div>
-
-
-                    <div class="quick-item">
-
-                        <span>
-
-                            7 Hari Terakhir
-
-                        </span>
-
-                        <strong style="
-                            color:#fff;
-                            font-size:13px;
-                        ">
-
-                            8
-
-                        </strong>
-
-                    </div>
-
-
-                    <div class="quick-item">
-
-                        <span>
-
-                            Bulan Ini
-
-                        </span>
-
-                        <strong style="
-                            color:#fff;
-                            font-size:13px;
-                        ">
-
-                            24
-
-                        </strong>
-
-                    </div>
-
-
-                </div>
-
-            </div> --}}
-
-
-        </div>
-
     </div>
-
 @endsection
 
-
-@section('js')
-
-<script>
-
-    $(document).ready(function () {
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | QUICK PERIOD
-        |--------------------------------------------------------------------------
-        */
-
-        $('.notification-period-btn').on('click', function (e) {
-
-            e.preventDefault();
-
-            $('.notification-period-btn')
-                .removeClass('active');
-
-            $(this)
-                .addClass('active');
-
-        });
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | RESET FILTER
-        |--------------------------------------------------------------------------
-        */
-
-        $('.btn-notification-reset').on('click', function () {
-
-            $('.notification-filter-input').val('');
-
-            $('.notification-filter-select')
-                .val('');
-
-            $('.notification-period-btn')
-                .removeClass('active');
-
-        });
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | MARK ALL READ
-        |--------------------------------------------------------------------------
-        */
-
-        $('.notification-mark-all').on('click', function (e) {
-
-            e.preventDefault();
-
-            $('.notification-item')
-                .removeClass('unread');
-
-            $('.notification-unread-dot')
-                .remove();
-
-        });
-
-    });
-
-</script>
-
-@endsection

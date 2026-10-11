@@ -8,6 +8,7 @@ use App\Http\Resources\Api\TrainingParticipantResource;
 use App\Models\Training;
 use App\Models\TrainingApplication;
 use Illuminate\Database\Eloquent\Builder;
+use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
@@ -121,7 +122,7 @@ class OwnedTrainingParticipantController extends OwnedOrganizationController
                 ->where('status', 'approved')
                 ->count();
             $training->update(['registered' => (string) $approvedCount]);
-            $application->load('security.user_security.user');
+            $application->load(['security.user_security.user', 'cleaning_service.user_cleaning_service.user']);
 
             return ['application' => $application];
         });
@@ -135,6 +136,16 @@ class OwnedTrainingParticipantController extends OwnedOrganizationController
 
         /** @var TrainingApplication $application */
         $application = $result['application'];
+
+        $participant = $application->security?->user_security?->user ?? $application->cleaning_service?->user_cleaning_service?->user;
+
+        if ($participant) {
+            app(NotificationService::class)->send($participant->id, 'training_application_status_changed', [
+                'training' => $training->title,
+                'status' => NotificationService::TRAINING_STATUS_LABELS[$status],
+            ]);
+        }
+
 
         return response()->json([
             'status' => true,

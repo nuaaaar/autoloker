@@ -13,6 +13,7 @@ use App\Models\Training;
 use App\Models\Security;
 
 use App\Models\CleaningService;
+use App\Services\NotificationService;
 
 use Auth;
 
@@ -201,6 +202,15 @@ class TrainingApplicationController extends Controller
             'training_id' => $training->id,
             'status' => 'pending',
         ]);
+
+        $owner = $training->company?->userCompany?->user ?? $training->bujp?->userBujp?->user;
+
+        if ($owner) {
+            app(NotificationService::class)->send($owner->id, 'training_application_created', [
+                'training' => $training->title,
+                'participant' => Auth::user()->name,
+            ]);
+        }
 
         return response()->json([
             'success' => true,

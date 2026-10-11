@@ -8,6 +8,7 @@ use App\Http\Resources\Api\JobVacancyResource;
 use App\Models\JobApplication;
 use App\Models\JobVacancy;
 use App\Services\Api\ApplicantProfileResolver;
+use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -141,6 +142,7 @@ class JobApplicationController extends Controller
                 'application' => JobApplication::create([
                     $column => $profileId,
                     'job_vacancy_id' => $vacancy->id,
+                    'status' => 'applied',
                 ]),
             ];
         });
@@ -154,6 +156,16 @@ class JobApplicationController extends Controller
 
         /** @var JobApplication $application */
         $application = $result['application'];
+
+        $owner = $vacancy->company?->userCompany?->user ?? $vacancy->bujp?->userBujp?->user;
+
+        if ($owner) {
+            app(NotificationService::class)->send($owner->id, 'job_application_created', [
+                'position' => $vacancy->position,
+                'applicant' => $request->user()->name,
+            ]);
+        }
+
 
         return response()->json([
             'status' => true,

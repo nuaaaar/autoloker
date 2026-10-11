@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\JobApplicationController;
 use App\Http\Controllers\Api\JobVacancyController;
 use App\Http\Controllers\Api\LoginController;
 use App\Http\Controllers\Api\LogoutController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\MeController;
 use App\Http\Controllers\Api\OwnedJobApplicantController;
 use App\Http\Controllers\Api\OwnedJobVacancyController;
@@ -65,6 +66,10 @@ Route::middleware('api.token')->group(function () {
     Route::get('/user-subscriptions/active', [UserSubscriptionController::class, 'active'])->name('api.user-subscriptions.active');
     Route::post('/device-tokens', [DeviceTokenController::class, 'store'])->name('api.device-tokens.store');
     Route::post('/device-tokens/unregister', [DeviceTokenController::class, 'unregister'])->name('api.device-tokens.unregister');
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('api.notifications.index');
+    Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount'])->name('api.notifications.unread-count');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('api.notifications.read-all');
+    Route::post('/notifications/{uuid}/read', [NotificationController::class, 'markRead'])->name('api.notifications.read');
     Route::post('/logout', LogoutController::class)->name('api.logout');
     Route::apiResource('security-histories', SecurityHistoryController::class)
         ->parameters(['security-histories' => 'uuid'])

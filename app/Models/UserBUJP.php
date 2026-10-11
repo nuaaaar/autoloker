@@ -17,6 +17,11 @@ class UserBUJP extends Model
         return $this->hasOne('App\Models\BUJP');
     }
 
+    public function user()
+    {
+        return $this->belongsTo('App\Models\User');
+    }
+
     public static function boot() {
         parent::boot();
     

@@ -1780,6 +1780,104 @@ paths:
                 $ref: '#/components/schemas/ActiveUserSubscriptionResponse'
         '401':
           $ref: '#/components/responses/Unauthenticated'
+  /api/notifications:
+    get:
+      summary: List the authenticated user's notification history
+      description: Returns only the caller's notifications, newest first. Optional filters are `is_read`, `type`, `date_from`, and `date_to`; results use ten notifications per page.
+      operationId: listNotifications
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: is_read
+          in: query
+          schema:
+            type: boolean
+        - name: type
+          in: query
+          schema:
+            type: string
+        - name: date_from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: date_to
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Paginated notification history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationHistoryResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /api/notifications/unread-count:
+    get:
+      summary: Get the authenticated user's unread notification count
+      operationId: getNotificationUnreadCount
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Unread notification count
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationUnreadCountResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+  /api/notifications/read-all:
+    post:
+      summary: Mark all of the authenticated user's notifications as read
+      operationId: markAllNotificationsRead
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Notifications marked as read
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+  /api/notifications/{uuid}/read:
+    post:
+      summary: Mark one of the authenticated user's notifications as read
+      operationId: markNotificationRead
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Notification marked as read
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          description: Notification not found for the authenticated user
+        '422':
+          $ref: '#/components/responses/ValidationError'
   /api/device-tokens:
     post:
       summary: Register an FCM device token for the authenticated account
@@ -1793,10 +1891,12 @@ paths:
         new account. Accounts may hold several tokens at once, one per device.
 
         `fcm_token` is treated as an opaque string and is stored verbatim, without trimming or
-        normalization. Neither the token nor its digest is ever returned by the API. This operation
-        only enrolls a device token; it does not send push notifications, and the client must call
-        `POST /api/device-tokens/unregister` before logging out, as well as for the previous token
-        when the Firebase SDK rotates it.
+        normalization. Neither the token nor its digest is ever returned by the API. Register
+        `platform` as `mobile` or `web` so the matching channel's enabled flag controls push delivery.
+        Omitting `platform` defaults to `mobile`. Registered tokens receive FCM push messages when
+        the associated master notification has push enabled. The client must call
+        `POST /api/device-tokens/unregister` before logging out and for a previous token when the
+        Firebase SDK rotates it.
       operationId: registerDeviceToken
       security:
         - bearerAuth: []
@@ -1808,6 +1908,7 @@ paths:
               $ref: '#/components/schemas/DeviceTokenRequest'
             example:
               fcm_token: dGhpc19pc19hbl9leGFtcGxlX2RldmljZV90b2tlbg
+              platform: mobile
       responses:
         '200':
           description: Device token registered or transferred to the authenticated account
@@ -6127,6 +6228,54 @@ components:
         can_access_protected_features:
           type: boolean
 
+    NotificationHistoryResponse:
+      type: object
+      required: [status, message, data]
+      properties:
+        status: {type: boolean, example: true}
+        message: {type: string}
+        data:
+          type: object
+          required: [notifications, pagination]
+          properties:
+            notifications:
+              type: array
+              items: {$ref: '#/components/schemas/Notification'}
+            pagination:
+              type: object
+              required: [current_page, last_page, per_page, total, from, to]
+              properties:
+                current_page: {type: integer}
+                last_page: {type: integer}
+                per_page: {type: integer}
+                total: {type: integer}
+                from: {type: [integer, 'null']}
+                to: {type: [integer, 'null']}
+
+    Notification:
+      type: object
+      required: [uuid, title, description, url, type, is_read, read_at, created_at]
+      properties:
+        uuid: {type: string, format: uuid}
+        title: {type: string}
+        description: {type: [string, 'null']}
+        url: {type: [string, 'null']}
+        type: {type: [string, 'null']}
+        is_read: {type: boolean}
+        read_at: {type: [string, 'null'], format: date-time}
+        created_at: {type: string, format: date-time}
+
+    NotificationUnreadCountResponse:
+      type: object
+      required: [status, message, data]
+      properties:
+        status: {type: boolean, example: true}
+        message: {type: string}
+        data:
+          type: object
+          required: [unread_count]
+          properties:
+            unread_count: {type: integer, minimum: 0}
     DeviceTokenRequest:
       type: object
       required: [fcm_token]
@@ -6138,6 +6287,10 @@ components:
           description: >-
             Opaque Firebase Cloud Messaging registration token read from the device's Firebase SDK.
             Stored verbatim and never returned by the API.
+        platform:
+          type: string
+          enum: [mobile, web]
+          default: mobile
 
     MessageResponse:
       type: object

@@ -55,6 +55,49 @@ class DeviceTokenTest extends TestCase
         $this->assertSame(1, UserDeviceToken::where('user_id', $user->id)->count());
     }
 
+    public function test_registration_without_platform_defaults_to_mobile(): void
+    {
+        $user = $this->account('platform-default@example.com');
+
+        $this->withToken($this->accessToken($user))
+            ->postJson('/api/device-tokens', ['fcm_token' => 'test-token-a'])
+            ->assertOk()
+            ->assertJsonPath('message', self::REGISTERED_MESSAGE);
+
+        $stored = UserDeviceToken::sole();
+
+        $this->assertSame($user->id, $stored->user_id);
+        $this->assertSame('mobile', $stored->platform);
+    }
+
+    public function test_registration_stores_the_web_platform(): void
+    {
+        $user = $this->account('platform-web@example.com');
+
+        $this->withToken($this->accessToken($user))
+            ->postJson('/api/device-tokens', ['fcm_token' => 'test-token-a', 'platform' => 'web'])
+            ->assertOk()
+            ->assertJsonPath('message', self::REGISTERED_MESSAGE);
+
+        $stored = UserDeviceToken::sole();
+
+        $this->assertSame($user->id, $stored->user_id);
+        $this->assertSame('web', $stored->platform);
+    }
+
+    public function test_invalid_platform_value_is_rejected_without_writes(): void
+    {
+        $user = $this->account('platform-invalid@example.com');
+
+        $this->withToken($this->accessToken($user))
+            ->postJson('/api/device-tokens', ['fcm_token' => 'test-token-a', 'platform' => 'desktop'])
+            ->assertStatus(422)
+            ->assertJsonPath('status', false);
+
+        $this->assertSame(0, UserDeviceToken::where('user_id', $user->id)->count());
+    }
+
+
     public function test_same_token_registered_by_a_second_account_transfers_ownership(): void
     {
         $first = $this->account('first@example.com');

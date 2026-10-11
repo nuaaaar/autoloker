@@ -12,6 +12,11 @@ class Company extends Model
 
     protected $guarded = ['id'];
 
+    public function userCompany()
+    {
+        return $this->belongsTo('App\Models\UserCompany', 'user_company_id');
+    }
+
     public function profileProgress()
     {
         $fields = [

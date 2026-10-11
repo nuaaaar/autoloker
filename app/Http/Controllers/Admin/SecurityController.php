@@ -10,6 +10,7 @@ use App\Http\Resources\MasterResource;
 use App\Models\UserSecurity;
 use App\Models\UserCleaningService;
 use App\Models\User;
+use App\Services\NotificationService;
 
 class SecurityController extends Controller
 {
@@ -153,6 +154,10 @@ class SecurityController extends Controller
 
         $security->user_security->user->update([
             'status' => $request->status
+        ]);
+
+        app(NotificationService::class)->send($security->user_security->user->id, 'security_status_changed', [
+            'status' => $request->status === 'active' ? 'aktif' : 'nonaktif',
         ]);
 
         return response()->json([

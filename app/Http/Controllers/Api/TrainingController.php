@@ -8,6 +8,7 @@ use App\Http\Resources\Api\TrainingResource;
 use App\Models\Training;
 use App\Models\TrainingApplication;
 use App\Services\Api\ApplicantProfileResolver;
+use App\Services\NotificationService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -178,6 +179,16 @@ class TrainingController extends Controller
 
         /** @var TrainingApplication $application */
         $application = $result['application'];
+
+        $owner = $training->company?->userCompany?->user ?? $training->bujp?->userBujp?->user;
+
+        if ($owner) {
+            app(NotificationService::class)->send($owner->id, 'training_application_created', [
+                'training' => $training->title,
+                'participant' => $request->user()->name,
+            ]);
+        }
+
 
         return response()->json([
             'status' => true,

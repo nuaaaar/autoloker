@@ -13,6 +13,7 @@ use App\Models\TrainingApplication;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\Training;
+use App\Services\NotificationService;
 use Carbon\Carbon;
 use Auth;
 
@@ -1920,6 +1921,8 @@ class TrainingController extends Controller
 
             DB::commit();
 
+            $this->notifyParticipant($application, $training, 'approved');
+
 
             return response()->json([
 
@@ -2034,6 +2037,8 @@ class TrainingController extends Controller
 
 
             DB::commit();
+
+            $this->notifyParticipant($application, $training, 'rejected');
 
 
             return response()->json([
@@ -2159,6 +2164,8 @@ class TrainingController extends Controller
 
             DB::commit();
 
+            $this->notifyParticipant($application, $training, 'pending');
+
 
             return response()->json([
 
@@ -2252,5 +2259,22 @@ class TrainingController extends Controller
             403,
             'Anda tidak memiliki akses ke pelatihan ini.'
         );
+    }
+
+    private function notifyParticipant($application, $training, $status)
+    {
+        $application->load([
+            'security.user_security.user',
+            'cleaning_service.user_cleaning_service.user',
+        ]);
+
+        $participant = $application->security?->user_security?->user ?? $application->cleaning_service?->user_cleaning_service?->user;
+
+        if ($participant) {
+            app(NotificationService::class)->send($participant->id, 'training_application_status_changed', [
+                'training' => $training->title,
+                'status' => NotificationService::TRAINING_STATUS_LABELS[$status],
+            ]);
+        }
     }
 }
