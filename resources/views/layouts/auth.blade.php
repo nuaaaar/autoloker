@@ -634,7 +634,8 @@
                 </div>
             `;
 
-            const dz = new Dropzone("#uploadContainer", {
+            const dz = document.querySelector("#uploadContainer")
+                ? new Dropzone("#uploadContainer", {
 
                 url: "#",
 
@@ -706,9 +707,11 @@
 
                 }
 
-            });
+            }) : null;
 
             $(document).on("click", ".remove-file", function () {
+
+                if (!dz) return;
 
                 uploadedFile = null;
 
@@ -717,7 +720,6 @@
                 $("#uploadContainer").html(defaultDropzone);
 
             });
-
             $(document).on('click', '#btnLink', function () {
 
                 $('#uploadContainer').hide();
