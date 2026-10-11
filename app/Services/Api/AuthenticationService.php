@@ -9,7 +9,10 @@ use Illuminate\Validation\ValidationException;
 
 class AuthenticationService
 {
-    public function __construct(private readonly TokenService $tokens) {}
+    public function __construct(
+        private readonly TokenService $tokens,
+        private readonly RoleSwitchService $roles,
+    ) {}
 
     public function login(array $data): array
     {
@@ -39,7 +42,14 @@ class AuthenticationService
             default => $data['role'],
         };
         if ($user->role !== $expectedRole) {
-            throw ValidationException::withMessages(['role' => 'Peran akun tidak sesuai.']);
+            $workerAccount = in_array($user->role, ['satpam', 'cs'], true);
+            $workerTarget = in_array($data['role'], RoleSwitchService::ROLES, true);
+
+            if (! ($workerAccount && $workerTarget)) {
+                throw ValidationException::withMessages(['role' => 'Peran akun tidak sesuai.']);
+            }
+
+            $this->roles->switch($user, $data['role']);
         }
 
         return [

@@ -5343,7 +5343,11 @@ components:
         role:
           type: string
           enum: [security, cs, company]
-          description: security maps to the stored satpam role.
+          description: >-
+            security maps to the stored satpam role. Worker accounts (stored satpam or cs) may log in
+            with either security or cs; the account role is switched to the requested one and the
+            matching profile is created when missing. Company accounts must send company; any other
+            value is rejected with a role mismatch error.
         identifier:
           type: string
           maxLength: 150
