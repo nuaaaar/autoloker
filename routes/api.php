@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\ChangePasswordController;
 use App\Http\Controllers\Api\ChangeRoleController;
 use App\Http\Controllers\Api\CleaningServiceCertificateController;
 use App\Http\Controllers\Api\CleaningServiceHistoryController;
+use App\Http\Controllers\Api\DeviceTokenController;
 use App\Http\Controllers\Api\JobApplicationController;
 use App\Http\Controllers\Api\JobVacancyController;
 use App\Http\Controllers\Api\LoginController;
@@ -62,6 +63,8 @@ Route::middleware('api.token')->group(function () {
     Route::post('/user-order-manuals/{uuid}/cancel', [UserOrderManualController::class, 'cancel'])->name('api.user-order-manuals.cancel');
     Route::post('/user-order-manuals/{uuid}/upload-proof', [UserOrderManualController::class, 'uploadProof'])->name('api.user-order-manuals.upload-proof');
     Route::get('/user-subscriptions/active', [UserSubscriptionController::class, 'active'])->name('api.user-subscriptions.active');
+    Route::post('/device-tokens', [DeviceTokenController::class, 'store'])->name('api.device-tokens.store');
+    Route::post('/device-tokens/unregister', [DeviceTokenController::class, 'unregister'])->name('api.device-tokens.unregister');
     Route::post('/logout', LogoutController::class)->name('api.logout');
     Route::apiResource('security-histories', SecurityHistoryController::class)
         ->parameters(['security-histories' => 'uuid'])

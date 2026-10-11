@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Autoloker API
   version: 1.0.0
-  description: API documentation for mobile authentication, profile editing, security work history CRUD, security certificate CRUD, public job vacancy and training listings, company- and company-owned job vacancy and training management, job vacancy and training applications, paginated vacancy, published training, registered training listings, owned application status follow-up, active subscription plans, manual subscription order payments and proof uploads, bank references, and hierarchical location references.
+  description: API documentation for mobile authentication, profile editing, security work history CRUD, security certificate CRUD, public job vacancy and training listings, company- and company-owned job vacancy and training management, job vacancy and training applications, paginated vacancy, published training, registered training listings, owned application status follow-up, active subscription plans, manual subscription order payments and proof uploads, bank references, hierarchical location references, and FCM device token enrollment and removal.
   license:
     name: Proprietary
 
@@ -1780,6 +1780,81 @@ paths:
                 $ref: '#/components/schemas/ActiveUserSubscriptionResponse'
         '401':
           $ref: '#/components/responses/Unauthenticated'
+  /api/device-tokens:
+    post:
+      summary: Register an FCM device token for the authenticated account
+      description: |
+        Stores the Firebase Cloud Messaging registration token of the device the client is running
+        on, so notifications can later be addressed to that device. A token is registered once per
+        account and device, so re-registering the same `fcm_token` is idempotent and refreshes its
+        stored value instead of creating another row. Ownership of a token is global: if the same
+        token is registered by a different account, the existing registration is transferred to that
+        account instead of being duplicated, which is what happens when a device is signed in to a
+        new account. Accounts may hold several tokens at once, one per device.
+
+        `fcm_token` is treated as an opaque string and is stored verbatim, without trimming or
+        normalization. Neither the token nor its digest is ever returned by the API. This operation
+        only enrolls a device token; it does not send push notifications, and the client must call
+        `POST /api/device-tokens/unregister` before logging out, as well as for the previous token
+        when the Firebase SDK rotates it.
+      operationId: registerDeviceToken
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceTokenRequest'
+            example:
+              fcm_token: dGhpc19pc19hbl9leGFtcGxlX2RldmljZV90b2tlbg
+      responses:
+        '200':
+          description: Device token registered or transferred to the authenticated account
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /api/device-tokens/unregister:
+    post:
+      summary: Remove an FCM device token from the authenticated account
+      description: |
+        Deletes the stored registration for the given `fcm_token` when it belongs to the
+        authenticated account. Removal is scoped to the caller: a token registered by another
+        account is left untouched. Unregistering a token that is not registered, or that belongs to
+        someone else, is a successful no-op, so clients can call this idempotently while
+        authenticated and immediately before logging out, and when the Firebase SDK rotates the
+        token. Unregistering affects only the device it names; other devices of the same account keep
+        receiving notifications. This operation only removes an enrollment; it does not send push
+        notifications.
+      operationId: unregisterDeviceToken
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceTokenRequest'
+            example:
+              fcm_token: dGhpc19pc19hbl9leGFtcGxlX2RldmljZV90b2tlbg
+      responses:
+        '200':
+          description: Device token removed, or already absent for the authenticated account
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
   /api/user-order-manuals:
     get:
       summary: List the authenticated user's manual subscription orders
@@ -6047,6 +6122,18 @@ components:
           type: boolean
         can_access_protected_features:
           type: boolean
+
+    DeviceTokenRequest:
+      type: object
+      required: [fcm_token]
+      properties:
+        fcm_token:
+          type: string
+          minLength: 1
+          maxLength: 4096
+          description: >-
+            Opaque Firebase Cloud Messaging registration token read from the device's Firebase SDK.
+            Stored verbatim and never returned by the API.
 
     MessageResponse:
       type: object

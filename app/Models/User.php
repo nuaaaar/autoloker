@@ -50,6 +50,11 @@ class User extends Authenticatable
         return $this->hasOne('App\Models\UserBUJP');
     }
 
+    public function user_device_tokens()
+    {
+        return $this->hasMany('App\Models\UserDeviceToken');
+    }
+
     public static function boot()
     {
         parent::boot();
