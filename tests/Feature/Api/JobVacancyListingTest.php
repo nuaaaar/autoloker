@@ -128,6 +128,29 @@ class JobVacancyListingTest extends TestCase
             ->assertJsonPath('data.job_vacancies.1.is_appled', false);
     }
 
+    public function test_applicant_can_read_only_its_applied_vacancy_detail(): void
+    {
+        [$user, $security] = $this->securityAccount('vacancy-detail@example.com');
+        $vacancy = JobVacancy::create($this->vacancyAttributes());
+        JobApplication::create(['security_id' => $security->id, 'job_vacancy_id' => $vacancy->id, 'status' => 'pending']);
+        $token = app(TokenService::class)->issue($user)['access_token'];
+
+        $this->withToken($token)
+            ->getJson("/api/job-vacancies/{$vacancy->uuid}")
+            ->assertOk()
+            ->assertJsonPath('status', true)
+            ->assertJsonPath('data.job_vacancy.uuid', (string) $vacancy->uuid)
+            ->assertJsonPath('data.job_vacancy.is_applied', true)
+            ->assertJsonPath('data.job_vacancy.application_status', 'pending');
+
+        $otherToken = app(TokenService::class)->issue($this->securityAccount('unrelated-vacancy@example.com')[0])['access_token'];
+        $this->withToken($otherToken)
+            ->getJson("/api/job-vacancies/{$vacancy->uuid}")
+            ->assertNotFound()
+            ->assertJsonPath('status', false)
+            ->assertJsonMissingPath('data.job_vacancy');
+    }
+
     /** @return array{0: User, 1: Security} */
     private function securityAccount(string $email): array
     {

@@ -138,6 +138,34 @@ class TrainingApplicationTest extends TestCase
         $this->assertDatabaseMissing('training_applications', ['id' => $application->id]);
     }
 
+    public function test_applicant_can_read_only_its_applied_training_detail(): void
+    {
+        [$user, $security] = $this->securityAccount('training-detail@example.com');
+        $training = Training::create($this->trainingAttributes());
+        $application = TrainingApplication::create([
+            'security_id' => $security->id,
+            'training_id' => $training->id,
+            'status' => 'pending',
+        ]);
+        $token = app(TokenService::class)->issue($user)['access_token'];
+
+        $this->withToken($token)
+            ->getJson("/api/trainings/{$training->uuid}")
+            ->assertOk()
+            ->assertJsonPath('status', true)
+            ->assertJsonPath('data.training.uuid', (string) $training->uuid)
+            ->assertJsonPath('data.training.application_uuid', (string) $application->uuid)
+            ->assertJsonPath('data.training.application_status', 'pending');
+
+        [$otherUser] = $this->securityAccount('unrelated-training@example.com');
+        $otherToken = app(TokenService::class)->issue($otherUser)['access_token'];
+        $this->withToken($otherToken)
+            ->getJson("/api/trainings/{$training->uuid}")
+            ->assertNotFound()
+            ->assertJsonPath('status', false)
+            ->assertJsonMissingPath('data.training');
+    }
+
     /** @return array{0: User, 1: Security} */
     private function securityAccount(string $email): array
     {

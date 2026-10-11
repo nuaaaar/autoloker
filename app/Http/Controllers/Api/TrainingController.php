@@ -83,6 +83,70 @@ class TrainingController extends Controller
         ]);
     }
 
+    public function show(Request $request, string $uuid): JsonResponse
+    {
+        $user = $request->user();
+        $application = null;
+        $query = Training::query()->where('uuid', $uuid);
+
+        if ($user->role === 'company') {
+            $companyId = $user->user_company?->company?->id;
+            $query->where('company_id', $companyId ?? 0);
+        } else {
+            $securityId = $user->user_security?->security?->id;
+            $cleaningServiceId = $user->user_cleaning_service?->cleaning_service?->id;
+            $query->whereHas('applications', function (Builder $applications) use ($securityId, $cleaningServiceId): void {
+                if ($securityId === null && $cleaningServiceId === null) {
+                    $applications->whereRaw('1 = 0');
+                    return;
+                }
+                $applications->where(function (Builder $profiles) use ($securityId, $cleaningServiceId): void {
+                    if ($securityId !== null) {
+                        $profiles->where('security_id', $securityId);
+                    }
+                    if ($cleaningServiceId !== null) {
+                        $method = $securityId !== null ? 'orWhere' : 'where';
+                        $profiles->{$method}('cleaning_service_id', $cleaningServiceId);
+                    }
+                });
+            });
+        }
+
+        $training = $query
+            ->with(['bujp:id,company_name', 'company:id,company_name'])
+            ->withCount(['applications as approved_applications_count' => function (Builder $applications): void {
+                $applications->where('status', 'approved');
+            }])
+            ->firstOrFail();
+
+        if ($user->role !== 'company') {
+            $application = $training->applications()
+                ->where(function (Builder $profiles) use ($user): void {
+                    $securityId = $user->user_security?->security?->id;
+                    $cleaningServiceId = $user->user_cleaning_service?->cleaning_service?->id;
+                    if ($securityId !== null) {
+                        $profiles->where('security_id', $securityId);
+                    }
+                    if ($cleaningServiceId !== null) {
+                        $method = $securityId !== null ? 'orWhere' : 'where';
+                        $profiles->{$method}('cleaning_service_id', $cleaningServiceId);
+                    }
+                })
+                ->firstOrFail();
+            $training->setAttribute('is_applied', true);
+            $training->setAttribute('application_uuid', $application->uuid);
+            $training->setAttribute('application_status', $application->status);
+            $training->setAttribute('applied_at', $application->created_at);
+            $training->setAttribute('application_updated_at', $application->updated_at);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Pelatihan berhasil diambil.',
+            'data' => ['training' => (new TrainingResource($training))->resolve()],
+        ]);
+    }
+
     public function store(Request $request, string $uuid): JsonResponse
     {
         $applicant = $this->applicants->resolve($request->user());

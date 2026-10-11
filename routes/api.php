@@ -46,7 +46,9 @@ Route::middleware('api.token')->group(function () {
     Route::get('/company/trainings/{uuid}/participants', [OwnedTrainingParticipantController::class, 'index'])->name('api.company.trainings.participants.index');
     Route::patch('/company/trainings/{uuid}/participants/{applicationUuid}/status', [OwnedTrainingParticipantController::class, 'updateStatus'])->name('api.company.trainings.participants.status');
     Route::get('/job-vacancies', [JobVacancyController::class, 'index'])->name('api.job-vacancies.index');
+    Route::get('/job-vacancies/{uuid}', [JobVacancyController::class, 'show'])->name('api.job-vacancies.show');
     Route::get('/trainings', [TrainingController::class, 'index'])->name('api.trainings.index');
+    Route::get('/trainings/{uuid}', [TrainingController::class, 'show'])->name('api.trainings.show');
     Route::post('/trainings/{uuid}/apply', [TrainingController::class, 'store'])->name('api.trainings.apply');
     Route::post('/job-vacancies/{uuid}/apply', [JobApplicationController::class, 'store'])->name('api.job-vacancies.apply');
     Route::get('/job-applications', [JobApplicationController::class, 'index'])->name('api.job-applications.index');

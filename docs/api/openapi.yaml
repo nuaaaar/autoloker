@@ -160,6 +160,39 @@ paths:
         '422':
           $ref: '#/components/responses/ValidationError'
 
+  /api/job-vacancies/{uuid}:
+    get:
+      summary: Get a vacancy owned by the company or applied to by the authenticated worker
+      description: Requires bearer authentication. Companies may read only their own vacancy. Workers may read only a vacancy with their application linked to either their security or cleaning-service profile, including unpublished vacancies only when they have an application. Other records return 404. Applicant deep links `autoloker://job-vacancies/{uuid}` map here; owner notifications remain under `/api/company/job-vacancies/{uuid}`.
+      operationId: showJobVacancy
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Public vacancy resource, including application fields for an authorized applicant
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      job_vacancy:
+                        type: object
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          description: Vacancy not found or not owned/applied to
   /api/company/job-vacancies:
     get:
       summary: List the authenticated company's job vacancies
@@ -1075,6 +1108,39 @@ paths:
           $ref: '#/components/responses/ValidationError'
 
 
+  /api/trainings/{uuid}:
+    get:
+      summary: Get a training owned by the company or applied to by the authenticated worker
+      description: Requires bearer authentication. Companies may read only their own training. Workers may read only a training with their application linked to either their security or cleaning-service profile, including unpublished trainings only when they have an application. Other records return 404. Applicant deep links `autoloker://trainings/{uuid}` map here; owner notifications remain under `/api/company/trainings/{uuid}`.
+      operationId: showTraining
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Public training resource, including application fields for an authorized applicant
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      training:
+                        type: object
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          description: Training not found or not owned/applied to
   /api/trainings:
     get:
       summary: List published trainings for security users
@@ -1783,7 +1849,7 @@ paths:
   /api/notifications:
     get:
       summary: List the authenticated user's notification history
-      description: Returns only the caller's notifications, newest first. Optional filters are `is_read`, `type`, `date_from`, and `date_to`; results use ten notifications per page.
+      description: Returns only the caller's notifications, newest first. Optional filters are `is_read`, `type`, `date_from`, and `date_to`; results use ten notifications per page. Account-status notifications use `autoloker://notifications` to return to this screen and have no resource-detail endpoint. Subscription deep links `autoloker://subscription-orders/{uuid}` map to `GET /api/user-order-manuals/{uuid}`, which is scoped to the current user.
       operationId: listNotifications
       security:
         - bearerAuth: []
@@ -2147,7 +2213,8 @@ paths:
       summary: Get a manual subscription order
       description: >-
         Returns an order owned by the authenticated user with its subscription details and current
-        payment status. Repeat this request to poll for status changes. Every response includes
+        payment status. Subscription notification deep links `autoloker://subscription-orders/{uuid}`
+        resolve to this endpoint. Repeat this request to poll for status changes. Every response includes
         `Cache-Control: no-store` so a cached response does not mask an updated payment status.
       operationId: getUserOrderManual
       security:
