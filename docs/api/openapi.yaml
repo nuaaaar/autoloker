@@ -41,6 +41,64 @@ paths:
                 $ref: '#/components/schemas/ValidationErrorResponse'
       security: []
 
+  /api/auth/google/login:
+    post:
+      summary: Log in with a Google ID token
+      description: Verifies a Google OAuth ID token against the configured server client ID and authenticates an already registered Google subject. This endpoint does not auto-link accounts or create users.
+      operationId: loginWithGoogle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GoogleAuthRequest'
+            example:
+              role: security
+              id_token: '<Google OAuth ID token>'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+        '422':
+          description: Invalid ID token, unregistered Google account, role mismatch, or inactive account
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+      security: []
+
+  /api/auth/google/register:
+    post:
+      summary: Register and log in with a Google ID token
+      description: Creates a security, cleaning service, or company account from verified Google identity claims and returns API tokens immediately. The Google server client ID must match the Flutter serverClientId.
+      operationId: registerWithGoogle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GoogleAuthRequest'
+            example:
+              role: security
+              id_token: '<Google OAuth ID token>'
+      responses:
+        '201':
+          description: Account registered and logged in
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+        '422':
+          description: Invalid ID token, duplicate email or Google subject, or invalid role
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+      security: []
+
   /api/job-vacancies:
     get:
       summary: List published job vacancies
@@ -5523,6 +5581,20 @@ components:
         password:
           type: string
           format: password
+
+    GoogleAuthRequest:
+      type: object
+      required: [role, id_token]
+      properties:
+        role:
+          type: string
+          enum: [security, cs, company]
+          description: Requested API role. Security maps to stored satpam; worker accounts may switch between security and cs.
+        id_token:
+          type: string
+          minLength: 101
+          maxLength: 8192
+          description: Google OAuth ID token signed for the server client ID configured on the API. Google access tokens and Firebase ID tokens are not accepted.
 
     RefreshTokenRequest:
       type: object

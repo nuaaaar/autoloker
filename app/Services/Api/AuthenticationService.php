@@ -33,23 +33,25 @@ class AuthenticationService
 
         RateLimiter::clear($key);
 
+        return $this->authenticate($user, $data['role'], 'identifier');
+    }
+
+    public function authenticate(User $user, string $role, string $credentialField): array
+    {
         if ($user->status !== 'active') {
-            throw ValidationException::withMessages(['identifier' => 'Akun tidak aktif.']);
+            throw ValidationException::withMessages([$credentialField => 'Akun tidak aktif.']);
         }
 
-        $expectedRole = match ($data['role']) {
-            'security' => 'satpam',
-            default => $data['role'],
-        };
+        $expectedRole = $role === 'security' ? 'satpam' : $role;
         if ($user->role !== $expectedRole) {
             $workerAccount = in_array($user->role, ['satpam', 'cs'], true);
-            $workerTarget = in_array($data['role'], RoleSwitchService::ROLES, true);
+            $workerTarget = in_array($role, RoleSwitchService::ROLES, true);
 
             if (! ($workerAccount && $workerTarget)) {
                 throw ValidationException::withMessages(['role' => 'Peran akun tidak sesuai.']);
             }
 
-            $this->roles->switch($user, $data['role']);
+            $this->roles->switch($user, $role);
         }
 
         return [

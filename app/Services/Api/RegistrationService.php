@@ -9,9 +9,13 @@ use App\Models\UserCompany;
 use App\Models\UserSecurity;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class RegistrationService
 {
+    public function __construct(private readonly RoleSwitchService $roles) {}
+
     public function register(array $data): User
     {
         return DB::transaction(function () use ($data): User {
@@ -34,6 +38,39 @@ class RegistrationService
         });
     }
 
+    public function registerGoogle(array $identity, string $role): User
+    {
+        return DB::transaction(function () use ($identity, $role): User {
+            if (User::where('email', $identity['email'])->exists()) {
+                throw ValidationException::withMessages(['email' => 'Email sudah terdaftar. Silakan login menggunakan akun tersebut.']);
+            }
+            if (User::where('google_id', $identity['google_id'])->exists()) {
+                throw ValidationException::withMessages(['id_token' => 'Akun Google sudah terdaftar. Silakan login.']);
+            }
+
+            $user = User::create([
+                'name' => $identity['name'],
+                'email' => $identity['email'],
+                'phone_number' => null,
+                'google_id' => $identity['google_id'],
+                'avatar' => $identity['avatar'],
+                'password' => Hash::make(Str::random(32)),
+                'has_local_password' => false,
+                'email_verified_at' => now(),
+                'role' => $this->databaseRole($role),
+                'status' => 'active',
+            ]);
+
+            match ($role) {
+                'security' => $this->createSecurity($user, ['phone_number' => null]),
+                'cs' => $this->roles->switch($user, 'cs'),
+                'company' => $this->createCompany($user, ['name' => $identity['name']]),
+            };
+
+            return $user;
+        });
+    }
+
     private function databaseRole(string $role): string
     {
         return $role === 'security' ? 'satpam' : $role;
@@ -49,7 +86,7 @@ class RegistrationService
             'user_security_id' => $userSecurity->id,
             'name' => $user->name,
             'email' => $user->email,
-            'phone_number' => $data['phone_number'],
+            'phone_number' => $data['phone_number'] ?? null,
         ]);
     }
 
