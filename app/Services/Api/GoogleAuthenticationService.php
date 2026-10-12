@@ -3,12 +3,13 @@
 namespace App\Services\Api;
 
 use App\Models\User;
+use Firebase\JWT\JWK;
+use Firebase\JWT\JWT;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Laravel\Socialite\Facades\Socialite;
-use Laravel\Socialite\Two\GoogleProvider;
 
 class GoogleAuthenticationService
 {
@@ -53,7 +54,7 @@ class GoogleAuthenticationService
 
     private function verify(string $idToken): array
     {
-        $clientId = config('services.google.client_id');
+        $clientId = config('services.google.server_client_id');
         if (! is_string($clientId) || $clientId === '') {
             abort(503);
         }
@@ -62,21 +63,17 @@ class GoogleAuthenticationService
             throw ValidationException::withMessages(['id_token' => 'Token Google tidak dapat diverifikasi.']);
         }
 
-        $provider = Socialite::buildProvider(GoogleProvider::class, [
-            'client_id' => $clientId,
-            'client_secret' => '',
-            'redirect' => '',
-            'guzzle' => ['connect_timeout' => 5, 'timeout' => 10],
-        ])->stateless();
-
         try {
-            $googleUser = $provider->userFromToken($idToken);
+            $keys = Http::connectTimeout(5)->timeout(10)
+                ->get('https://www.googleapis.com/oauth2/v3/certs')
+                ->throw()->json();
+            $claims = (array) JWT::decode($idToken, JWK::parseKeySet($keys));
         } catch (\Exception) {
             throw ValidationException::withMessages(['id_token' => 'Token Google tidak dapat diverifikasi.']);
         }
-
-        $claims = $googleUser->getRaw();
-        if (! is_numeric($claims['exp'] ?? null) || (float) $claims['exp'] <= time()
+        if (! in_array($claims['iss'] ?? null, ['accounts.google.com', 'https://accounts.google.com'], true)
+            || ($claims['aud'] ?? null) !== $clientId
+            || ! is_numeric($claims['exp'] ?? null) || (float) $claims['exp'] <= time()
             || ! is_string($claims['sub'] ?? null) || $claims['sub'] === '' || strlen($claims['sub']) > 255
             || ! is_string($claims['email'] ?? null) || strlen($claims['email']) > 255
             || ! filter_var($claims['email'], FILTER_VALIDATE_EMAIL)

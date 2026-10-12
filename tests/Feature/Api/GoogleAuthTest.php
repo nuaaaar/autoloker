@@ -6,15 +6,8 @@ use App\Models\ApiToken;
 use App\Models\User;
 use App\Services\Api\TokenService;
 use Firebase\JWT\JWT;
-use GuzzleHttp\Client;
-use GuzzleHttp\Handler\MockHandler;
-use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Psr7\Response as Psr7Response;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Socialite\Facades\Socialite;
-use Laravel\Socialite\Two\GoogleProvider;
-use Mockery;
-use PHPUnit\Framework\Attributes\DataProvider;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class GoogleAuthTest extends TestCase
@@ -28,23 +21,73 @@ class GoogleAuthTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        config(['services.google.client_id' => 'flutter-test.apps.googleusercontent.com']);
+        config(['services.google.server_client_id' => 'flutter-test.apps.googleusercontent.com']);
+        config(['services.google.client_id' => 'web-test.apps.googleusercontent.com']);
         $key = openssl_pkey_new(['private_key_type' => OPENSSL_KEYTYPE_RSA, 'private_key_bits' => 2048]);
         openssl_pkey_export($key, $this->privateKey);
         $details = openssl_pkey_get_details($key);
         $this->modulus = $this->base64url($details['rsa']['n']);
         $this->exponent = $this->base64url($details['rsa']['e']);
 
-        Socialite::shouldReceive('buildProvider')->andReturnUsing(function (string $provider, array $config): GoogleProvider {
-            $response = json_encode(['keys' => [[
+        Http::preventStrayRequests();
+        Http::fake([
+            'https://www.googleapis.com/oauth2/v3/certs' => Http::response(['keys' => [[
                 'kty' => 'RSA', 'alg' => 'RS256', 'use' => 'sig', 'kid' => 'test-key',
                 'n' => $this->modulus, 'e' => $this->exponent,
-            ]]], JSON_THROW_ON_ERROR);
-            $stack = HandlerStack::create(new MockHandler([new Psr7Response(200, [], $response)]));
-            $providerInstance = new $provider(app('request'), $config['client_id'], $config['client_secret'], $config['redirect'], ['handler' => $stack]);
+            ]]]),
+        ]);
+    }
 
-            return $providerInstance;
-        });
+    public function test_mobile_google_issuer_is_accepted_for_registration_and_login(): void
+    {
+        $token = $this->token(['iss' => 'accounts.google.com']);
+        $this->postJson('/api/auth/google/register', ['role' => 'security', 'id_token' => $token])
+            ->assertCreated();
+        $this->postJson('/api/auth/google/login', ['role' => 'security', 'id_token' => $token])
+            ->assertOk()->assertJsonPath('data.user.email', 'google-test@example.com');
+    }
+
+    public function test_mobile_issuer_does_not_bypass_signature_verification(): void
+    {
+        $parts = explode('.', $this->token());
+        $claims = json_decode(base64_decode(strtr($parts[1], '-_', '+/')), true, flags: JSON_THROW_ON_ERROR);
+        $claims['iss'] = 'accounts.google.com';
+        $parts[1] = $this->base64url(json_encode($claims, JSON_THROW_ON_ERROR));
+
+        $this->postJson('/api/auth/google/register', ['role' => 'security', 'id_token' => implode('.', $parts)])
+            ->assertUnprocessable()->assertJsonValidationErrors('id_token');
+        $this->assertDatabaseCount('users', 0);
+        $this->assertDatabaseCount('api_tokens', 0);
+    }
+
+    public function test_google_auth_uses_mobile_audience_instead_of_website_audience(): void
+    {
+        $websiteToken = $this->token(['aud' => 'web-test.apps.googleusercontent.com']);
+        $this->postJson('/api/auth/google/register', ['role' => 'security', 'id_token' => $websiteToken])
+            ->assertUnprocessable()->assertJsonValidationErrors('id_token');
+        $this->assertSame(0, User::count());
+        $this->assertSame(0, ApiToken::count());
+
+        $mobileToken = $this->token();
+        $response = $this->postJson('/api/auth/google/register', ['role' => 'security', 'id_token' => $mobileToken])
+            ->assertCreated();
+        $user = User::where('google_id', 'google-test-sub')->firstOrFail();
+        $this->assertDatabaseHas('api_tokens', [
+            'user_id' => $user->id,
+            'access_token_hash' => hash('sha256', $response->json('data.access_token')),
+        ]);
+        $this->assertNotSame('', $response->json('data.access_token'));
+        $this->assertNotSame('', $response->json('data.refresh_token'));
+    }
+
+    public function test_missing_mobile_audience_fails_closed_even_when_website_audience_is_configured(): void
+    {
+        config(['services.google.server_client_id' => null]);
+
+        $this->postJson('/api/auth/google/register', ['role' => 'security', 'id_token' => $this->token()])
+            ->assertServiceUnavailable();
+        $this->assertSame(0, User::count());
+        $this->assertSame(0, ApiToken::count());
     }
 
     public function test_register_google_creates_role_profile_and_api_token(): void
