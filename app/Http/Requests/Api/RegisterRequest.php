@@ -42,7 +42,7 @@ class RegisterRequest extends FormRequest
         return [
             'role' => [
                 'required',
-                Rule::in(['security', 'company']),
+                Rule::in(['security', 'cs', 'company']),
             ],
             'name' => [
                 'required',
