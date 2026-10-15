@@ -37,7 +37,6 @@ class UserSubscriptionController extends Controller
             ->orderBy('price')
             ->get();
 
-
         /*
         |--------------------------------------------------------------------------
         | ORDERS

@@ -44,9 +44,9 @@ use App\Http\Controllers\UserPage\JobBookmarkController as UPPJobBookmark;
 use App\Http\Controllers\UserPage\JobApplicationController as UPPJobApplication;
 use App\Http\Controllers\UserPage\TrainingController as UPPTraining;
 use App\Http\Controllers\UserPage\TrainingApplicationController as UPPTrainingApplication;
-use App\Http\Controllers\UserPage\SubscriptionController as USRSubscription;
+use App\Http\Controllers\UserPage\SubscriptionController as UPPSubscription;
 use App\Http\Controllers\UserPage\UserOrderManualController as UPPUserOrderManual;
-use App\Http\Controllers\UserPage\UserSubscriptionController as USRUserSubscription;
+use App\Http\Controllers\UserPage\UserSubscriptionController as UPPUserSubscription;
 
 use App\Http\Controllers\User\DashboardUserController as USRDashboard;
 use App\Http\Controllers\User\ProfileController as USRProfile;
@@ -54,6 +54,9 @@ use App\Http\Controllers\User\JobVacancyController as USRJobVacancy;
 use App\Http\Controllers\User\TrainingController as USRTraining;
 use App\Http\Controllers\User\JobApplicationController as USRJobApplication;
 use App\Http\Controllers\User\NotificationController as USRNotification;
+use App\Http\Controllers\User\SubscriptionController as USRSubscription;
+use App\Http\Controllers\User\UserOrderManualController as USRUserOrderManual;
+use App\Http\Controllers\User\UserSubscriptionController as USRUserSubscription;
 
 use App\Http\Controllers\RegisterSecurityController;
 use App\Http\Controllers\RegisterCompanyController;
@@ -483,6 +486,25 @@ Route::middleware(['auth'])->group(function () {
 
             });
 
+            Route::prefix('subscription')->name('subscription.')->group(function () {
+
+                Route::get(
+                    '',
+                    [USRSubscription::class, 'index']
+                )->name('index');
+
+                Route::post(
+                    '/order',
+                    [USRUserOrderManual::class, 'store']
+                )->name('order.store');
+
+                Route::post(
+                    '/order/{uuid}/upload-proof',
+                    [USRUserOrderManual::class, 'uploadProof']
+                )->name('order.upload-proof');
+
+            });
+
         });
 
     });
@@ -580,7 +602,7 @@ Route::middleware(['auth'])->group(function () {
 
             Route::get(
                 '',
-                [USRSubscription::class, 'index']
+                [UPPSubscription::class, 'index']
             )->name('index');
 
             Route::post(
@@ -599,7 +621,7 @@ Route::middleware(['auth'])->group(function () {
 
             Route::get(
                 '',
-                [USRUserSubscription::class, 'index']
+                [UPPUserSubscription::class, 'index']
             )->name('index');
 
         });

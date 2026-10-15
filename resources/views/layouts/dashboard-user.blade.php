@@ -1655,6 +1655,21 @@
 
                                         </a>
 
+                                        <a href="{{ route('dashboard-user.subscription.index') }}"
+                                        class="menu-link {{ Route::is('dashboard-user.subscription.*') ? 'active' : '' }}">
+
+                                            <span class="menu-icon">
+
+                                                <i class="ki-duotone ki-star fs-2"></i>
+
+                                            </span>
+
+                                            <span class="menu-title">
+                                                Paket Berlangganan
+                                            </span>
+
+                                        </a>
+
                                     </div>
 
 
