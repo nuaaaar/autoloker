@@ -498,6 +498,15 @@ Route::middleware(['auth'])->group(function () {
                     [USRUserOrderManual::class, 'store']
                 )->name('order.store');
 
+            });
+
+            Route::prefix('user-subscription')->name('user-subscription.')->group(function () {
+
+                Route::get(
+                    '',
+                    [USRUserSubscription::class, 'index']
+                )->name('index');
+
                 Route::post(
                     '/order/{uuid}/upload-proof',
                     [USRUserOrderManual::class, 'uploadProof']

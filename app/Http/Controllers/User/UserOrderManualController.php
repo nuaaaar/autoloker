@@ -31,7 +31,7 @@ class UserOrderManualController extends Controller
         $roleMapping = [
             'satpam' => 'security',
             'bujp' => 'bujp',
-            'company' => 'company',
+            'company' => 'client',
         ];
 
         $userRole = strtolower(trim($user->role));
@@ -120,7 +120,7 @@ class UserOrderManualController extends Controller
                 'success' => true,
                 'message' => 'Anda sudah memiliki order yang menunggu pembayaran.',
                 'redirect' => route(
-                    'user-page.user-subscription.index'
+                    'dashboard-user.user-subscription.index'
                 ),
             ]);
 
@@ -310,7 +310,7 @@ class UserOrderManualController extends Controller
             */
 
             return redirect()
-                ->route('user-page.user-subscription.index')
+                ->route('dashboard-user.user-subscription.index')
                 ->with(
                     'OK',
                     'Bukti pembayaran berhasil dikirim dan sedang menunggu verifikasi admin.'
@@ -332,7 +332,7 @@ class UserOrderManualController extends Controller
 
 
             return redirect()
-                ->route('user-page.user-subscription.index')
+                ->route('dashboard-user.user-subscription.index')
                 ->with(
                     'ERR',
                     'Gagal mengupload bukti pembayaran. Silakan coba lagi.'

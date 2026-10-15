@@ -1217,17 +1217,41 @@
 
         {{-- DAFTAR PAKET --}}
         <div class="sub-grid" id="sub-grid">
-            @forelse($subscriptions as $index => $subscription)
-                @php
-                    $price = (float) ($subscription->price ?? 0);
-                    $duration = strtolower((string) ($subscription->duration ?? 'month'));
 
-                    $durationLabel = match ($duration) {
+            @forelse($subscriptions as $index => $subscription)
+
+                @php
+                    /*
+                    |--------------------------------------------------------------------------
+                    | DATA PAKET
+                    |--------------------------------------------------------------------------
+                    */
+                    $price = (float) ($subscription->price ?? 0);
+
+                    $durationValue = max(1, (int) ($subscription->duration ?? 1));
+
+                    $durationType = strtolower(
+                        (string) ($subscription->duration_type ?? 'month')
+                    );
+
+                    $durationLabel = match ($durationType) {
                         'day' => 'hari',
                         'year' => 'tahun',
                         default => 'bulan',
                     };
 
+                    $durationText = $durationValue . ' ' . $durationLabel;
+
+                    $description = $subscription->description
+                        ?? 'Paket berlangganan untuk mendukung kebutuhan Anda.';
+
+                    $planName = $subscription->name ?? 'Paket Berlangganan';
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | NORMALISASI FEATURES
+                    |--------------------------------------------------------------------------
+                    */
                     $features = $subscription->features ?? [];
 
                     if (is_string($features)) {
@@ -1238,102 +1262,169 @@
                         $features = [];
                     }
 
-                    $description = $subscription->description ?? 'Paket berlangganan untuk mendukung kebutuhan Anda.';
+                    /*
+                    |--------------------------------------------------------------------------
+                    | IDENTIFIKASI PAKET GRATIS
+                    |--------------------------------------------------------------------------
+                    */
+                    $isFreePlan = $price == 0.0;
 
-                    $planName = $subscription->name ?? 'Paket Berlangganan';
+                    /*
+                    |--------------------------------------------------------------------------
+                    | IDENTIFIKASI PAKET YANG SEDANG DIGUNAKAN
+                    |--------------------------------------------------------------------------
+                    */
+                    $currentMasterSubscriptionId =
+                        $currentSubscription->master_subscription_id
+                        ?? $currentSubscription->subscription_id
+                        ?? $currentSubscription->subscription->id
+                        ?? null;
 
                     $isCurrentPlan = $currentSubscriptionActive
-                        && (
-                            ($currentSubscription->subscription_id ?? null) == $subscription->id
-                            || ($currentSubscription->master_subscription_id ?? null) == $subscription->id
-                            || ($currentSubscription->subscription->id ?? null) == $subscription->id
-                        );
+                        && $currentMasterSubscriptionId !== null
+                        && (int) $currentMasterSubscriptionId === (int) $subscription->id;
 
-                    $searchText = strtolower($planName . ' ' . $description . ' ' . implode(' ', array_map(
-                        fn($feature) => is_scalar($feature) ? (string) $feature : '',
-                        $features
-                    )));
+                    /*
+                    |--------------------------------------------------------------------------
+                    | PAKET GRATIS DEFAULT
+                    |--------------------------------------------------------------------------
+                    | Jika user belum memiliki langganan aktif, paket Rp0
+                    | menjadi paket milik user pada tampilan.
+                    */
+                    $isDefaultFreePlan = !$currentSubscriptionActive && $isFreePlan;
 
-                    $planCategory = $price <= 100000 ? 'affordable' : 'premium';
+                    $isUserPlan = $isCurrentPlan || $isDefaultFreePlan;
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | LABEL DAN ICON FEATURE
+                    |--------------------------------------------------------------------------
+                    */
+                    $featureLabels = [
+                        'job_vacancy' => 'Lamaran aktif',
+                        'training' => 'Pelatihan aktif',
+                        'video_bimtek' => 'Video Bimtek',
+                    ];
+
+                    $featureIcons = [
+                        'job_vacancy' => 'ki-briefcase',
+                        'training' => 'ki-teacher',
+                        'video_bimtek' => 'ki-youtube',
+                    ];
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | TEKS PENCARIAN
+                    |--------------------------------------------------------------------------
+                    */
+                    $searchFeatures = collect($features)
+                        ->map(function ($feature, $featureKey) use ($featureLabels) {
+                            if (is_array($feature)) {
+                                return (string) (
+                                    $featureLabels[$featureKey]
+                                    ?? $feature['name']
+                                    ?? str_replace('_', ' ', (string) $featureKey)
+                                );
+                            }
+
+                            return is_scalar($feature) ? (string) $feature : '';
+                        })
+                        ->implode(' ');
+
+                    $searchText = strtolower(
+                        $planName . ' ' . $description . ' ' . $searchFeatures
+                    );
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | KATEGORI HARGA
+                    |--------------------------------------------------------------------------
+                    */
+                    $planCategory = $isFreePlan
+                        ? 'affordable'
+                        : ($price <= 100000 ? 'affordable' : 'premium');
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | ICON PAKET
+                    |--------------------------------------------------------------------------
+                    */
+                    $planIcon = match (strtolower((string) ($subscription->slug ?? ''))) {
+                        'dasar', 'basic' => 'bx-leaf',
+                        'pro', 'professional' => 'bx-rocket',
+                        'premium', 'enterprise' => 'bx-crown',
+                        default => $isFreePlan ? 'bx-leaf' : 'bx-package',
+                    };
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | STATUS FEATURE
+                    |--------------------------------------------------------------------------
+                    */
                 @endphp
 
-                <div class="sub-card {{ $index === 1 ? 'featured' : '' }}"
+                <div class="sub-card {{ $isUserPlan ? 'current-plan' : ($index === 1 ? 'featured' : '') }}"
                     data-name="{{ strtolower($planName) }}"
                     data-search="{{ $searchText }}"
                     data-category="{{ $planCategory }}"
                     data-price="{{ $price }}">
 
-                    @if($index === 1)
+                    {{-- BADGE PAKET POPULER --}}
+                    @if($index === 1 && !$isUserPlan)
                         <div class="sub-popular">
-                            <i class="bx bxs-star"></i> PILIHAN POPULER
+                            <i class="bx bxs-star"></i>
+                            PILIHAN POPULER
                         </div>
                     @endif
 
+                    {{-- HEADER PAKET --}}
                     <div class="sub-card-top">
+
                         <div class="sub-plan-icon">
-                            @if($index === 0)
-                                <i class="bx bx-leaf"></i>
-                            @elseif($index === 1)
-                                <i class="bx bx-rocket"></i>
-                            @else
-                                <i class="bx bx-crown"></i>
-                            @endif
+                            <i class="bx {{ $planIcon }}"></i>
                         </div>
 
                         <div>
-                            <h4 class="sub-plan-name">{{ $planName }}</h4>
-                            <p class="sub-plan-caption">Paket berlangganan</p>
+                            <h4 class="sub-plan-name">
+                                {{ $planName }}
+                            </h4>
+
+                            <p class="sub-plan-caption">
+                                Paket berlangganan
+                            </p>
                         </div>
+
                     </div>
 
+                    {{-- HARGA --}}
                     <div class="sub-price">
                         Rp {{ number_format($price, 0, ',', '.') }}
-                        <small>/ {{ $durationLabel }}</small>
+
+                        <small>
+                            / {{ $durationLabel }}
+                        </small>
                     </div>
 
                     <div class="sub-price-note">
-                        Durasi berlangganan {{ $subscription->duration ?? 30 }}
-                        {{ $durationLabel }}
+                        Durasi berlangganan {{ $durationText }}
                     </div>
 
                     <div class="sub-divider"></div>
 
+                    {{-- DESKRIPSI --}}
                     <p class="sub-description">
                         {{ $description }}
                     </p>
 
-                    <div class="sub-feature-title">Fitur yang Anda dapatkan</div>
+                    <div class="sub-feature-title">
+                        Fitur yang Anda dapatkan
+                    </div>
 
+                    {{-- DAFTAR FITUR DINAMIS --}}
                     <ul class="sub-features">
-                        @php
-                            /*
-                            |--------------------------------------------------------------------------
-                            | NORMALISASI FEATURES
-                            |--------------------------------------------------------------------------
-                            */
-                            $features = $subscription->features ?? [];
 
-                            if (is_string($features)) {
-                                $features = json_decode($features, true) ?? [];
-                            }
+                        @forelse($features as $featureKey => $feature)
 
-                            if (!is_array($features)) {
-                                $features = [];
-                            }
-
-                            /*
-                            |--------------------------------------------------------------------------
-                            | LABEL FEATURE
-                            |--------------------------------------------------------------------------
-                            */
-                            $featureLabels = [
-                                'job_vacancy' => 'Lamaran aktif',
-                                'training' => 'Pelatihan aktif',
-                                'video_bimtek' => 'Video Bimtek',
-                            ];
-                        @endphp
-
-                        @forelse ($features as $featureKey => $feature)
                             @php
                                 /*
                                 |--------------------------------------------------------------------------
@@ -1349,63 +1440,109 @@
                                     $limit = (int) ($feature['limit'] ?? -2);
 
                                     $featureLabel = $featureLabels[$featureKey]
-                                        ?? ($feature['name'] ?? ucwords(
+                                        ?? $feature['name']
+                                        ?? ucwords(
                                             str_replace('_', ' ', (string) $featureKey)
-                                        ));
+                                        );
                                 } else {
-                                    // Mendukung format feature sederhana berupa string atau angka.
+                                    /*
+                                    | Format sederhana:
+                                    | "job_vacancy": "Lamaran aktif"
+                                    */
                                     $enabled = true;
                                     $limit = -1;
 
                                     $featureLabel = is_string($feature) || is_numeric($feature)
                                         ? (string) $feature
-                                        : ucwords(str_replace('_', ' ', (string) $featureKey));
+                                        : ucwords(
+                                            str_replace('_', ' ', (string) $featureKey)
+                                        );
                                 }
                             @endphp
 
-                            @if (is_string($feature) || is_numeric($feature) || is_array($feature))
+                            @if(is_string($feature) || is_numeric($feature) || is_array($feature))
+
                                 <li>
-                                    {{-- ICON DAN NAMA FEATURE --}}
-                                    @if (!$enabled || (is_array($feature) && $limit === -2))
+
+                                    {{-- ICON STATUS --}}
+                                    @if(!$enabled || (is_array($feature) && $limit === -2))
                                         <i class="bx bx-x-circle"></i>
                                     @else
                                         <i class="bx bx-check-circle"></i>
                                     @endif
 
+                                    {{-- NAMA DAN LIMIT FEATURE --}}
                                     <span>
                                         {{ $featureLabel }}
 
-                                        {{-- STATUS DAN LIMIT FEATURE --}}
-                                        @if (is_array($feature))
-                                            @if (!$enabled || $limit === -2)
+                                        @if(is_array($feature))
+
+                                            @if(!$enabled || $limit === -2)
                                                 <small>(Tidak tersedia)</small>
-                                            @elseif ($limit === -1)
+
+                                            @elseif($limit === -1)
                                                 <small>(Unlimited)</small>
+
                                             @else
-                                                <small>({{ number_format($limit, 0, ',', '.') }})</small>
+                                                <small>
+                                                    ({{ number_format($limit, 0, ',', '.') }})
+                                                </small>
                                             @endif
+
                                         @endif
                                     </span>
+
                                 </li>
+
                             @endif
+
                         @empty
+
                             <li>
                                 <i class="bx bx-check-circle"></i>
-                                <span>Akses layanan sesuai paket yang dipilih</span>
+                                <span>
+                                    Akses layanan sesuai paket yang dipilih
+                                </span>
                             </li>
+
                         @endforelse
+
                     </ul>
 
+                    {{-- TOMBOL PAKET --}}
                     <div class="sub-card-bottom">
+
                         @if($isCurrentPlan)
-                            <button type="button" class="sub-btn disabled" disabled>
+
+                            {{-- PAKET YANG SUDAH AKTIF --}}
+                            <button type="button"
+                                class="sub-btn disabled"
+                                disabled>
+
                                 <i class="bx bx-check-circle"></i>
                                 Paket Sedang Digunakan
+
                             </button>
+
+                        @elseif($isDefaultFreePlan)
+
+                            {{-- PAKET GRATIS DEFAULT UNTUK USER BARU --}}
+                            <button type="button"
+                                class="sub-btn disabled"
+                                disabled>
+
+                                <i class="bx bx-check-circle"></i>
+                                Paket Anda
+
+                            </button>
+
                         @else
-                            <form action="{{ route('user-page.subscription.order.store') }}"
+
+                            {{-- PAKET YANG DAPAT DIPILIH --}}
+                            <form action="{{ route('dashboard-user.subscription.order.store') }}"
                                 method="POST"
                                 class="sub-subscribe-form">
+
                                 @csrf
 
                                 <input type="hidden"
@@ -1413,32 +1550,58 @@
                                     value="{{ $subscription->uuid }}">
 
                                 <button type="button"
-                                        class="sub-btn {{ $index === 1 ? '' : 'outline' }} btn-subscribe"
-                                        data-name="{{ $planName }}"
-                                        data-price="{{ number_format($price, 0, ',', '.') }}"
-                                        data-duration="{{ $durationLabel }}">
+                                    class="sub-btn {{ $index === 1 ? '' : 'outline' }} btn-subscribe"
+                                    data-name="{{ $planName }}"
+                                    data-price="{{ number_format($price, 0, ',', '.') }}"
+                                    data-duration="{{ $durationText }}">
+
                                     Pilih Paket
+
                                     <i class="bx bx-right-arrow-alt"></i>
+
                                 </button>
+
                             </form>
+
                         @endif
+
                     </div>
+
                 </div>
+
             @empty
+
                 <div style="grid-column:1/-1;padding:35px 20px;text-align:center;border:1px dashed var(--sub-border);border-radius:18px;color:var(--sub-muted)">
+
                     <i class="bx bx-package" style="font-size:40px"></i>
-                    <h5 style="margin-top:10px;color:var(--sub-text)">Belum Ada Paket Berlangganan</h5>
+
+                    <h5 style="margin-top:10px;color:var(--sub-text)">
+                        Belum Ada Paket Berlangganan
+                    </h5>
+
                     <p style="font-size:12px;margin-bottom:0">
                         Saat ini belum ada paket yang tersedia untuk akun Anda.
                     </p>
+
                 </div>
+
             @endforelse
+
         </div>
 
+        {{-- PESAN JIKA HASIL PENCARIAN KOSONG --}}
         <div class="sub-no-results" id="sub-no-results">
+
             <i class="bx bx-search-alt"></i>
-            <h5>Paket Tidak Ditemukan</h5>
-            <p>Coba gunakan kata kunci lain atau pilih filter yang berbeda.</p>
+
+            <h5>
+                Paket Tidak Ditemukan
+            </h5>
+
+            <p>
+                Coba gunakan kata kunci lain atau pilih filter yang berbeda.
+            </p>
+
         </div>
 
         {{-- INFORMASI PEMBAYARAN --}}
@@ -1482,135 +1645,179 @@
 
 @section('js')
 <script>
-    $(document).ready(function () {
-        const $cards = $('.subscription-page .sub-card');
-        let activeFilter = 'all';
+    document.addEventListener('DOMContentLoaded', function () {
+        /*
+        |--------------------------------------------------------------------------
+        | SUBMIT ORDER PAKET VIA AJAX
+        |--------------------------------------------------------------------------
+        | Tidak membuka response JSON sebagai halaman baru.
+        */
+        document.addEventListener('click', async function (event) {
+            const button = event.target.closest('.btn-subscribe');
 
-        function filterSubscriptions() {
-            const keyword = ($('#sub-search-input').val() || '').toLowerCase().trim();
-            let visibleCount = 0;
+            if (!button) {
+                return;
+            }
 
-            $cards.each(function () {
-                const $card = $(this);
-                const name = String($card.data('name') || '').toLowerCase();
-                const search = String($card.data('search') || name).toLowerCase();
-                const category = String($card.data('category') || '');
-                const price = Number($card.data('price') || 0);
+            event.preventDefault();
 
-                const matchesSearch =
-                    !keyword ||
-                    name.includes(keyword) ||
-                    search.includes(keyword);
+            const form = button.closest('.sub-subscribe-form');
 
-                let matchesFilter = true;
+            if (!form || button.disabled) {
+                return;
+            }
 
-                if (activeFilter === 'affordable') {
-                    matchesFilter = category === 'affordable';
-                } else if (activeFilter === 'premium') {
-                    matchesFilter = category === 'premium';
-                }
+            const packageName = button.dataset.name || 'Paket Berlangganan';
+            const packagePrice = button.dataset.price || '0';
+            const packageDuration = button.dataset.duration || '';
 
-                const visible = matchesSearch && matchesFilter;
-
-                $card.toggle(visible);
-
-                if (visible) {
-                    visibleCount++;
-                }
+            /*
+            |--------------------------------------------------------------------------
+            | KONFIRMASI
+            |--------------------------------------------------------------------------
+            */
+            const confirmation = await Swal.fire({
+                title: 'Pilih Paket?',
+                html: `
+                    <div style="text-align:center">
+                        <p>Anda akan memilih paket:</p>
+                        <h4 style="margin:10px 0">${packageName}</h4>
+                        <p style="margin-bottom:5px">
+                            Harga: <strong>Rp ${packagePrice}</strong>
+                        </p>
+                        <p>Durasi: <strong>${packageDuration}</strong></p>
+                    </div>
+                `,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Pilih Paket',
+                cancelButtonText: 'Batal',
+                reverseButtons: true
             });
 
-            $('#sub-visible-count').text(visibleCount);
-            $('#sub-no-results').toggle(visibleCount === 0 && $cards.length > 0);
-        }
+            if (!confirmation.isConfirmed) {
+                return;
+            }
 
-        $('.sub-filter').on('click', function () {
-            $('.sub-filter').removeClass('active');
-            $(this).addClass('active');
+            /*
+            |--------------------------------------------------------------------------
+            | STATUS LOADING
+            |--------------------------------------------------------------------------
+            */
+            const originalButtonHtml = button.innerHTML;
 
-            activeFilter = $(this).data('filter') || 'all';
+            button.disabled = true;
+            button.innerHTML = `
+                <i class="bx bx-loader-alt bx-spin"></i>
+                Memproses...
+            `;
 
-            filterSubscriptions();
-        });
-
-        $('#sub-search-input').on('input', filterSubscriptions);
-
-        // Konfirmasi sebelum mengirim pilihan paket.
-        $(document).on('click', '.btn-subscribe', function () {
-            const $button = $(this);
-            const $form = $button.closest('form');
-
-            const name = $button.data('name') || 'Paket Berlangganan';
-            const price = $button.data('price') || '0';
-            const duration = $button.data('duration') || 'bulan';
-
-            // Menggunakan SweetAlert2 bila tersedia di layout.
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    title: 'Konfirmasi Paket',
-                    html:
-                        'Anda akan memilih paket <strong>' + escapeHtml(name) +
-                        '</strong><br><br>' +
-                        '<span style="color:var(--sub-muted)">Harga</span><br>' +
-                        '<strong>Rp ' + escapeHtml(price) +
-                        ' / ' + escapeHtml(duration) + '</strong>',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: 'Ya, Pilih Paket',
-                    cancelButtonText: 'Batal',
-                    confirmButtonColor: '#39745a',
-                    reverseButtons: true
-                }).then(function (result) {
-                    if (result.isConfirmed) {
-                        $button.prop('disabled', true);
-                        $button.html('<i class="bx bx-loader-alt bx-spin"></i> Memproses...');
-                        $form.trigger('submit');
-                    }
+            try {
+                /*
+                |--------------------------------------------------------------------------
+                | KIRIM REQUEST KE CONTROLLER
+                |--------------------------------------------------------------------------
+                */
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: new FormData(form),
+                    credentials: 'same-origin'
                 });
-            } else {
-                const confirmed = window.confirm(
-                    'Pilih paket ' + name + ' dengan harga Rp ' +
-                    price + ' / ' + duration + '?'
-                );
 
-                if (confirmed) {
-                    $button.prop('disabled', true);
-                    $button.text('Memproses...');
-                    $form.trigger('submit');
+                /*
+                |--------------------------------------------------------------------------
+                | BACA RESPONSE JSON
+                |--------------------------------------------------------------------------
+                */
+                let result;
+
+                try {
+                    result = await response.json();
+                } catch (error) {
+                    throw new Error(
+                        'Server tidak mengembalikan JSON yang valid. Silakan periksa route dan controller.'
+                    );
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | RESPONSE GAGAL
+                |--------------------------------------------------------------------------
+                */
+                if (!response.ok || !result.success) {
+                    let errorMessage = result.message
+                        || 'Paket gagal diproses. Silakan coba kembali.';
+
+                    if (result.errors) {
+                        const validationMessages = Object.values(result.errors)
+                            .flat()
+                            .join('<br>');
+
+                        if (validationMessages) {
+                            errorMessage = validationMessages;
+                        }
+                    }
+
+                    await Swal.fire({
+                        title: 'Tidak Berhasil',
+                        html: errorMessage,
+                        icon: 'error',
+                        confirmButtonText: 'Mengerti'
+                    });
+
+                    return;
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | RESPONSE BERHASIL
+                |--------------------------------------------------------------------------
+                */
+                await Swal.fire({
+                    title: 'Berhasil!',
+                    text: result.message || 'Order paket berhasil diproses.',
+                    icon: 'success',
+                    confirmButtonText: 'Lanjutkan'
+                });
+
+                /*
+                |--------------------------------------------------------------------------
+                | REDIRECT SESUAI RESPONSE CONTROLLER
+                |--------------------------------------------------------------------------
+                */
+                if (result.redirect) {
+                    window.location.assign(result.redirect);
+                } else {
+                    window.location.reload();
+                }
+
+            } catch (error) {
+                console.error('Subscription order error:', error);
+
+                Swal.fire({
+                    title: 'Terjadi Kesalahan',
+                    text: error.message
+                        || 'Tidak dapat menghubungi server. Periksa koneksi Anda dan coba kembali.',
+                    icon: 'error',
+                    confirmButtonText: 'Tutup'
+                });
+
+            } finally {
+                /*
+                |--------------------------------------------------------------------------
+                | KEMBALIKAN TOMBOL JIKA MASIH DI HALAMAN INI
+                |--------------------------------------------------------------------------
+                */
+                if (document.body.contains(button)) {
+                    button.disabled = false;
+                    button.innerHTML = originalButtonHtml;
                 }
             }
         });
-
-        function escapeHtml(value) {
-            return String(value)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
-        }
-
-        // FAQ accordion.
-        $('.sub-faq-question').on('click', function () {
-            const $button = $(this);
-            const $answer = $button.next('.sub-faq-answer');
-
-            $button.toggleClass('active');
-            $answer.stop(true, true).slideToggle(200);
-        });
-
-        // Tampilkan error validasi Laravel bila tersedia.
-        @if($errors->any())
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Periksa kembali data',
-                    text: @json($errors->first())
-                });
-            }
-        @endif
-
-        // Filter awal.
-        filterSubscriptions();
     });
 </script>
 @endsection

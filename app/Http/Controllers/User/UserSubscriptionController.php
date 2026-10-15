@@ -131,7 +131,7 @@ class UserSubscriptionController extends Controller
         */
 
         return view(
-            'user-page.subscription.index',
+            'dashboard-user.user-subscription.index',
             compact(
                 'subscriptions',
                 'orders',
@@ -237,6 +237,7 @@ class UserSubscriptionController extends Controller
 
     public function store(Request $request)
     {
+
         $request->validate([
             'subscription_uuid' => 'required|string',
         ]);

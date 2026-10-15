@@ -1622,6 +1622,50 @@
 
                                     @endif
 
+                                    <div class="menu-item">
+
+                                        <div class="menu-content pt-5 pb-2">
+
+                                            <span class="menu-heading text-uppercase fs-7 fw-bold text-muted">
+
+                                                Berlangganan
+
+                                            </span>
+
+                                        </div>
+
+                                        <a href="{{ route('dashboard-user.subscription.index') }}"
+                                        class="menu-link {{ Route::is('dashboard-user.subscription.*') ? 'active' : '' }}">
+
+                                            <span class="menu-icon">
+
+                                                <i class="ki-duotone ki-star fs-2"></i>
+
+                                            </span>
+
+                                            <span class="menu-title">
+                                                Paket
+                                            </span>
+
+                                        </a>
+
+                                        <a href="{{ route('dashboard-user.user-subscription.index') }}"
+                                        class="menu-link {{ Route::is('dashboard-user.user-subscription.*') ? 'active' : '' }}">
+
+                                            <span class="menu-icon">
+
+                                                <i class="ki-duotone ki-cheque fs-2"></i>
+
+                                            </span>
+
+                                            <span class="menu-title">
+                                                Riwayat Pembayaran
+                                            </span>
+
+                                        </a>
+
+                                    </div>
+
 
                                     {{-- ================================================= --}}
                                     {{-- PENGATURAN --}}
@@ -1651,21 +1695,6 @@
 
                                             <span class="menu-title">
                                                 Profil Perusahaan
-                                            </span>
-
-                                        </a>
-
-                                        <a href="{{ route('dashboard-user.subscription.index') }}"
-                                        class="menu-link {{ Route::is('dashboard-user.subscription.*') ? 'active' : '' }}">
-
-                                            <span class="menu-icon">
-
-                                                <i class="ki-duotone ki-star fs-2"></i>
-
-                                            </span>
-
-                                            <span class="menu-title">
-                                                Paket Berlangganan
                                             </span>
 
                                         </a>
