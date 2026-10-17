@@ -66,6 +66,7 @@ use Laravolt\Indonesia\Models\Province;
 use Laravolt\Indonesia\Models\City;
 use Laravolt\Indonesia\Models\District;
 use Laravolt\Indonesia\Models\Village;
+use App\Http\Controllers\LegalDocumentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -95,6 +96,22 @@ Route::get('/lgn-admn', function () {
 
 Route::post('/sign-in-admin', [ADMAuth::class, 'signInAdmin'])->name('sign-in-admin');
 
+Route::withoutMiddleware([
+    \Illuminate\Session\Middleware\StartSession::class,
+    \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+    \Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class,
+])->group(function () {
+    Route::get('/delete-account', function () {
+        $subject = 'Permohonan Penghapusan Akun Autoloker';
+        $body = "Halo Tim Autoloker,\n\nSaya ingin mengajukan permohonan penghapusan akun Autoloker beserta data pribadi yang terkait.\n\nNama Lengkap:\nEmail Terdaftar:\n\nMohon informasi mengenai proses verifikasi dan penghapusan akun saya.\n\nTerima kasih.";
+
+        return view('legal.delete-account', [
+            'mailto' => 'mailto:devautoloker@gmail.com?subject=' . rawurlencode($subject) . '&body=' . rawurlencode($body),
+        ]);
+    })->name('account-deletion');
+    Route::get('/privacy-policy', [LegalDocumentController::class, 'privacyPolicy'])->name('legal.privacy-policy');
+    Route::get('/terms-and-conditions', [LegalDocumentController::class, 'termsAndConditions'])->name('legal.terms-and-conditions');
+});
 Route::middleware(['auth'])->group(function () {
 
     Route::post('/lgt-admn', [ADMAuth::class, 'logout'])

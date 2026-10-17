@@ -1,0 +1,60 @@
+.legal-page {
+    --legal-bg: #f7f8fa;
+    --legal-surface: #ffffff;
+    --legal-heading: #182338;
+    --legal-body: #475569;
+    --legal-border: #e2e8f0;
+    --legal-accent: #f7b003;
+    --legal-accent-soft: #fff4d6;
+    box-sizing: border-box;
+    min-width: 0;
+    min-height: 100vh;
+    margin: 0;
+    padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+    background: var(--legal-bg);
+    color: var(--legal-body);
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    font-size: 1rem;
+    line-height: 1.75;
+    overflow-wrap: anywhere;
+}
+.legal-page *, .legal-page *::before, .legal-page *::after { box-sizing: inherit; }
+.legal-header, .legal-main, .legal-footer { width: 100%; max-width: 52rem; min-width: 0; margin-inline: auto; }
+.legal-header { display: flex; flex-direction: column; gap: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--legal-border); }
+.legal-brand { display: inline-flex; align-items: center; min-height: 44px; }
+.legal-brand img { display: block; width: min(11.25rem, 100%); height: auto; }
+.legal-nav, .legal-footer nav { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.legal-nav a, .legal-footer a { display: inline-flex; align-items: center; min-height: 44px; padding: .35rem .75rem; border-radius: .4rem; color: var(--legal-heading); font-weight: 600; text-decoration: underline; text-underline-offset: .15em; }
+.legal-nav a[aria-current="page"] { background: var(--legal-accent); color: var(--legal-heading); text-decoration: none; }
+.legal-page a:focus-visible, .legal-table-scroll:focus-visible { outline: 3px solid var(--legal-heading); outline-offset: 3px; }
+.legal-skip { position: absolute; z-index: 1; top: .5rem; left: .5rem; padding: .5rem .75rem; transform: translateY(-150%); background: var(--legal-accent); color: var(--legal-heading); }
+.legal-skip:focus { transform: translateY(0); }
+.legal-main { padding-block: 1.5rem 2rem; }
+.legal-document { min-width: 0; padding: 1.25rem; border: 1px solid var(--legal-border); border-radius: .75rem; background: var(--legal-surface); color: var(--legal-body); }
+.legal-document h1, .legal-document h2, .legal-document h3 { color: var(--legal-heading); line-height: 1.25; }
+.legal-document h1 { margin: 0 0 1.25rem; font-size: clamp(1.75rem, 1.3rem + 2vw, 2.5rem); }
+.legal-document h2 { margin: 2rem 0 .75rem; font-size: 1.5rem; }
+.legal-document h3 { margin: 1.5rem 0 .5rem; font-size: 1.2rem; }
+.legal-document p { margin: 0 0 1rem; }
+.legal-document ul, .legal-document ol { margin: 0 0 1rem; padding-left: 1.75rem; }
+.legal-document ul { list-style: disc; }
+.legal-document ol { list-style: decimal; }
+.legal-document li { margin-block: .35rem; padding-left: .15rem; }
+.legal-document li > ul, .legal-document li > ol { margin-block: .35rem; }
+.legal-document strong, .legal-document b { font-weight: 700; }
+.legal-document a { color: var(--legal-heading); text-decoration: underline; text-underline-offset: .15em; }
+.legal-document hr { margin: 1.75rem 0; border: 0; border-top: 1px solid var(--legal-border); }
+.legal-table-scroll { max-width: 100%; margin-block: 1rem; overflow-x: auto; }
+.legal-document table { width: max-content; min-width: 100%; border-collapse: collapse; }
+.legal-document th, .legal-document td { padding: .65rem .75rem; border: 1px solid var(--legal-border); text-align: left; vertical-align: top; }
+.legal-document th { color: var(--legal-heading); background: var(--legal-bg); }
+.legal-document pre { max-width: 100%; padding: 1rem; overflow-x: auto; border: 1px solid var(--legal-border); border-radius: .4rem; background: var(--legal-bg); }
+.legal-document code { overflow-wrap: anywhere; }
+.legal-footer { padding-top: 1rem; border-top: 1px solid var(--legal-border); }
+@media (min-width: 40rem) {
+    .legal-header { flex-direction: row; align-items: center; justify-content: space-between; }
+}
+@media (min-width: 48rem) {
+    .legal-page { padding: max(2rem, env(safe-area-inset-top)) max(2rem, env(safe-area-inset-right)) max(2rem, env(safe-area-inset-bottom)) max(2rem, env(safe-area-inset-left)); }
+    .legal-document { padding: 2rem; }
+}
