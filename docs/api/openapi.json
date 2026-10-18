@@ -3411,7 +3411,7 @@
     "/api/register": {
       "post": {
         "summary": "Register a user",
-        "description": "Registers a security or company account using the existing\nusers, user_*, and role-specific profile models. BUJP self-service\nregistration is no longer accepted; cleaning service accounts are\ncreated by switching role from an existing security profile.\n",
+        "description": "Registers email/password accounts with role `security`, `cs`, or `company`. Job seekers choose `security` or `cs` before submitting; no role switch is required after registration.",
         "operationId": "registerUser",
         "security": [],
         "requestBody": {
@@ -3421,6 +3421,9 @@
               "schema": {
                 "oneOf": [
                   {
+                    "$ref": "#/components/schemas/RegisterCleaningServiceRequest"
+                  },
+                  {
                     "$ref": "#/components/schemas/RegisterSecurityRequest"
                   },
                   {
@@ -3429,6 +3432,9 @@
                 ]
               },
               "examples": {
+                "cs": {
+                  "$ref": "#/components/examples/CleaningServiceRequest"
+                },
                 "security": {
                   "$ref": "#/components/examples/SecurityRequest"
                 },
@@ -3440,15 +3446,15 @@
             "multipart/form-data": {
               "schema": {
                 "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/RegisterSecurityRequest"
-                  },
-                  {
-                    "$ref": "#/components/schemas/RegisterCompanyRequest"
-                  }
+                  {"$ref": "#/components/schemas/RegisterCleaningServiceRequest"},
+                  {"$ref": "#/components/schemas/RegisterSecurityRequest"},
+                  {"$ref": "#/components/schemas/RegisterCompanyRequest"}
                 ]
               },
               "examples": {
+                "cs": {
+                  "$ref": "#/components/examples/CleaningServiceRequest"
+                },
                 "security": {
                   "$ref": "#/components/examples/SecurityRequest"
                 },
@@ -3468,13 +3474,13 @@
                   "$ref": "#/components/schemas/RegisterResponse"
                 },
                 "examples": {
+                  "cs": {
+                    "$ref": "#/components/examples/CleaningServiceResponse"
+                  },
                   "security": {
                     "$ref": "#/components/examples/SecurityResponse"
                   },
                   "company": {
-                    "$ref": "#/components/examples/CompanyResponse"
-                  },
-                  "bujp": {
                     "$ref": "#/components/examples/CompanyResponse"
                   }
                 }
@@ -10941,6 +10947,25 @@
           }
         }
       },
+      "RegisterCleaningServiceRequest": {
+        "type": "object",
+        "required": ["role", "name", "email", "password", "password_confirmation", "agree"],
+        "properties": {
+          "role": {"type": "string", "const": "cs"},
+          "name": {"type": "string", "minLength": 3, "maxLength": 150},
+          "email": {"type": "string", "format": "email", "maxLength": 100},
+          "password": {"$ref": "#/components/schemas/Password"},
+          "password_confirmation": {"type": "string", "format": "password"},
+          "agree": {"type": "boolean", "const": true},
+          "phone_number": {
+            "type": ["string", "null"],
+            "minLength": 10,
+            "maxLength": 15,
+            "pattern": "^\\d{10,15}$",
+            "description": "Optional and unique; non-digit characters are stripped before validation."
+          }
+        }
+      },
       "Password": {
         "type": "string",
         "format": "password",
@@ -10992,8 +11017,8 @@
             "type": "string",
             "enum": [
               "satpam",
-              "company",
-              "bujp"
+              "cs",
+              "company"
             ]
           },
           "name": {
@@ -11365,6 +11390,17 @@
           }
         }
       },
+      "CleaningServiceRequest": {
+        "summary": "Cleaning service registration request",
+        "value": {
+          "role": "cs",
+          "name": "Siti Rahma",
+          "email": "siti@example.com",
+          "password": "Secret123",
+          "password_confirmation": "Secret123",
+          "agree": true
+        }
+      },
       "SecurityRequest": {
         "summary": "Security registration request",
         "value": {
@@ -11450,6 +11486,20 @@
           "facebook": "https://facebook.com/example",
           "linkedin": "https://linkedin.com/company/example",
           "youtube": "https://youtube.com/@example"
+        }
+      },
+      "CleaningServiceResponse": {
+        "summary": "Cleaning service registration response",
+        "value": {
+          "status": true,
+          "message": "Pendaftaran berhasil.",
+          "data": {
+            "id": 44,
+            "uuid": "550e8400-e29b-41d4-a716-446655440002",
+            "role": "cs",
+            "name": "Siti Rahma",
+            "email": "siti@example.com"
+          }
         }
       },
       "SecurityResponse": {

@@ -2471,12 +2471,10 @@ paths:
 
   /api/register:
     post:
-      summary: Register a user
       description: |
-        Registers a security or company account using the existing
-        users, user_*, and role-specific profile models. BUJP self-service
-        registration is no longer accepted; cleaning service accounts are
-        created by switching role from an existing security profile.
+        Supports email/password registration for `security`, `cs`, and `company`.
+        Job seekers choose `security` or `cs` before submitting; no role switch
+        is required after registration.
       operationId: registerUser
       security: []
       requestBody:
@@ -2485,9 +2483,12 @@ paths:
           application/json:
             schema:
               oneOf:
+                - $ref: '#/components/schemas/RegisterCleaningServiceRequest'
                 - $ref: '#/components/schemas/RegisterSecurityRequest'
                 - $ref: '#/components/schemas/RegisterCompanyRequest'
             examples:
+              cs:
+                $ref: '#/components/examples/CleaningServiceRequest'
               security:
                 $ref: '#/components/examples/SecurityRequest'
               company:
@@ -2495,14 +2496,16 @@ paths:
           multipart/form-data:
             schema:
               oneOf:
+                - $ref: '#/components/schemas/RegisterCleaningServiceRequest'
                 - $ref: '#/components/schemas/RegisterSecurityRequest'
                 - $ref: '#/components/schemas/RegisterCompanyRequest'
             examples:
+              cs:
+                $ref: '#/components/examples/CleaningServiceRequest'
               security:
                 $ref: '#/components/examples/SecurityRequest'
               company:
                 $ref: '#/components/examples/CompanyRequest'
-      responses:
         '201':
           description: Registration successful
           content:
@@ -2510,11 +2513,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/RegisterResponse'
               examples:
+                cs:
+                  $ref: '#/components/examples/CleaningServiceResponse'
                 security:
                   $ref: '#/components/examples/SecurityResponse'
                 company:
-                  $ref: '#/components/examples/CompanyResponse'
-                bujp:
                   $ref: '#/components/examples/CompanyResponse'
         '422':
           description: Validation failed
@@ -6508,6 +6511,22 @@ components:
         message:
           type: string
 
+    RegisterCleaningServiceRequest:
+      type: object
+      required: [role, name, email, password, password_confirmation, agree]
+      properties:
+        role: {type: string, const: cs}
+        name: {type: string, minLength: 3, maxLength: 150}
+        email: {type: string, format: email, maxLength: 100}
+        password: {$ref: '#/components/schemas/Password'}
+        password_confirmation: {type: string, format: password}
+        agree: {type: boolean, const: true}
+        phone_number:
+          type: [string, 'null']
+          minLength: 10
+          maxLength: 15
+          pattern: '^\d{10,15}$'
+          description: Optional and unique; non-digit characters are stripped before validation.
     RegisterSecurityRequest:
       type: object
       required:
@@ -6620,7 +6639,7 @@ components:
           format: uuid
         role:
           type: string
-          enum: [satpam, company, bujp]
+          enum: [satpam, cs, company]
         name:
           type: string
         email:
@@ -6918,6 +6937,15 @@ components:
             status: applied
             created_at: '2026-09-22T08:30:11.000000Z'
 
+    CleaningServiceRequest:
+      summary: Cleaning service registration request
+      value:
+        role: cs
+        name: Siti Rahma
+        email: siti@example.com
+        password: Secret123
+        password_confirmation: Secret123
+        agree: true
     SecurityRequest:
       summary: Security registration request
       value:
@@ -6995,6 +7023,17 @@ components:
         facebook: https://facebook.com/example
         linkedin: https://linkedin.com/company/example
         youtube: https://youtube.com/@example
+    CleaningServiceResponse:
+      summary: Cleaning service registration response
+      value:
+        status: true
+        message: Pendaftaran berhasil.
+        data:
+          id: 44
+          uuid: 550e8400-e29b-41d4-a716-446655440002
+          role: cs
+          name: Siti Rahma
+          email: siti@example.com
     SecurityResponse:
       summary: Security registration response
       value:

@@ -31,6 +31,7 @@ class RegistrationService
 
             match ($data['role']) {
                 'security' => $this->createSecurity($user, $data),
+                'cs' => $this->roles->switch($user, 'cs'),
                 'company' => $this->createCompany($user, $data),
             };
 
