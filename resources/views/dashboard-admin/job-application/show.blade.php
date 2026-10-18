@@ -550,9 +550,7 @@
 
                                 <div class="fw-bold mt-1">
 
-                                    {{ $job->working_system == 'shift'
-                                        ? 'Shift'
-                                        : 'Non-Shift' }}
+                                    {{ match ($job->working_system) { 'shift' => 'Shift', 'reliever' => 'Reliever', default => 'Non-Shift' } }}
 
                                 </div>
 

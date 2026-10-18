@@ -1045,9 +1045,7 @@
                                     <span>
                                         <i class="ki-duotone ki-time"></i>
 
-                                        {{ $job->working_system == 'shift'
-                                            ? 'Shift'
-                                            : 'Non-Shift' }}
+                                        {{ match ($job->working_system) { 'shift' => 'Shift', 'reliever' => 'Reliever', default => 'Non-Shift' } }}
 
                                     </span>
 
@@ -1376,9 +1374,7 @@
                             {{-- Sistem kerja --}}
                             <span class="job-tag">
 
-                                {{ $job->working_system === 'shift'
-                                    ? 'Shift'
-                                    : 'Non-Shift' }}
+                                {{ match ($job->working_system) { 'shift' => 'Shift', 'reliever' => 'Reliever', default => 'Non-Shift' } }}
 
                             </span>
 

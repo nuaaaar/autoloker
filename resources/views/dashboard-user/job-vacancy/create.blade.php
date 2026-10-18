@@ -1518,26 +1518,29 @@
 
                             <div class="option-group">
 
-                                <label class="option-card active">
+                                @php($workingSystem = old('working_system', 'shift'))
 
-                                    <input
-                                        type="radio"
-                                        name="working_system"
-                                        value="shift"
-                                        checked>
+                                <label class="option-card {{ $workingSystem == 'shift' ? 'active' : '' }}">
+
+                                    <input type="radio" name="working_system" value="shift" {{ $workingSystem == 'shift' ? 'checked' : '' }}>
 
                                     Shift
 
                                 </label>
 
-                                <label class="option-card">
+                                <label class="option-card {{ $workingSystem == 'non-shift' ? 'active' : '' }}">
 
-                                    <input
-                                        type="radio"
-                                        name="working_system"
-                                        value="non-shift">
+                                    <input type="radio" name="working_system" value="non-shift" {{ $workingSystem == 'non-shift' ? 'checked' : '' }}>
 
                                     Non Shift
+
+                                </label>
+
+                                <label class="option-card {{ $workingSystem == 'reliever' ? 'active' : '' }}">
+
+                                    <input type="radio" name="working_system" value="reliever" {{ $workingSystem == 'reliever' ? 'checked' : '' }}>
+
+                                    Reliever
 
                                 </label>
 

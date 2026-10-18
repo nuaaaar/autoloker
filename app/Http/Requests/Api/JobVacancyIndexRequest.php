@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Api;
 
+use App\Services\Api\JobVacancyRules;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -23,7 +24,7 @@ class JobVacancyIndexRequest extends FormRequest
                 'intenrship',
                 'freelance',
             ])],
-            'working_system' => ['sometimes', 'nullable', Rule::in(['shift', 'non-shift'])],
+            'working_system' => ['sometimes', 'nullable', Rule::in(JobVacancyRules::workingSystems())],
             'certificate' => ['sometimes', 'nullable', 'string', 'max:255'],
             'min_price' => ['sometimes', 'nullable', 'numeric', 'min:0'],
             'is_urgent' => ['sometimes', 'nullable', 'boolean'],

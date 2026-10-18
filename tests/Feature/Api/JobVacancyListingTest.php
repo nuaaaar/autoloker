@@ -92,6 +92,26 @@ class JobVacancyListingTest extends TestCase
 
     }
 
+    public function test_working_system_filter_supports_reliever(): void
+    {
+        $token = $this->token();
+        $vacancies = collect(['shift', 'non-shift', 'reliever'])
+            ->map(fn (string $workingSystem) => JobVacancy::create($this->vacancyAttributes([
+                'working_system' => $workingSystem,
+            ])));
+
+        $this->withToken($token)->getJson('/api/job-vacancies?working_system=reliever')
+            ->assertOk()
+            ->assertJsonPath('data.pagination.total', 1)
+            ->assertJsonCount(1, 'data.job_vacancies')
+            ->assertJsonPath('data.job_vacancies.0.uuid', (string) $vacancies->last()->uuid)
+            ->assertJsonPath('data.job_vacancies.0.working_system', 'reliever');
+
+        $this->withToken($token)->getJson('/api/job-vacancies?working_system=office')
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['working_system']);
+    }
+
     public function test_list_includes_company_and_bujp_logo_urls(): void
     {
         config(['filesystems.disks.public.url' => 'https://assets.example.test/storage']);

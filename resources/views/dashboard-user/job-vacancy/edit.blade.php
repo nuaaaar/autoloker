@@ -1507,6 +1507,17 @@
                                         Non Shift
 
                                     </label>
+                                    <label class="option-card {{ old('working_system', $data->working_system) == 'reliever' ? 'active' : '' }}">
+
+                                        <input
+                                            type="radio"
+                                            name="working_system"
+                                            value="reliever"
+                                            {{ old('working_system', $data->working_system) == 'reliever' ? 'checked' : '' }}>
+
+                                        Reliever
+
+                                    </label>
 
                                 </div>
 

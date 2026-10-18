@@ -121,7 +121,8 @@
               "type": "string",
               "enum": [
                 "shift",
-                "non-shift"
+                "non-shift",
+                "reliever"
               ],
               "example": "shift"
             },
@@ -7428,7 +7429,8 @@
             "type": "string",
             "enum": [
               "shift",
-              "non-shift"
+              "non-shift",
+              "reliever"
             ],
             "example": "shift"
           },
@@ -7726,7 +7728,8 @@
             "description": "Work schedule.",
             "enum": [
               "shift",
-              "non-shift"
+              "non-shift",
+              "reliever"
             ],
             "example": "shift"
           },
@@ -8011,7 +8014,8 @@
             "description": "Work schedule.",
             "enum": [
               "shift",
-              "non-shift"
+              "non-shift",
+              "reliever"
             ],
             "example": "shift"
           },

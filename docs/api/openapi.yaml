@@ -146,7 +146,7 @@ paths:
           description: Filter by work system.
           schema:
             type: string
-            enum: [shift, non-shift]
+            enum: [shift, non-shift, reliever]
             example: shift
           example: shift
         - name: certificate
@@ -4795,7 +4795,7 @@ components:
           example: permanent
         working_system:
           type: string
-          enum: [shift, non-shift]
+          enum: [shift, non-shift, reliever]
           example: shift
         is_show_fee:
           type: integer
@@ -4956,7 +4956,7 @@ components:
         working_system:
           type: string
           description: Work schedule.
-          enum: [shift, non-shift]
+          enum: [shift, non-shift, reliever]
           example: shift
         responsibilities:
           type: [array, 'null']
@@ -5123,7 +5123,7 @@ components:
         working_system:
           type: string
           description: Work schedule.
-          enum: [shift, non-shift]
+          enum: [shift, non-shift, reliever]
           example: shift
         responsibilities:
           type: [array, 'null']

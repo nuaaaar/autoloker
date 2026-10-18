@@ -150,6 +150,37 @@ class JobVacancyManagementTest extends TestCase
             ->assertJsonPath('data.job_vacancy.village', 'Sepinggan');
     }
 
+    public function test_reliever_can_be_created_patched_and_submitted(): void
+    {
+        [, $company, $token] = $this->companyAccount('reliever@example.com', 'Reliever Company');
+        $created = $this->withToken($token)->postJson('/api/company/job-vacancies', $this->payload([
+            'working_system' => 'reliever',
+            'end_date' => now()->addDays(7)->toDateString(),
+        ]))->assertCreated()
+            ->assertJsonPath('data.job_vacancy.working_system', 'reliever');
+        $uuid = $created->json('data.job_vacancy.uuid');
+        $this->assertDatabaseHas('job_vacancies', ['uuid' => $uuid, 'company_id' => $company->id, 'working_system' => 'reliever']);
+
+        $this->withToken($token)->patchJson("/api/company/job-vacancies/{$uuid}", ['working_system' => 'shift'])
+            ->assertOk()->assertJsonPath('data.job_vacancy.working_system', 'shift');
+        $this->assertDatabaseHas('job_vacancies', ['uuid' => $uuid, 'working_system' => 'shift']);
+
+        $this->withToken($token)->patchJson("/api/company/job-vacancies/{$uuid}", ['working_system' => 'reliever'])
+            ->assertOk()->assertJsonPath('data.job_vacancy.working_system', 'reliever');
+        $this->assertDatabaseHas('job_vacancies', ['uuid' => $uuid, 'working_system' => 'reliever']);
+
+        $this->withToken($token)->patchJson("/api/company/job-vacancies/{$uuid}", ['working_system' => 'office'])
+            ->assertUnprocessable()->assertJsonValidationErrors(['working_system']);
+        $this->assertDatabaseHas('job_vacancies', ['uuid' => $uuid, 'working_system' => 'reliever']);
+
+        $this->withToken($token)->getJson("/api/company/job-vacancies/{$uuid}")
+            ->assertOk()->assertJsonPath('data.job_vacancy.working_system', 'reliever');
+        $this->withToken($token)->postJson("/api/company/job-vacancies/{$uuid}/submit")
+            ->assertOk()->assertJsonPath('data.job_vacancy.working_system', 'reliever')
+            ->assertJsonPath('data.job_vacancy.status', 'submitted');
+    }
+
+
 
     public function test_patch_updates_only_submitted_fields_and_replaces_arrays(): void
     {

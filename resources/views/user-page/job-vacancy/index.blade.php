@@ -1035,6 +1035,10 @@
                                         Non-Shift
                                     </option>
 
+                                    <option value="reliever">
+                                        Reliever
+                                    </option>
+
                                 </select>
 
                             </div>

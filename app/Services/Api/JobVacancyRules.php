@@ -183,7 +183,7 @@ final class JobVacancyRules
 
     public static function workingSystems(): array
     {
-        return ['shift', 'non-shift'];
+        return ['shift', 'non-shift', 'reliever'];
     }
 
     private static function shared(): array
