@@ -6121,6 +6121,24 @@
             "description": "City name returned directly as a string, not a nested object.",
             "example": "KOTA BALIKPAPAN"
           },
+          "district": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 255,
+            "description": "Optional district name.",
+            "example": "Balikpapan Selatan"
+          },
+          "village": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 255,
+            "description": "Optional village or urban-village name.",
+            "example": "Sepinggan"
+          },
           "address": {
             "type": [
               "string",
@@ -6377,6 +6395,24 @@
             "description": "City name in the selected province. Required when workflow_action is submit.",
             "example": "KOTA BALIKPAPAN"
           },
+          "district": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 255,
+            "description": "Optional district name.",
+            "example": "Balikpapan Selatan"
+          },
+          "village": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 255,
+            "description": "Optional village or urban-village name.",
+            "example": "Sepinggan"
+          },
           "address": {
             "type": [
               "string",
@@ -6607,6 +6643,24 @@
             ],
             "description": "Training address.",
             "example": "Jl. Jend Sudirman"
+          },
+          "district": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 255,
+            "description": "Optional district name.",
+            "example": "Balikpapan Selatan"
+          },
+          "village": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 255,
+            "description": "Optional village or urban-village name.",
+            "example": "Sepinggan"
           },
           "syllabus": {
             "type": [
@@ -7630,6 +7684,24 @@
             "description": "City name in the selected province. Required when workflow_action is submit.",
             "example": "KOTA BALIKPAPAN"
           },
+          "district": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 255,
+            "description": "Optional district name.",
+            "example": "Balikpapan Selatan"
+          },
+          "village": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 255,
+            "description": "Optional village or urban-village name.",
+            "example": "Sepinggan"
+          },
           "address": {
             "type": [
               "string",
@@ -7896,6 +7968,24 @@
             "maxLength": 255,
             "description": "City name in the selected province.",
             "example": "KOTA BALIKPAPAN"
+          },
+          "district": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 255,
+            "description": "Optional district name.",
+            "example": "Balikpapan Selatan"
+          },
+          "village": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 255,
+            "description": "Optional village or urban-village name.",
+            "example": "Sepinggan"
           },
           "address": {
             "type": [

@@ -31,6 +31,8 @@ class OwnedJobVacancyResource extends JsonResource
             ] : null,
             'province' => $this->province,
             'city' => $this->city,
+            'district' => $this->district,
+            'village' => $this->village,
             'address' => $this->address,
             'working_type' => $this->working_type,
             'working_system' => $this->working_system,

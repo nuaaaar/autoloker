@@ -51,6 +51,8 @@ class OwnedTrainingResource extends JsonResource
             'training_mode' => $this->training_mode,
             'province' => $this->province,
             'city' => $this->city,
+            'district' => $this->district,
+            'village' => $this->village,
             'address' => $this->address,
             'syllabus' => $this->arrayValue($this->syllabus),
             'requirements' => $this->arrayValue($this->requirements),

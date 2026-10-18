@@ -4050,6 +4050,16 @@ components:
           type: [string, 'null']
           description: City name returned directly as a string, not a nested object.
           example: KOTA BALIKPAPAN
+        district:
+          type: [string, 'null']
+          maxLength: 255
+          description: Optional district name.
+          example: Balikpapan Selatan
+        village:
+          type: [string, 'null']
+          maxLength: 255
+          description: Optional village or urban-village name.
+          example: Sepinggan
         address:
           type: [string, 'null']
           example: Platform pembelajaran BUJP Aman
@@ -4198,6 +4208,16 @@ components:
           maxLength: 255
           description: City name in the selected province. Required when workflow_action is submit.
           example: KOTA BALIKPAPAN
+        district:
+          type: [string, 'null']
+          maxLength: 255
+          description: Optional district name.
+          example: Balikpapan Selatan
+        village:
+          type: [string, 'null']
+          maxLength: 255
+          description: Optional village or urban-village name.
+          example: Sepinggan
         address:
           type: [string, 'null']
           description: Training address. Required when workflow_action is submit.
@@ -4331,6 +4351,16 @@ components:
           maxLength: 255
           description: City name in the selected province.
           example: KOTA BALIKPAPAN
+        district:
+          type: [string, 'null']
+          maxLength: 255
+          description: Optional district name.
+          example: Balikpapan Selatan
+        village:
+          type: [string, 'null']
+          maxLength: 255
+          description: Optional village or urban-village name.
+          example: Sepinggan
         address:
           type: [string, 'null']
           description: Training address.
@@ -4748,10 +4778,14 @@ components:
           example: KOTA BALIKPAPAN
         district:
           type: [string, 'null']
-          example: null
+          maxLength: 255
+          description: Optional district name.
+          example: Balikpapan Selatan
         village:
           type: [string, 'null']
-          example: null
+          maxLength: 255
+          description: Optional village or urban-village name.
+          example: Sepinggan
         address:
           type: [string, 'null']
           example: Jl. Jend Sudirman
@@ -4900,6 +4934,16 @@ components:
           maxLength: 255
           description: City name in the selected province. Required when workflow_action is submit.
           example: KOTA BALIKPAPAN
+        district:
+          type: [string, 'null']
+          maxLength: 255
+          description: Optional district name.
+          example: Balikpapan Selatan
+        village:
+          type: [string, 'null']
+          maxLength: 255
+          description: Optional village or urban-village name.
+          example: Sepinggan
         address:
           type: [string, 'null']
           description: Work location address. Required when workflow_action is submit.
@@ -5057,6 +5101,16 @@ components:
           maxLength: 255
           description: City name in the selected province.
           example: KOTA BALIKPAPAN
+        district:
+          type: [string, 'null']
+          maxLength: 255
+          description: Optional district name.
+          example: Balikpapan Selatan
+        village:
+          type: [string, 'null']
+          maxLength: 255
+          description: Optional village or urban-village name.
+          example: Sepinggan
         address:
           type: [string, 'null']
           description: Work location address.

@@ -18,6 +18,7 @@ final class JobVacancyRules
         return $rules;
     }
 
+
     public static function update(): array
     {
         return self::shared();
@@ -42,6 +43,8 @@ final class JobVacancyRules
             'description_work' => ['required', 'string'],
             'province' => ['required', 'string', 'max:255'],
             'city' => ['required', 'string', 'max:255'],
+            'district' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'village' => ['sometimes', 'nullable', 'string', 'max:255'],
             'address' => ['required', 'string'],
             'working_type' => ['required', 'string', Rule::in(self::workingTypes())],
             'working_system' => ['required', 'string', Rule::in(self::workingSystems())],
@@ -190,6 +193,8 @@ final class JobVacancyRules
             'description_work' => ['sometimes', 'nullable', 'string'],
             'province' => ['sometimes', 'nullable', 'string', 'max:255'],
             'city' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'district' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'village' => ['sometimes', 'nullable', 'string', 'max:255'],
             'address' => ['sometimes', 'nullable', 'string'],
             'working_type' => ['sometimes', 'string', Rule::in(self::workingTypes())],
             'working_system' => ['sometimes', 'string', Rule::in(self::workingSystems())],

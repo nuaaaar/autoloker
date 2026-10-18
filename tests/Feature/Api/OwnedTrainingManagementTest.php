@@ -92,6 +92,69 @@ class OwnedTrainingManagementTest extends TestCase
             'duration_day' => 3,
         ]);
     }
+    public function test_post_patch_and_submit_preserve_optional_district_and_village(): void
+    {
+        [, , $token] = $this->companyAccount('district_and_village@example.com', 'Location Training');
+        $response = $this->withToken($token)->postJson('/api/company/trainings', $this->payload([
+            'district' => 'Balikpapan Selatan',
+            'village' => 'Sepinggan',
+        ]))->assertCreated();
+        $uuid = $response->json('data.training.uuid');
+        $response->assertJsonStructure(['data' => ['training' => ['district', 'village']]]);
+        $response->assertJsonPath('data.training.district', 'Balikpapan Selatan')
+            ->assertJsonPath('data.training.village', 'Sepinggan');
+        $this->assertDatabaseHas('trainings', [
+            'uuid' => $uuid,
+            'district' => 'Balikpapan Selatan',
+            'village' => 'Sepinggan',
+        ]);
+
+        $this->withToken($token)->patchJson("/api/company/trainings/{$uuid}", [
+            'district' => 'Balikpapan Utara',
+        ])->assertOk()
+            ->assertJsonPath('data.training.district', 'Balikpapan Utara')
+            ->assertJsonPath('data.training.village', 'Sepinggan');
+        $this->withToken($token)->patchJson("/api/company/trainings/{$uuid}", [
+            'title' => 'Pelatihan Updated',
+        ])->assertOk()
+            ->assertJsonPath('data.training.district', 'Balikpapan Utara')
+            ->assertJsonPath('data.training.village', 'Sepinggan');
+        $this->withToken($token)->patchJson("/api/company/trainings/{$uuid}", [
+            'district' => null,
+            'village' => null,
+        ])->assertOk()
+            ->assertJsonPath('data.training.district', null)
+            ->assertJsonPath('data.training.village', null);
+        $this->assertDatabaseHas('trainings', ['uuid' => $uuid, 'district' => null, 'village' => null]);
+
+        $this->withToken($token)->postJson('/api/company/trainings', $this->payload())
+            ->assertCreated()->assertJsonStructure(['data' => ['training' => ['district', 'village']]]);
+        $this->withToken($token)->postJson('/api/company/trainings', $this->payload([
+            'district' => [],
+            'village' => str_repeat('x', 256),
+        ]))->assertUnprocessable()->assertJsonValidationErrors(['district', 'village']);
+        $this->withToken($token)->patchJson("/api/company/trainings/{$uuid}", [
+            'district' => str_repeat('d', 256),
+            'village' => 123,
+        ])->assertUnprocessable()->assertJsonValidationErrors(['district', 'village']);
+        $this->assertDatabaseHas('trainings', ['uuid' => $uuid, 'district' => null, 'village' => null]);
+
+        $boundary = $this->withToken($token)->postJson('/api/company/trainings', $this->payload([
+            'district' => str_repeat('d', 255),
+            'village' => str_repeat('v', 255),
+        ]))->assertCreated();
+        $boundary->assertJsonPath('data.training.district', str_repeat('d', 255))
+            ->assertJsonPath('data.training.village', str_repeat('v', 255));
+
+        $this->withToken($token)->postJson('/api/company/trainings', $this->payload([
+            'district' => 'Balikpapan Selatan',
+            'village' => 'Sepinggan',
+            'workflow_action' => 'submit',
+        ]))->assertCreated()
+            ->assertJsonPath('data.training.district', 'Balikpapan Selatan')
+            ->assertJsonPath('data.training.village', 'Sepinggan');
+    }
+
 
     public function test_patch_updates_only_submitted_fields_and_replaces_arrays(): void
     {
