@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Api;
 
+use App\Models\BUJP;
+use App\Models\Company;
 use App\Models\JobApplication;
 use App\Models\JobVacancy;
 use App\Models\Security;
@@ -62,6 +64,15 @@ class JobVacancyListingTest extends TestCase
             ->assertJsonCount(5, 'data.job_vacancies')
             ->assertJsonPath('data.job_vacancies.0.position', 'Security 6');
 
+        $nextPage = $response->json('data.pagination.next_page_url');
+        $this->assertStringContainsString('province_name=Jawa%20Barat', $nextPage);
+        $this->withToken($token)
+            ->getJson($nextPage)
+            ->assertOk()
+            ->assertJsonPath('data.pagination.current_page', 2)
+            ->assertJsonPath('data.pagination.has_more', false)
+            ->assertJsonCount(1, 'data.job_vacancies')
+            ->assertJsonPath('data.job_vacancies.0.position', 'Security 1');
         $this->assertSame(
             ['Site security'],
             $response->json('data.job_vacancies.0.responsibility')
@@ -79,20 +90,69 @@ class JobVacancyListingTest extends TestCase
             $response->json('data.job_vacancies.0.competency_scheme')
         );
 
-        $this->withToken($token)
-            ->getJson("/api/job-vacancies?{$filters}&page=2")
-            ->assertOk()
-            ->assertJsonPath('data.pagination.current_page', 2)
-            ->assertJsonPath('data.pagination.has_more', false)
-            ->assertJsonCount(1, 'data.job_vacancies')
-            ->assertJsonPath('data.job_vacancies.0.position', 'Security 1');
     }
 
+    public function test_list_includes_company_and_bujp_logo_urls(): void
+    {
+        config(['filesystems.disks.public.url' => 'https://assets.example.test/storage']);
+        $token = $this->token();
+
+        $company = Company::create(['company_name' => 'Logo Company', 'logo' => 'company-logo/company.png']);
+        $bujp = BUJP::create(['company_name' => 'Logo BUJP', 'logo' => 'company-logo/bujp.png']);
+        $vacancies = [
+            JobVacancy::create($this->vacancyAttributes([
+                'position' => 'Company Logo', 'company_id' => $company->id, 'category' => 'security',
+            ])),
+            JobVacancy::create($this->vacancyAttributes([
+                'position' => 'BUJP Logo', 'b_u_j_p_id' => $bujp->id, 'category' => 'security',
+            ])),
+            JobVacancy::create($this->vacancyAttributes([
+                'position' => 'No Logo', 'company_id' => Company::create([
+                    'company_name' => 'No Logo Company', 'logo' => null,
+                ])->id, 'category' => 'security',
+            ])),
+            JobVacancy::create($this->vacancyAttributes([
+                'position' => 'Empty Logo', 'company_id' => Company::create([
+                    'company_name' => 'Empty Logo Company', 'logo' => '',
+                ])->id, 'category' => 'security',
+            ])),
+            JobVacancy::create($this->vacancyAttributes(['position' => 'No Owner', 'category' => 'security'])),
+            JobVacancy::create($this->vacancyAttributes([
+                'position' => 'Both Owners', 'company_id' => $company->id, 'b_u_j_p_id' => $bujp->id, 'category' => 'security',
+            ])),
+        ];
+
+        $response = $this->withToken($token)->getJson('/api/job-vacancies');
+        $response->assertOk();
+        $secondPage = $this->withToken($token)->getJson('/api/job-vacancies?page=2');
+        $secondPage->assertOk();
+        $items = collect(array_merge($response->json('data.job_vacancies'), $secondPage->json('data.job_vacancies')))->keyBy('position');
+        $this->assertSame('https://assets.example.test/storage/company-logo/company.png', $items['Company Logo']['company']['logo']);
+        $this->assertSame('https://assets.example.test/storage/company-logo/bujp.png', $items['BUJP Logo']['bujp']['logo']);
+        $this->assertArrayHasKey('logo', $items['No Logo']['company']);
+        $this->assertNull($items['No Logo']['company']['logo']);
+        $this->assertNull($items['Empty Logo']['company']['logo']);
+        $this->assertNull($items['No Owner']['company']);
+        $this->assertNull($items['No Owner']['bujp']);
+        $this->assertSame('https://assets.example.test/storage/company-logo/company.png', $items['Both Owners']['company']['logo']);
+        $this->assertSame('https://assets.example.test/storage/company-logo/bujp.png', $items['Both Owners']['bujp']['logo']);
+        $this->assertCount(6, $vacancies);
+    }
+
+    public function test_empty_search_results_keep_pagination_shape(): void
+    {
+        $this->withToken($this->token())
+            ->getJson('/api/job-vacancies?search=No%20matching%20vacancy')
+            ->assertOk()
+            ->assertJsonCount(0, 'data.job_vacancies')
+            ->assertJsonPath('data.pagination.total', 0)
+            ->assertJsonPath('data.pagination.has_more', false)
+            ->assertJsonPath('data.pagination.next_page_url', null);
+    }
     public function test_list_includes_total_applications_and_authenticated_security_application_state(): void
     {
         [$user, $security] = $this->securityAccount('vacancy-state@example.com');
         [, $otherSecurity] = $this->securityAccount('other-vacancy-state@example.com');
-
         $notAppliedVacancy = JobVacancy::create($this->vacancyAttributes([
             'position' => 'Not Applied Security',
         ]));

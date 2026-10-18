@@ -5750,7 +5750,8 @@
         "type": "object",
         "required": [
           "id",
-          "company_name"
+          "company_name",
+          "logo"
         ],
         "properties": {
           "id": {
@@ -5763,6 +5764,15 @@
               "null"
             ],
             "example": "PT Example Training"
+          },
+          "logo": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri",
+            "description": "Publicly accessible organization logo URL, or null when no logo is set.",
+            "example": "https://assets.example.test/storage/company-logo/example.png"
           }
         }
       },
@@ -8105,7 +8115,8 @@
         "type": "object",
         "required": [
           "id",
-          "company_name"
+          "company_name",
+          "logo"
         ],
         "properties": {
           "id": {
@@ -8118,6 +8129,15 @@
               "null"
             ],
             "example": "Digital Partner Autotalenta"
+          },
+          "logo": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri",
+            "description": "Publicly accessible organization logo URL, or null when no logo is set.",
+            "example": "https://assets.example.test/storage/company-logo/example.png"
           }
         }
       },

@@ -33,8 +33,8 @@ class OwnedJobVacancyController extends OwnedOrganizationController
 
         $query = JobVacancy::query()
             ->with([
-                'bujp:id,company_name',
-                'company:id,company_name',
+                'bujp:id,company_name,logo',
+                'company:id,company_name,logo',
             ])
             ->withCount('applications as total_applications')
             ->where($owner['column'], $owner['id']);

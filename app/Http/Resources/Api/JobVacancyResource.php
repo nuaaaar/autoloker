@@ -1,9 +1,9 @@
 <?php
 
 namespace App\Http\Resources\Api;
-
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 class JobVacancyResource extends JsonResource
 {
@@ -17,6 +17,17 @@ class JobVacancyResource extends JsonResource
     public function toArray(Request $request): array
     {
         $data = $this->resource->toArray();
+
+        foreach (['bujp', 'company'] as $organization) {
+            if (! is_array($data[$organization] ?? null)) {
+                continue;
+            }
+
+            $path = $data[$organization]['logo'] ?? null;
+            $data[$organization]['logo'] = is_string($path) && $path !== ''
+                ? Storage::disk('public')->url($path)
+                : null;
+        }
 
         foreach (self::ARRAY_FIELDS as $field) {
             $data[$field] = $this->normalizeArray($data[$field] ?? null);

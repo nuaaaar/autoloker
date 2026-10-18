@@ -27,8 +27,8 @@ class JobApplicationController extends Controller
             ->with([
                 'job_vacancy' => function ($query): void {
                     $query->with([
-                        'bujp:id,company_name',
-                        'company:id,company_name',
+                        'bujp:id,company_name,logo',
+                        'company:id,company_name,logo',
                     ]);
                 },
             ])

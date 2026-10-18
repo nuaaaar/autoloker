@@ -28,8 +28,8 @@ class OwnedTrainingController extends OwnedOrganizationController
 
         $query = Training::query()
             ->with([
-                'bujp:id,company_name',
-                'company:id,company_name',
+                'bujp:id,company_name,logo',
+                'company:id,company_name,logo',
             ])
             ->withCount([
                 'applications as approved_applications_count' => function (Builder $query): void {

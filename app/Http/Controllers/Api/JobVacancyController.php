@@ -30,8 +30,8 @@ class JobVacancyController extends Controller
 
         $query = JobVacancy::query()
             ->with([
-                'bujp:id,company_name',
-                'company:id,company_name',
+                'bujp:id,company_name,logo',
+                'company:id,company_name,logo',
             ])
             ->withCount('applications as total_applications')
             ->withExists([
@@ -148,7 +148,7 @@ class JobVacancyController extends Controller
             });
         }
 
-        $vacancy = $query->with(['bujp:id,company_name', 'company:id,company_name'])->firstOrFail();
+        $vacancy = $query->with(['bujp:id,company_name,logo', 'company:id,company_name,logo'])->firstOrFail();
 
         if ($user->role !== 'company') {
             $application = $vacancy->applications()
