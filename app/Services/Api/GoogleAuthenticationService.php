@@ -21,16 +21,32 @@ class GoogleAuthenticationService
     public function login(array $data): array
     {
         $identity = $this->verify($data['id_token']);
-        $users = User::where('google_id', $identity['google_id'])->limit(2)->get();
 
-        if ($users->isEmpty()) {
-            throw ValidationException::withMessages(['id_token' => 'Akun Google belum terdaftar.']);
-        }
-        if ($users->count() !== 1) {
-            throw ValidationException::withMessages(['id_token' => 'Akun Google tidak dapat digunakan untuk login.']);
-        }
+        return DB::transaction(function () use ($identity, $data): array {
+            $users = User::where('google_id', $identity['google_id'])->limit(2)->get();
 
-        return DB::transaction(fn (): array => $this->authentication->authenticate($users->first(), $data['role'], 'id_token'));
+            if ($users->count() > 1) {
+                throw ValidationException::withMessages(['id_token' => 'Akun Google tidak dapat digunakan untuk login.']);
+            }
+
+            if ($users->count() === 1) {
+                $user = $users->first();
+            } else {
+                $user = User::where('email', $identity['email'])->lockForUpdate()->first();
+                if (! $user) {
+                    throw ValidationException::withMessages(['id_token' => 'Akun Google belum terdaftar.']);
+                }
+
+                if ($user->google_id === null || $user->google_id === '') {
+                    $user->google_id = $identity['google_id'];
+                    $user->save();
+                } elseif ($user->google_id !== $identity['google_id']) {
+                    throw ValidationException::withMessages(['id_token' => 'Akun Google tidak dapat digunakan untuk login.']);
+                }
+            }
+
+            return $this->authentication->authenticate($user, $data['role'], 'id_token');
+        });
     }
 
     public function register(array $data): array

@@ -4,10 +4,15 @@ namespace Tests\Feature\Api;
 
 use App\Models\ApiToken;
 use App\Models\User;
+use App\Models\UserCompany;
+use App\Models\UserCleaningService;
+use App\Models\UserSecurity;
+use App\Services\Api\RegistrationService;
 use App\Services\Api\TokenService;
 use Firebase\JWT\JWT;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class GoogleAuthTest extends TestCase
@@ -141,12 +146,143 @@ class GoogleAuthTest extends TestCase
         $this->postJson('/api/auth/google/register', ['role' => 'security'])->assertUnprocessable();
     }
 
-    public function test_existing_email_is_not_linked_or_changed(): void
+    public function test_local_account_with_matching_verified_google_email_is_linked_and_remains_usable(): void
     {
-        $user = User::create(['name' => 'Local User', 'email' => 'google-test@example.com', 'password' => 'local-password', 'role' => 'satpam', 'status' => 'active', 'google_id' => null]);
-        $this->postJson('/api/auth/google/register', ['role' => 'security', 'id_token' => $this->token()])->assertUnprocessable();
-        $this->postJson('/api/auth/google/login', ['role' => 'security', 'id_token' => $this->token()])->assertUnprocessable();
-        $this->assertNull($user->fresh()->google_id);
+        foreach ([
+            ['security', 'blank', 'link-security@example.test', 'google-link-security'],
+            ['cs', 'null', 'link-cs@example.test', 'google-link-cs'],
+            ['company', 'blank', 'link-company@example.test', 'google-link-company'],
+        ] as [$role, $subjectState, $email, $subject]) {
+            $user = app(RegistrationService::class)->register([
+                'role' => $role,
+                'name' => 'Existing Local User',
+                'email' => $email,
+                'password' => 'LocalPass123',
+                'phone_number' => $role === 'security' ? '081234567891' : null,
+            ]);
+            if ($subjectState === 'null') {
+                $user->forceFill(['google_id' => null])->save();
+            }
+            $user->refresh();
+            $hash = $user->password;
+            $profileId = match ($role) {
+                'security' => UserSecurity::where('user_id', $user->id)->value('id'),
+                'cs' => UserCleaningService::where('user_id', $user->id)->value('id'),
+                'company' => UserCompany::where('user_id', $user->id)->value('id'),
+            };
+            $initialUsers = User::count();
+            $token = $this->token(['sub' => $subject, 'email' => $email]);
+
+            $this->postJson('/api/auth/google/register', ['role' => $role, 'id_token' => $token])
+                ->assertUnprocessable()->assertJsonValidationErrors('email');
+            $this->assertSame($subjectState === 'null' ? null : '', $user->fresh()->google_id);
+
+            $response = $this->postJson('/api/auth/google/login', ['role' => $role, 'id_token' => $token])
+                ->assertOk()->assertJsonPath('data.user.uuid', $user->uuid);
+            $user->refresh();
+            $this->assertSame($subject, $user->google_id);
+            $this->assertSame($hash, $user->password);
+            $this->assertTrue($user->has_local_password);
+            $this->assertSame($profileId, match ($role) {
+                'security' => UserSecurity::where('user_id', $user->id)->value('id'),
+                'cs' => UserCleaningService::where('user_id', $user->id)->value('id'),
+                'company' => UserCompany::where('user_id', $user->id)->value('id'),
+            });
+            $this->assertSame($initialUsers, User::count());
+            $this->assertDatabaseHas('api_tokens', [
+                'user_id' => $user->id,
+                'access_token_hash' => hash('sha256', $response->json('data.access_token')),
+            ]);
+            $this->withToken($response->json('data.access_token'))->getJson('/api/me')
+                ->assertOk()->assertJsonPath('data.user.uuid', $user->uuid);
+            $this->postJson('/api/auth/google/login', ['role' => $role, 'id_token' => $token])
+                ->assertOk()->assertJsonPath('data.user.uuid', $user->uuid);
+            $this->postJson('/api/login', [
+                'role' => $role, 'identifier' => $email, 'password' => 'LocalPass123',
+            ])->assertOk()->assertJsonPath('data.user.uuid', $user->uuid);
+            $this->assertSame($initialUsers, User::count());
+        }
+    }
+
+    public function test_google_login_rejects_unknown_subject_conflicting_email_and_duplicate_subject(): void
+    {
+        $local = app(RegistrationService::class)->register([
+            'role' => 'security', 'name' => 'Local User', 'email' => 'local@example.test',
+            'password' => 'LocalPass123', 'phone_number' => '081234567891',
+        ]);
+        $linked = app(RegistrationService::class)->register([
+            'role' => 'company', 'name' => 'Linked User', 'email' => 'linked@example.test',
+            'password' => 'LocalPass123',
+        ]);
+        $linked->forceFill(['google_id' => 'owner-sub'])->save();
+        $beforeTokens = ApiToken::count();
+
+        $this->postJson('/api/auth/google/login', ['role' => 'security', 'id_token' => $this->token([
+            'sub' => 'unknown-sub', 'email' => 'unknown@example.test',
+        ])])->assertUnprocessable()->assertJsonValidationErrors('id_token');
+        $this->assertSame(2, User::count());
+        $this->assertSame($beforeTokens, ApiToken::count());
+
+        $this->postJson('/api/auth/google/login', ['role' => 'security', 'id_token' => $this->token([
+            'sub' => 'replacement-sub', 'email' => 'linked@example.test',
+        ])])->assertUnprocessable()->assertJsonValidationErrors('id_token');
+        $this->assertSame('owner-sub', $linked->fresh()->google_id);
+
+        User::whereKey($local->id)->update(['google_id' => 'duplicate-sub']);
+        User::whereKey($linked->id)->update(['google_id' => 'duplicate-sub']);
+        $this->postJson('/api/auth/google/login', ['role' => 'security', 'id_token' => $this->token([
+            'sub' => 'duplicate-sub', 'email' => 'local@example.test',
+        ])])->assertUnprocessable()->assertJsonValidationErrors('id_token');
+        $this->assertSame($beforeTokens, ApiToken::count());
+    }
+
+    public function test_google_login_rejects_unverified_email_inactive_accounts_and_incompatible_roles(): void
+    {
+        $local = app(RegistrationService::class)->register([
+            'role' => 'security', 'name' => 'Local User', 'email' => 'unverified@example.test',
+            'password' => 'LocalPass123', 'phone_number' => '081234567891',
+        ]);
+        $this->postJson('/api/auth/google/login', ['role' => 'security', 'id_token' => $this->token([
+            'sub' => 'unverified-sub', 'email' => 'unverified@example.test', 'email_verified' => false,
+        ])])->assertUnprocessable()->assertJsonValidationErrors('id_token');
+        $this->assertSame('', $local->fresh()->google_id);
+        $this->assertSame(0, ApiToken::count());
+
+        $local->update(['status' => 'inactive']);
+        $this->postJson('/api/auth/google/login', ['role' => 'security', 'id_token' => $this->token([
+            'sub' => 'inactive-sub', 'email' => 'unverified@example.test',
+        ])])->assertUnprocessable();
+        $this->assertSame('', $local->fresh()->google_id);
+        $this->assertSame(0, ApiToken::count());
+
+        $company = app(RegistrationService::class)->register([
+            'role' => 'company', 'name' => 'Local Company', 'email' => 'company@example.test',
+            'password' => 'LocalPass123',
+        ]);
+        $this->postJson('/api/auth/google/login', ['role' => 'security', 'id_token' => $this->token([
+            'sub' => 'company-sub', 'email' => 'company@example.test',
+        ])])->assertUnprocessable()->assertJsonValidationErrors('role');
+        $this->assertSame('', $company->fresh()->google_id);
+        $this->assertSame(0, ApiToken::count());
+    }
+
+    public function test_google_login_rolls_back_link_and_role_profile_when_token_issue_fails(): void
+    {
+        $user = app(RegistrationService::class)->register([
+            'role' => 'security', 'name' => 'Local User', 'email' => 'rollback@example.test',
+            'password' => 'LocalPass123', 'phone_number' => '081234567891',
+        ]);
+        $securityProfileId = UserSecurity::where('user_id', $user->id)->value('id');
+        $this->mock(TokenService::class)->shouldReceive('issue')->once()->andThrow(new \RuntimeException('token issue failure'));
+
+        $this->postJson('/api/auth/google/login', ['role' => 'cs', 'id_token' => $this->token([
+            'sub' => 'rollback-sub', 'email' => 'rollback@example.test',
+        ])])->assertInternalServerError();
+        $user->refresh();
+        $this->assertSame('satpam', $user->role);
+        $this->assertSame('', $user->google_id);
+        $this->assertSame($securityProfileId, UserSecurity::where('user_id', $user->id)->value('id'));
+        $this->assertSame(0, UserCleaningService::where('user_id', $user->id)->count());
         $this->assertSame(0, ApiToken::count());
     }
 

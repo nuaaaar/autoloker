@@ -44,7 +44,7 @@ paths:
   /api/auth/google/login:
     post:
       summary: Log in with a Google ID token
-      description: Verifies a Google OAuth ID token against the configured server client ID and authenticates an already registered Google subject. This endpoint does not auto-link accounts or create users.
+      description: Verifies the Google ID token against the configured server client ID. Authenticates an already linked Google subject, or automatically links a verified Google email to an existing local account with the same email. It does not create users; Google account registration remains available through the separate register endpoint.
       operationId: loginWithGoogle
       requestBody:
         required: true
