@@ -38,6 +38,13 @@ final class JobVacancyRules
     public static function complete(): array
     {
         return [
+            'security_position' => [
+                'required_if:category,security', 'nullable', 'string', 'max:150',
+                'prohibited_if:category,cs',
+                Rule::exists('master_positions', 'title')
+                    ->where('category', 'security')
+                    ->whereNull('deleted_at'),
+            ],
             'position' => ['required', 'string', 'min:3', 'max:150'],
             'category' => ['required', Rule::in(self::categories())],
             'description_work' => ['required', 'string'],
@@ -189,6 +196,13 @@ final class JobVacancyRules
     private static function shared(): array
     {
         return [
+            'security_position' => [
+                'sometimes', 'nullable', 'string', 'max:150',
+                'prohibited_if:category,cs',
+                Rule::exists('master_positions', 'title')
+                    ->where('category', 'security')
+                    ->whereNull('deleted_at'),
+            ],
             'position' => ['sometimes', 'string', 'min:3', 'max:150'],
             'description_work' => ['sometimes', 'nullable', 'string'],
             'province' => ['sometimes', 'nullable', 'string', 'max:255'],

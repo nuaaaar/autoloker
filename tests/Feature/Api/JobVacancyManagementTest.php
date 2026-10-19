@@ -5,6 +5,7 @@ namespace Tests\Feature\Api;
 use App\Models\Company;
 use App\Models\User;
 use App\Models\UserCompany;
+use App\Models\MasterPosition;
 use App\Services\Api\TokenService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -18,6 +19,27 @@ class JobVacancyManagementTest extends TestCase
     {
         parent::setUp();
         $this->seedLocations();
+        MasterPosition::create(['title' => 'Komandan Regu', 'category' => 'security']);
+    }
+    public function test_security_position_is_optional_on_draft_and_required_before_submit(): void
+    {
+        [, , $token] = $this->companyAccount('security-position@example.com', 'Security Position');
+        $draftPayload = $this->payload();
+        unset($draftPayload['security_position']);
+        $draft = $this->withToken($token)->postJson('/api/company/job-vacancies', $draftPayload)
+            ->assertCreated()->assertJsonPath('data.job_vacancy.security_position', null);
+        $uuid = $draft->json('data.job_vacancy.uuid');
+
+        $this->withToken($token)->postJson("/api/company/job-vacancies/{$uuid}/submit")
+            ->assertUnprocessable()->assertJsonValidationErrors(['security_position']);
+        $this->assertDatabaseHas('job_vacancies', ['uuid' => $uuid, 'status' => 'draft', 'security_position' => null]);
+
+        $this->withToken($token)->patchJson("/api/company/job-vacancies/{$uuid}", [
+            'security_position' => 'Komandan Regu',
+        ])->assertOk()->assertJsonPath('data.job_vacancy.security_position', 'Komandan Regu');
+        $this->withToken($token)->postJson("/api/company/job-vacancies/{$uuid}/submit")
+            ->assertOk()->assertJsonPath('data.job_vacancy.status', 'submitted');
+        $this->assertSame('Satpam Pabrik', $draftPayload['position']);
     }
 
     public function test_post_creates_draft_with_canonical_envelope_and_location_header(): void
@@ -395,6 +417,7 @@ class JobVacancyManagementTest extends TestCase
     private function payload(array $overrides = []): array
     {
         return array_merge([
+            'security_position' => 'Komandan Regu',
             'position' => 'Satpam Pabrik',
             'category' => 'security',
             'description_work' => 'Menjaga keamanan area pabrik.',

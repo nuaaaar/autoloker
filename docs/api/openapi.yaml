@@ -303,13 +303,15 @@ paths:
     post:
       summary: Create a job vacancy for the authenticated company
       description: >-
-        Creates a company-owned job vacancy as a draft by default. For save_draft, only
-        position is required. Set workflow_action to submit to validate and submit the vacancy directly
-        for review; submit requires every field listed in the complete request example. Ownership,
-        status, timestamps, provider, and application counters are server-managed. The request uses
-        responsibilities and quota; these map to responsibility and kuota in storage and response
-        data. The response-only fields start_date, fee_type, gender, district, and village are not
-        accepted in this request.
+        Creates a company-owned job vacancy as a draft by default. `position` and `category`
+        are required on create. For `workflow_action: submit`, all fields shown in the submit
+        example are required. `security_position` is optional for drafts and PATCH, but required
+        on security submit and must match an active title from
+        `GET /api/masters/positions?category=security`. CS may omit it or send null.
+        That endpoint lists profile positions, distinct from template positions in company
+        master-data. Ownership, status, timestamps, provider, and counters are server-managed.
+        Request fields `responsibilities` and `quota` map to `responsibility` and `kuota`.
+        Response-only fields are not accepted.
       operationId: createOwnedJobVacancy
       security:
         - bearerAuth: []
@@ -319,11 +321,14 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateOwnedJobVacancyRequest'
+              description: For security submit, send an active title from GET /api/masters/positions?category=security. Komandan Regu is an example; replace it with an actual returned title.
             examples:
               draft:
                 summary: Create a complete draft from a real vacancy
                 value:
                   position: Satpam Objek Vital (Obvit) - Test 10
+                  category: security
+                  security_position: Komandan Regu
                   description_work: Pengamanan pada objek vital seperti pembangkit listrik, pelabuhan, bandara dan kilang minyak.
                   province: KALIMANTAN TIMUR
                   city: KOTA BALIKPAPAN
@@ -366,6 +371,8 @@ paths:
                 summary: Create and submit a complete vacancy
                 value:
                   position: Satpam Objek Vital (Obvit) - Test 10
+                  category: security
+                  security_position: Komandan Regu
                   description_work: Pengamanan pada objek vital seperti pembangkit listrik, pelabuhan, bandara dan kilang minyak.
                   province: KALIMANTAN TIMUR
                   city: KOTA BALIKPAPAN
@@ -530,8 +537,7 @@ paths:
           format: uuid
     post:
       summary: Submit an owned job vacancy for review
-      description: Submits a draft or rejected job vacancy owned by the authenticated company for review. The complete vacancy payload is validated before the status changes to `submitted`.
-      operationId: submitOwnedJobVacancy
+      description: Submits a draft or rejected vacancy for review. Security vacancies require security_position to match an active title from GET /api/masters/positions?category=security; CS vacancies may omit it or send null. The endpoint lists profile positions, distinct from company template positions.
       security:
         - bearerAuth: []
       responses:
@@ -4671,6 +4677,7 @@ components:
         - b_u_j_p_id
         - company_id
         - position
+        - security_position
         - category
         - description_work
         - responsibility
@@ -4725,6 +4732,11 @@ components:
         position:
           type: [string, 'null']
           example: Satpam Objek Vital (Obvit)
+        security_position:
+          type: [string, 'null']
+          maxLength: 150
+          description: Active master_positions title in category security, stored as a snapshot. Always returned; null for legacy rows and CS vacancies.
+          example: Komandan Regu
         category:
           type: string
           enum: [security, cs]
@@ -4908,6 +4920,9 @@ components:
         (security or cs); category is immutable after creation. Using workflow_action submit
         additionally requires description_work, province, city, address, working_type,
         working_system, at least one responsibility, all age/height/weight ranges,
+        Security submissions require security_position to match an active title from
+        GET /api/masters/positions?category=security. It is optional for drafts and PATCH;
+        CS may omit it or send null. This reference is distinct from template positions in company master-data.
         last_education, min_experience, at least one certificate, competency scheme, facility,
         min_price, max_price, is_show_fee, is_urgent, quota, and end_date. Do not send ownership,
         status, provider, counters, start_date, fee_type, or other response-only fields.
@@ -4921,8 +4936,11 @@ components:
           enum: [security, cs]
           description: Applicant category the vacancy targets. Required on create; prohibited on PATCH.
           example: security
-          description: Vacancy position title.
-          example: Satpam Objek Vital (Obvit) - Test 10
+        security_position:
+          type: [string, 'null']
+          maxLength: 150
+          description: Optional for drafts/PATCH; required for security submit. Must match an active title from GET /api/masters/positions?category=security. CS may omit it or send null.
+          example: Komandan Regu
         description_work:
           type: [string, 'null']
           description: Work description. Required when workflow_action is submit.
@@ -5086,6 +5104,11 @@ components:
           maxLength: 150
           description: Vacancy position title.
           example: Satpam Objek Vital (Obvit) - Test 10
+        security_position:
+          type: [string, 'null']
+          maxLength: 150
+          description: Optional title from active security master positions; PATCH may set null. CS values are prohibited.
+          example: Komandan Regu
         category:
           description: Vacancy category cannot be changed after creation; sending it fails validation with a prohibited rule.
           not: {}

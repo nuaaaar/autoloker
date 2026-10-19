@@ -32,7 +32,9 @@ class JobVacancyService
     {
         $merged = array_merge($this->payload($vacancy), $data);
         $validateLocation = array_key_exists('province', $data) || array_key_exists('city', $data);
-        $normalized = $this->validatePayload($merged, false, $validateLocation);
+        $validationPayload = $merged;
+        unset($validationPayload['category'], $validationPayload['workflow_action']);
+        $normalized = $this->validatePayload(array_merge(['category' => $vacancy->category], $validationPayload), false, $validateLocation);
 
         foreach (['province', 'city'] as $field) {
             if (array_key_exists($field, $data)) {
@@ -96,7 +98,12 @@ class JobVacancyService
             $this->throwValidatorErrors($validator);
         }
 
-        return $data;
+        $validated = $validator->validated();
+        if (! $complete && array_key_exists('category', $data)) {
+            $validated['category'] = $data['category'];
+        }
+
+        return $validated;
     }
 
     /** @return array{0: array, 1: array<string, list<string>>} */
@@ -141,10 +148,11 @@ class JobVacancyService
     {
         $mapping = [
             'position' => 'position',
+            'security_position' => 'security_position',
             'category' => 'category',
             'description_work' => 'description_work',
-            'province' => 'province',
             'city' => 'city',
+            'province' => 'province',
             'district' => 'district',
             'village' => 'village',
             'address' => 'address',
@@ -189,6 +197,7 @@ class JobVacancyService
     {
         return [
             'position' => $vacancy->position,
+            'security_position' => $vacancy->security_position,
             'category' => $vacancy->category,
             'description_work' => $vacancy->description_work,
             'province' => $vacancy->province,
