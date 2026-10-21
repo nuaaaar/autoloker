@@ -102,22 +102,15 @@ Data pribadi disimpan selama akun pengguna masih aktif dan sepanjang masih diper
 
 Saat akun tidak lagi digunakan atau pengguna mengajukan penghapusan, kami akan meninjau data terkait untuk dihapus sesuai permintaan dan ketentuan hukum yang berlaku. Sebagian catatan dapat perlu dipertahankan apabila terdapat dasar hukum yang sah, misalnya kewajiban pencatatan transaksi atau penyelesaian sengketa. Jika hal tersebut berlaku, akses dan penggunaan data yang dipertahankan dibatasi sesuai tujuannya.
 
-Jangka waktu penyelesaian permintaan penghapusan belum ditetapkan sebagai standar operasional tetap pada tanggal berlakunya kebijakan ini. Kami akan menindaklanjuti permintaan yang diterima melalui kontak resmi dan memberikan informasi prosesnya kepada pemohon.
+Permintaan penghapusan melalui API diproses secara sinkron untuk data akun. Penghapusan berkas yang gagal saat itu dicatat untuk dicoba kembali; respons 202 berarti data akun dan kredensial telah dihapus, sementara sebagian berkas masih menunggu cleanup.
 
 ## 7. Hak Pengguna dan Permintaan Penghapusan Akun
 
 Pengguna dapat melihat serta memperbarui informasi profil melalui fitur yang tersedia. Pengguna juga dapat menghubungi kami untuk mengajukan pertanyaan atau permintaan terkait data pribadi, termasuk koreksi dan penghapusan sesuai peraturan yang berlaku.
 
-**Cara mengajukan permintaan penghapusan akun dan data saat ini:**
+Pengguna dengan bearer token yang valid dapat menghapus akun melalui `DELETE /api/account` dengan body JSON `{"confirm_delete":true}`. API ini tersedia bagi akun satpam, cs, company, dan bujp. Tidak memerlukan password lokal atau autentikasi Google baru. API menghapus akun beserta data terkait dan konten milik organisasi; file upload yang gagal dihapus akan dicoba kembali secara terjadwal.
 
-1. Kirim email ke **[devautoloker@gmail.com](mailto:devautoloker@gmail.com)** dengan subjek **Permintaan Penghapusan Akun Autoloker**.
-2. Sertakan alamat email atau nomor telepon yang terhubung ke akun, serta penjelasan bahwa Anda ingin menghapus akun dan data yang terkait.
-3. Kami dapat melakukan verifikasi yang wajar untuk memastikan bahwa permintaan dibuat oleh pemilik akun atau pihak yang berwenang. Jangan mengirim kata sandi, OTP, atau informasi autentikasi rahasia melalui email.
-4. Setelah verifikasi, kami akan memproses permintaan dan memberi informasi mengenai hasilnya, termasuk apabila terdapat data yang wajib dipertahankan karena alasan hukum yang sah.
-
-Jenis data yang termasuk dalam cakupan peninjauan penghapusan meliputi informasi profil, dokumen dan sertifikat yang diunggah, riwayat lamaran, riwayat pendaftaran pelatihan, catatan pembayaran dan langganan, data autentikasi dan sesi, serta token notifikasi perangkat. Penghapusan dilakukan dengan memperhatikan hubungan data dengan transaksi atau catatan lain dan kewajiban penyimpanan yang mungkin berlaku.
-
-**Pada tanggal berlakunya kebijakan ini, fitur penghapusan akun mandiri di dalam aplikasi belum tersedia.** Permintaan dapat disampaikan melalui email resmi di atas.
+Respons 200 berarti akun, data terkait, dan file yang terdaftar telah dihapus. Respons 202 berarti akun, data terkait, dan kredensial telah dihapus, tetapi pembersihan sebagian file masih tertunda. Kedua respons berarti akun tidak dapat digunakan lagi. Fitur tombol penghapusan di client tidak dinyatakan tersedia.
 
 ## 8. Akses Fitur Perangkat
 

@@ -25,6 +25,7 @@ use App\Http\Controllers\Api\TrainingApplicationController;
 use App\Http\Controllers\Api\TrainingController;
 use App\Http\Controllers\Api\UserOrderManualController;
 use App\Http\Controllers\Api\UserSubscriptionController;
+use App\Http\Controllers\Api\DeleteAccountController;
 use App\Http\Controllers\Api\GoogleAuthController;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +34,7 @@ Route::post('/refresh-token', RefreshTokenController::class)->name('api.refresh-
 Route::post('/auth/google/login', [GoogleAuthController::class, 'login'])->name('api.auth.google.login');
 Route::post('/auth/google/register', [GoogleAuthController::class, 'register'])->name('api.auth.google.register');
 Route::middleware('api.token')->group(function () {
+    Route::delete('/account', DeleteAccountController::class)->name('api.account.destroy');
     Route::get('/company/job-vacancies', [OwnedJobVacancyController::class, 'index'])->name('api.company.job-vacancies.index');
     Route::post('/company/job-vacancies', [OwnedJobVacancyController::class, 'store'])->name('api.company.job-vacancies.store');
     Route::get('/company/job-vacancies/master-data', [OwnedJobVacancyController::class, 'masterData'])->name('api.company.job-vacancies.master-data');

@@ -4882,6 +4882,36 @@
           }
         }
       }
+    },
+    "/api/account": {
+      "delete": {
+        "summary": "Delete the authenticated account and its owned data",
+        "operationId": "deleteAuthenticatedAccount",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "required": ["confirm_delete"], "properties": {"confirm_delete": {"type": "boolean", "const": true}}}}}},
+        "responses": {
+          "200": {"description": "Account and associated data and files deleted", "content": {"application/json": {"schema": {"type": "object", "required": ["status", "message", "data"], "properties": {"status": {"type": "boolean", "const": true}, "message": {"type": "string", "const": "Akun dan data terkait berhasil dihapus."}, "data": {"type": "object", "required": ["files_pending"], "properties": {"files_pending": {"type": "boolean", "const": false}}}}}}}},
+          "202": {"description": "Account deleted; file cleanup remains pending", "content": {"application/json": {"schema": {"type": "object", "required": ["status", "message", "data"], "properties": {"status": {"type": "boolean", "const": true}, "message": {"type": "string", "const": "Akun telah dihapus. Penghapusan berkas terkait masih diproses."}, "data": {"type": "object", "required": ["files_pending"], "properties": {"files_pending": {"type": "boolean", "const": true}}}}}}}},
+          "401": {"$ref": "#/components/responses/Unauthenticated"},
+          "403": {"$ref": "#/components/responses/Forbidden"},
+          "409": {
+            "description": "Request conflicts with shared ownership or contains an invalid local file location",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["status", "message"],
+                  "properties": {
+                    "status": {"type": "boolean", "const": false},
+                    "message": {"type": "string", "enum": ["Akun tidak dapat dihapus karena ada data atau berkas yang dipakai bersama akun lain.", "Akun tidak dapat dihapus karena lokasi berkas tidak valid."]}
+                  }
+                }
+              }
+            }
+          },
+          "422": {"$ref": "#/components/responses/ValidationError"}
+        }
+      }
     }
   },
   "components": {
