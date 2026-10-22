@@ -1378,7 +1378,7 @@
 
                         </div>
 
-                        {{-- <div class="col-md-6 mb-5">
+                        <div class="col-md-6 mb-5">
 
                             <label class="form-label required">
 
@@ -1420,7 +1420,7 @@
 
                             </select>
 
-                        </div> --}}
+                        </div>
 
                         <div class="col-md-12 mb-7">
 

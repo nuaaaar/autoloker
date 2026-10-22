@@ -1079,8 +1079,8 @@ class JobVacancyController extends Controller
 
             'province'          => 'required',
             'city'              => 'required',
-            // 'district'          => 'required',
-            // 'village'           => 'required',
+            'district'          => 'required',
+            'village'           => 'required',
             'address'           => 'required',
 
             'working_type'      => 'required',
@@ -1153,8 +1153,8 @@ class JobVacancyController extends Controller
 
             'province.required'             => 'Provinsi wajib dipilih.',
             'city.required'                 => 'Kota/Kabupaten wajib dipilih.',
-            // 'district.required'             => 'Kecamatan wajib dipilih.',
-            // 'village.required'              => 'Kelurahan wajib dipilih.',
+            'district.required'             => 'Kecamatan wajib dipilih.',
+            'village.required'              => 'Kelurahan wajib dipilih.',
             'address.required'              => 'Alamat lengkap wajib diisi.',
 
             'working_type.required'         => 'Jenis pekerjaan wajib dipilih.',
@@ -1401,8 +1401,8 @@ class JobVacancyController extends Controller
 
             'province'          => 'required',
             'city'              => 'required',
-            // 'district'       => 'required',
-            // 'village'        => 'required',
+            'district'       => 'required',
+            'village'        => 'required',
             'address'           => 'required',
 
             'working_type'      => 'required',
@@ -1476,8 +1476,8 @@ class JobVacancyController extends Controller
 
             'province.required'             => 'Provinsi wajib dipilih.',
             'city.required'                 => 'Kota/Kabupaten wajib dipilih.',
-            // 'district.required'          => 'Kecamatan wajib dipilih.',
-            // 'village.required'           => 'Kelurahan wajib dipilih.',
+            'district.required'          => 'Kecamatan wajib dipilih.',
+            'village.required'           => 'Kelurahan wajib dipilih.',
             'address.required'              => 'Alamat lengkap wajib diisi.',
 
             'working_type.required'         => 'Jenis pekerjaan wajib dipilih.',

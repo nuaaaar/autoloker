@@ -879,7 +879,7 @@
 
                             </tr>
 
-                            {{-- <tr>
+                            <tr>
 
                                 <td>Kecamatan</td>
 
@@ -893,7 +893,7 @@
 
                                 <th>{{ $data->village ?? '-' }}</th>
 
-                            </tr> --}}
+                            </tr>
 
                             <tr>
 

@@ -1293,7 +1293,7 @@
 
                                 @if($job->district || $job->village)
 
-                                    {{-- <div class="detail-list-item">
+                                    <div class="detail-list-item">
 
                                         <span class="number-icon">
                                             <i class="ki-duotone ki-geolocation"></i>
@@ -1312,7 +1312,7 @@
 
                                         </span>
 
-                                    </div> --}}
+                                    </div>
 
                                 @endif
 

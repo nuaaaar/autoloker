@@ -1169,13 +1169,48 @@
 
                                 </div>
                                 <!--end::Notification-->
-                            <!--begin::User menu-->
+                                <!--begin::User menu-->
+                            @php
+                                $user = Auth::user();
+
+                                if ($user->role == 'company') {
+                                    $profile = \App\Models\Company::find(
+                                        optional(optional($user->user_company)->company)->id
+                                    );
+                                } elseif ($user->role == 'bujp') {
+                                    $profile = \App\Models\BUJP::find(
+                                        optional(optional($user->user_bujp)->bujp)->id
+                                    );
+                                } else {
+                                    $profile = null;
+                                }
+
+                                $subscription = \App\Models\UserSubscription::where('user_id', Auth::user()->id)
+                                    ->where('status', 'active')
+                                    ->where(function ($query) {
+                                        $query->whereNull('expired_at')
+                                            ->orWhere('expired_at', '>', now());
+                                    })
+                                    ->orderByRaw('expired_at IS NULL DESC')
+                                    ->orderByDesc('expired_at')
+                                    ->first();
+
+                                $packageName = $subscription
+                                    ? $subscription->subscription_name
+                                    : 'Free';
+                            @endphp
                             <div class="app-navbar-item ms-1 ms-md-4" id="kt_header_user_menu_toggle">
                                 <!--begin::Menu wrapper-->
                                 <div class="cursor-pointer symbol symbol-35px ms-4"
                                     data-kt-menu-trigger="{default: 'click', lg: 'hover'}"
                                     data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end">
-                                    <img src="/assets/media/avatars/300-3.jpg" class="rounded-3" alt="user" />
+                                    @if(Auth::user()->role == 'company')
+                                        <img src="{{ Storage::url($profile->logo) }}" class="rounded-3" alt="user" />
+                                    @elseif(Auth::user()->role == 'bujp')
+                                        <img src="{{ Storage::url($profile->logo) }}" class="rounded-3" alt="user" />
+                                    @else
+                                        <img src="/assets/media/logos/autoloker-logo.png" class="rounded-3" alt="user" />
+                                    @endif
                                 </div>
                                 <!--begin::User account menu-->
                                 <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg menu-state-color fw-semibold py-4 fs-6 w-275px"
@@ -1185,17 +1220,40 @@
                                         <div class="menu-content d-flex align-items-center px-3">
                                             <!--begin::Avatar-->
                                             <div class="symbol symbol-50px me-5">
-                                                <img alt="Logo" src="/assets/media/logos/autoloker-logo.png" class="h-50px" style="background: white; border-radius: 8px;"/>
+                                                @if(Auth::user()->role == 'company')
+                                                    <img alt="Logo" src="{{ Storage::url($profile->logo) }}" class="h-50px" style="background: white; border-radius: 8px;"/>
+                                                @elseif(Auth::user()->role == 'bujp')
+                                                    <img alt="Logo" src="{{ Storage::url($profile->logo) }}" class="h-50px" style="background: white; border-radius: 8px;"/>
+                                                @else
+                                                    <img alt="Logo" src="/assets/media/logos/autoloker-logo.png" class="h-50px" style="background: white; border-radius: 8px;"/>
+                                                @endif
                                             </div>
                                             <!--end::Avatar-->
                                             <!--begin::Username-->
-                                            <div class="d-flex flex-column">
-                                                <div class="fw-bold d-flex align-items-center fs-5">{{ Auth::user()->name }}
-                                                    <span
-                                                        class="badge badge-light-success fw-bold fs-8 px-2 py-1 ms-2">Pro</span>
+                                            <div class="d-flex flex-column overflow-hidden" style="min-width: 0;">
+
+                                                <div class="fw-bold d-flex align-items-center fs-5"
+                                                    style="min-width: 0;">
+
+                                                    <span class="text-truncate"
+                                                        style="min-width: 0; max-width: 125px;"
+                                                        title="{{ Auth::user()->name }}">
+                                                        {{ Auth::user()->name }}
+                                                    </span>
+
+                                                    <span class="badge badge-light-success fw-bold fs-8 px-2 py-1 ms-2 flex-shrink-0">
+                                                        {{ $packageName }}
+                                                    </span>
+
                                                 </div>
+
                                                 <a href="#"
-                                                    class="fw-semibold text-muted text-hover-primary fs-7">{{ Auth::user()->email }}</a>
+                                                class="fw-semibold text-muted text-hover-primary fs-7 text-truncate"
+                                                style="max-width: 200px;"
+                                                title="{{ Auth::user()->email }}">
+                                                    {{ Auth::user()->email }}
+                                                </a>
+
                                             </div>
                                             <!--end::Username-->
                                         </div>
@@ -1206,7 +1264,7 @@
                                     <!--end::Menu separator-->
                                     <!--begin::Menu item-->
                                     <div class="menu-item px-5">
-                                        <a href="account/overview.html" class="menu-link px-5">Edit Profil</a>
+                                        <a href="account/overview.html" class="menu-link px-5">Edit Password</a>
                                     </div>
                                     <!--end::Menu item-->
                                     <!--begin::Menu item-->
@@ -1831,98 +1889,99 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
+        // Mengambil tema aktif dari Bootstrap / Metronic
+        function getSwalTheme() {
+            const theme = document.documentElement.getAttribute('data-bs-theme') || 'light';
+
+            if (theme === 'dark') {
+                return {
+                    background: '#152040',
+                    color: '#F5F7FA',
+                    confirmButtonColor: '#D6A928',
+                    cancelButtonColor: '#64748B',
+                    customClass: {
+                        popup: 'swal-theme-dark',
+                        title: 'swal-title-dark',
+                        htmlContainer: 'swal-text-dark'
+                    }
+                };
+            }
+
+            return {
+                background: '#FFFFFF',
+                color: '#263247',
+                confirmButtonColor: '#C99A1A',
+                cancelButtonColor: '#64748B',
+                customClass: {
+                    popup: 'swal-theme-light',
+                    title: 'swal-title-light',
+                    htmlContainer: 'swal-text-light'
+                }
+            };
+        }
+
+        // Logout
         $(document).on('click', '#btnLogout', function () {
 
             Swal.fire({
-
+                ...getSwalTheme(),
                 title: 'Logout?',
                 text: 'Apakah Anda yakin ingin keluar?',
                 icon: 'question',
-
                 showCancelButton: true,
-
-                confirmButtonColor: '#ffc107',
-                cancelButtonColor: '#6c757d',
-
                 confirmButtonText: 'Ya, Logout',
                 cancelButtonText: 'Batal',
-
-                background: '#152040',
-                color: '#fff'
-
+                reverseButtons: true
             }).then((result) => {
 
                 if (!result.isConfirmed) return;
 
                 $.ajax({
-
                     url: "{{ route('logout') }}",
-
                     type: "POST",
-
                     data: {
                         _token: "{{ csrf_token() }}"
                     },
 
-                    success: function(res){
-
+                    success: function (res) {
                         Swal.fire({
-
+                            ...getSwalTheme(),
                             icon: 'success',
                             title: 'Berhasil',
                             text: res.message,
                             timer: 1200,
-                            showConfirmButton: false,
-                            background: '#152040',
-                            color: '#fff'
-
+                            showConfirmButton: false
                         }).then(() => {
-
                             window.location.href = res.redirect;
-
                         });
-
                     },
 
-                    error: function(){
-
+                    error: function () {
                         Swal.fire({
-
+                            ...getSwalTheme(),
                             icon: 'error',
                             title: 'Oops...',
                             text: 'Logout gagal.',
-                            confirmButtonColor: '#ffc107',
-                            background: '#152040',
-                            color: '#fff'
-
+                            confirmButtonText: 'Tutup'
                         });
-
                     }
-
                 });
-
             });
-
         });
     </script>
-
 
     @if(session('swal'))
         <script>
             Swal.fire({
-                icon: "{{ session('swal.icon') }}",
-                title: "{{ session('swal.title') }}",
-                text: "{{ session('swal.text') }}",
-                confirmButtonColor: '#ffc107',
-                background: '#152040',
-                color: 'white',
-                didOpen: () => {
-                    document.querySelector('.swal2-title').style.setProperty('color', '#fff', 'important');
-                    document.querySelector('.swal2-html-container').style.setProperty('color', '#fff', 'important');
-                }
+                ...getSwalTheme(),
+                icon: @json(session('swal.icon')),
+                title: @json(session('swal.title')),
+                text: @json(session('swal.text')),
+                confirmButtonText: 'OK'
             });
         </script>
     @endif
+
 
     @yield('js')
 </body>

@@ -2353,195 +2353,176 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        $(document).on('click', '#btnLogout', function () {
+            /**
+             * Konfigurasi SweetAlert mengikuti tema aktif.
+             */
+            function getSwalTheme() {
+                const theme = document.documentElement.getAttribute('data-bs-theme') || 'light';
+                const isDark = theme === 'dark';
 
-            Swal.fire({
-
-                title: 'Logout?',
-                text: 'Apakah Anda yakin ingin keluar?',
-                icon: 'question',
-
-                showCancelButton: true,
-
-                confirmButtonColor: '#ffc107',
-                cancelButtonColor: '#6c757d',
-
-                confirmButtonText: 'Ya, Logout',
-                cancelButtonText: 'Batal',
-
-                background: '#152040',
-                color: '#fff'
-
-            }).then((result) => {
-
-                if (!result.isConfirmed) return;
-
-                $.ajax({
-
-                    url: "{{ route('logout') }}",
-
-                    type: "POST",
-
-                    data: {
-                        _token: "{{ csrf_token() }}"
-                    },
-
-                    success: function(res){
-
-                        Swal.fire({
-
-                            icon: 'success',
-                            title: 'Berhasil',
-                            text: res.message,
-                            timer: 1200,
-                            showConfirmButton: false,
-                            background: '#152040',
-                            color: '#fff'
-
-                        }).then(() => {
-
-                            window.location.href = res.redirect;
-
-                        });
-
-                    },
-
-                    error: function(){
-
-                        Swal.fire({
-
-                            icon: 'error',
-                            title: 'Oops...',
-                            text: 'Logout gagal.',
-                            confirmButtonColor: '#ffc107',
-                            background: '#152040',
-                            color: '#fff'
-
-                        });
-
+                return {
+                    background: isDark ? '#152040' : '#FFFFFF',
+                    color: isDark ? '#FFFFFF' : '#263247',
+                    confirmButtonColor: isDark ? '#FFC107' : '#C99A1A',
+                    cancelButtonColor: isDark ? '#64748B' : '#6C757D',
+                    customClass: {
+                        popup: isDark ? 'swal-theme-dark' : 'swal-theme-light'
                     }
+                };
+            }
 
+            // Logout
+            $(document).on('click', '#btnLogout', function (e) {
+                e.preventDefault();
+
+                Swal.fire({
+                    ...getSwalTheme(),
+                    title: 'Logout?',
+                    text: 'Apakah Anda yakin ingin keluar?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Logout',
+                    cancelButtonText: 'Batal',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (!result.isConfirmed) return;
+
+                    $.ajax({
+                        url: "{{ route('logout') }}",
+                        type: 'POST',
+                        data: {
+                            _token: "{{ csrf_token() }}"
+                        },
+
+                        success: function (res) {
+                            Swal.fire({
+                                ...getSwalTheme(),
+                                icon: 'success',
+                                title: 'Berhasil',
+                                text: res.message,
+                                timer: 1200,
+                                showConfirmButton: false,
+                                allowOutsideClick: false
+                            }).then(() => {
+                                window.location.href = res.redirect;
+                            });
+                        },
+
+                        error: function () {
+                            Swal.fire({
+                                ...getSwalTheme(),
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: 'Logout gagal.',
+                                confirmButtonText: 'Tutup'
+                            });
+                        }
+                    });
                 });
-
-            });
-
-        });
-    </script>
-
-    {{-- PROFILE --}}
-    <script>
-        $(document).on("click",".profile-menu",function(){
-
-            $(".profile-menu").removeClass("active");
-
-            $(this).addClass("active");
-
-            let target = $(this).data("target");
-
-            $(".profile-page").addClass("d-none");
-
-            $("#" + target).removeClass("d-none");
-
-        });
-    </script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-
-            const html = document.documentElement;
-
-            const btnLight = document.getElementById('btnThemeLight');
-            const btnDark = document.getElementById('btnThemeDark');
-
-            function setTheme(theme) {
-
-                html.setAttribute('data-bs-theme', theme);
-
-                localStorage.setItem('data-bs-theme', theme);
-
-                updateThemeButton(theme);
-            }
-
-            function updateThemeButton(theme) {
-
-                if (!btnLight || !btnDark) {
-                    return;
-                }
-
-                if (theme === 'light') {
-
-                    btnLight.classList.add('active');
-                    btnDark.classList.remove('active');
-
-                    btnLight.classList.remove('btn-light');
-                    btnLight.classList.add('btn-warning');
-
-                    btnDark.classList.remove('btn-dark');
-                    btnDark.classList.add('btn-light');
-
-                } else {
-
-                    btnDark.classList.add('active');
-                    btnLight.classList.remove('active');
-
-                    btnDark.classList.remove('btn-light');
-                    btnDark.classList.add('btn-warning');
-
-                    btnLight.classList.remove('btn-warning');
-                    btnLight.classList.add('btn-light');
-                }
-            }
-
-            // Klik Light
-            if (btnLight) {
-                btnLight.addEventListener('click', function (e) {
-
-                    e.preventDefault();
-                    e.stopPropagation();
-
-                    setTheme('light');
-                });
-            }
-
-            // Klik Dark
-            if (btnDark) {
-                btnDark.addEventListener('click', function (e) {
-
-                    e.preventDefault();
-                    e.stopPropagation();
-
-                    setTheme('dark');
-                });
-            }
-
-            // Ambil theme saat halaman dibuka
-            let currentTheme = html.getAttribute('data-bs-theme');
-
-            if (!currentTheme) {
-                currentTheme = localStorage.getItem('data-bs-theme') || 'light';
-            }
-
-            updateThemeButton(currentTheme);
-
-        });
-    </script>
-
-    @if(session('swal'))
-        <script>
-            Swal.fire({
-                icon: "{{ session('swal.icon') }}",
-                title: "{{ session('swal.title') }}",
-                text: "{{ session('swal.text') }}",
-                confirmButtonColor: '#ffc107',
-                background: '#152040',
-                color: 'white',
-                didOpen: () => {
-                    document.querySelector('.swal2-title').style.setProperty('color', '#fff', 'important');
-                    document.querySelector('.swal2-html-container').style.setProperty('color', '#fff', 'important');
-                }
             });
         </script>
-    @endif
+
+
+        {{-- PROFILE --}}
+        <script>
+            $(document).on('click', '.profile-menu', function () {
+                $('.profile-menu').removeClass('active');
+
+                $(this).addClass('active');
+
+                const target = $(this).data('target');
+
+                $('.profile-page').addClass('d-none');
+                $('#' + target).removeClass('d-none');
+            });
+        </script>
+
+
+        {{-- PENGATURAN LIGHT MODE DAN DARK MODE --}}
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const html = document.documentElement;
+
+                const btnLight = document.getElementById('btnThemeLight');
+                const btnDark = document.getElementById('btnThemeDark');
+
+                function setTheme(theme) {
+                    html.setAttribute('data-bs-theme', theme);
+                    localStorage.setItem('data-bs-theme', theme);
+
+                    updateThemeButton(theme);
+                }
+
+                function updateThemeButton(theme) {
+                    if (!btnLight || !btnDark) return;
+
+                    if (theme === 'light') {
+                        btnLight.classList.add('active');
+                        btnDark.classList.remove('active');
+
+                        btnLight.classList.remove('btn-light');
+                        btnLight.classList.add('btn-warning');
+
+                        btnDark.classList.remove('btn-dark', 'btn-warning');
+                        btnDark.classList.add('btn-light');
+                    } else {
+                        btnDark.classList.add('active');
+                        btnLight.classList.remove('active');
+
+                        btnDark.classList.remove('btn-light');
+                        btnDark.classList.add('btn-warning');
+
+                        btnLight.classList.remove('btn-warning', 'btn-dark');
+                        btnLight.classList.add('btn-light');
+                    }
+                }
+
+                // Klik Light Mode
+                if (btnLight) {
+                    btnLight.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        setTheme('light');
+                    });
+                }
+
+                // Klik Dark Mode
+                if (btnDark) {
+                    btnDark.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        setTheme('dark');
+                    });
+                }
+
+                // Sinkronisasi tema saat halaman dibuka
+                let currentTheme = html.getAttribute('data-bs-theme');
+
+                if (!currentTheme || currentTheme === 'system') {
+                    currentTheme = localStorage.getItem('data-bs-theme') || 'light';
+                }
+
+                setTheme(currentTheme === 'dark' ? 'dark' : 'light');
+            });
+        </script>
+
+
+        {{-- SWEETALERT DARI SESSION LARAVEL --}}
+        @if(session('swal'))
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    Swal.fire({
+                        ...getSwalTheme(),
+                        icon: @json(session('swal.icon')),
+                        title: @json(session('swal.title')),
+                        text: @json(session('swal.text')),
+                        confirmButtonText: 'OK'
+                    });
+                });
+            </script>
+        @endif
 
     @yield('js')
 </body>
