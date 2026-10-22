@@ -180,8 +180,8 @@ class JobVacancyController extends Controller
         $job = JobVacancy::query()
 
             ->with([
-                'bujp:id,company_name',
-                'company:id,company_name',
+                'bujp:id,company_name,logo',
+                'company:id,company_name,logo',
             ])
 
             ->withCount([
@@ -415,8 +415,8 @@ class JobVacancyController extends Controller
                 ) {
 
                     $query->with([
-                        'bujp:id,company_name',
-                        'company:id,company_name',
+                        'bujp:id,company_name,logo',
+                        'company:id,company_name,logo',
                     ]);
 
 
@@ -1019,8 +1019,8 @@ class JobVacancyController extends Controller
             */
 
             ->with([
-                'bujp:id,company_name',
-                'company:id,company_name',
+                'bujp:id,company_name,logo',
+                'company:id,company_name,logo',
             ])
 
 
@@ -1593,9 +1593,9 @@ class JobVacancyController extends Controller
 
                     $query->with([
 
-                        'bujp:id,company_name',
+                        'bujp:id,company_name,logo',
 
-                        'company:id,company_name',
+                        'company:id,company_name,logo',
 
                     ]);
 

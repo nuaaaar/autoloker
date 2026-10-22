@@ -950,6 +950,34 @@
             color: #fff;
             background-color: #198754;
         }
+
+        .job-company-icon {
+            width: 48px;
+            height: 48px;
+            flex-shrink: 0;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+        }
+
+        .job-company-logo {
+            display: block;
+            width: 100%;
+            height: 100%;
+            padding: 4px;
+            object-fit: contain;
+        }
+
+        .job-company-fallback {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
     </style>
 @endsection
 
@@ -1001,9 +1029,29 @@
 
                         <div class="job-header">
 
-                            <div class="job-company-icon">
-                                <i class="ki-duotone ki-briefcase"></i>
-                            </div>
+                        @php
+                            $company = $job->bujp ?? $job->company;
+                            $companyLogo = $company->logo ?? null;
+                        @endphp
+
+                        <div class="job-company-icon">
+                            @if ($companyLogo)
+                                <img
+                                    src="{{ \Illuminate\Support\Facades\Storage::url($companyLogo) }}"
+                                    alt="Logo {{ $company->company_name ?? 'Perusahaan' }}"
+                                    class="job-company-logo"
+                                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                                >
+
+                                <div class="job-company-fallback" style="display: none;">
+                                    <i class="ki-duotone ki-briefcase"></i>
+                                </div>
+                            @else
+                                <div class="job-company-fallback">
+                                    <i class="ki-duotone ki-briefcase"></i>
+                                </div>
+                            @endif
+                        </div>
 
                             <div class="job-header-content">
 

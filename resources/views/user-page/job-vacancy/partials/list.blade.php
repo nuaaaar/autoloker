@@ -1,3 +1,67 @@
+<style>
+    /* =========================================
+    COMPANY LOGO - LIGHT & DARK MODE
+    ========================================= */
+
+    .company-logo-wrapper {
+        width: 76px;
+        height: 76px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--vacancy-border, #E2E8F0);
+        border-radius: 14px;
+        background: var(--vacancy-bg, #FFFFFF);
+        overflow: hidden;
+    }
+
+    .company-logo {
+        display: block;
+        width: 100%;
+        height: 100%;
+        padding: 7px;
+        object-fit: contain;
+    }
+
+    .company-logo-fallback {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--vacancy-bg-secondary, #F8FAFC);
+        color: var(--vacancy-text-muted, #64748B);
+    }
+
+    /* Dark mode */
+    [data-bs-theme="dark"] .company-logo-wrapper {
+        background: var(--vacancy-bg-secondary, #182338);
+        border-color: var(--vacancy-border, rgba(255, 255, 255, .10));
+    }
+
+    [data-bs-theme="dark"] .company-logo-fallback {
+        background: var(--vacancy-bg-input, #0B1020);
+        color: var(--vacancy-text-muted, #95A2BD);
+    }
+
+    /* Responsive */
+    @media (max-width: 576px) {
+        .company-logo-wrapper {
+            width: 56px;
+            height: 56px;
+            border-radius: 11px;
+        }
+
+        .company-logo {
+            padding: 5px;
+        }
+
+        .company-logo-fallback .ki-office-bag {
+            font-size: 1.35rem !important;
+        }
+    }
+</style>
 @forelse($jobs as $job)
 
     <div class="card job-card mb-4">
@@ -322,15 +386,36 @@
 
                     </div>
 
-
                     {{-- ================================================= --}}
-                    {{-- ICON --}}
+                    {{-- COMPANY LOGO --}}
                     {{-- ================================================= --}}
 
-                    <div class="company-icon">
+                    @php
+                        $company = $job->bujp ?? $job->company;
+                        $companyLogo = $company->logo ?? null;
 
-                        <i class="ki-duotone ki-office-bag fs-2"></i>
+                        $logoUrl = $companyLogo
+                            ? Storage::url($companyLogo)
+                            : null;
+                    @endphp
+                    <div class="company-logo-wrapper flex-shrink-0">
+                        @if($logoUrl)
+                            <img
+                                src="{{ $logoUrl }}"
+                                alt="Logo {{ $company->company_name ?? 'Perusahaan' }}"
+                                class="company-logo"
+                                loading="lazy"
+                                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                            >
 
+                            <div class="company-logo-fallback" style="display: none;">
+                                <i class="ki-duotone ki-office-bag fs-2"></i>
+                            </div>
+                        @else
+                            <div class="company-logo-fallback">
+                                <i class="ki-duotone ki-office-bag fs-2"></i>
+                            </div>
+                        @endif
                     </div>
 
                 </div>

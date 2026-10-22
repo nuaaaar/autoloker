@@ -130,10 +130,28 @@
                 AVATAR
             ================================================== --}}
 
+            @php
+                $company = $job->bujp ?? $job->company;
+                $companyLogo = $company->logo ?? null;
+            @endphp
+
             <div class="company-avatar">
+                @if($companyLogo)
+                    <img
+                        src="{{ \Illuminate\Support\Facades\Storage::url($companyLogo) }}"
+                        alt="Logo {{ $company->company_name ?? 'Perusahaan' }}"
+                        class="company-avatar-logo"
+                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                    >
 
-                <i class="ki-duotone ki-user"></i>
-
+                    <div class="company-avatar-fallback" style="display: none;">
+                        <i class="ki-duotone ki-user"></i>
+                    </div>
+                @else
+                    <div class="company-avatar-fallback">
+                        <i class="ki-duotone ki-user"></i>
+                    </div>
+                @endif
             </div>
 
 
