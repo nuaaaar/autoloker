@@ -1,6 +1,6 @@
 @extends('layouts.dashboard-admin')
 
-@section('title', 'User')
+@section('title', 'Users')
 
 @section('css')
     <style>
