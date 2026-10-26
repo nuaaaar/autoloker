@@ -25,7 +25,7 @@ class SecurityController extends Controller
             $orderSort = $request->input('order.0.dir') ?? 'asc';
             $orderValue  = $request->input('columns.' . $orderColumn . '.data') ?? 'id';
             //get data
-            $data = Security::with('user_security.user')->when($searchValue, function($q) use($searchValue) {
+            $data = Security::with('user_security.user')->whereHas('user_security.user')->when($searchValue, function($q) use($searchValue) {
                 $q->orWhere('name', 'like', '%' . $searchValue . '%');
                 $q->orWhere('email', 'like', '%' . $searchValue . '%');
                 $q->orWhere('birth_place', 'like', '%' . $searchValue . '%');
