@@ -437,11 +437,6 @@ class TrainingController extends Controller
                 $categoryRole
             )
 
-            ->where(
-                'status',
-                'published'
-            )
-
             ->firstOrFail();
 
 
@@ -450,15 +445,15 @@ class TrainingController extends Controller
         | CEK END DATE
         |--------------------------------------------------------------------------
         */
+        
+        // if (
+        //     $data->end_date &&
+        //     $data->end_date < now()->toDateString()
+        // ) {
 
-        if (
-            $data->end_date &&
-            $data->end_date < now()->toDateString()
-        ) {
+        //     abort(404);
 
-            abort(404);
-
-        }
+        // }
 
 
         /*

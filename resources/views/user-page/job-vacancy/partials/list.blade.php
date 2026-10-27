@@ -285,25 +285,26 @@
 
                         @endphp
 
+                        @if($job->category == 'security')
+                            @if(count($competencySchemes))
 
-                        @if(count($competencySchemes))
+                                <div class="d-flex align-items-center flex-wrap gap-2 mt-2">
 
-                            <div class="d-flex align-items-center flex-wrap gap-2 mt-2">
+                                    @foreach($competencySchemes as $scheme)
 
-                                @foreach($competencySchemes as $scheme)
+                                        <span class="badge-license">
 
-                                    <span class="badge-license">
+                                            <i class="ki-duotone ki-medal-star text-success fs-7"></i>
 
-                                        <i class="ki-duotone ki-medal-star text-success fs-7"></i>
+                                            {{ $scheme }}
 
-                                        {{ $scheme }}
+                                        </span>
 
-                                    </span>
+                                    @endforeach
 
-                                @endforeach
+                                </div>
 
-                            </div>
-
+                            @endif
                         @endif
 
 

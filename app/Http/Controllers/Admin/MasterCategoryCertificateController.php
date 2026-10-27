@@ -58,104 +58,116 @@ class MasterCategoryCertificateController extends Controller
             );
         }
 
+        $parentCertificates = MasterCategoryCertificate::where('category', $category)
+        ->orderBy('level')
+        ->orderBy('title')
+        ->get(['id', 'title', 'level']);
+
         return view(
             'dashboard-admin.master.category-certificate.index',
-            compact('category')
+            compact('category', 'parentCertificates')
         );
     }
 
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(
-        Request $request,
-        $category
-    ) {
+    public function store(Request $request, $category)
+    {
         $this->validateCategory($category);
 
-        $request->validate([
+        $validated = $request->validate([
             'title' => [
                 'required',
+                'string',
                 'max:255',
-
-                Rule::unique(
-                    'master_category_certificates',
-                    'title'
-                )->where(function ($query) use ($category) {
-
-                    return $query->where(
-                        'category',
-                        $category
-                    );
-
-                }),
+                Rule::unique('master_category_certificates', 'title')
+                    ->where(function ($query) use ($category) {
+                        return $query->where('category', $category);
+                    }),
+            ],
+            'parent_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('master_category_certificates', 'id')
+                    ->where(function ($query) use ($category) {
+                        return $query->where('category', $category);
+                    }),
+            ],
+            'is_tuk' => [
+                'nullable',
+                'boolean',
+            ],
+            'level' => [
+                'required',
+                'integer',
+                'min:1',
             ],
         ]);
 
         MasterCategoryCertificate::create([
-            'title' => $request->title,
-            'category' => $category,
+            'title'     => $validated['title'],
+            'category'  => $category,
+            'parent_id' => $validated['parent_id'] ?? null,
+            'is_tuk'    => $request->boolean('is_tuk'),
+            'level'     => $validated['level'],
         ]);
 
         return response()->json([
-            'status' => true,
-            'message' => 'Data berhasil ditambahkan.'
+            'status'  => true,
+            'message' => 'Data berhasil ditambahkan.',
         ]);
     }
 
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(
-        Request $request,
-        $category,
-        $uuid
-    ) {
+    public function update(Request $request, $category, $uuid)
+    {
         $this->validateCategory($category);
 
-        $data = MasterCategoryCertificate::where(
-                'uuid',
-                $uuid
-            )
-            ->where(
-                'category',
-                $category
-            )
+        $data = MasterCategoryCertificate::where('uuid', $uuid)
+            ->where('category', $category)
             ->firstOrFail();
 
-        $request->validate([
+        $validated = $request->validate([
             'title' => [
                 'required',
+                'string',
                 'max:255',
-
-                Rule::unique(
-                    'master_category_certificates',
-                    'title'
-                )
-                ->where(function ($query) use ($category) {
-
-                    return $query->where(
-                        'category',
-                        $category
-                    );
-
-                })
-                ->ignore(
-                    $uuid,
-                    'uuid'
-                ),
+                Rule::unique('master_category_certificates', 'title')
+                    ->where(function ($query) use ($category) {
+                        return $query->where('category', $category);
+                    })
+                    ->ignore($uuid, 'uuid'),
+            ],
+            'parent_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('master_category_certificates', 'id')
+                    ->where(function ($query) use ($category, $data) {
+                        return $query
+                            ->where('category', $category)
+                            ->where('id', '!=', $data->id);
+                    }),
+            ],
+            'is_tuk' => [
+                'nullable',
+                'boolean',
+            ],
+            'level' => [
+                'required',
+                'integer',
+                'min:1',
             ],
         ]);
 
         $data->update([
-            'title' => $request->title
+            'title'     => $validated['title'],
+            'parent_id' => $validated['parent_id'] ?? null,
+            'is_tuk'    => $request->boolean('is_tuk'),
+            'level'     => $validated['level'],
         ]);
 
         return response()->json([
-            'status' => true,
-            'message' => 'Data berhasil diperbarui.'
+            'status'  => true,
+            'message' => 'Data berhasil diperbarui.',
         ]);
     }
 

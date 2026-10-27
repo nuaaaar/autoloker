@@ -1,6 +1,6 @@
 @extends('layouts.dashboard-admin')
 
-@section('title', 'Perusahaan Klien')
+@section('title', 'Perusahaan')
 
 @section('css')
     <style>
@@ -11,7 +11,7 @@
 @section('breadcrumb')
     <h1
         class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">
-        Perusahaan Klien</h1>
+        Perusahaan</h1>
     <!--end::Title-->
     <!--begin::Breadcrumb-->
     <ul class="breadcrumb breadcrumb-separatorless fw-semibold fs-7 my-0 pt-1">
@@ -32,7 +32,7 @@
         </li>
         <!--end::Item-->
         <!--begin::Item-->
-        <li class="breadcrumb-item text-muted">Perusahaan Klien</li>
+        <li class="breadcrumb-item text-muted">Perusahaan</li>
         <!--end::Item-->
     </ul>
     <!--end::Breadcrumb-->

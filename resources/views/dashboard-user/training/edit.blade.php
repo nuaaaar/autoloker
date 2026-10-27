@@ -4,710 +4,475 @@
 
 @section('css')
     <style>
-        /* ==============================
+        /* =========================================================
+        THEME VARIABLES - LIGHT MODE
+        ========================================================= */
+        :root {
+            --vacancy-bg: #f7f8fa;
+            --vacancy-card: #ffffff;
+            --vacancy-card-soft: #f8fafc;
+            --vacancy-hover: #f1f5f9;
+
+            --vacancy-border: #e2e8f0;
+            --vacancy-border-hover: #cbd5e1;
+
+            --vacancy-title: #182338;
+            --vacancy-text: #475569;
+            --vacancy-muted: #64748b;
+
+            --vacancy-input-bg: #ffffff;
+            --vacancy-input-text: #182338;
+            --vacancy-placeholder: #94a3b8;
+
+            --vacancy-icon-bg: #f1f5f9;
+            --vacancy-icon-text: #64748b;
+
+            --vacancy-footer: #ffffff;
+
+            --vacancy-accent: #e8a801;
+            --vacancy-accent-hover: #f2b600;
+            --vacancy-accent-soft: rgba(232, 168, 1, .10);
+            --vacancy-accent-border: rgba(232, 168, 1, .40);
+
+            --vacancy-tag-bg: #fff8e1;
+            --vacancy-tag-border: #ffd54f;
+            --vacancy-tag-text: #795548;
+
+            --vacancy-empty-border: #cbd5e1;
+            --vacancy-shadow: 0 8px 25px rgba(15, 23, 42, .06);
+        }
+
+        /* =========================================================
+        DARK MODE
+        Mendukung atribut tema Bootstrap dan class umum
+        ========================================================= */
+        [data-bs-theme="dark"],
+        .dark-layout,
+        .dark-mode,
+        [data-theme="dark"] {
+            --vacancy-bg: #0b1020;
+            --vacancy-card: #11192c;
+            --vacancy-card-soft: #0d1426;
+            --vacancy-hover: #1b2942;
+
+            --vacancy-border: rgba(255, 255, 255, .08);
+            --vacancy-border-hover: rgba(255, 255, 255, .16);
+
+            --vacancy-title: #ffffff;
+            --vacancy-text: #cbd5e1;
+            --vacancy-muted: #95a2bd;
+
+            --vacancy-input-bg: #0b1020;
+            --vacancy-input-text: #ffffff;
+            --vacancy-placeholder: #73819d;
+
+            --vacancy-icon-bg: #18243d;
+            --vacancy-icon-text: #8fa7c6;
+
+            --vacancy-footer: #121c33;
+
+            --vacancy-accent: #e8a801;
+            --vacancy-accent-hover: #f2b600;
+            --vacancy-accent-soft: rgba(232, 168, 1, .12);
+            --vacancy-accent-border: rgba(232, 168, 1, .45);
+
+            --vacancy-tag-bg: rgba(255, 213, 79, .10);
+            --vacancy-tag-border: rgba(255, 213, 79, .30);
+            --vacancy-tag-text: #ffd980;
+
+            --vacancy-empty-border: rgba(255, 255, 255, .12);
+            --vacancy-shadow: 0 8px 25px rgba(0, 0, 0, .16);
+        }
+
+        /* =========================================================
         STEP WRAPPER
-        ================================= */
-
-        .vacancy-step-wrapper{
-
-            display:flex;
-            align-items:center;
-            gap:12px;
-
-            padding:20px 24px;
-
-            border-top:1px solid rgba(255,255,255,.05);
-            border-bottom:1px solid rgba(255,255,255,.05);
-
-            overflow-x:auto;
-            overflow-y:hidden;
-
-            white-space:nowrap;
-
-            scrollbar-width:none;
-
+        ========================================================= */
+        .vacancy-step-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 20px 24px;
+            border-top: 1px solid var(--vacancy-border);
+            border-bottom: 1px solid var(--vacancy-border);
+            overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
+            scrollbar-width: none;
         }
 
-        .vacancy-step-wrapper::-webkit-scrollbar{
-
-            display:none;
-
+        .vacancy-step-wrapper::-webkit-scrollbar {
+            display: none;
         }
 
-
-        /* ==============================
+        /* =========================================================
         STEP BUTTON
-        ================================= */
-
-        .vacancy-step{
-
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            gap:10px;
-
-            min-width:max-content;
-
-            height:52px;
-
-            padding:0 22px;
-
-            border-radius:14px;
-
-            cursor:pointer;
-
-            transition:.25s;
-
-            color:#94A3B8;
-
-            border:1px solid transparent;
-
-            font-size:15px;
-
-            font-weight:600;
-
+        ========================================================= */
+        .vacancy-step {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-width: max-content;
+            height: 52px;
+            padding: 0 22px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: .25s;
+            color: var(--vacancy-muted);
+            background: transparent;
+            border: 1px solid transparent;
+            font-size: 15px;
+            font-weight: 600;
         }
 
-        .vacancy-step i{
-
-            font-size:18px;
-
-            color:inherit;
-
+        .vacancy-step i {
+            font-size: 18px;
+            color: inherit;
         }
 
-        .vacancy-step:hover{
-
-            background:#182338;
-
-            color:#fff;
-
+        .vacancy-step:hover {
+            background: var(--vacancy-hover);
+            color: var(--vacancy-title);
         }
 
-
-        /* ==============================
-        ACTIVE
-        ================================= */
-
-        .vacancy-step.active{
-
-            background:rgba(232,168,1,.12);
-
-            border:1px solid rgba(232,168,1,.45);
-
-            color:#E8A801;
-
+        .vacancy-step.active {
+            background: var(--vacancy-accent-soft);
+            border: 1px solid var(--vacancy-accent-border);
+            color: var(--vacancy-accent);
         }
 
-        .vacancy-step.active i{
-
-            color:#E8A801;
-
+        .vacancy-step.active i {
+            color: var(--vacancy-accent);
         }
 
-
-        /* ==============================
-        BODY
-        ================================= */
-
-        .vacancy-section{
-
-            animation:fadeSection .25s ease;
-
+        /* =========================================================
+        SECTION ANIMATION
+        ========================================================= */
+        .vacancy-section {
+            animation: fadeSection .25s ease;
         }
 
-        @keyframes fadeSection{
-
-            from{
-
-                opacity:0;
-                transform:translateY(8px);
-
+        @keyframes fadeSection {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
             }
-
-            to{
-
-                opacity:1;
-                transform:translateY(0);
-
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
-
         }
 
-
-        /* ==============================
-        FOOTER
-        ================================= */
-
-        .card-footer{
-
-            border-top:1px solid rgba(255,255,255,.05);
-
-            background:#121C33;
-
+        /* =========================================================
+        SECTION CARD
+        ========================================================= */
+        .section-card {
+            padding: 30px;
+            background: var(--vacancy-card);
+            color: var(--vacancy-text);
+            border: 1px solid var(--vacancy-border);
+            border-radius: 16px;
+            box-shadow: var(--vacancy-shadow);
         }
 
-
-        /* ==============================
-        BUTTON
-        ================================= */
-
-        #btnBack,
-        #btnDraft,
-        #btnNext,
-        #btnSubmit{
-
-            min-width:170px;
-
-            height:48px;
-
-            border-radius:12px;
-
-            font-weight:600;
-
+        .section-title {
+            color: var(--vacancy-title);
+            font-size: 24px;
+            font-weight: 700;
         }
 
-        #btnDraft{
-
-            background:#1B2438;
-
-            color:#fff;
-
-            border:1px solid rgba(255,255,255,.08);
-
+        .section-subtitle {
+            color: var(--vacancy-muted);
+            margin-top: 5px;
+            margin-bottom: 35px;
         }
 
-        #btnDraft:hover{
-
-            background:#24314C;
-
+        /* =========================================================
+        BUILDER
+        ========================================================= */
+        .job-builder {
+            background: var(--vacancy-card);
+            color: var(--vacancy-text);
+            border: 1px solid var(--vacancy-border);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--vacancy-shadow);
         }
 
-        #btnNext,
-        #btnSubmit{
-
-            background:#E8A801;
-
-            border:none;
-
-            color:#121212;
-
+        .builder-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
         }
 
-        #btnNext:hover,
-        #btnSubmit:hover{
-
-            background:#F2B600;
-
+        .builder-title {
+            color: var(--vacancy-title);
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
         }
 
-        @media(max-width:768px){
-
-            .vacancy-step{
-
-                padding:0 16px;
-
-                height:46px;
-
-                font-size:14px;
-
-            }
-
-            .vacancy-step i{
-
-                font-size:16px;
-
-            }
-
-            #btnBack,
-            #btnDraft,
-            #btnNext,
-            #btnSubmit{
-
-                min-width:auto;
-
-                flex:1;
-
-            }
-
-            .card-footer{
-
-                display:flex;
-
-                gap:10px;
-
-                flex-wrap:wrap;
-
-            }
-
+        .builder-subtitle {
+            color: var(--vacancy-muted);
+            font-size: 13px;
         }
 
-        .job-builder{
-
-            background:#11192c;
-
-            border:1px solid rgba(255,255,255,.06);
-
-            border-radius:16px;
-
-            padding:24px;
-
+        .builder-input {
+            margin-bottom: 20px;
         }
 
-        .builder-header{
-
-            display:flex;
-
-            justify-content:space-between;
-
-            align-items:center;
-
-            margin-bottom:20px;
-
+        .builder-input .input-group {
+            background: var(--vacancy-input-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--vacancy-border);
         }
 
-        .builder-title{
-
-            color:#fff;
-
-            font-size:18px;
-
-            font-weight:700;
-
-            margin-bottom:4px;
-
+        .builder-input .input-group-text {
+            background: var(--vacancy-input-bg);
+            border: none;
+            color: var(--vacancy-icon-text);
         }
 
-        .builder-subtitle{
-
-            color:#8c98b3;
-
-            font-size:13px;
-
+        .builder-input input,
+        .builder-input textarea,
+        .builder-input select {
+            background: var(--vacancy-input-bg);
+            color: var(--vacancy-input-text);
+            border-color: var(--vacancy-border);
         }
 
-        .builder-input{
-
-            margin-bottom:20px;
-
+        .builder-input input {
+            height: 54px;
+            border: none;
         }
 
-        .builder-input .input-group{
-
-            background:#0b1020;
-
-            border-radius:12px;
-
-            overflow:hidden;
-
-            border:1px solid rgba(255,255,255,.07);
-
+        .builder-input input::placeholder,
+        .builder-input textarea::placeholder {
+            color: var(--vacancy-placeholder);
         }
 
-        .builder-input .input-group-text{
-
-            background:#0b1020;
-
-            border:none;
-
-            color:#8fa7c6;
-
+        .builder-input input:focus,
+        .builder-input textarea:focus,
+        .builder-input select:focus {
+            background: var(--vacancy-input-bg);
+            color: var(--vacancy-input-text);
+            border-color: var(--vacancy-accent);
+            box-shadow: 0 0 0 .2rem rgba(232, 168, 1, .12);
         }
 
-        .builder-input input{
-
-            background:#0b1020;
-
-            border:none;
-
-            color:#fff;
-
-            height:54px;
-
+        .builder-input .btn {
+            border-radius: 0;
+            padding: 0 24px;
+            font-weight: 600;
         }
 
-        .builder-input input:focus{
-
-            background:#0b1020;
-
-            color:#fff;
-
-            box-shadow:none;
-
+        .builder-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
         }
 
-        .builder-input .btn{
-
-            border-radius:0;
-
-            padding:0 24px;
-
-            font-weight:600;
-
+        .builder-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--vacancy-card-soft);
+            color: var(--vacancy-text);
+            border: 1px solid var(--vacancy-border);
+            border-radius: 14px;
+            padding: 16px 18px;
+            transition: .25s;
         }
 
-        .builder-list{
-
-            display:flex;
-
-            flex-direction:column;
-
-            gap:14px;
-
+        .builder-item:hover {
+            border-color: var(--vacancy-accent);
         }
 
-        .builder-item{
-
-            display:flex;
-
-            align-items:center;
-
-            justify-content:space-between;
-
-            background:#0b1020;
-
-            border:1px solid rgba(255,255,255,.05);
-
-            border-radius:14px;
-
-            padding:16px 18px;
-
-            transition:.25s;
-
+        .builder-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            min-width: 0;
         }
 
-        .builder-item:hover{
-
-            border-color:#c7932b;
-
+        .builder-number {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: var(--vacancy-accent-soft);
+            border: 1px solid var(--vacancy-accent-border);
+            color: var(--vacancy-accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
         }
 
-        .builder-left{
-
-            display:flex;
-
-            align-items:center;
-
-            gap:15px;
-
+        .builder-text {
+            color: var(--vacancy-title);
+            font-size: 15px;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
         }
 
-        .builder-number{
-
-            width:34px;
-
-            height:34px;
-
-            border-radius:50%;
-
-            background:rgba(199,147,43,.15);
-
-            border:1px solid rgba(199,147,43,.4);
-
-            color:#f5b942;
-
-            display:flex;
-
-            align-items:center;
-
-            justify-content:center;
-
-            font-weight:700;
-
-            flex-shrink:0;
-
+        .builder-action {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
         }
 
-        .builder-text{
-
-            color:#fff;
-
-            font-size:15px;
-
-            line-height:1.5;
-
+        .builder-action button {
+            width: 38px;
+            height: 38px;
+            border: 1px solid var(--vacancy-border);
+            border-radius: 10px;
+            background: var(--vacancy-icon-bg);
+            color: var(--vacancy-icon-text);
+            transition: .25s;
         }
 
-        .builder-action{
-
-            display:flex;
-
-            gap:8px;
-
+        .builder-action button:hover {
+            background: var(--vacancy-accent);
+            border-color: var(--vacancy-accent);
+            color: #121212;
         }
 
-        .builder-action button{
-
-            width:38px;
-
-            height:38px;
-
-            border:none;
-
-            border-radius:10px;
-
-            background:#18243d;
-
-            color:#8fa7c6;
-
-            transition:.25s;
-
+        .builder-empty {
+            text-align: center;
+            padding: 50px 20px;
+            border: 2px dashed var(--vacancy-empty-border);
+            border-radius: 14px;
+            color: var(--vacancy-muted);
         }
 
-        .builder-action button:hover{
-
-            background:#c7932b;
-
-            color:#fff;
-
+        .builder-empty h6 {
+            color: var(--vacancy-title);
+            margin-top: 10px;
         }
 
-        .builder-empty{
-
-            text-align:center;
-
-            padding:50px 20px;
-
-            border:2px dashed rgba(255,255,255,.08);
-
-            border-radius:14px;
-
-            color:#73819d;
-
+        /* =========================================================
+        OPTION GROUP
+        ========================================================= */
+        .option-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
         }
 
-        .builder-empty h6{
-
-            color:#fff;
-
-            margin-top:10px;
-
+        .option-card {
+            min-width: 140px;
+            min-height: 52px;
+            padding: 10px 18px;
+            border-radius: 14px;
+            border: 1px solid var(--vacancy-border);
+            background: var(--vacancy-card-soft);
+            color: var(--vacancy-text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: .25s;
+            font-size: 15px;
+            font-weight: 600;
         }
 
-        @media(max-width:768px){
-
-            .builder-item{
-
-                flex-direction:column;
-
-                align-items:flex-start;
-
-                gap:15px;
-
-            }
-
-            .builder-action{
-
-                width:100%;
-
-                justify-content:flex-end;
-
-            }
-
+        .option-card input {
+            display: none;
         }
 
-        .section-card{
-
-            padding:30px;
-
+        .option-card:hover {
+            border-color: var(--vacancy-accent);
+            color: var(--vacancy-title);
         }
 
-        .section-title{
-
-            color:#fff;
-
-            font-size:24px;
-
-            font-weight:700;
-
+        .option-card.active {
+            background: var(--vacancy-accent-soft);
+            color: var(--vacancy-accent);
+            border-color: var(--vacancy-accent);
         }
 
-        .section-subtitle{
-
-            color:#95a2bd;
-
-            margin-top:5px;
-
-            margin-bottom:35px;
-
+        /* =========================================================
+        CERTIFICATE
+        ========================================================= */
+        .certificate-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
         }
 
-        .option-group{
-
-            display:flex;
-
-            gap:15px;
-
-            flex-wrap:wrap;
-
+        .certificate-item {
+            padding: 14px 22px;
+            border: 1px solid var(--vacancy-border);
+            border-radius: 14px;
+            background: var(--vacancy-card-soft);
+            color: var(--vacancy-text);
+            cursor: pointer;
+            transition: .25s;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            user-select: none;
         }
 
-        .option-card{
-
-            min-width:140px;
-
-            height:52px;
-
-            border-radius:14px;
-
-            border:1px solid rgba(255,255,255,.08);
-
-            background:#0b1020;
-
-            color:#93a3be;
-
-            display:flex;
-
-            justify-content:center;
-
-            align-items:center;
-
-            cursor:pointer;
-
-            transition:.25s;
-
-            font-size:15px;
-
-            font-weight:600;
-
+        .certificate-item i {
+            font-size: 15px;
         }
 
-        .option-card input{
-
-            display:none;
-
+        .certificate-item:hover {
+            border-color: var(--vacancy-accent);
+            color: var(--vacancy-title);
         }
 
-        .option-card:hover{
-
-            border-color:#d39c32;
-
-            color:#fff;
-
+        .certificate-item.active {
+            background: var(--vacancy-accent-soft);
+            border-color: var(--vacancy-accent);
+            color: var(--vacancy-accent);
+            box-shadow: 0 0 15px rgba(214, 161, 59, .10);
         }
 
-        .option-card.active{
-
-            background:rgba(211,156,50,.15);
-
-            color:#ffc24c;
-
-            border-color:#d39c32;
-
+        /* =========================================================
+        TAGS
+        ========================================================= */
+        .tag-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
         }
 
-        .certificate-group{
-
-            display:flex;
-
-            flex-wrap:wrap;
-
-            gap:14px;
-
+        .tag-item {
+            display: flex;
+            align-items: center;
+            background: var(--vacancy-tag-bg);
+            border: 1px solid var(--vacancy-tag-border);
+            color: var(--vacancy-tag-text);
+            border-radius: 50px;
+            padding: 8px 14px;
+            font-size: 13px;
+            font-weight: 600;
         }
 
-        .certificate-item{
-
-            padding:14px 22px;
-
-            border:1px solid rgba(255,255,255,.10);
-
-            border-radius:14px;
-
-            background:#0d1426;
-
-            color:#97a5bf;
-
-            cursor:pointer;
-
-            transition:.25s;
-
-            font-weight:600;
-
-            display:flex;
-
-            align-items:center;
-
-            gap:10px;
-
-            user-select:none;
-
+        .tag-item i {
+            cursor: pointer;
+            margin-left: 8px;
+            color: #dc3545;
         }
 
-        .certificate-item i{
-
-            font-size:15px;
-
-        }
-
-        .certificate-item:hover{
-
-            border-color:#d6a13b;
-
-            color:#fff;
-
-        }
-
-        .certificate-item.active{
-
-            background:rgba(214,161,59,.12);
-
-            border-color:#d6a13b;
-
-            color:#ffc84d;
-
-            box-shadow:0 0 15px rgba(214,161,59,.20);
-
-        }
-
-        .invalid-feedback{
-
-            display:block;
-
-            margin-top:6px;
-
-            font-size:13px;
-
-        }
-
-        .is-invalid{
-
-            border-color:#dc3545 !important;
-
-        }
-
-        .tag-wrapper{
-            display:flex;
-            flex-wrap:wrap;
-            gap:10px;
-            margin-top:20px;
-        }
-
-        .tag-item{
-            display:flex;
-            align-items:center;
-            background:#FFF8E1;
-            border:1px solid #FFD54F;
-            color:#795548;
-            border-radius:50px;
-            padding:8px 14px;
-            font-size:13px;
-            font-weight:600;
-        }
-
-        .tag-item i{
-            cursor:pointer;
-            margin-left:8px;
-            color:#dc3545;
-        }
-
+        /* =========================================================
+        POSTER UPLOAD
+        ========================================================= */
         .poster-upload-card {
             width: 100%;
+            color: var(--vacancy-text);
         }
 
         .poster-upload-area {
             min-height: 260px;
-            border: 2px dashed rgba(255, 255, 255, .15);
+            border: 2px dashed var(--vacancy-border-hover);
             border-radius: 14px;
             display: flex;
             flex-direction: column;
@@ -717,12 +482,13 @@
             padding: 30px;
             text-align: center;
             transition: .2s;
-            background: rgba(255, 255, 255, .02);
+            background: var(--vacancy-card-soft);
+            color: var(--vacancy-text);
         }
 
         .poster-upload-area:hover {
-            border-color: #f7b003;
-            background: rgba(247, 176, 3, .05);
+            border-color: var(--vacancy-accent);
+            background: var(--vacancy-accent-soft);
         }
 
         .poster-upload-icon {
@@ -732,8 +498,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(247, 176, 3, .12);
-            color: #f7b003;
+            background: var(--vacancy-accent-soft);
+            color: var(--vacancy-accent);
             margin-bottom: 15px;
         }
 
@@ -748,8 +514,8 @@
             max-height: 500px;
             object-fit: contain;
             border-radius: 14px;
-            border: 1px solid rgba(255, 255, 255, .1);
-            background: rgba(0, 0, 0, .15);
+            border: 1px solid var(--vacancy-border);
+            background: var(--vacancy-card-soft);
             display: block;
         }
 
@@ -757,6 +523,130 @@
             position: absolute;
             top: 10px;
             right: 10px;
+        }
+
+        /* =========================================================
+        FOOTER
+        ========================================================= */
+        .card-footer {
+            border-top: 1px solid var(--vacancy-border);
+            background: var(--vacancy-footer);
+            color: var(--vacancy-text);
+        }
+
+        /* =========================================================
+        BUTTONS
+        ========================================================= */
+        #btnBack,
+        #btnDraft,
+        #btnNext,
+        #btnSubmit {
+            min-width: 170px;
+            height: 48px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: .2s;
+        }
+
+        #btnBack {
+            background: var(--vacancy-card);
+            color: var(--vacancy-text);
+            border: 1px solid var(--vacancy-border-hover);
+        }
+
+        #btnBack:hover {
+            background: var(--vacancy-hover);
+            color: var(--vacancy-title);
+        }
+
+        #btnDraft {
+            background: var(--vacancy-card-soft);
+            color: var(--vacancy-title);
+            border: 1px solid var(--vacancy-border);
+        }
+
+        #btnDraft:hover {
+            background: var(--vacancy-hover);
+        }
+
+        #btnNext,
+        #btnSubmit {
+            background: var(--vacancy-accent);
+            border: 1px solid var(--vacancy-accent);
+            color: #121212;
+        }
+
+        #btnNext:hover,
+        #btnSubmit:hover {
+            background: var(--vacancy-accent-hover);
+            border-color: var(--vacancy-accent-hover);
+        }
+
+        /* =========================================================
+        VALIDATION
+        ========================================================= */
+        .invalid-feedback {
+            display: block;
+            margin-top: 6px;
+            font-size: 13px;
+        }
+
+        .is-invalid {
+            border-color: #dc3545 !important;
+        }
+
+        /* =========================================================
+        RESPONSIVE
+        ========================================================= */
+        @media (max-width: 768px) {
+            .vacancy-step {
+                padding: 0 16px;
+                height: 46px;
+                font-size: 14px;
+            }
+
+            .vacancy-step i {
+                font-size: 16px;
+            }
+
+            #btnBack,
+            #btnDraft,
+            #btnNext,
+            #btnSubmit {
+                min-width: auto;
+                flex: 1;
+            }
+
+            .card-footer {
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+
+            .builder-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .builder-action {
+                width: 100%;
+                justify-content: flex-end;
+            }
+
+            .section-card {
+                padding: 20px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .vacancy-section,
+            .vacancy-step,
+            .builder-item,
+            .builder-action button {
+                animation: none;
+                transition: none;
+            }
         }
     </style>
 @endsection

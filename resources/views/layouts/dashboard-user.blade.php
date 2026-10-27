@@ -1361,7 +1361,7 @@
 
                                                     case 'company':
 
-                                                        $label = 'Perusahaan Klien';
+                                                        $label = 'Perusahaan';
                                                         $class = 'role-company';
                                                         $icon = 'ki-office-bag text-success';
 
@@ -1539,146 +1539,142 @@
                                     {{-- MANAJEMEN PELATIHAN --}}
                                     {{-- ================================================= --}}
 
-                                    @if(Auth::user()->role == 'bujp')
+                                    <div class="menu-item">
 
-                                        <div class="menu-item">
+                                        <div class="menu-content pt-5 pb-2">
 
-                                            <div class="menu-content pt-5 pb-2">
+                                            <span class="menu-heading text-uppercase fs-7 fw-bold text-muted">
 
-                                                <span class="menu-heading text-uppercase fs-7 fw-bold text-muted">
+                                                Manajemen Pelatihan Saya
 
-                                                    Manajemen Pelatihan Saya
-
-                                                </span>
-
-                                            </div>
-
-                                            <a href="{{ route('dashboard-user.training.statistic') }}"
-                                            class="menu-link {{ Route::is('dashboard-user.training.statistic') ? 'active' : '' }}">
-
-                                                <span class="menu-icon">
-
-                                                    <i class="ki-duotone ki-chart-line fs-2"></i>
-
-                                                </span>
-
-                                                <span class="menu-title">
-                                                    Statistik
-                                                </span>
-
-                                            </a>
-
-                                            <a href="{{ route('dashboard-user.training.index') }}?status=all"
-                                            class="menu-link {{ Route::is('dashboard-user.training.*')
-                                            && request()->query('status') === 'all'
-                                                ? 'active'
-                                                : '' }}">
-
-                                                <span class="menu-icon">
-
-                                                    <i class="ki-duotone ki-award fs-2"></i>
-
-                                                </span>
-
-                                                <span class="menu-title">
-                                                    Semua
-                                                </span>
-
-                                            </a>
-
-                                            <a href="{{ route('dashboard-user.training.index') }}?status=draft"
-                                            class="menu-link {{ Route::is('dashboard-user.training.*')
-                                            && request()->query('status') === 'draft'
-                                                ? 'active'
-                                                : '' }}">
-
-                                                <span class="menu-icon">
-
-                                                    <i class="ki-duotone ki-receipt-square fs-2"></i>
-
-                                                </span>
-
-                                                <span class="menu-title">
-                                                    Draft
-                                                </span>
-
-                                            </a>
-
-                                            <a href="{{ route('dashboard-user.training.index') }}?status=published"
-                                            class="menu-link {{ Route::is('dashboard-user.training.*')
-                                            && request()->query('status') === 'published'
-                                                ? 'active'
-                                                : '' }}">
-
-                                                <span class="menu-icon">
-
-                                                    <i class="ki-duotone ki-check-squared fs-2"></i>
-
-                                                </span>
-
-                                                <span class="menu-title">
-                                                    Terpublish
-                                                </span>
-
-                                            </a>
-
-                                            <a href="{{ route('dashboard-user.training.index') }}?status=running"
-                                            class="menu-link {{ Route::is('dashboard-user.training.*')
-                                            && request()->query('status') === 'running'
-                                                ? 'active'
-                                                : '' }}">
-
-                                                <span class="menu-icon">
-
-                                                    <i class="ki-duotone ki-loading fs-2"></i>
-
-                                                </span>
-
-                                                <span class="menu-title">
-                                                    Berjalan
-                                                </span>
-
-                                            </a>
-
-                                            <a href="{{ route('dashboard-user.training.index') }}?status=closed"
-                                            class="menu-link {{ Route::is('dashboard-user.training.*')
-                                            && request()->query('status') === 'closed'
-                                                ? 'active'
-                                                : '' }}">
-
-                                                <span class="menu-icon">
-
-                                                    <i class="ki-duotone ki-cross-square fs-2"></i>
-
-                                                </span>
-
-                                                <span class="menu-title">
-                                                    Ditutup
-                                                </span>
-
-                                            </a>
-
-                                            <a href="{{ route('dashboard-user.training.index') }}?status=cancelled"
-                                            class="menu-link {{ Route::is('dashboard-user.training.*')
-                                            && request()->query('status') === 'cancelled'
-                                                ? 'active'
-                                                : '' }}">
-
-                                                <span class="menu-icon">
-
-                                                    <i class="ki-duotone ki-minus-circle fs-2"></i>
-
-                                                </span>
-
-                                                <span class="menu-title">
-                                                    Dibatalkan
-                                                </span>
-
-                                            </a>
+                                            </span>
 
                                         </div>
 
-                                    @endif
+                                        <a href="{{ route('dashboard-user.training.statistic') }}"
+                                        class="menu-link {{ Route::is('dashboard-user.training.statistic') ? 'active' : '' }}">
+
+                                            <span class="menu-icon">
+
+                                                <i class="ki-duotone ki-chart-line fs-2"></i>
+
+                                            </span>
+
+                                            <span class="menu-title">
+                                                Statistik
+                                            </span>
+
+                                        </a>
+
+                                        <a href="{{ route('dashboard-user.training.index') }}?status=all"
+                                        class="menu-link {{ Route::is('dashboard-user.training.*')
+                                        && request()->query('status') === 'all'
+                                            ? 'active'
+                                            : '' }}">
+
+                                            <span class="menu-icon">
+
+                                                <i class="ki-duotone ki-award fs-2"></i>
+
+                                            </span>
+
+                                            <span class="menu-title">
+                                                Semua
+                                            </span>
+
+                                        </a>
+
+                                        <a href="{{ route('dashboard-user.training.index') }}?status=draft"
+                                        class="menu-link {{ Route::is('dashboard-user.training.*')
+                                        && request()->query('status') === 'draft'
+                                            ? 'active'
+                                            : '' }}">
+
+                                            <span class="menu-icon">
+
+                                                <i class="ki-duotone ki-receipt-square fs-2"></i>
+
+                                            </span>
+
+                                            <span class="menu-title">
+                                                Draft
+                                            </span>
+
+                                        </a>
+
+                                        <a href="{{ route('dashboard-user.training.index') }}?status=published"
+                                        class="menu-link {{ Route::is('dashboard-user.training.*')
+                                        && request()->query('status') === 'published'
+                                            ? 'active'
+                                            : '' }}">
+
+                                            <span class="menu-icon">
+
+                                                <i class="ki-duotone ki-check-squared fs-2"></i>
+
+                                            </span>
+
+                                            <span class="menu-title">
+                                                Terpublish
+                                            </span>
+
+                                        </a>
+
+                                        <a href="{{ route('dashboard-user.training.index') }}?status=running"
+                                        class="menu-link {{ Route::is('dashboard-user.training.*')
+                                        && request()->query('status') === 'running'
+                                            ? 'active'
+                                            : '' }}">
+
+                                            <span class="menu-icon">
+
+                                                <i class="ki-duotone ki-loading fs-2"></i>
+
+                                            </span>
+
+                                            <span class="menu-title">
+                                                Berjalan
+                                            </span>
+
+                                        </a>
+
+                                        <a href="{{ route('dashboard-user.training.index') }}?status=closed"
+                                        class="menu-link {{ Route::is('dashboard-user.training.*')
+                                        && request()->query('status') === 'closed'
+                                            ? 'active'
+                                            : '' }}">
+
+                                            <span class="menu-icon">
+
+                                                <i class="ki-duotone ki-cross-square fs-2"></i>
+
+                                            </span>
+
+                                            <span class="menu-title">
+                                                Ditutup
+                                            </span>
+
+                                        </a>
+
+                                        <a href="{{ route('dashboard-user.training.index') }}?status=cancelled"
+                                        class="menu-link {{ Route::is('dashboard-user.training.*')
+                                        && request()->query('status') === 'cancelled'
+                                            ? 'active'
+                                            : '' }}">
+
+                                            <span class="menu-icon">
+
+                                                <i class="ki-duotone ki-minus-circle fs-2"></i>
+
+                                            </span>
+
+                                            <span class="menu-title">
+                                                Dibatalkan
+                                            </span>
+
+                                        </a>
+
+                                    </div>
 
                                     <div class="menu-item">
 

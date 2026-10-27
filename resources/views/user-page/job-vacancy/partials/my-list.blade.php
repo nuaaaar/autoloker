@@ -269,14 +269,15 @@
 
 
                     {{-- COMPETENCY SCHEME --}}
+                    @if($job->category == 'security')
+                        @foreach($competencySchemes as $scheme)
 
-                    @foreach($competencySchemes as $scheme)
+                            <span class="application-badge">
+                                {{ $scheme }}
+                            </span>
 
-                        <span class="application-badge">
-                            {{ $scheme }}
-                        </span>
-
-                    @endforeach
+                        @endforeach
+                    @endif
 
 
                     {{-- LOCATION --}}

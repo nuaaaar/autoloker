@@ -1853,39 +1853,40 @@
 
                                 @endphp
 
+                                @if($job->category == 'security')
+                                    @if(count($competencySchemes))
 
-                                @if(count($competencySchemes))
-
-                                    <div class="requirement-certificates mt-4">
+                                        <div class="requirement-certificates mt-4">
 
 
-                                        <div class="requirement-label mb-2">
+                                            <div class="requirement-label mb-2">
 
-                                            UJI KOMPETENSI SKEMA YANG DIBUTUHKAN
+                                                UJI KOMPETENSI SKEMA YANG DIBUTUHKAN
+
+                                            </div>
+
+
+                                            <div class="job-tags">
+
+
+                                                @foreach($competencySchemes as $scheme)
+
+                                                    <span class="job-tag">
+
+                                                        <i class="ki-duotone ki-shield-tick text-warning fs-7 me-1"></i>
+
+                                                        {{ $scheme }}
+
+                                                    </span>
+
+                                                @endforeach
+
+
+                                            </div>
 
                                         </div>
 
-
-                                        <div class="job-tags">
-
-
-                                            @foreach($competencySchemes as $scheme)
-
-                                                <span class="job-tag">
-
-                                                    <i class="ki-duotone ki-shield-tick text-warning fs-7 me-1"></i>
-
-                                                    {{ $scheme }}
-
-                                                </span>
-
-                                            @endforeach
-
-
-                                        </div>
-
-                                    </div>
-
+                                    @endif
                                 @endif
 
                             @endif

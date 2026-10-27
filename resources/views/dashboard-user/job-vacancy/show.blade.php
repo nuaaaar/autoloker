@@ -1328,59 +1328,60 @@
             </div>
 
             <!-- Kompetensi Skema -->
+            @if($data->category == 'security')
+                <div class="col-lg-12 mb-4">
 
-            <div class="col-lg-12 mb-4">
+                    <div class="card border-0 shadow-sm detail-card">
 
-                <div class="card border-0 shadow-sm detail-card">
+                        <div class="card-header  border-0">
 
-                    <div class="card-header  border-0">
+                            <h5 class="mb-0">
 
-                        <h5 class="mb-0">
+                                <i class="fas fa-award text-warning me-2"></i>
 
-                            <i class="fas fa-award text-warning me-2"></i>
+                                Uji Kompetensi Skema yang Dibutuhkan
 
-                            Uji Kompetensi Skema yang Dibutuhkan
+                            </h5>
 
-                        </h5>
-
-                    </div>
-
-
-                    <div class="card-body">
-
-                        @php
-
-                            $competencySchemes = json_decode(
-                                $data->competency_scheme,
-                                true
-                            ) ?? [];
-
-                        @endphp
+                        </div>
 
 
-                        @forelse($competencySchemes as $scheme)
+                        <div class="card-body">
 
-                            <span class="certificate-badge">
+                            @php
 
-                                {{ $scheme }}
+                                $competencySchemes = json_decode(
+                                    $data->competency_scheme,
+                                    true
+                                ) ?? [];
 
-                            </span>
+                            @endphp
 
-                        @empty
 
-                            <span class="text-muted">
+                            @forelse($competencySchemes as $scheme)
 
-                                Tidak ada uji kompetensi skema khusus.
+                                <span class="certificate-badge">
 
-                            </span>
+                                    {{ $scheme }}
 
-                        @endforelse
+                                </span>
+
+                            @empty
+
+                                <span class="text-muted">
+
+                                    Tidak ada uji kompetensi skema khusus.
+
+                                </span>
+
+                            @endforelse
+
+                        </div>
 
                     </div>
 
                 </div>
-
-            </div>
+            @endif
 
         </div>
     </div>

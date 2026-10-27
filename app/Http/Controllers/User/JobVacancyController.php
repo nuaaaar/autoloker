@@ -1087,7 +1087,6 @@ class JobVacancyController extends Controller
             'working_system'    => 'required',
 
             'fee_type'          => 'required_if:is_show_fee,1',
-
             'min_price'         => 'required_if:is_show_fee,1',
             'max_price'         => 'required_if:is_show_fee,1',
 
@@ -1098,9 +1097,7 @@ class JobVacancyController extends Controller
             */
 
             'min_age'           => 'nullable|integer|min:17|max:100',
-
             'max_age'           => 'nullable|integer|min:17|max:100|gte:min_age',
-
 
             /*
             |--------------------------------------------------------------------------
@@ -1109,9 +1106,7 @@ class JobVacancyController extends Controller
             */
 
             'min_height'        => 'nullable|integer|min:100|max:250',
-
             'max_height'        => 'nullable|integer|min:100|max:250|gte:min_height',
-
 
             /*
             |--------------------------------------------------------------------------
@@ -1120,13 +1115,11 @@ class JobVacancyController extends Controller
             */
 
             'min_weight'        => 'nullable|integer|min:20|max:300',
-
             'max_weight'        => 'nullable|integer|min:20|max:300|gte:min_weight',
-
 
             /*
             |--------------------------------------------------------------------------
-            | PENGALAMAN
+            | PENGALAMAN DAN SERTIFIKASI
             |--------------------------------------------------------------------------
             */
 
@@ -1134,7 +1127,8 @@ class JobVacancyController extends Controller
 
             'certificate'       => 'required|json',
 
-            'competency_scheme'       => 'required|json',
+            // Category CS tidak wajib mengisi competency_scheme.
+            'competency_scheme' => 'required_unless:category,cs|nullable|json',
 
         ], [
 
@@ -1161,10 +1155,8 @@ class JobVacancyController extends Controller
             'working_system.required'       => 'Sistem kerja wajib dipilih.',
 
             'fee_type.required_if'          => 'Tipe gaji wajib dipilih.',
-
             'min_price.required_if'         => 'Gaji minimum wajib diisi.',
             'max_price.required_if'         => 'Gaji maksimum wajib diisi.',
-
 
             /*
             |--------------------------------------------------------------------------
@@ -1175,7 +1167,6 @@ class JobVacancyController extends Controller
             'min_age.integer'               => 'Usia minimum harus berupa angka.',
             'max_age.integer'               => 'Usia maksimum harus berupa angka.',
             'max_age.gte'                   => 'Usia maksimum tidak boleh lebih kecil dari usia minimum.',
-
 
             /*
             |--------------------------------------------------------------------------
@@ -1192,7 +1183,6 @@ class JobVacancyController extends Controller
             'max_height.max'                => 'Tinggi badan maksimum tidak boleh lebih dari 250 cm.',
             'max_height.gte'                => 'Tinggi badan maksimum tidak boleh lebih kecil dari tinggi badan minimum.',
 
-
             /*
             |--------------------------------------------------------------------------
             | BERAT BADAN
@@ -1208,30 +1198,35 @@ class JobVacancyController extends Controller
             'max_weight.max'                => 'Berat badan maksimum tidak boleh lebih dari 300 kg.',
             'max_weight.gte'                => 'Berat badan maksimum tidak boleh lebih kecil dari berat badan minimum.',
 
-
             /*
             |--------------------------------------------------------------------------
-            | PENGALAMAN
+            | PENGALAMAN DAN SERTIFIKASI
             |--------------------------------------------------------------------------
             */
 
             'min_experience.integer'        => 'Minimal pengalaman harus berupa angka.',
 
-            'certificate.required' =>
-                'Sertifikasi wajib dipilih.',
+            'certificate.required'          => 'Sertifikasi wajib dipilih.',
+            'certificate.json'              => 'Format sertifikasi tidak valid.',
 
-            'certificate.json' =>
-                'Format sertifikasi tidak valid.',
-
-            'competency_scheme.required' =>
-                'Kompetensi skema wajib dipilih.',
-
-            'competency_scheme.json' =>
-                'Format kompetensi skema tidak valid.',
+            'competency_scheme.required_unless' => 'Kompetensi skema wajib dipilih.',
+            'competency_scheme.json'           => 'Format kompetensi skema tidak valid.',
 
         ]);
 
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDASI TAMBAHAN
+        |--------------------------------------------------------------------------
+        */
+
         $validator->after(function ($validator) use ($request) {
+
+            /*
+            |--------------------------------------------------------------------------
+            | VALIDASI CERTIFICATE
+            |--------------------------------------------------------------------------
+            */
 
             $certificate = json_decode(
                 $request->certificate,
@@ -1242,33 +1237,44 @@ class JobVacancyController extends Controller
                 !is_array($certificate) ||
                 count($certificate) === 0
             ) {
-
                 $validator->errors()->add(
                     'certificate',
                     'Minimal pilih satu sertifikasi.'
                 );
-
             }
 
+            /*
+            |--------------------------------------------------------------------------
+            | VALIDASI COMPETENCY SCHEME
+            |--------------------------------------------------------------------------
+            | Category CS tidak membutuhkan competency_scheme.
+            |--------------------------------------------------------------------------
+            */
 
-            $competencyScheme = json_decode(
-                $request->competency_scheme,
-                true
-            );
+            if ($request->category !== 'cs') {
 
-            if (
-                !is_array($competencyScheme) ||
-                count($competencyScheme) === 0
-            ) {
-
-                $validator->errors()->add(
-                    'competency_scheme',
-                    'Minimal pilih satu kompetensi skema.'
+                $competencyScheme = json_decode(
+                    $request->competency_scheme,
+                    true
                 );
 
+                if (
+                    !is_array($competencyScheme) ||
+                    count($competencyScheme) === 0
+                ) {
+                    $validator->errors()->add(
+                        'competency_scheme',
+                        'Minimal pilih satu kompetensi skema.'
+                    );
+                }
             }
-
         });
+
+        /*
+        |--------------------------------------------------------------------------
+        | RESPONSE VALIDASI GAGAL
+        |--------------------------------------------------------------------------
+        */
 
         if ($validator->fails()) {
 
@@ -1276,24 +1282,43 @@ class JobVacancyController extends Controller
                 'status'  => false,
                 'message' => 'Validasi gagal.',
                 'errors'  => $validator->errors()
-            ],422);
-
+            ], 422);
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | IDENTITAS BUJP / COMPANY
+        |--------------------------------------------------------------------------
+        */
 
         $bujpId = null;
         $companyId = null;
 
-        if(Auth::user()->role == 'bujp')
-        {
+        if (Auth::user()->role == 'bujp') {
+
             $bujpId = Auth::user()->user_bujp->bujp->id;
+
         } else {
+
             $companyId = Auth::user()->user_company->company->id;
         }
-        
+
+        /*
+        |--------------------------------------------------------------------------
+        | DATA WILAYAH
+        |--------------------------------------------------------------------------
+        */
+
         $province = Province::where('code', $request->province)->first();
         $city = City::where('code', $request->city)->first();
         $district = District::where('code', $request->district)->first();
         $village = Village::where('code', $request->village)->first();
+
+        /*
+        |--------------------------------------------------------------------------
+        | SIMPAN LOWONGAN
+        |--------------------------------------------------------------------------
+        */
 
         JobVacancy::create([
 
@@ -1307,12 +1332,12 @@ class JobVacancyController extends Controller
 
             'kuota'            => $request->kuota,
 
-            'status' => ($request->status === 'submitted')
-            ? 'published'
-            : ($request->status ?? 'draft'),
+            'status'           => ($request->status === 'submitted')
+                ? 'published'
+                : ($request->status ?? 'draft'),
 
             'start_date'       => $request->start_date,
-            'end_date'        => $request->end_date,
+            'end_date'         => $request->end_date,
 
             'province'         => $province?->name,
             'city'             => $city?->name,
@@ -1346,17 +1371,26 @@ class JobVacancyController extends Controller
 
             'certificate'      => $request->certificate,
 
-            'competency_scheme'      => $request->competency_scheme,
+            // CS menyimpan NULL, kategori lain menyimpan JSON yang dikirim.
+            'competency_scheme' => $request->category === 'cs'
+                ? null
+                : $request->competency_scheme,
 
-            'category'      => $request->category,
+            'category'         => $request->category,
 
             'is_urgent'        => $request->boolean('is_urgent'),
 
         ]);
 
+        /*
+        |--------------------------------------------------------------------------
+        | RESPONSE BERHASIL
+        |--------------------------------------------------------------------------
+        */
+
         return response()->json([
 
-            'status' => true,
+            'status'  => true,
             'message' => 'Lowongan berhasil disimpan.'
 
         ]);

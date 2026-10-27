@@ -19,39 +19,51 @@ use Auth;
 
 class TrainingController extends Controller
 {
+    
     public function statistic()
     {
         /*
         |--------------------------------------------------------------------------
-        | GET BUJP
+        | USER
         |--------------------------------------------------------------------------
         */
-
         $user = Auth::user();
 
-        $bujp = $user->user_bujp->bujp;
+        /*
+        |--------------------------------------------------------------------------
+        | CARI OWNER
+        |--------------------------------------------------------------------------
+        */
+        if ($user->role === 'bujp') {
+            $ownerColumn = 'b_u_j_p_id';
 
-        $bujpId = $bujp->id;
+            $bujp = $user->user_bujp->bujp;
+            $ownerId = $bujp->id;
 
+        } elseif ($user->role === 'company') {
+            $ownerColumn = 'company_id';
+
+            $bujp = $user->user_company->company;
+            $ownerId = $bujp->id;
+
+        } else {
+            abort(403, 'Anda tidak memiliki akses ke statistik pelatihan.');
+        }
 
         /*
         |--------------------------------------------------------------------------
-        | BASE QUERY TRAINING
+        | BASE TRAINING QUERY
         |--------------------------------------------------------------------------
         */
-
         $trainingQuery = Training::query()
-            ->where('b_u_j_p_id', $bujpId);
-
+            ->where($ownerColumn, $ownerId);
 
         /*
         |--------------------------------------------------------------------------
-        | STATISTIK TRAINING
+        | STATISTIK PELATIHAN
         |--------------------------------------------------------------------------
         */
-
-        $totalTrainings = (clone $trainingQuery)
-            ->count();
+        $totalTrainings = (clone $trainingQuery)->count();
 
         $totalPublished = (clone $trainingQuery)
             ->where('status', 'published')
@@ -69,65 +81,32 @@ class TrainingController extends Controller
             ->where('status', 'rejected')
             ->count();
 
-
         /*
         |--------------------------------------------------------------------------
-        | ID TRAINING
+        | BASE APPLICATION QUERY
         |--------------------------------------------------------------------------
         */
-
-        $trainingIds = (clone $trainingQuery)
-            ->pluck('id');
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | BASE QUERY PENDAFTAR
-        |--------------------------------------------------------------------------
-        */
-
         $registrationQuery = TrainingApplication::query()
-            ->whereIn('training_id', $trainingIds);
-
+            ->whereHas('training', function ($query) use (
+                $ownerColumn,
+                $ownerId
+            ) {
+                $query->where($ownerColumn, $ownerId);
+            });
 
         /*
         |--------------------------------------------------------------------------
         | TOTAL PENDAFTAR
         |--------------------------------------------------------------------------
         */
-
         $totalRegistrations = (clone $registrationQuery)
             ->count();
 
-
         /*
         |--------------------------------------------------------------------------
-        | PESERTA DITERIMA
+        | STATUS PENDAFTAR
         |--------------------------------------------------------------------------
         */
-
-        $totalAccepted = (clone $registrationQuery)
-            ->where('status', 'approved')
-            ->count();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | PESERTA DITOLAK
-        |--------------------------------------------------------------------------
-        */
-
-        $totalRejectedRegistrations = (clone $registrationQuery)
-            ->where('status', 'rejected')
-            ->count();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | STATUS PESERTA
-        |--------------------------------------------------------------------------
-        */
-
         $pendingRegistrations = (clone $registrationQuery)
             ->where('status', 'pending')
             ->count();
@@ -140,13 +119,26 @@ class TrainingController extends Controller
             ->where('status', 'rejected')
             ->count();
 
+        $totalAccepted = $approvedRegistrations;
+
+        $totalRejectedRegistrations = $rejectedRegistrations;
+
+        /*
+        |--------------------------------------------------------------------------
+        | PENDAFTAR AKTIF
+        |--------------------------------------------------------------------------
+        | Pending dan approved dihitung sebagai pendaftar aktif.
+        |--------------------------------------------------------------------------
+        */
+        $activeRegistrations = (clone $registrationQuery)
+            ->whereIn('status', ['pending', 'approved'])
+            ->count();
 
         /*
         |--------------------------------------------------------------------------
         | DATA DOUGHNUT CHART
         |--------------------------------------------------------------------------
         */
-
         $statusChart = [
             [
                 'label' => 'Pending',
@@ -162,100 +154,107 @@ class TrainingController extends Controller
             ],
         ];
 
+        /*
+        |--------------------------------------------------------------------------
+        | CONVERSION RATE
+        |--------------------------------------------------------------------------
+        */
+        $acceptanceRate = $totalRegistrations > 0
+            ? round(
+                ($totalAccepted / $totalRegistrations) * 100,
+                1
+            )
+            : 0;
+
+        $rejectionRate = $totalRegistrations > 0
+            ? round(
+                ($totalRejectedRegistrations / $totalRegistrations) * 100,
+                1
+            )
+            : 0;
+
+        $publicationRate = $totalTrainings > 0
+            ? round(
+                ($totalPublished / $totalTrainings) * 100,
+                1
+            )
+            : 0;
 
         /*
         |--------------------------------------------------------------------------
-        | TREND 6 BULAN
+        | ID TRAINING MILIK OWNER
         |--------------------------------------------------------------------------
         */
-
-        $months = [];
-
-        for ($i = 5; $i >= 0; $i--) {
-
-            $date = Carbon::now()
-                ->subMonths($i);
-
-            $months[] = [
-                'key' => $date->format('Y-m'),
-                'label' => $date->translatedFormat('M Y'),
-            ];
-        }
-
+        $trainingIds = (clone $trainingQuery)->select('id');
 
         /*
         |--------------------------------------------------------------------------
-        | TREND TRAINING
+        | STATISTIK BULANAN PELATIHAN
         |--------------------------------------------------------------------------
         */
+        $monthlyTrainings = (clone $trainingQuery)
+            ->selectRaw('MONTH(created_at) as month, COUNT(*) as total')
+            ->whereYear('created_at', now()->year)
+            ->groupByRaw('MONTH(created_at)')
+            ->orderBy('month')
+            ->pluck('total', 'month');
 
-        $trainingTrend = [];
+        /*
+        |--------------------------------------------------------------------------
+        | STATISTIK BULANAN PENDAFTAR
+        |--------------------------------------------------------------------------
+        */
+        $monthlyRegistrations = (clone $registrationQuery)
+            ->selectRaw('MONTH(created_at) as month, COUNT(*) as total')
+            ->whereYear('created_at', now()->year)
+            ->groupByRaw('MONTH(created_at)')
+            ->pluck('total', 'month');
 
-        foreach ($months as $month) {
+        /*
+        |--------------------------------------------------------------------------
+        | LABEL BULAN
+        |--------------------------------------------------------------------------
+        */
+        $monthLabels = [
+            'Januari',
+            'Februari',
+            'Maret',
+            'April',
+            'Mei',
+            'Juni',
+            'Juli',
+            'Agustus',
+            'September',
+            'Oktober',
+            'November',
+            'Desember',
+        ];
 
-            $date = Carbon::createFromFormat(
-                'Y-m',
-                $month['key']
+        /*
+        |--------------------------------------------------------------------------
+        | DATA GRAFIK BULANAN
+        |--------------------------------------------------------------------------
+        */
+        $trainingChartData = [];
+        $registrationChartData = [];
+
+        for ($month = 1; $month <= 12; $month++) {
+            $trainingChartData[] = (int) ($monthlyTrainings[$month] ?? 0);
+
+            $registrationChartData[] = (int) (
+                $monthlyRegistrations[$month] ?? 0
             );
-
-            $trainingTrend[] = [
-                'label' => $month['label'],
-
-                'total' => (clone $trainingQuery)
-                    ->whereYear(
-                        'created_at',
-                        $date->year
-                    )
-                    ->whereMonth(
-                        'created_at',
-                        $date->month
-                    )
-                    ->count(),
-            ];
         }
-
 
         /*
         |--------------------------------------------------------------------------
-        | TREND PENDAFTAR
+        | TOP 5 PELATIHAN BERDASARKAN PENDAFTAR
         |--------------------------------------------------------------------------
         */
-
-        $registrationTrend = [];
-
-        foreach ($months as $month) {
-
-            $date = Carbon::createFromFormat(
-                'Y-m',
-                $month['key']
-            );
-
-            $registrationTrend[] = [
-                'label' => $month['label'],
-
-                'total' => (clone $registrationQuery)
-                    ->whereYear(
-                        'created_at',
-                        $date->year
-                    )
-                    ->whereMonth(
-                        'created_at',
-                        $date->month
-                    )
-                    ->count(),
-            ];
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | TOP 5 TRAINING
-        |--------------------------------------------------------------------------
-        */
-
         $topTrainings = (clone $trainingQuery)
             ->withCount('applications')
             ->orderByDesc('applications_count')
+            ->orderBy('title')
             ->limit(5)
             ->get([
                 'id',
@@ -263,32 +262,45 @@ class TrainingController extends Controller
                 'status',
             ]);
 
-
         /*
         |--------------------------------------------------------------------------
         | RETURN VIEW
         |--------------------------------------------------------------------------
         */
-
         return view(
             'dashboard-user.training.statistic',
             compact(
                 'bujp',
+
                 'totalTrainings',
                 'totalPublished',
                 'totalDraft',
                 'totalClosed',
                 'totalRejected',
+
                 'totalRegistrations',
+                'activeRegistrations',
                 'totalAccepted',
                 'totalRejectedRegistrations',
-                'trainingTrend',
-                'registrationTrend',
+
+                'pendingRegistrations',
+                'approvedRegistrations',
+                'rejectedRegistrations',
+
+                'acceptanceRate',
+                'rejectionRate',
+                'publicationRate',
+
                 'statusChart',
+                'monthLabels',
+                'trainingChartData',
+                'registrationChartData',
+
                 'topTrainings'
             )
         );
     }
+
 
     /**
      * Display a listing of the resource.
@@ -560,7 +572,19 @@ class TrainingController extends Controller
      */
     public function create()
     {
-        return view('dashboard-user.training.create');
+        $masterCategoryCertificates = \App\Models\MasterCategoryCertificate::query()
+            ->orderBy('level')
+            ->orderBy('title')
+            ->get([
+                'id',
+                'title',
+                'category',
+                'parent_id',
+                'is_tuk',
+                'level',
+            ]);
+
+        return view('dashboard-user.training.create', compact('masterCategoryCertificates'));
     }
 
     /**
@@ -580,8 +604,11 @@ class TrainingController extends Controller
 
             'title'                 => 'required|max:255',
             'provider'              => 'required|max:255',
-            'category'              => 'required',
+            'category'              => 'required|string|max:255',
             'category_role'         => 'required|in:security,cs',
+            'sub_category'          => 'nullable|string|max:255',
+            'tuk'                   => 'nullable|in:mandiri,sewaktu,tempat kerja',
+            'discount'              => 'nullable|numeric|min:1|max:100',
             'level'                 => 'required',
 
             'description'           => 'required',
@@ -752,6 +779,65 @@ class TrainingController extends Controller
 
         ]);
 
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDASI MASTER KATEGORI SERTIFIKAT
+        |--------------------------------------------------------------------------
+        */
+
+        $categoryRole = $request->input('category_role');
+        $selectedCategory = null;
+        $selectedSubCategory = null;
+
+        if ($categoryRole && $request->filled('category')) {
+            $selectedCategory = \App\Models\MasterCategoryCertificate::query()
+                ->where('category', $categoryRole)
+                ->where('level', 1)
+                ->whereNull('parent_id')
+                ->where('title', $request->category)
+                ->first();
+
+            if (!$selectedCategory) {
+                $validator->errors()->add(
+                    'category',
+                    'Kategori pelatihan tidak sesuai dengan sasaran peserta yang dipilih.'
+                );
+            } else {
+                $subCategories = \App\Models\MasterCategoryCertificate::query()
+                    ->where('category', $categoryRole)
+                    ->where('parent_id', $selectedCategory->id)
+                    ->orderBy('title')
+                    ->get();
+
+                if ($subCategories->isNotEmpty() && !$request->filled('sub_category')) {
+                    $validator->errors()->add(
+                        'sub_category',
+                        'Sub kategori pelatihan wajib dipilih.'
+                    );
+                }
+
+                if ($request->filled('sub_category')) {
+                    $selectedSubCategory = $subCategories->firstWhere('title', $request->sub_category);
+
+                    if (!$selectedSubCategory) {
+                        $validator->errors()->add(
+                            'sub_category',
+                            'Sub kategori tidak sesuai dengan kategori pelatihan.'
+                        );
+                    }
+                }
+
+                $tukSource = $selectedSubCategory ?: $selectedCategory;
+
+                if ($tukSource && $tukSource->is_tuk && !$request->filled('tuk')) {
+                    $validator->errors()->add('tuk', 'TUK wajib dipilih.');
+                }
+
+                if ($tukSource && !$tukSource->is_tuk && $request->filled('tuk')) {
+                    $validator->errors()->add('tuk', 'TUK tidak diperlukan untuk kategori ini.');
+                }
+            }
+        }
 
         /*
         |--------------------------------------------------------------------------
@@ -895,6 +981,9 @@ class TrainingController extends Controller
 
             'category'              => $request->category,
             'category_role'         => $request->category_role,
+            'sub_category'          => $request->sub_category,
+            'tuk'                   => $request->tuk,
+            'discount'              => $request->filled('discount') ? $request->discount : 0,
             'level'                 => $request->level,
 
             /*

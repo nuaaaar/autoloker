@@ -3,286 +3,355 @@
 @section('title', 'Detail')
 
 @section('css')
-    <style>
-        .page-title{
-
-            font-size:28px;
-
-            font-weight:700;
-
-        }
-
-        .job-header-card{
-
-            border-radius:18px;
-
-        }
-
-        .job-icon{
-
-            width:90px;
-
-            height:90px;
-
-            border-radius:18px;
-
-            background:#152040;
-
-            color:#fff;
-
-            display:flex;
-
-            justify-content:center;
-
-            align-items:center;
-
-            font-size:34px;
-
-        }
-
-        .job-location,
-        .job-period{
-
-            color:#6c757d;
-
-            font-size:15px;
-
-        }
-
-        .badge-status{
-
-            font-size:14px;
-
-            padding:12px 20px;
-
-            border-radius:30px;
-
-        }
-
-        .summary-card{
-
-            background:#FFD54A;
-
-            border-radius:15px;
-
-            padding:22px;
-
-            display:flex;
-
-            align-items:center;
-
-            transition:.3s;
-
-            height:100%;
-
-        }
-
-        .summary-card:hover{
-
-            transform:translateY(-4px);
-
-        }
-
-        .summary-icon{
-
-            width:60px;
-
-            height:60px;
-
-            border-radius:50%;
-
-            background:#152040;
-
-            color:#fff;
-
-            display:flex;
-
-            justify-content:center;
-
-            align-items:center;
-
-            font-size:22px;
-
-            margin-right:18px;
-
-        }
-
-        .summary-card small{
-
-            display:block;
-
-            color:#555;
-
-            font-weight:600;
-
-        }
-
-        .summary-card h4{
-
-            margin:3px 0 0;
-
-            font-size:19px;
-
-            font-weight:700;
-
-            color:#152040;
-
-        }
-
-        .detail-card{
-
-            border-radius:16px;
-
-        }
-
-        .detail-card .card-header{
-
-            padding:18px 22px;
-
-        }
-
-        .detail-card .card-header h5{
-
-            font-size:18px;
-
-            font-weight:700;
-
-            color:#152040;
-
-        }
-
-        .detail-table{
-
-            margin-bottom:0;
-
-        }
-
-        .detail-table td{
-
-            color:#6c757d;
-
-            padding:12px 6px;
-
-            vertical-align:top;
-
-            font-weight:500;
-
-        }
-
-        .detail-table th{
-
-            color:#152040;
-
-            padding:12px 6px;
-
-            font-weight:600;
-
-        }
-
-        .detail-table tr:not(:last-child){
-
-            border-bottom:1px dashed #ececec;
-
-        }
-
-        .salary-text{
-
-            color:white;
-
-            font-size:30px;
-
-            font-weight:700;
-
-        }
-
-        .check-item{
-
-            display:flex;
-
-            align-items:flex-start;
-
-            margin-bottom:14px;
-
-        }
-
-        .check-item i{
-
-            color:#ffc107;
-
-            font-size:18px;
-
-            margin-right:12px;
-
-            margin-top:3px;
-
-        }
-
-        .check-item span{
-
-            color:white;
-
-            line-height:1.7;
-
-        }
-
-        .certificate-badge{
-
-            display:inline-block;
-
-            background:#152040;
-
-            color:#fff;
-
-            padding:10px 18px;
-
-            border-radius:30px;
-
-            margin:6px;
-
-            font-size:14px;
-
-            font-weight:600;
-
-            transition:.3s;
-
-        }
-
-        .certificate-badge:hover{
-
-            background:#ffc107;
-
-            color:#152040;
-
-        }
-
-        .detail-card .card-body{
-
-            line-height:1.8;
-
+    
+<style>
+    /* =========================================================
+       THEME VARIABLES - LIGHT MODE
+    ========================================================= */
+    :root {
+        --job-page-bg: #f7f8fa;
+        --job-surface: #ffffff;
+        --job-surface-soft: #f8fafc;
+        --job-surface-hover: #f1f5f9;
+
+        --job-border: #e2e8f0;
+        --job-border-strong: #cbd5e1;
+
+        --job-title: #182338;
+        --job-text: #475569;
+        --job-muted: #64748b;
+
+        --job-icon-bg: #eef2f7;
+        --job-icon-color: #152040;
+
+        --job-summary-bg: #fff4d6;
+        --job-summary-border: #f4d77c;
+        --job-summary-title: #182338;
+        --job-summary-text: #64748b;
+
+        --job-accent: #e8a801;
+        --job-accent-hover: #f2b600;
+        --job-accent-soft: rgba(232, 168, 1, .12);
+
+        --job-table-border: #e2e8f0;
+        --job-table-label: #64748b;
+        --job-table-value: #182338;
+
+        --job-certificate-bg: #eef2f7;
+        --job-certificate-text: #152040;
+
+        --job-shadow: 0 8px 25px rgba(15, 23, 42, .06);
+    }
+
+    /* =========================================================
+       DARK MODE
+    ========================================================= */
+    [data-bs-theme="dark"],
+    .dark-layout,
+    .dark-mode,
+    [data-theme="dark"] {
+        --job-page-bg: #0b1020;
+        --job-surface: #11192c;
+        --job-surface-soft: #0d1426;
+        --job-surface-hover: #1b2942;
+
+        --job-border: rgba(255, 255, 255, .08);
+        --job-border-strong: rgba(255, 255, 255, .15);
+
+        --job-title: #ffffff;
+        --job-text: #cbd5e1;
+        --job-muted: #95a2bd;
+
+        --job-icon-bg: #152040;
+        --job-icon-color: #ffffff;
+
+        --job-summary-bg: #1b2438;
+        --job-summary-border: rgba(255, 213, 74, .25);
+        --job-summary-title: #ffffff;
+        --job-summary-text: #b7c2d6;
+
+        --job-accent: #ffc107;
+        --job-accent-hover: #ffd04a;
+        --job-accent-soft: rgba(255, 193, 7, .12);
+
+        --job-table-border: rgba(255, 255, 255, .10);
+        --job-table-label: #a5b1c7;
+        --job-table-value: #ffffff;
+
+        --job-certificate-bg: #152040;
+        --job-certificate-text: #ffffff;
+
+        --job-shadow: 0 8px 25px rgba(0, 0, 0, .16);
+    }
+
+    /* =========================================================
+       PAGE TITLE
+    ========================================================= */
+    .page-title {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--job-title);
+    }
+
+    /* =========================================================
+       HEADER CARD
+    ========================================================= */
+    .job-header-card {
+        border-radius: 18px;
+        background: var(--job-surface);
+        border: 1px solid var(--job-border);
+        box-shadow: var(--job-shadow);
+        color: var(--job-text);
+    }
+
+    /* =========================================================
+       JOB ICON / LOGO
+    ========================================================= */
+    .job-icon {
+        width: 90px;
+        height: 90px;
+        border-radius: 18px;
+        background: var(--job-icon-bg);
+        color: var(--job-icon-color);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 34px;
+        overflow: hidden;
+        flex-shrink: 0;
+        border: 1px solid var(--job-border);
+        transition: background .25s ease;
+    }
+
+    .job-icon img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        transition: transform .3s ease;
+    }
+
+    .job-icon:hover img {
+        transform: scale(1.08);
+    }
+
+    /* =========================================================
+       LOCATION & PERIOD
+    ========================================================= */
+    .job-location,
+    .job-period {
+        color: var(--job-muted);
+        font-size: 15px;
+    }
+
+    /* =========================================================
+       STATUS BADGE
+    ========================================================= */
+    .badge-status {
+        font-size: 14px;
+        padding: 12px 20px;
+        border-radius: 30px;
+    }
+
+    /* =========================================================
+       SUMMARY CARD
+    ========================================================= */
+    .summary-card {
+        background: var(--job-summary-bg);
+        border: 1px solid var(--job-summary-border);
+        border-radius: 15px;
+        padding: 22px;
+        display: flex;
+        align-items: center;
+        transition: transform .3s ease, box-shadow .3s ease;
+        height: 100%;
+        box-shadow: var(--job-shadow);
+    }
+
+    .summary-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 28px rgba(15, 23, 42, .10);
+    }
+
+    .summary-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: var(--job-icon-bg);
+        color: var(--job-icon-color);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 22px;
+        margin-right: 18px;
+        flex-shrink: 0;
+    }
+
+    .summary-card small {
+        display: block;
+        color: var(--job-summary-text);
+        font-weight: 600;
+    }
+
+    .summary-card h4 {
+        margin: 3px 0 0;
+        font-size: 19px;
+        font-weight: 700;
+        color: var(--job-summary-title);
+        overflow-wrap: anywhere;
+    }
+
+    /* =========================================================
+       DETAIL CARD
+    ========================================================= */
+    .detail-card {
+        border-radius: 16px;
+        background: var(--job-surface);
+        border: 1px solid var(--job-border);
+        color: var(--job-text);
+        box-shadow: var(--job-shadow);
+        overflow: hidden;
+    }
+
+    .detail-card .card-header {
+        padding: 18px 22px;
+        background: var(--job-surface);
+        border-bottom: 1px solid var(--job-border);
+    }
+
+    .detail-card .card-header h5 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--job-title);
+        margin-bottom: 0;
+    }
+
+    .detail-card .card-body {
+        line-height: 1.8;
+        color: var(--job-text);
+        background: var(--job-surface);
+    }
+
+    /* =========================================================
+       DETAIL TABLE
+    ========================================================= */
+    .detail-table {
+        margin-bottom: 0;
+        background: transparent;
+        --bs-table-bg: transparent;
+        --bs-table-color: var(--job-text);
+        --bs-table-border-color: var(--job-table-border);
+    }
+
+    .detail-table td {
+        color: var(--job-table-label);
+        padding: 12px 6px;
+        vertical-align: top;
+        font-weight: 500;
+    }
+
+    .detail-table th {
+        color: var(--job-table-value);
+        padding: 12px 6px;
+        font-weight: 600;
+    }
+
+    .detail-table tr:not(:last-child) {
+        border-bottom: 1px dashed var(--job-table-border);
+    }
+
+    /* =========================================================
+       SALARY
+    ========================================================= */
+    .salary-text {
+        color: var(--job-title);
+        font-size: 30px;
+        font-weight: 700;
+    }
+
+    /* =========================================================
+       REQUIREMENTS / CHECKLIST
+    ========================================================= */
+    .check-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 14px;
+    }
+
+    .check-item i {
+        color: var(--job-accent);
+        font-size: 18px;
+        margin-right: 12px;
+        margin-top: 3px;
+        flex-shrink: 0;
+    }
+
+    .check-item span {
+        color: var(--job-text);
+        line-height: 1.7;
+    }
+
+    /* =========================================================
+       CERTIFICATE BADGE
+    ========================================================= */
+    .certificate-badge {
+        display: inline-block;
+        background: var(--job-certificate-bg);
+        color: var(--job-certificate-text);
+        border: 1px solid var(--job-border);
+        padding: 10px 18px;
+        border-radius: 30px;
+        margin: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        transition: background .25s ease, color .25s ease;
+    }
+
+    .certificate-badge:hover {
+        background: var(--job-accent);
+        border-color: var(--job-accent);
+        color: #152040;
+    }
+
+    /* =========================================================
+       RESPONSIVE
+    ========================================================= */
+    @media (max-width: 768px) {
+        .page-title {
+            font-size: 23px;
         }
 
         .job-icon {
-            width: 90px;
-            height: 90px;
-            border-radius: 18px;
-            background: #152040;
-            color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 34px;
-            overflow: hidden;
-            flex-shrink: 0;
+            width: 70px;
+            height: 70px;
+            border-radius: 14px;
+            font-size: 28px;
         }
 
-        .job-icon img {
-            transition: .3s ease;
+        .summary-card {
+            padding: 16px;
         }
 
-        .job-icon:hover img {
-            transform: scale(1.08);
+        .summary-icon {
+            width: 48px;
+            height: 48px;
+            font-size: 19px;
+            margin-right: 12px;
         }
-    </style>
+
+        .summary-card h4 {
+            font-size: 17px;
+        }
+
+        .detail-card .card-header {
+            padding: 16px;
+        }
+
+        .salary-text {
+            font-size: 25px;
+        }
+    }
+</style>
+
 @endsection
 
 @section('breadcrumb')
@@ -500,7 +569,7 @@
 
                             @case('closed')
 
-                                <span class="badge badge-status badge-dark">
+                                <span class="badge badge-status badge-danger">
 
                                     Ditutup
 
@@ -724,7 +793,7 @@
 
                 <div class="card border-0 shadow-sm detail-card">
 
-                    <div class="card-header bg-white border-0">
+                    <div class="card-header  border-0">
 
                         <h5 class="mb-0">
                             <i class="fas fa-circle-info text-warning me-2"></i>
@@ -807,7 +876,7 @@
                                         @break
 
                                         @case('closed')
-                                            <span class="badge bg-dark">Ditutup</span>
+                                            <span class="badge bg-danger">Ditutup</span>
                                         @break
 
                                         @case('cancelled')
@@ -839,7 +908,7 @@
 
                 <div class="card border-0 shadow-sm detail-card">
 
-                    <div class="card-header bg-white border-0">
+                    <div class="card-header  border-0">
 
                         <h5 class="mb-0">
 
@@ -930,7 +999,7 @@
 
                 <div class="card border-0 shadow-sm detail-card">
 
-                    <div class="card-header bg-white border-0">
+                    <div class="card-header  border-0">
 
                         <h5>
 
@@ -1031,7 +1100,7 @@
 
         <div class="card border-0 shadow-sm detail-card mb-4">
 
-            <div class="card-header bg-white border-0">
+            <div class="card-header  border-0">
 
                 <h5>
 
@@ -1057,7 +1126,7 @@
 
                 <div class="card border-0 shadow-sm detail-card">
 
-                    <div class="card-header bg-white border-0">
+                    <div class="card-header  border-0">
 
                         <h5>
 
@@ -1093,7 +1162,7 @@
 
                 <div class="card border-0 shadow-sm detail-card">
 
-                    <div class="card-header bg-white border-0">
+                    <div class="card-header  border-0">
 
                         <h5>
 
@@ -1133,7 +1202,7 @@
 
                 <div class="card border-0 shadow-sm detail-card">
 
-                    <div class="card-header bg-white border-0">
+                    <div class="card-header  border-0">
 
                         <h5>
 
@@ -1205,7 +1274,7 @@
 
                 <div class="card border-0 shadow-sm detail-card">
 
-                    <div class="card-header bg-white border-0">
+                    <div class="card-header  border-0">
 
                         <h5>
 

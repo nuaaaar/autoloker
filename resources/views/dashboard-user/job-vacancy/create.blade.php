@@ -2019,40 +2019,27 @@
 
                     </div>
 
-
                     {{-- =====================================================
                         KOMPETENSI SKEMA
                     ====================================================== --}}
 
-                    <div class="row mt-10">
+                    <div class="row mt-10" id="competencySchemeSection">
 
                         <div class="col-lg-12">
 
                             <label class="form-label required">
-
                                 Kompetensi Skema
-
                             </label>
 
                             <div class="text-muted mb-5">
-
                                 Pilih kompetensi skema yang wajib dimiliki pelamar.
-
                             </div>
-
 
                             <div class="competency-scheme-group">
-
-                                {{-- Data competency akan dimuat berdasarkan category --}}
-
                                 <div class="text-muted">
-
                                     Pilih kategori lowongan terlebih dahulu.
-
                                 </div>
-
                             </div>
-
 
                             <input
                                 type="hidden"
@@ -3837,6 +3824,7 @@
 
                 let category = $(this).val();
 
+                toggleCompetencyScheme(category);
 
                 /*
                 |--------------------------------------------------------------------------
@@ -3919,7 +3907,6 @@
                             Pilih kategori lowongan terlebih dahulu.
                         </div>
                     `);
-
 
                     return;
 
@@ -4226,5 +4213,21 @@
             }
 
         });
+
+        function toggleCompetencyScheme(category) {
+            const isCleaningService = category === "cs";
+
+            if (isCleaningService) {
+                // Hilangkan seluruh bagian kompetensi skema
+                $("#competencySchemeSection").addClass("d-none");
+
+                // Kosongkan nilai agar tidak mengirim pilihan lama
+                $("#competency_scheme_json").val("");
+                $(".competency-scheme-group").empty();
+            } else {
+                // Tampilkan kembali untuk kategori selain CS
+                $("#competencySchemeSection").removeClass("d-none");
+            }
+        }
     </script>
 @endsection

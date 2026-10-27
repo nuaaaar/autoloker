@@ -1,31 +1,124 @@
+
 @extends('layouts.dashboard-user')
 
 @section('title', 'Statistik Pelatihan')
 
+@section('css')
+<style>
+    .training-statistic .stat-card {
+        border: 1px solid var(--bs-border-color);
+        border-radius: 12px;
+        transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .training-statistic .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, .06);
+    }
+
+    .training-statistic .stat-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 52px;
+        height: 52px;
+        flex-shrink: 0;
+        border-radius: 12px;
+    }
+
+    .training-statistic .chart-container {
+        position: relative;
+        width: 100%;
+        height: 330px;
+    }
+
+    .training-statistic .status-chart-container {
+        position: relative;
+        width: 100%;
+        height: 290px;
+    }
+
+    .training-statistic .stat-value {
+        font-size: 28px;
+        font-weight: 700;
+        line-height: 1.3;
+        color: var(--bs-heading-color, var(--bs-body-color));
+    }
+
+    .training-statistic .stat-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--bs-secondary-color);
+    }
+
+    .training-statistic .section-title {
+        font-size: 17px;
+        font-weight: 700;
+    }
+
+    .training-statistic .progress {
+        background-color: var(--bs-secondary-bg);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .training-statistic .progress-bar {
+        border-radius: 10px;
+        transition: width .5s ease;
+    }
+
+    .training-statistic .top-training-item:last-child {
+        margin-bottom: 0 !important;
+    }
+
+    @media (max-width: 767px) {
+        .training-statistic .chart-container {
+            height: 280px;
+        }
+
+        .training-statistic .status-chart-container {
+            height: 260px;
+        }
+
+        .training-statistic .stat-value {
+            font-size: 24px;
+        }
+    }
+</style>
+@endsection
+
 @section('content')
 
-<div class="container-fluid">
+<div class="container-fluid training-statistic">
 
-    {{-- ================================================= --}}
     {{-- HEADER --}}
-    {{-- ================================================= --}}
-
-    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-7">
+    <div class="d-flex flex-column flex-md-row
+                align-items-md-center justify-content-between mb-7">
 
         <div>
-
             <h1 class="fw-bold text-gray-900 mb-2">
                 Statistik Pelatihan
             </h1>
 
             <div class="text-muted">
-                Ringkasan performa pelatihan dan peserta Anda
+                Ringkasan performa pelatihan dan peserta Anda.
             </div>
 
+            @if(isset($bujp))
+                <div class="text-muted fs-7 mt-2">
+                    <i class="ki-duotone ki-office-bag fs-5 me-1">
+                    </i>
+                    {{ $bujp->name ?? $bujp->company_name ?? 'Data organisasi' }}
+                </div>
+            @endif
+        </div>
+
+        <div class="text-muted fs-7 mt-3 mt-md-0">
+            <i class="ki-duotone ki-calendar fs-5 me-1"></i>
+            Tahun {{ now()->year }}
         </div>
 
     </div>
-
 
     {{-- ================================================= --}}
     {{-- SUMMARY --}}
@@ -34,228 +127,129 @@
     <div class="row g-5 mb-7">
 
         {{-- TOTAL PELATIHAN --}}
-        <div class="col-12 col-md-4">
-
-            <div class="card card-flush h-100">
-
+        <div class="col-12 col-sm-6 col-xl-4">
+            <div class="card card-flush stat-card h-100">
                 <div class="card-body d-flex align-items-center">
-
-                    <div class="symbol symbol-55px bg-light-primary me-5">
-
-                        <span class="symbol-label">
-
-                            <i class="ki-duotone ki-book-open fs-2x text-primary">
-                            </i>
-
-                        </span>
-
+                    <div class="stat-icon bg-light-primary me-4">
+                        <i class="ki-duotone ki-book-open fs-2x text-primary"></i>
                     </div>
 
                     <div class="flex-grow-1">
-
-                        <div class="text-muted fs-7 fw-semibold mb-1">
+                        <div class="stat-label mb-1">
                             Total Pelatihan
                         </div>
-
-                        <div class="fs-2x fw-bold text-gray-900">
-                            {{ $totalTrainings }}
+                        <div class="stat-value">
+                            {{ number_format($totalTrainings, 0, ',', '.') }}
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
-
         </div>
-
 
         {{-- PUBLISHED --}}
-        <div class="col-12 col-md-4">
-
-            <div class="card card-flush h-100">
-
+        <div class="col-12 col-sm-6 col-xl-4">
+            <div class="card card-flush stat-card h-100">
                 <div class="card-body d-flex align-items-center">
-
-                    <div class="symbol symbol-55px bg-light-success me-5">
-
-                        <span class="symbol-label">
-
-                            <i class="ki-duotone ki-check-circle fs-2x text-success">
-                            </i>
-
-                        </span>
-
+                    <div class="stat-icon bg-light-success me-4">
+                        <i class="ki-duotone ki-check-circle fs-2x text-success"></i>
                     </div>
 
                     <div class="flex-grow-1">
-
-                        <div class="text-muted fs-7 fw-semibold mb-1">
+                        <div class="stat-label mb-1">
                             Published
                         </div>
-
-                        <div class="fs-2x fw-bold text-gray-900">
-                            {{ $totalPublished }}
+                        <div class="stat-value">
+                            {{ number_format($totalPublished, 0, ',', '.') }}
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
-
         </div>
-
 
         {{-- DRAFT --}}
-        <div class="col-12 col-md-4">
-
-            <div class="card card-flush h-100">
-
+        <div class="col-12 col-sm-6 col-xl-4">
+            <div class="card card-flush stat-card h-100">
                 <div class="card-body d-flex align-items-center">
-
-                    <div class="symbol symbol-55px bg-light-warning me-5">
-
-                        <span class="symbol-label">
-
-                            <i class="ki-duotone ki-pencil fs-2x text-warning">
-                            </i>
-
-                        </span>
-
+                    <div class="stat-icon bg-light-warning me-4">
+                        <i class="ki-duotone ki-pencil fs-2x text-warning"></i>
                     </div>
 
                     <div class="flex-grow-1">
-
-                        <div class="text-muted fs-7 fw-semibold mb-1">
+                        <div class="stat-label mb-1">
                             Draft
                         </div>
-
-                        <div class="fs-2x fw-bold text-gray-900">
-                            {{ $totalDraft }}
+                        <div class="stat-value">
+                            {{ number_format($totalDraft, 0, ',', '.') }}
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
-
         </div>
-
 
         {{-- CLOSED --}}
-        <div class="col-12 col-md-4">
-
-            <div class="card card-flush h-100">
-
+        <div class="col-12 col-sm-6 col-xl-4">
+            <div class="card card-flush stat-card h-100">
                 <div class="card-body d-flex align-items-center">
-
-                    <div class="symbol symbol-55px bg-light-danger me-5">
-
-                        <span class="symbol-label">
-
-                            <i class="ki-duotone ki-cross-circle fs-2x text-danger">
-                            </i>
-
-                        </span>
-
+                    <div class="stat-icon bg-light-danger me-4">
+                        <i class="ki-duotone ki-cross-circle fs-2x text-danger"></i>
                     </div>
 
                     <div class="flex-grow-1">
-
-                        <div class="text-muted fs-7 fw-semibold mb-1">
+                        <div class="stat-label mb-1">
                             Closed
                         </div>
-
-                        <div class="fs-2x fw-bold text-gray-900">
-                            {{ $totalClosed }}
+                        <div class="stat-value">
+                            {{ number_format($totalClosed, 0, ',', '.') }}
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
-
         </div>
 
-
-        {{-- TOTAL PESERTA --}}
-        <div class="col-12 col-md-4">
-
-            <div class="card card-flush h-100">
-
+        {{-- TOTAL PENDAFTAR --}}
+        <div class="col-12 col-sm-6 col-xl-4">
+            <div class="card card-flush stat-card h-100">
                 <div class="card-body d-flex align-items-center">
-
-                    <div class="symbol symbol-55px bg-light-info me-5">
-
-                        <span class="symbol-label">
-
-                            <i class="ki-duotone ki-people fs-2x text-info">
-                            </i>
-
-                        </span>
-
+                    <div class="stat-icon bg-light-info me-4">
+                        <i class="ki-duotone ki-people fs-2x text-info"></i>
                     </div>
 
                     <div class="flex-grow-1">
-
-                        <div class="text-muted fs-7 fw-semibold mb-1">
-                            Total Peserta
+                        <div class="stat-label mb-1">
+                            Total Pendaftar
                         </div>
-
-                        <div class="fs-2x fw-bold text-gray-900">
-                            {{ $totalRegistrations }}
+                        <div class="stat-value">
+                            {{ number_format($totalRegistrations, 0, ',', '.') }}
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
-
         </div>
 
-
-        {{-- PESERTA DITERIMA --}}
-        <div class="col-12 col-md-4">
-
-            <div class="card card-flush h-100">
-
+        {{-- PESERTA AKTIF --}}
+        <div class="col-12 col-sm-6 col-xl-4">
+            <div class="card card-flush stat-card h-100">
                 <div class="card-body d-flex align-items-center">
-
-                    <div class="symbol symbol-55px bg-light-primary me-5">
-
-                        <span class="symbol-label">
-
-                            <i class="ki-duotone ki-user-tick fs-2x text-primary">
-                            </i>
-
-                        </span>
-
+                    <div class="stat-icon bg-light-primary me-4">
+                        <i class="ki-duotone ki-user-tick fs-2x text-primary"></i>
                     </div>
 
                     <div class="flex-grow-1">
-
-                        <div class="text-muted fs-7 fw-semibold mb-1">
-                            Peserta Diterima
+                        <div class="stat-label mb-1">
+                            Pendaftar Aktif
                         </div>
-
-                        <div class="fs-2x fw-bold text-gray-900">
-                            {{ $totalAccepted }}
+                        <div class="stat-value">
+                            {{ number_format($activeRegistrations, 0, ',', '.') }}
                         </div>
-
+                        <div class="text-muted fs-8 mt-1">
+                            Pending + Approved
+                        </div>
                     </div>
-
                 </div>
-
             </div>
-
         </div>
 
     </div>
-
 
     {{-- ================================================= --}}
     {{-- CHART --}}
@@ -263,288 +257,289 @@
 
     <div class="row g-5 mb-7">
 
-
-        {{-- TREND PELATIHAN & PESERTA --}}
-
-        <div class="col-xl-8">
-
-            <div class="card card-flush h-100">
+        {{-- TREND BULANAN --}}
+        <div class="col-12 col-xl-8">
+            <div class="card card-flush stat-card h-100">
 
                 <div class="card-header">
-
                     <div class="card-title">
-
-                        <h3 class="fw-bold">
-                            Trend Pelatihan & Peserta
-                        </h3>
-
+                        <div>
+                            <h3 class="section-title mb-1">
+                                Trend Pelatihan & Pendaftar
+                            </h3>
+                            <div class="text-muted fs-7">
+                                Perbandingan aktivitas bulanan
+                            </div>
+                        </div>
                     </div>
 
                     <div class="card-toolbar">
-
-                        <span class="text-muted fs-7">
-                            6 Bulan Terakhir
+                        <span class="badge badge-light-primary">
+                            {{ now()->year }}
                         </span>
-
                     </div>
-
                 </div>
 
                 <div class="card-body">
-
-                    <div style="height: 350px;">
-
+                    <div class="chart-container">
                         <canvas id="trainingRegistrationChart"></canvas>
-
                     </div>
-
                 </div>
 
             </div>
-
         </div>
 
-
-        {{-- STATUS PESERTA --}}
-
-        <div class="col-xl-4">
-
-            <div class="card card-flush h-100">
+        {{-- STATUS PENDAFTAR --}}
+        <div class="col-12 col-xl-4">
+            <div class="card card-flush stat-card h-100">
 
                 <div class="card-header">
-
                     <div class="card-title">
-
-                        <h3 class="fw-bold">
-                            Status Peserta
-                        </h3>
-
+                        <div>
+                            <h3 class="section-title mb-1">
+                                Status Pendaftar
+                            </h3>
+                            <div class="text-muted fs-7">
+                                Distribusi status pendaftaran
+                            </div>
+                        </div>
                     </div>
-
                 </div>
 
                 <div class="card-body">
-
-                    <div style="height: 300px;">
-
+                    <div class="status-chart-container">
                         <canvas id="registrationStatusChart"></canvas>
-
                     </div>
-
                 </div>
 
             </div>
-
         </div>
 
     </div>
 
-
     {{-- ================================================= --}}
-    {{-- CONVERSION --}}
+    {{-- CONVERSION RATE --}}
     {{-- ================================================= --}}
 
     <div class="row g-5 mb-7">
 
-
         {{-- ACCEPTANCE RATE --}}
-
-        @php
-
-            $acceptanceRate = $totalRegistrations > 0
-                ? round(($totalAccepted / $totalRegistrations) * 100, 1)
-                : 0;
-
-        @endphp
-
-        <div class="col-md-4">
-
-            <div class="card card-flush">
-
+        <div class="col-12 col-md-4">
+            <div class="card card-flush stat-card h-100">
                 <div class="card-body">
 
-                    <div class="text-muted fs-7 mb-2">
-                        Acceptance Rate
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="stat-icon bg-light-success me-3"
+                             style="width:42px;height:42px;">
+                            <i class="ki-duotone ki-user-tick fs-2 text-success"></i>
+                        </div>
+
+                        <div class="stat-label">
+                            Acceptance Rate
+                        </div>
                     </div>
 
                     <div class="fs-1 fw-bold text-success">
-
                         {{ $acceptanceRate }}%
-
                     </div>
 
                     <div class="text-muted fs-7 mt-2">
+                        {{ $totalAccepted }} dari
+                        {{ $totalRegistrations }} pendaftar diterima
+                    </div>
 
-                        {{ $totalAccepted }}
-                        dari
-                        {{ $totalRegistrations }}
-                        peserta
-
+                    <div class="progress h-6px mt-4">
+                        <div class="progress-bar bg-success"
+                             role="progressbar"
+                             style="width: {{ min(100, max(0, $acceptanceRate)) }}%"
+                             aria-valuenow="{{ $acceptanceRate }}"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+                        </div>
                     </div>
 
                 </div>
-
             </div>
-
         </div>
 
-
         {{-- REJECTION RATE --}}
-
-        @php
-
-            $rejectionRate = $totalRegistrations > 0
-                ? round(($totalRejectedRegistrations / $totalRegistrations) * 100, 1)
-                : 0;
-
-        @endphp
-
-        <div class="col-md-4">
-
-            <div class="card card-flush">
-
+        <div class="col-12 col-md-4">
+            <div class="card card-flush stat-card h-100">
                 <div class="card-body">
 
-                    <div class="text-muted fs-7 mb-2">
-                        Rejection Rate
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="stat-icon bg-light-danger me-3"
+                             style="width:42px;height:42px;">
+                            <i class="ki-duotone ki-cross-circle fs-2 text-danger"></i>
+                        </div>
+
+                        <div class="stat-label">
+                            Rejection Rate
+                        </div>
                     </div>
 
                     <div class="fs-1 fw-bold text-danger">
-
                         {{ $rejectionRate }}%
-
                     </div>
 
                     <div class="text-muted fs-7 mt-2">
+                        {{ $totalRejectedRegistrations }} dari
+                        {{ $totalRegistrations }} pendaftar ditolak
+                    </div>
 
-                        {{ $totalRejectedRegistrations }}
-                        dari
-                        {{ $totalRegistrations }}
-                        peserta
-
+                    <div class="progress h-6px mt-4">
+                        <div class="progress-bar bg-danger"
+                             role="progressbar"
+                             style="width: {{ min(100, max(0, $rejectionRate)) }}%"
+                             aria-valuenow="{{ $rejectionRate }}"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+                        </div>
                     </div>
 
                 </div>
-
             </div>
-
         </div>
 
-
-        {{-- COMPLETION / PARTICIPATION --}}
-
-        @php
-
-            $participationRate = $totalTrainings > 0
-                ? round(($totalPublished / $totalTrainings) * 100, 1)
-                : 0;
-
-        @endphp
-
-        <div class="col-md-4">
-
-            <div class="card card-flush">
-
+        {{-- PUBLICATION RATE --}}
+        <div class="col-12 col-md-4">
+            <div class="card card-flush stat-card h-100">
                 <div class="card-body">
 
-                    <div class="text-muted fs-7 mb-2">
-                        Publication Rate
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="stat-icon bg-light-primary me-3"
+                             style="width:42px;height:42px;">
+                            <i class="ki-duotone ki-book-open fs-2 text-primary"></i>
+                        </div>
+
+                        <div class="stat-label">
+                            Publication Rate
+                        </div>
                     </div>
 
                     <div class="fs-1 fw-bold text-primary">
-
-                        {{ $participationRate }}%
-
+                        {{ $publicationRate }}%
                     </div>
 
                     <div class="text-muted fs-7 mt-2">
+                        {{ $totalPublished }} dari
+                        {{ $totalTrainings }} pelatihan dipublikasikan
+                    </div>
 
-                        {{ $totalPublished }}
-                        dari
-                        {{ $totalTrainings }}
-                        pelatihan
-
+                    <div class="progress h-6px mt-4">
+                        <div class="progress-bar bg-primary"
+                             role="progressbar"
+                             style="width: {{ min(100, max(0, $publicationRate)) }}%"
+                             aria-valuenow="{{ $publicationRate }}"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+                        </div>
                     </div>
 
                 </div>
-
             </div>
-
         </div>
 
     </div>
 
-
     {{-- ================================================= --}}
-    {{-- TOP TRAINING --}}
+    {{-- TOP 5 TRAINING --}}
     {{-- ================================================= --}}
 
-    <div class="card card-flush mb-7">
+    <div class="card card-flush stat-card mb-7">
 
         <div class="card-header">
-
             <div class="card-title">
-
-                <h3 class="fw-bold">
-                    Top 5 Pelatihan Berdasarkan Peserta
-                </h3>
-
+                <div>
+                    <h3 class="section-title mb-1">
+                        Top 5 Pelatihan Berdasarkan Pendaftar
+                    </h3>
+                    <div class="text-muted fs-7">
+                        Pelatihan dengan jumlah pendaftar terbanyak
+                    </div>
+                </div>
             </div>
-
         </div>
 
         <div class="card-body">
 
             @php
-
-                $maxRegistrations =
-                    $topTrainings->max('applications_count') ?: 1;
-
+                $maxRegistrations = $topTrainings->max(
+                    'applications_count'
+                ) ?: 1;
             @endphp
-
 
             @forelse($topTrainings as $training)
 
                 @php
+                    $percentage = (
+                        $training->applications_count / $maxRegistrations
+                    ) * 100;
 
-                    $percentage = $maxRegistrations > 0
-                        ? ($training->applications_count / $maxRegistrations) * 100
-                        : 0;
+                    $statusClasses = [
+                        'published' => 'badge-light-success',
+                        'draft' => 'badge-light-warning',
+                        'closed' => 'badge-light-danger',
+                        'rejected' => 'badge-light-danger',
+                    ];
 
+                    $statusLabels = [
+                        'published' => 'Published',
+                        'draft' => 'Draft',
+                        'closed' => 'Closed',
+                        'rejected' => 'Rejected',
+                    ];
+
+                    $statusClass = $statusClasses[$training->status]
+                        ?? 'badge-light-secondary';
+
+                    $statusLabel = $statusLabels[$training->status]
+                        ?? ucfirst($training->status ?? 'Unknown');
                 @endphp
 
+                <div class="top-training-item mb-7">
 
-                <div class="mb-7">
+                    <div class="d-flex flex-column flex-sm-row
+                                justify-content-between
+                                align-items-sm-center gap-2 mb-3">
 
-                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="flex-grow-1">
+                            <div class="fw-bold text-gray-800 mb-2">
+                                {{ $training->title ?? 'Pelatihan Tanpa Nama' }}
+                            </div>
 
-                        <div class="fw-semibold text-gray-800">
-
-                            {{ $training->title ?? 'Pelatihan Tanpa Nama' }}
-
+                            <span class="badge {{ $statusClass }}">
+                                {{ $statusLabel }}
+                            </span>
                         </div>
 
-                        <div class="text-muted fs-7">
+                        <div class="text-sm-end">
+                            <div class="fw-bold text-gray-900">
+                                {{ number_format(
+                                    $training->applications_count,
+                                    0,
+                                    ',',
+                                    '.'
+                                ) }}
+                                pendaftar
+                            </div>
 
-                            {{ $training->applications_count ?? 0 }}
-                            peserta
-
+                            <div class="text-muted fs-8">
+                                {{ number_format($percentage, 0) }}%
+                                dari nilai tertinggi
+                            </div>
                         </div>
 
                     </div>
 
-
                     <div class="progress h-7px">
-
-                        <div
-                            class="progress-bar"
-                            role="progressbar"
-                            style="width: {{ $percentage }}%"
-                            aria-valuenow="{{ $percentage }}"
-                            aria-valuemin="0"
-                            aria-valuemax="100">
+                        <div class="progress-bar bg-primary"
+                             role="progressbar"
+                             style="width: {{ $percentage }}%"
+                             aria-valuenow="{{ $percentage }}"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
                         </div>
-
                     </div>
 
                 </div>
@@ -552,297 +547,404 @@
             @empty
 
                 <div class="text-center text-muted py-10">
+                    <i class="ki-duotone ki-information-5 fs-3x mb-3"></i>
 
-                    <i class="ki-duotone ki-information-5 fs-3x text-muted mb-3"></i>
-
-                    <div>
-                        Belum ada data pelatihan.
+                    <div class="fw-semibold mb-1">
+                        Belum ada data pelatihan
                     </div>
 
+                    <div class="fs-7">
+                        Data akan ditampilkan setelah pelatihan tersedia.
+                    </div>
                 </div>
 
             @endforelse
 
         </div>
-
     </div>
 
+    {{-- ================================================= --}}
+    {{-- RINGKASAN STATUS TAMBAHAN --}}
+    {{-- ================================================= --}}
+
+    <div class="card card-flush stat-card mb-7">
+
+        <div class="card-header">
+            <div class="card-title">
+                <div>
+                    <h3 class="section-title mb-1">
+                        Ringkasan Status Pelatihan
+                    </h3>
+                    <div class="text-muted fs-7">
+                        Seluruh status pelatihan yang tercatat
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body">
+            @php
+                $trainingStatuses = [
+                    [
+                        'label' => 'Published',
+                        'total' => $totalPublished,
+                        'color' => 'success',
+                    ],
+                    [
+                        'label' => 'Draft',
+                        'total' => $totalDraft,
+                        'color' => 'warning',
+                    ],
+                    [
+                        'label' => 'Closed',
+                        'total' => $totalClosed,
+                        'color' => 'danger',
+                    ],
+                    [
+                        'label' => 'Rejected',
+                        'total' => $totalRejected,
+                        'color' => 'info',
+                    ],
+                ];
+            @endphp
+
+            <div class="row g-5">
+                @foreach($trainingStatuses as $item)
+
+                    @php
+                        $statusPercentage = $totalTrainings > 0
+                            ? round(
+                                ($item['total'] / $totalTrainings) * 100,
+                                1
+                            )
+                            : 0;
+                    @endphp
+
+                    <div class="col-12 col-md-6">
+
+                        <div class="d-flex justify-content-between
+                                    align-items-center mb-2">
+
+                            <span class="fw-semibold text-gray-700">
+                                {{ $item['label'] }}
+                            </span>
+
+                            <span class="fw-bold text-gray-900">
+                                {{ $item['total'] }}
+                                <span class="text-muted fw-normal fs-8">
+                                    ({{ $statusPercentage }}%)
+                                </span>
+                            </span>
+
+                        </div>
+
+                        <div class="progress h-6px">
+                            <div class="progress-bar bg-{{ $item['color'] }}"
+                                 role="progressbar"
+                                 style="width: {{ min(100, max(0, $statusPercentage)) }}%"
+                                 aria-valuenow="{{ $statusPercentage }}"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100">
+                            </div>
+                        </div>
+
+                    </div>
+
+                @endforeach
+            </div>
+
+        </div>
+    </div>
 
 </div>
 
 @endsection
 
-
 @section('js')
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
 
 <script>
-
 $(document).ready(function () {
 
+    /*
+    |--------------------------------------------------------------------------
+    | DATA DARI CONTROLLER
+    |--------------------------------------------------------------------------
+    */
+    const monthLabels = @json($monthLabels);
+    const trainingChartData = @json($trainingChartData);
+    const registrationChartData = @json($registrationChartData);
+    const statusChart = @json($statusChart);
 
     /*
     |--------------------------------------------------------------------------
-    | DATA
+    | THEME
     |--------------------------------------------------------------------------
     */
+    function getChartColors() {
+        const styles = getComputedStyle(document.documentElement);
 
-    const trainingTrend =
-        @json($trainingTrend);
+        return {
+            text: styles.getPropertyValue('--bs-body-color').trim()
+                || '#475569',
 
-    const registrationTrend =
-        @json($registrationTrend);
+            muted: styles.getPropertyValue('--bs-secondary-color').trim()
+                || '#94a3b8',
 
-    const statusChart =
-        @json($statusChart);
+            border: styles.getPropertyValue('--bs-border-color').trim()
+                || '#e2e8f0',
 
+            primary: '#3974d8',
+            success: '#3b9b75',
+            warning: '#f0ad35',
+            danger: '#e35d6a',
+            info: '#45a4c7'
+        };
+    }
+
+    let trainingRegistrationChart = null;
+    let registrationStatusChart = null;
 
     /*
     |--------------------------------------------------------------------------
-    | THEME COLOR
+    | TREND PELATIHAN DAN PENDAFTAR
     |--------------------------------------------------------------------------
     */
-
-    const chartTextColor =
-        getComputedStyle(document.documentElement)
-            .getPropertyValue('--bs-body-color')
-            .trim();
-
-    const chartBorderColor =
-        getComputedStyle(document.documentElement)
-            .getPropertyValue('--bs-border-color')
-            .trim();
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | TREND PELATIHAN & PESERTA
-    |--------------------------------------------------------------------------
-    */
-
-    const trainingRegistrationCanvas =
-        document.getElementById(
+    function renderTrainingRegistrationChart() {
+        const canvas = document.getElementById(
             'trainingRegistrationChart'
         );
 
+        if (!canvas || typeof Chart === 'undefined') {
+            return;
+        }
 
-    if (trainingRegistrationCanvas) {
+        const colors = getChartColors();
 
-        new Chart(
-            trainingRegistrationCanvas,
-            {
+        if (trainingRegistrationChart) {
+            trainingRegistrationChart.destroy();
+        }
 
-                type: 'line',
+        trainingRegistrationChart = new Chart(canvas, {
+            type: 'line',
 
-                data: {
+            data: {
+                labels: monthLabels,
 
-                    labels: trainingTrend.map(
-                        item => item.label
-                    ),
+                datasets: [
+                    {
+                        label: 'Pelatihan',
+                        data: trainingChartData,
 
-                    datasets: [
+                        borderColor: colors.primary,
+                        backgroundColor: colors.primary
+                            + '1A',
 
-                        {
+                        pointBackgroundColor: colors.primary,
+                        pointBorderColor: '#ffffff',
 
-                            label: 'Pelatihan',
+                        borderWidth: 2.5,
+                        pointRadius: 3,
+                        pointHoverRadius: 6,
 
-                            data: trainingTrend.map(
-                                item => item.total
-                            ),
+                        tension: 0.35,
+                        fill: false
+                    },
 
-                            tension: 0.4,
+                    {
+                        label: 'Pendaftar',
+                        data: registrationChartData,
 
-                            borderWidth: 2,
+                        borderColor: colors.success,
+                        backgroundColor: colors.success
+                            + '1A',
 
-                            fill: false,
+                        pointBackgroundColor: colors.success,
+                        pointBorderColor: '#ffffff',
 
-                            pointRadius: 4,
+                        borderWidth: 2.5,
+                        pointRadius: 3,
+                        pointHoverRadius: 6,
 
-                            pointHoverRadius: 6
+                        tension: 0.35,
+                        fill: false
+                    }
+                ]
+            },
 
-                        },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
 
-                        {
-
-                            label: 'Peserta',
-
-                            data: registrationTrend.map(
-                                item => item.total
-                            ),
-
-                            tension: 0.4,
-
-                            borderWidth: 2,
-
-                            fill: false,
-
-                            pointRadius: 4,
-
-                            pointHoverRadius: 6
-
-                        }
-
-                    ]
-
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
                 },
 
-                options: {
+                plugins: {
+                    legend: {
+                        position: 'bottom',
 
-                    responsive: true,
-
-                    maintainAspectRatio: false,
-
-                    interaction: {
-
-                        intersect: false,
-
-                        mode: 'index'
-
-                    },
-
-                    plugins: {
-
-                        legend: {
-
-                            position: 'bottom',
-
-                            labels: {
-
-                                color: chartTextColor
-
-                            }
-
+                        labels: {
+                            color: colors.text,
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            padding: 20
                         }
-
                     },
 
-                    scales: {
-
-                        x: {
-
-                            ticks: {
-
-                                color: chartTextColor
-
-                            },
-
-                            grid: {
-
-                                color: chartBorderColor
-
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return context.dataset.label
+                                    + ': '
+                                    + new Intl.NumberFormat('id-ID')
+                                        .format(context.parsed.y ?? 0);
                             }
+                        }
+                    }
+                },
 
+                scales: {
+                    x: {
+                        ticks: {
+                            color: colors.text,
+                            maxRotation: 45,
+                            minRotation: 0
                         },
 
-                        y: {
+                        grid: {
+                            display: false
+                        },
 
-                            beginAtZero: true,
-
-                            ticks: {
-
-                                precision: 0,
-
-                                color: chartTextColor
-
-                            },
-
-                            grid: {
-
-                                color: chartBorderColor
-
-                            }
-
+                        border: {
+                            color: colors.border
                         }
+                    },
 
+                    y: {
+                        beginAtZero: true,
+
+                        ticks: {
+                            precision: 0,
+                            color: colors.text
+                        },
+
+                        grid: {
+                            color: colors.border
+                        },
+
+                        border: {
+                            display: false
+                        }
                     }
-
                 }
-
             }
-        );
-
+        });
     }
-
 
     /*
     |--------------------------------------------------------------------------
-    | STATUS PESERTA
+    | DOUGHNUT STATUS PENDAFTAR
     |--------------------------------------------------------------------------
     */
-
-    const registrationStatusCanvas =
-        document.getElementById(
+    function renderRegistrationStatusChart() {
+        const canvas = document.getElementById(
             'registrationStatusChart'
         );
 
-    if (registrationStatusCanvas) {
+        if (!canvas || typeof Chart === 'undefined') {
+            return;
+        }
 
-        new Chart(
-            registrationStatusCanvas,
-            {
+        const colors = getChartColors();
 
-                type: 'doughnut',
+        if (registrationStatusChart) {
+            registrationStatusChart.destroy();
+        }
 
-                data: {
+        registrationStatusChart = new Chart(canvas, {
+            type: 'doughnut',
 
-                    labels: statusChart.map(
-                        item => item.label
-                    ),
+            data: {
+                labels: statusChart.map(function (item) {
+                    return item.label;
+                }),
 
-                    datasets: [
+                datasets: [
+                    {
+                        data: statusChart.map(function (item) {
+                            return Number(item.total) || 0;
+                        }),
 
-                        {
+                        backgroundColor: [
+                            colors.warning,
+                            colors.success,
+                            colors.danger
+                        ],
 
-                            data: statusChart.map(
-                                item => item.total
-                            ),
-
-                            borderWidth: 0
-
-                        }
-
-                    ]
-
-                },
-
-                options: {
-
-                    responsive: true,
-
-                    maintainAspectRatio: false,
-
-                    cutout: '70%',
-
-                    plugins: {
-
-                        legend: {
-
-                            position: 'bottom',
-
-                            labels: {
-
-                                color: chartTextColor,
-
-                                usePointStyle: true,
-
-                                padding: 15
-
-                            }
-
-                        }
-
+                        hoverOffset: 7,
+                        borderWidth: 0,
+                        spacing: 3
                     }
+                ]
+            },
 
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+
+                        labels: {
+                            color: colors.text,
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            padding: 16
+                        }
+                    },
+
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                const value = Number(context.raw) || 0;
+
+                                const total = context.dataset.data.reduce(
+                                    function (sum, item) {
+                                        return sum + (Number(item) || 0);
+                                    },
+                                    0
+                                );
+
+                                const percentage = total > 0
+                                    ? (value / total * 100).toFixed(1)
+                                    : '0.0';
+
+                                return context.label + ': '
+                                    + new Intl.NumberFormat('id-ID')
+                                        .format(value)
+                                    + ' (' + percentage + '%)';
+                            }
+                        }
+                    }
                 }
-
             }
-        );
-
+        });
     }
 
-});
+    /*
+    |--------------------------------------------------------------------------
+    | INIT
+    |--------------------------------------------------------------------------
+    */
+    renderTrainingRegistrationChart();
+    renderRegistrationStatusChart();
 
+});
 </script>
 
 @endsection

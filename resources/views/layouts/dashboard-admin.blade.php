@@ -469,7 +469,7 @@
                                                     </div>
 
 
-                                                    <!-- Kategori Sertifikasi -->
+                                                    <!-- Kategori Pelatihan -->
                                                     <div class="menu-item">
                                                         <a class="menu-link {{ Route::is('dashboard-admin.master.category-certificate.category.index') && request()->route('category') === 'cs' ? 'active' : '' }}"
                                                             href="{{ route('dashboard-admin.master.category-certificate.category.index', ['category' => 'cs']) }}">
@@ -479,7 +479,7 @@
                                                             </span>
 
                                                             <span class="menu-title">
-                                                                Kategori Sertifikasi
+                                                                Kategori Pelatihan
                                                             </span>
                                                         </a>
                                                     </div>
@@ -500,7 +500,7 @@
                                                         </a>
                                                     </div>
 
-                                                    <div class="menu-item">
+                                                    {{-- <div class="menu-item">
                                                         <a class="menu-link {{ Route::is('dashboard-admin.master.competency-scheme.category.index') && request()->route('category') === 'cs' ? 'active' : '' }}"
                                                             href="{{ route('dashboard-admin.master.competency-scheme.category.index', ['category' => 'cs']) }}">
 
@@ -512,7 +512,7 @@
                                                                 Kompetensi Skema
                                                             </span>
                                                         </a>
-                                                    </div>
+                                                    </div> --}}
 
                                                 </div>
                                                 <!--end:Cleaning Service sub-->
@@ -609,7 +609,7 @@
                                                     </div>
 
 
-                                                    <!-- Kategori Sertifikasi -->
+                                                    <!-- Kategori Pelatihan -->
                                                     <div class="menu-item">
                                                         <a class="menu-link {{ Route::is('dashboard-admin.master.category-certificate.category.index') && request()->route('category') === 'security' ? 'active' : '' }}"
                                                             href="{{ route('dashboard-admin.master.category-certificate.category.index', ['category' => 'security']) }}">
@@ -619,7 +619,7 @@
                                                             </span>
 
                                                             <span class="menu-title">
-                                                                Kategori Sertifikasi
+                                                                Kategori Pelatihan
                                                             </span>
                                                         </a>
                                                     </div>
@@ -794,17 +794,17 @@
                                                     </span>
                                                     <span class="menu-title">User</span>
                                                 </a>
-                                                <a class="menu-link {{ Route::is('dashboard-admin.management-user.bujp.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.management-user.bujp.index') }}">
+                                                {{-- <a class="menu-link {{ Route::is('dashboard-admin.management-user.bujp.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.management-user.bujp.index') }}">
                                                     <span class="menu-bullet">
                                                         <span class="bullet bullet-dot"></span>
                                                     </span>
                                                     <span class="menu-title">BUJP</span>
-                                                </a>
+                                                </a> --}}
                                                 <a class="menu-link {{ Route::is('dashboard-admin.management-user.company.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.management-user.company.index') }}">
                                                     <span class="menu-bullet">
                                                         <span class="bullet bullet-dot"></span>
                                                     </span>
-                                                    <span class="menu-title">Perusahaan Klien</span>
+                                                    <span class="menu-title">Perusahaan</span>
                                                 </a>
                                                 <a class="menu-link {{ Route::is('dashboard-admin.management-user.partner.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.management-user.partner.index') }}">
                                                     <span class="menu-bullet">

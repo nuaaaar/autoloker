@@ -673,15 +673,18 @@
                 </span>
 
             @endforeach
+            
+            @if($job->category == 'security')
+                {{-- UJI KOMPETENSI / SERTIFIKASI --}}
+                @foreach($competencySchemes as $scheme)
 
-            {{-- UJI KOMPETENSI / SERTIFIKASI --}}
-            @foreach($competencySchemes as $scheme)
+                    <span class="bookmark-badge">
+                        {{ $scheme }}
+                    </span>
 
-                <span class="bookmark-badge">
-                    {{ $scheme }}
-                </span>
+                @endforeach
 
-            @endforeach
+            @endif
 
             {{-- APPLICANTS --}}
             <span class="bookmark-applicants">
