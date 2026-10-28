@@ -1013,16 +1013,6 @@
                             </select>
                         </div>
 
-                        <div class="col-md-6 mb-7">
-                            <label class="form-label required" for="level">Level</label>
-                            <select class="form-select form-select-dark" name="level" id="level" required>
-                                <option value="">Pilih Level</option>
-                                <option>Dasar</option>
-                                <option>Menengah</option>
-                                <option>Lanjutan</option>
-                                <option>Profesional</option>
-                            </select>
-                        </div>
 
                         <!-- Biaya Pelatihan -->
                         <div class="col-md-12 mb-7">
@@ -1261,7 +1251,7 @@
 
                                 <li>Tuliskan manfaat yang akan diperoleh peserta.</li>
 
-                                <li>Pilih kategori dan level yang sesuai.</li>
+                                <li>Pilih kategori yang sesuai.</li>
 
                                 <li>Tambahkan tag agar pelatihan mudah ditemukan.</li>
 

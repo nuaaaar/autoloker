@@ -15,7 +15,9 @@ final class TrainingRules
             'title' => ['required', 'string', 'min:3', 'max:200'],
             'category' => ['sometimes', 'nullable', 'string', 'max:255'],
             'category_role' => ['required', Rule::in(self::categoryRoles())],
-            'level' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'sub_category' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'tuk' => ['sometimes', 'nullable', Rule::in(['mandiri', 'sewaktu', 'tempat kerja'])],
+            'discount' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:100', 'decimal:0,2'],
             'is_certificate' => ['sometimes', 'boolean'],
             'tags' => ['sometimes', 'nullable', 'array'],
             'tags.*' => ['string', 'min:1', 'max:255'],
@@ -63,10 +65,10 @@ final class TrainingRules
     public static function complete(bool $hasPosterFile = false): array
     {
         return [
-            'title' => ['required', 'string', 'min:3', 'max:200'],
             'category' => ['required', 'string', 'max:255'],
-            'category_role' => ['required', Rule::in(self::categoryRoles())],
-            'level' => ['required', 'string', 'max:255'],
+            'sub_category' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'tuk' => ['sometimes', 'nullable', Rule::in(['mandiri', 'sewaktu', 'tempat kerja'])],
+            'discount' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:100', 'decimal:0,2'],
             'is_certificate' => ['sometimes', 'boolean'],
             'tags' => ['sometimes', 'nullable', 'array'],
             'tags.*' => ['string', 'min:1', 'max:255'],

@@ -609,7 +609,7 @@ class TrainingController extends Controller
             'sub_category'          => 'nullable|string|max:255',
             'tuk'                   => 'nullable|in:mandiri,sewaktu,tempat kerja',
             'discount'              => 'nullable|numeric|min:1|max:100',
-            'level'                 => 'required',
+
 
             'description'           => 'required',
 
@@ -697,7 +697,6 @@ class TrainingController extends Controller
             'category.required'                 => 'Kategori pelatihan wajib dipilih.',
             'category_role.required'            => 'Sasaran peserta wajib dipilih.',
             'category_role.in'                  => 'Sasaran peserta harus Security atau Cleaning Service.',
-            'level.required'                    => 'Level pelatihan wajib dipilih.',
 
             'description.required'              => 'Deskripsi pelatihan wajib diisi.',
 
@@ -984,7 +983,7 @@ class TrainingController extends Controller
             'sub_category'          => $request->sub_category,
             'tuk'                   => $request->tuk,
             'discount'              => $request->filled('discount') ? $request->discount : 0,
-            'level'                 => $request->level,
+
 
             /*
             |--------------------------------------------------------------------------
@@ -1167,7 +1166,7 @@ class TrainingController extends Controller
             'provider'              => 'required|max:255',
             'category'              => 'required',
             'category_role' => 'sometimes|in:security,cs',
-            'level'                 => 'required',
+
 
             'description'           => 'required',
 
@@ -1395,7 +1394,7 @@ class TrainingController extends Controller
 
             'category'              => $request->category,
 
-            'level'                 => $request->level,
+
 
             'price'                 => $request->boolean('is_free')
                                         ? 0

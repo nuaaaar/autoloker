@@ -519,15 +519,7 @@
 
                                     <span class="mx-3 text-muted">|</span>
 
-                                    <span class="job-location">
 
-                                        <i class="fas fa-signal me-1"></i>
-
-                                        {{ ucfirst($data->level) }}
-
-                                    </span>
-
-                                    <span class="mx-3 text-muted">|</span>
 
                                     <span class="job-location">
 
@@ -889,10 +881,6 @@
                                 </tr>
                             @endif
 
-                            <tr>
-                                <td>Level</td>
-                                <th>{{ ucfirst($data->level) }}</th>
-                            </tr>
 
                             <tr>
                                 <td>Biaya</td>

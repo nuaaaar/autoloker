@@ -61,7 +61,7 @@ class MasterCategoryCertificateController extends Controller
         $parentCertificates = MasterCategoryCertificate::where('category', $category)
         ->orderBy('level')
         ->orderBy('title')
-        ->get(['id', 'title', 'level']);
+        ->get(['id', 'title', 'level', 'is_tuk']);
 
         return view(
             'dashboard-admin.master.category-certificate.index',
@@ -96,27 +96,39 @@ class MasterCategoryCertificateController extends Controller
                 'nullable',
                 'boolean',
             ],
-            'level' => [
-                'required',
-                'integer',
-                'min:1',
-            ],
         ]);
+        $parentId = $validated['parent_id'] ?? null;
 
-        MasterCategoryCertificate::create([
+        $parent = $parentId === null
+            ? null
+            : MasterCategoryCertificate::withTrashed()
+                ->where('category', $category)
+                ->findOrFail($parentId);
+        $level = $parent === null ? 1 : (int) $parent->level + 1;
+
+        $saved = MasterCategoryCertificate::create([
             'title'     => $validated['title'],
             'category'  => $category,
-            'parent_id' => $validated['parent_id'] ?? null,
-            'is_tuk'    => $request->boolean('is_tuk'),
-            'level'     => $validated['level'],
+            'parent_id' => $parentId,
+            'is_tuk'    => (bool) $parent?->is_tuk || $request->boolean('is_tuk'),
+            'level'     => $level,
         ]);
 
         return response()->json([
             'status'  => true,
             'message' => 'Data berhasil ditambahkan.',
+            'data' => [
+                'id' => (int) $saved->id,
+                'title' => $saved->title,
+                'level' => (int) $saved->level,
+                'is_tuk' => (bool) $saved->is_tuk,
+            ],
         ]);
-    }
 
+
+
+
+    }
 
     public function update(Request $request, $category, $uuid)
     {
@@ -139,7 +151,6 @@ class MasterCategoryCertificateController extends Controller
             ],
             'parent_id' => [
                 'nullable',
-                'integer',
                 Rule::exists('master_category_certificates', 'id')
                     ->where(function ($query) use ($category, $data) {
                         return $query
@@ -151,30 +162,42 @@ class MasterCategoryCertificateController extends Controller
                 'nullable',
                 'boolean',
             ],
-            'level' => [
-                'required',
-                'integer',
-                'min:1',
-            ],
         ]);
+
+        $parentId = $validated['parent_id'] ?? null;
+        $parent = $parentId === null
+            ? null
+            : MasterCategoryCertificate::withTrashed()
+                ->where('category', $category)
+                ->findOrFail($parentId);
+        $level = $parent === null ? 1 : (int) $parent->level + 1;
 
         $data->update([
             'title'     => $validated['title'],
-            'parent_id' => $validated['parent_id'] ?? null,
-            'is_tuk'    => $request->boolean('is_tuk'),
-            'level'     => $validated['level'],
+            'parent_id' => $parentId,
+            'is_tuk'    => (bool) $parent?->is_tuk || $request->boolean('is_tuk'),
+            'level'     => $level,
         ]);
 
         return response()->json([
             'status'  => true,
             'message' => 'Data berhasil diperbarui.',
+            'data' => [
+                'id' => (int) $data->id,
+                'title' => $data->title,
+                'level' => (int) $data->level,
+                'is_tuk' => (bool) $data->is_tuk,
+            ],
         ]);
-    }
 
+
+    }
 
     /**
      * Remove the specified resource from storage.
      */
+
+
     public function destroy(
         $category,
         $uuid

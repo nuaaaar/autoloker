@@ -49,7 +49,6 @@ class OwnedTrainingController extends OwnedOrganizationController
                 $query->where('title', 'like', "%{$search}%")
                     ->orWhere('provider', 'like', "%{$search}%")
                     ->orWhere('category', 'like', "%{$search}%")
-                    ->orWhere('level', 'like', "%{$search}%")
                     ->orWhere('province', 'like', "%{$search}%")
                     ->orWhere('city', 'like', "%{$search}%")
                     ->orWhere('district', 'like', "%{$search}%")

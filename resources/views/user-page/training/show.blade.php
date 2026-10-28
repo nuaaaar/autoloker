@@ -1685,15 +1685,6 @@
                                 @endif
 
 
-                                @if($data->level)
-
-                                    <span class="training-badge">
-
-                                        {{ $data->level }}
-
-                                    </span>
-
-                                @endif
 
 
                                 @if($data->is_free)

@@ -686,7 +686,8 @@ paths:
       description: >-
         Updates only submitted fields. Omitted fields remain unchanged, null clears nullable fields,
         and tags, syllabus, or requirements replace their complete existing array. The start and end
-        dates must use YYYY-MM-DD, and duration_day is recalculated from them. UUID, ownership,
+        dates must use YYYY-MM-DD, and duration_day is recalculated from them. Legacy level input is
+        ignored and never changes stored values. Training responses omit level. UUID, ownership,
         provider, workflow_action, status, timestamps, counters, and duration_day are immutable.
         For multipart/form-data, arrays may be sent as JSON-encoded array strings.
       operationId: updateOwnedTraining
@@ -703,8 +704,10 @@ paths:
                 summary: Update every mutable training field
                 value:
                   title: Pelatihan Gada Pratama Angkatan 12 - Test 10
-                  category: Keamanan / Satpam
-                  level: Lanjutan
+                  category: Keamanan
+                  sub_category: Patroli
+                  tuk: mandiri
+                  discount: 12.5
                   is_certificate: true
                   tags:
                     - Satpam
@@ -734,7 +737,7 @@ paths:
                     - Surat Keterangan Sehat
                   instructor: AKBP Budi Santoso
                   quota: 30
-                  price: 0
+                  price: 750000
                   poster: training/posters/ZMA1dfKYh1TSmNyMGoTPwzqR4tqwzqLsKtPFtnB8.png
           multipart/form-data:
             schema:
@@ -748,8 +751,10 @@ paths:
                 description: Send poster as a JPG, JPEG, PNG, or WEBP file; send array fields as JSON-encoded arrays when required by the multipart client.
                 value:
                   title: Pelatihan Gada Pratama Angkatan 12 - Test 10
-                  category: Keamanan / Satpam
-                  level: Lanjutan
+                  category: Keamanan
+                  sub_category: Patroli
+                  tuk: mandiri
+                  discount: 12.5
                   is_certificate: true
                   tags:
                     - Satpam
@@ -778,7 +783,7 @@ paths:
                     - Surat Keterangan Sehat
                   instructor: AKBP Budi Santoso
                   quota: 30
-                  price: 0
+                  price: 750000
                   poster: poster.png
       responses:
         '200':
@@ -807,7 +812,7 @@ paths:
           format: uuid
     post:
       summary: Submit an owned training for review
-      description: Submits a draft or rejected training after complete validation. Validation failure leaves the draft unchanged.
+      description: Submits a draft or rejected training after complete validation. Level is not required. Validation failure leaves the draft unchanged.
       operationId: submitOwnedTraining
       security:
         - bearerAuth: []
@@ -928,7 +933,7 @@ paths:
   /api/company/trainings:
     get:
       summary: List the authenticated company's trainings
-      description: Returns only trainings owned by the authenticated company account. Results include every training status, are ordered by newest training ID, and are paginated with five trainings per page. The optional search parameter matches the title, provider, category, level, or location.
+      description: Returns only trainings owned by the authenticated company account. Results include every training status, are ordered by newest training ID, and are paginated with five trainings per page. The optional search parameter matches the title, provider, category, or location.
       operationId: listOwnedTrainings
       security:
         - bearerAuth: []
@@ -979,8 +984,9 @@ paths:
       description: >-
         Creates a company-owned training as a draft by default. For save_draft, only title is required.
         Set workflow_action to submit to validate and submit the new training directly for review;
-        submit requires category, level, description, start_date, end_date, total_jp, training_mode,
-        province, city, address, at least one syllabus item, at least one requirement, and quota.
+        submit requires category, description, start_date, end_date, total_jp, training_mode, province,
+        city, address, at least one syllabus item, at least one requirement, and quota. Legacy level
+        input is ignored and never changes stored values. Training responses omit level.
         is_certificate, tags, instructor, price, and poster are optional. Provider and ownership are
         derived from the authenticated company and must not be sent. Send multipart/form-data with a
         poster file to upload a new poster; poster files must be JPG, JPEG, PNG, or WEBP and no
@@ -1000,8 +1006,10 @@ paths:
                 summary: Create a complete draft with an existing public poster path
                 value:
                   title: Pelatihan Gada Pratama Angkatan 12 - Test 10
-                  category: Keamanan / Satpam
-                  level: Lanjutan
+                  category: Keamanan
+                  sub_category: Patroli
+                  tuk: mandiri
+                  discount: 12.5
                   is_certificate: true
                   tags:
                     - Satpam
@@ -1032,15 +1040,17 @@ paths:
                     - Surat Keterangan Sehat
                   instructor: AKBP Budi Santoso
                   quota: 30
-                  price: 0
+                  price: 750000
                   poster: training/posters/ZMA1dfKYh1TSmNyMGoTPwzqR4tqwzqLsKtPFtnB8.png
                   workflow_action: save_draft
               submit:
                 summary: Create and submit a complete training
                 value:
                   title: Pelatihan Gada Pratama Angkatan 12 - Test 10
-                  category: Keamanan / Satpam
-                  level: Lanjutan
+                  category: Keamanan
+                  sub_category: Patroli
+                  tuk: mandiri
+                  discount: 12.5
                   is_certificate: true
                   tags:
                     - Satpam
@@ -1071,7 +1081,7 @@ paths:
                     - Surat Keterangan Sehat
                   instructor: AKBP Budi Santoso
                   quota: 30
-                  price: 0
+                  price: 750000
                   poster: training/posters/ZMA1dfKYh1TSmNyMGoTPwzqR4tqwzqLsKtPFtnB8.png
                   workflow_action: submit
           multipart/form-data:
@@ -1086,8 +1096,10 @@ paths:
                 description: Send poster as a JPG, JPEG, PNG, or WEBP file; send array fields as JSON-encoded arrays when required by the multipart client.
                 value:
                   title: Pelatihan Gada Pratama Angkatan 12 - Test 10
-                  category: Keamanan / Satpam
-                  level: Lanjutan
+                  category: Keamanan
+                  sub_category: Patroli
+                  tuk: mandiri
+                  discount: 12.5
                   is_certificate: true
                   tags:
                     - Satpam
@@ -1116,7 +1128,7 @@ paths:
                     - Surat Keterangan Sehat
                   instructor: AKBP Budi Santoso
                   quota: 30
-                  price: 0
+                  price: 750000
                   poster: poster.png
                   workflow_action: save_draft
               submit:
@@ -1124,8 +1136,10 @@ paths:
                 description: Use workflow_action submit only when all submit-required fields are present.
                 value:
                   title: Pelatihan Gada Pratama Angkatan 12 - Test 10
-                  category: Keamanan / Satpam
-                  level: Lanjutan
+                  category: Keamanan
+                  sub_category: Patroli
+                  tuk: mandiri
+                  discount: 12.5
                   is_certificate: true
                   tags:
                     - Satpam
@@ -1154,7 +1168,7 @@ paths:
                     - Surat Keterangan Sehat
                   instructor: AKBP Budi Santoso
                   quota: 30
-                  price: 0
+                  price: 750000
                   poster: poster.png
                   workflow_action: submit
       responses:
@@ -1540,7 +1554,7 @@ paths:
   /api/masters/category-certificates:
     get:
       summary: List certificate categories
-      description: Returns active master certificate categories ordered by title. Each item contains only the category title.
+      description: Returns active, non-deleted master certificate categories ordered by title, with category audience, parent, TUK flag, and hierarchy level. Optional category filtering accepts security or cs; unsupported values return 422.
       operationId: listCertificateCategories
       security:
         - bearerAuth: []
@@ -1559,16 +1573,29 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReferenceListResponse'
+                $ref: '#/components/schemas/CategoryCertificateListResponse'
               examples:
                 valid:
                   summary: Certificate categories
                   value:
                     status: true
                     data:
-                      - title: K3 / Keselamatan Kerja
+                      - id: 10
+                        title: Keamanan
+                        category: security
+                        parent_id: null
+                        is_tuk: true
+                        level: 1
+                      - id: 11
+                        title: Patroli
+                        category: security
+                        parent_id: 10
+                        is_tuk: true
+                        level: 2
         '401':
           $ref: '#/components/responses/Unauthenticated'
+        '422':
+          $ref: '#/components/responses/ValidationError'
   /api/masters/abilities:
     get:
       summary: List security and cleaning service abilities
@@ -3728,7 +3755,9 @@ components:
         - instructor
         - category
         - category_role
-        - level
+        - sub_category
+        - tuk
+        - discount
         - price
         - is_free
         - description
@@ -3759,7 +3788,6 @@ components:
         - created_at
         - updated_at
         - bujp
-        - company
       properties:
         id:
           type: integer
@@ -3791,9 +3819,22 @@ components:
           enum: [security, cs]
           description: Audience of the training. security targets satpam profiles, cs targets cleaning service profiles.
           example: security
-        level:
+        sub_category:
           type: [string, 'null']
-          example: Basic
+          description: Direct-child certificate category title, or null.
+          example: Patroli
+        tuk:
+          type: [string, 'null']
+          enum: [mandiri, sewaktu, tempat kerja, null]
+          description: TUK selection required for a root or subcategory marked is_tuk=true.
+          example: mandiri
+        discount:
+          type: number
+          minimum: 0
+          maximum: 100
+          multipleOf: 0.01
+          description: Discount percentage, from 0 to 100, with at most two decimal places.
+          example: 12.5
         price:
           type: [string, 'null']
           example: '750000'
@@ -4021,7 +4062,9 @@ components:
         - reason_rejected
         - poster
         - category
-        - level
+        - sub_category
+        - tuk
+        - discount
         - is_certificate
         - tags
         - description
@@ -4080,14 +4123,24 @@ components:
         category:
           type: [string, 'null']
           example: Keamanan
+        sub_category:
+          type: [string, 'null']
+          example: Patroli
+        tuk:
+          type: [string, 'null']
+          enum: [mandiri, sewaktu, tempat kerja, null]
+          example: mandiri
+        discount:
+          type: number
+          minimum: 0
+          maximum: 100
+          multipleOf: 0.01
+          example: 12.5
         category_role:
           type: string
           enum: [security, cs]
           description: Audience fixed at creation. PATCH rejects any attempt to change it.
           example: security
-        level:
-          type: [string, 'null']
-          example: Dasar
         is_certificate:
           type: boolean
           example: true
@@ -4211,11 +4264,17 @@ components:
     CreateOwnedTrainingRequest:
       type: object
       description: >-
-        Accepted request fields for a company-owned training. Drafts require title and
-        category_role (security or cs audience); using workflow_action submit additionally requires
-        category, level, description, start_date, end_date, total_jp, training_mode, province, city,
-        address, at least one syllabus item, at least one requirement, and quota. category_role is
-        immutable after creation. Do not send provider or ownership fields.
+        Accepted request fields for a company-owned training. `category` is the exact active root
+        title for `category_role`; `sub_category` is the exact direct-child title. Drafts may omit
+        taxonomy selections, but submission requires a subcategory when the root has children and
+        requires `tuk` when the selected source has is_tuk=true. TUK is one of mandiri, sewaktu, or
+        tempat kerja. PATCH validates merged stored and submitted fields; conflicts fail without
+        mutation, so send compatible replacements or explicit nulls. `discount` is a percentage
+        from 0 to 100 with at most two decimal places; null stores as zero. Drafts require title and
+        category_role (security or cs audience); submission additionally requires description,
+        start_date, end_date, total_jp, training_mode, province, city, address, syllabus, requirements,
+        and quota. category_role is immutable. Do not send provider or ownership fields. Legacy level
+        input is ignored and never changes stored values. Training responses omit level.
       additionalProperties: false
       required: [title]
       properties:
@@ -4229,17 +4288,12 @@ components:
           type: [string, 'null']
           maxLength: 255
           description: Training topic category. Required when workflow_action is submit.
-          example: Keamanan / Satpam
+          example: Keamanan
         category_role:
           type: string
           enum: [security, cs]
           description: Audience of the training. Required on create; prohibited on PATCH.
           example: security
-        level:
-          type: [string, 'null']
-          maxLength: 255
-          description: Training level. Required when workflow_action is submit.
-          example: Lanjutan
         is_certificate:
           type: boolean
           description: Whether the training provides a certificate.
@@ -4337,6 +4391,23 @@ components:
           minimum: 0
           description: Training price; use 0 for a free training.
           example: 0
+        sub_category:
+          type: [string, 'null']
+          maxLength: 255
+          description: Direct child title from the selected audience-matching master root. Drafts may omit it; submit requires it when the root has children.
+          example: Patroli
+        tuk:
+          type: [string, 'null']
+          enum: [mandiri, sewaktu, tempat kerja, null]
+          description: Required on submit when the selected root or child is_tuk=true; drafts may omit it.
+          example: mandiri
+        discount:
+          type: [number, 'null']
+          minimum: 0
+          maximum: 100
+          multipleOf: 0.01
+          description: Percentage discount; null stores as zero.
+          example: 12.5
         poster:
           anyOf:
             - type: string
@@ -4357,10 +4428,14 @@ components:
     UpdateOwnedTrainingRequest:
       type: object
       description: >-
-        Partial update of accepted mutable training fields. Omitted fields remain unchanged,
-        null clears nullable fields, and tags, syllabus, or requirements replace their complete
-        existing array. workflow_action, ownership, provider, status, timestamps, counters, and
-        duration_day are not accepted.
+        Partial update of accepted mutable training fields. Omitted fields remain unchanged, null
+        clears nullable fields, and tags, syllabus, or requirements replace their complete arrays.
+        Taxonomy strings are master titles. PATCH validates the merged stored and submitted taxonomy;
+        conflicts fail without mutation. Send compatible replacements or explicit nulls to clear.
+        Discount is a 0..100 percentage with at most two decimal places; null stores as zero. Legacy
+        level input is ignored and never changes stored values. Training responses omit level.
+        workflow_action, ownership, provider, status, timestamps, counters, and duration_day are not
+        accepted.
       additionalProperties: false
       properties:
         title:
@@ -4373,16 +4448,11 @@ components:
           type: [string, 'null']
           maxLength: 255
           description: Training topic category.
-          example: Keamanan / Satpam
+          example: Keamanan
         category_role:
           description: Audience cannot be changed after creation; sending it fails validation with a prohibited rule.
           not: {}
           example: null
-        level:
-          type: [string, 'null']
-          maxLength: 255
-          description: Training level.
-          example: Lanjutan
         is_certificate:
           type: boolean
           description: Whether the training provides a certificate.
@@ -4480,6 +4550,23 @@ components:
           minimum: 0
           description: Training price; use 0 for a free training.
           example: 0
+        sub_category:
+          type: [string, 'null']
+          maxLength: 255
+          description: Direct child title. Must remain compatible with the merged category; send null explicitly to clear.
+          example: Patroli
+        tuk:
+          type: [string, 'null']
+          enum: [mandiri, sewaktu, tempat kerja, null]
+          description: Must remain compatible with the merged category and subcategory.
+          example: mandiri
+        discount:
+          type: [number, 'null']
+          minimum: 0
+          maximum: 100
+          multipleOf: 0.01
+          description: Percentage discount; null stores as zero.
+          example: 12.5
         poster:
           anyOf:
             - type: string
@@ -6186,6 +6273,25 @@ components:
         capabilities:
           $ref: '#/components/schemas/Capabilities'
 
+    CategoryCertificate:
+      type: object
+      required: [id, title, category, parent_id, is_tuk, level]
+      properties:
+        id: {type: integer}
+        title: {type: string}
+        category: {type: string, enum: [security, cs]}
+        parent_id: {type: [integer, 'null']}
+        is_tuk: {type: boolean}
+        level: {type: integer}
+    CategoryCertificateListResponse:
+      type: object
+      required: [status, data]
+      properties:
+        status: {type: boolean}
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryCertificate'
     ReferenceListResponse:
       type: object
       required: [status, data]
@@ -6882,7 +6988,9 @@ components:
               provider: PT Example Training
               instructor: Budi Santoso
               category: Security
-              level: Basic
+              sub_category: Patroli
+              tuk: mandiri
+              discount: 12.5
               price: '750000'
               is_free: '0'
               description: Pelatihan dasar untuk meningkatkan kompetensi petugas keamanan.
@@ -6948,7 +7056,9 @@ components:
               provider: PT Example Training
               instructor: Budi Santoso
               category: Security
-              level: Basic
+              sub_category: Patroli
+              tuk: mandiri
+              discount: 12.5
               price: '750000'
               is_free: '0'
               description: Pelatihan dasar untuk meningkatkan kompetensi petugas keamanan.

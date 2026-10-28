@@ -1071,25 +1071,6 @@
                         </div>
 
 
-                        <div class="col-md-6 mb-7">
-
-                            <label class="form-label required">
-                                Level
-                            </label>
-
-                            <select
-                                class="form-select form-select-dark"
-                                name="level">
-
-                                <option value="">Pilih Level</option>
-                                <option value="Dasar"  {{ $data->level == 'Dasar' ? 'selected' : '' }}>Dasar</option>
-                                <option value="Menengah" {{ $data->level == 'Menengah' ? 'selected' : '' }}>Menengah</option>
-                                <option value="Lanjutan" {{ $data->level == 'Lanjutan' ? 'selected' : '' }}>Lanjutan</option>
-                                <option value="Profesional" {{ $data->level == 'Profesional' ? 'selected' : '' }}>Profesional</option>
-
-                            </select>
-
-                        </div>
 
                         <!-- Biaya Pelatihan -->
                         <div class="col-md-12 mb-7">
@@ -1345,7 +1326,7 @@
 
                                 <li>Tuliskan manfaat yang akan diperoleh peserta.</li>
 
-                                <li>Pilih kategori dan level yang sesuai.</li>
+                                <li>Pilih kategori yang sesuai.</li>
 
                                 <li>Tambahkan tag agar pelatihan mudah ditemukan.</li>
 

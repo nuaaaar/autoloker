@@ -16,6 +16,8 @@ class TrainingResource extends JsonResource
     public function toArray(Request $request): array
     {
         $data = $this->resource->toArray();
+        unset($data['level']);
+        $data['discount'] = is_numeric($data['discount'] ?? null) ? (float) $data['discount'] : 0.0;
 
         foreach (['bujp', 'company'] as $organization) {
             if (! is_array($data[$organization] ?? null)) {

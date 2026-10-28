@@ -22,6 +22,7 @@ class TrainingService
         $this->validatePayload($data, $action === 'submit', $locationErrors);
 
         $company = Company::query()->findOrFail($owner['id']);
+        $data['discount'] = $data['discount'] ?? 0;
         $attributes = $this->attributes($data);
         $attributes['b_u_j_p_id'] = null;
         $attributes['company_id'] = $owner['id'];
@@ -41,6 +42,9 @@ class TrainingService
         $merged = array_merge($this->payload($training), $data);
         [$merged, $locationErrors] = $this->normalizeLocation($merged);
         $this->validatePayload($merged, false, $locationErrors);
+        if (array_key_exists('discount', $data)) {
+            $data['discount'] = $data['discount'] ?? 0;
+        }
 
         foreach (['province', 'city'] as $field) {
             if (array_key_exists($field, $data)) {
@@ -105,11 +109,12 @@ class TrainingService
                 : TrainingRules::create(isset($data['poster']) && $data['poster'] instanceof UploadedFile),
         );
 
-        $validator->after(function ($validator) use ($data, $locationErrors): void {
+        $validator->after(function ($validator) use ($data, $locationErrors, $complete): void {
             foreach (array_merge(
                 TrainingRules::dateErrors($data),
                 TrainingRules::arrayErrors($data),
                 $locationErrors,
+                $this->taxonomyErrors($data, $complete),
             ) as $field => $messages) {
                 foreach ($messages as $message) {
                     $validator->errors()->add($field, $message);
@@ -120,6 +125,76 @@ class TrainingService
         if ($validator->fails()) {
             $this->throwValidation($validator->errors()->toArray());
         }
+    }
+
+    /** @return array<string, list<string>> */
+    private function taxonomyErrors(array $data, bool $complete): array
+    {
+        $errors = [];
+        $role = $data['category_role'] ?? null;
+        if (! is_string($role) || ! in_array($role, TrainingRules::categoryRoles(), true)) {
+            return $errors;
+        }
+        foreach (['category', 'sub_category', 'tuk'] as $field) {
+            if (array_key_exists($field, $data) && $data[$field] !== null && ! is_string($data[$field])) {
+                return $errors;
+            }
+        }
+
+        $category = $data['category'] ?? null;
+        $subCategory = $data['sub_category'] ?? null;
+        $tuk = $data['tuk'] ?? null;
+        $hasCategory = is_string($category) && trim($category) !== '';
+        $hasSubCategory = is_string($subCategory) && trim($subCategory) !== '';
+        $hasTuk = is_string($tuk) && trim($tuk) !== '';
+
+        if (! $hasCategory) {
+            if ($hasSubCategory) {
+                $errors['sub_category'][] = 'Sub kategori tidak sesuai dengan kategori pelatihan.';
+            }
+            if ($hasTuk) {
+                $errors['tuk'][] = 'TUK tidak diperlukan untuk kategori ini.';
+            }
+            return $errors;
+        }
+
+        $root = \App\Models\MasterCategoryCertificate::query()
+            ->where('category', $role)->where('level', 1)->whereNull('parent_id')
+            ->where('title', $category)->first();
+        if (! $root) {
+            $errors['category'][] = 'Kategori pelatihan tidak sesuai dengan sasaran peserta yang dipilih.';
+            return $errors;
+        }
+
+        $children = \App\Models\MasterCategoryCertificate::query()
+            ->where('category', $role)->where('parent_id', $root->id)
+            ->orderBy('title')->get();
+        $selectedChild = null;
+        if ($hasSubCategory) {
+            $selectedChild = $children->firstWhere('title', $subCategory);
+            if (! $selectedChild) {
+                $errors['sub_category'][] = 'Sub kategori tidak sesuai dengan kategori pelatihan.';
+            }
+        } elseif ($complete && $children->isNotEmpty()) {
+            $errors['sub_category'][] = 'Sub kategori pelatihan wajib dipilih.';
+        } elseif (! $complete && $children->isNotEmpty()) {
+            if ($hasTuk) {
+                $errors['tuk'][] = 'Pilih sub kategori pelatihan sebelum memilih TUK.';
+            }
+            return $errors;
+        }
+
+        $source = $selectedChild ?: ($children->isNotEmpty() && ! $hasSubCategory ? null : $root);
+        if (! $source) {
+            return $errors;
+        }
+        if (! $source->is_tuk && $hasTuk) {
+            $errors['tuk'][] = 'TUK tidak diperlukan untuk kategori ini.';
+        } elseif ($complete && $source->is_tuk && ! $hasTuk) {
+            $errors['tuk'][] = 'TUK wajib dipilih.';
+        }
+
+        return $errors;
     }
 
     /** @return array{0: array, 1: array<string, list<string>>} */
@@ -163,7 +238,9 @@ class TrainingService
             'title',
             'category',
             'category_role',
-            'level',
+            'sub_category',
+            'tuk',
+            'discount',
             'description',
             'start_date',
             'end_date',
@@ -251,7 +328,9 @@ class TrainingService
             'title' => $training->title,
             'category' => $training->category,
             'category_role' => $training->category_role,
-            'level' => $training->level,
+            'sub_category' => $training->sub_category,
+            'tuk' => $training->tuk,
+            'discount' => $training->discount,
             'is_certificate' => $training->is_certificate,
             'tags' => $this->decodeArray($training->tags),
             'description' => $training->description,
@@ -264,12 +343,14 @@ class TrainingService
             'district' => $training->district,
             'village' => $training->village,
             'address' => $training->address,
+            'syllabus' => $this->decodeArray($training->syllabus),
             'requirements' => $this->decodeArray($training->requirements),
             'instructor' => $training->instructor,
             'quota' => $training->quota,
             'price' => $training->price,
             'poster' => $training->poster,
         ];
+
     }
 
     private function decodeArray(mixed $value): ?array

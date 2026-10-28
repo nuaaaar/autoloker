@@ -63,7 +63,24 @@ class ReferenceDataController extends Controller
 
     public function categoryCertificates(Request $request): JsonResponse
     {
-        return $this->master(MasterCategoryCertificate::query(), $this->category($request));
+        $category = $this->category($request);
+        $query = MasterCategoryCertificate::query();
+        if ($category !== null) {
+            $query->where('category', $category);
+        }
+
+        $data = $query->orderBy('title')->orderBy('id')
+            ->get(['id', 'title', 'category', 'parent_id', 'is_tuk', 'level'])
+            ->map(fn (MasterCategoryCertificate $row) => [
+                'id' => (int) $row->id,
+                'title' => $row->title,
+                'category' => $row->category,
+                'parent_id' => $row->parent_id === null ? null : (int) $row->parent_id,
+                'is_tuk' => (bool) $row->is_tuk,
+                'level' => (int) $row->level,
+            ]);
+
+        return response()->json(['status' => true, 'data' => $data]);
     }
 
     public function placements(Request $request): JsonResponse

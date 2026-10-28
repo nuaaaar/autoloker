@@ -70,7 +70,6 @@
                                     <th>Nama Kategori Pelatihan</th>
                                     <th>Parent ID</th>
                                     <th>TUK</th>
-                                    <th>Level</th>
                                     <th class="text-end" width="8%">Aksi</th>
                                 </tr>
                             </thead>
@@ -104,8 +103,8 @@
                             <select class="form-select" name="parent_id" id="create_parent_id">
                                 <option value="">-- Tidak Ada Parent --</option>
                                 @foreach(($parentCertificates ?? collect()) as $parent)
-                                    <option value="{{ $parent->id }}">
-                                        {{ $parent->title }} (Level {{ $parent->level }})
+                                    <option value="{{ $parent->id }}" data-is-tuk="{{ (int) $parent->is_tuk }}">
+                                        {{ $parent->title }}
                                     </option>
                                 @endforeach
                             </select>
@@ -116,21 +115,16 @@
                             <input type="hidden" name="is_tuk" value="0">
                             <div class="form-check">
                                 <input type="checkbox" class="form-check-input" name="is_tuk"
-                                       id="create_is_tuk" value="1">
+                                       id="create_is_tuk" value="1" aria-describedby="create_tuk_help">
                                 <label class="form-check-label" for="create_is_tuk">Merupakan TUK</label>
                             </div>
+                            <small id="create_tuk_help" class="category-form-help mt-1 d-none" aria-live="polite">TUK mengikuti kategori induk dan tidak dapat diubah.</small>
                         </div>
-
-                        <div class="mb-3">
-                            <label class="form-label required" for="create_level">Level</label>
-                            <input type="number" class="form-control" name="level" id="create_level"
-                                   value="1" min="1" required>
                         </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary" id="btnCreate">Simpan</button>
-                    </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary" id="btnCreate">Simpan</button>
+                        </div>
                 </form>
             </div>
         </div>
@@ -161,8 +155,8 @@
                             <select class="form-select" name="parent_id" id="edit_parent_id">
                                 <option value="">-- Tidak Ada Parent --</option>
                                 @foreach(($parentCertificates ?? collect()) as $parent)
-                                    <option value="{{ $parent->id }}">
-                                        {{ $parent->title }} (Level {{ $parent->level }})
+                                    <option value="{{ $parent->id }}" data-is-tuk="{{ (int) $parent->is_tuk }}">
+                                        {{ $parent->title }}
                                     </option>
                                 @endforeach
                             </select>
@@ -173,15 +167,10 @@
                             <input type="hidden" name="is_tuk" value="0">
                             <div class="form-check">
                                 <input type="checkbox" class="form-check-input" name="is_tuk"
-                                       id="edit_is_tuk" value="1">
+                                       id="edit_is_tuk" value="1" aria-describedby="edit_tuk_help">
                                 <label class="form-check-label" for="edit_is_tuk">Merupakan TUK</label>
                             </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label required" for="edit_level">Level</label>
-                            <input type="number" class="form-control" name="level" id="edit_level"
-                                   value="1" min="1" required>
+                            <small id="edit_tuk_help" class="category-form-help mt-1 d-none" aria-live="polite">TUK mengikuti kategori induk dan tidak dapat diubah.</small>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -222,6 +211,48 @@ $(document).ready(function () {
     const storeUrl = @json($storeUrl);
     const updateUrlTemplate = @json($updateUrlTemplate);
     const deleteUrlTemplate = @json($deleteUrlTemplate);
+
+    function syncTukState(form) {
+        const parentSelect = form.find('select[name="parent_id"]');
+        const selected = parentSelect.find(':selected')[0];
+        const locked = selected?.getAttribute('data-is-tuk') === '1';
+        const checkbox = form.find('input[type="checkbox"][name="is_tuk"]');
+        form.find('input[type="hidden"][name="is_tuk"]').val(locked || checkbox.prop('checked') ? '1' : '0');
+        checkbox.prop('disabled', locked);
+        if (locked) checkbox.prop('checked', true);
+        form.find('[id$="_tuk_help"]').toggleClass('d-none', !locked);
+    }
+
+    function upsertParentOption(row) {
+        if (!row) return;
+        ['#create_parent_id', '#edit_parent_id'].forEach(function (selector) {
+            const select = $(selector);
+            const selectedValue = select.val();
+            let option = select.find('option').filter(function () {
+                return String(this.value) === String(row.id);
+            });
+            if (!option.length) {
+                option = $('<option>').val(row.id).appendTo(select);
+            }
+            option.text(row.title).attr('data-is-tuk', row.is_tuk ? '1' : '0');
+            select.val(selectedValue);
+        });
+        syncTukState($('#formCreate'));
+        syncTukState($('#formEdit'));
+    }
+
+    $('#create_parent_id, #edit_parent_id').on('change', function () {
+        syncTukState($(this).closest('form'));
+    });
+    $('#create_is_tuk, #edit_is_tuk').on('change', function () {
+        syncTukState($(this).closest('form'));
+    });
+    $('#createModal').on('hidden.bs.modal', function () {
+        $('#formCreate')[0].reset();
+        syncTukState($('#formCreate'));
+    });
+    syncTukState($('#formCreate'));
+    syncTukState($('#formEdit'));
 
     function escapeHtml(value) {
         return $('<div>').text(value == null ? '' : value).html();
@@ -295,12 +326,6 @@ $(document).ready(function () {
                 }
             },
             {
-                data: 'level',
-                render: function (data) {
-                    return escapeHtml(data ?? 1);
-                }
-            },
-            {
                 data: null,
                 orderable: false,
                 searchable: false,
@@ -310,12 +335,11 @@ $(document).ready(function () {
                     const title = escapeHtml(row.title);
                     const parentId = row.parent_id == null ? '' : row.parent_id;
                     const isTuk = Number(row.is_tuk) === 1 ? 1 : 0;
-                    const level = row.level ?? 1;
 
                     return `
                         <button type="button"
                             class="btn btn-outline-primary btn-sm me-1"
-                            onclick="editData('${row.id}', '${uuid}', '${title}', '${parentId}', ${isTuk}, ${level})"
+                            onclick="editData('${row.id}', '${uuid}', '${title}', '${parentId}', ${isTuk})"
                             title="Edit">
                             <i class="fas fa-pencil-alt"></i>
                         </button>
@@ -354,9 +378,10 @@ $(document).ready(function () {
                 button.prop('disabled', true).text('Menyimpan...');
             },
             success: function (res) {
+                upsertParentOption(res.data);
                 $('#createModal').modal('hide');
                 form[0].reset();
-                $('#create_level').val(1);
+                syncTukState(form);
 
                 Swal.fire({
                     icon: 'success',
@@ -367,7 +392,6 @@ $(document).ready(function () {
                 });
                 table.ajax.reload(null, false);
             },
-            error: showError,
             complete: function () {
                 button.prop('disabled', false).text('Simpan');
             }
@@ -389,6 +413,7 @@ $(document).ready(function () {
                 button.prop('disabled', true).text('Memperbarui...');
             },
             success: function (res) {
+                upsertParentOption(res.data);
                 $('#editModal').modal('hide');
                 Swal.fire({
                     icon: 'success',
@@ -443,12 +468,11 @@ $(document).ready(function () {
         });
     });
 
-    window.editData = function (id, uuid, title, parentId, isTuk, level) {
+    window.editData = function (id, uuid, title, parentId, isTuk) {
         $('#edit_uuid').val(uuid);
         $('#edit_title').val($('<textarea>').html(title).text());
         $('#edit_parent_id').val(parentId || '');
-        $('#edit_is_tuk').prop('checked', Number(isTuk) === 1);
-        $('#edit_level').val(level || 1);
+        syncTukState($('#formEdit'));
 
         // Hindari memilih data itu sendiri sebagai parent.
         $('#edit_parent_id option').prop('disabled', false);

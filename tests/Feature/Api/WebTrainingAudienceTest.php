@@ -19,7 +19,75 @@ class WebTrainingAudienceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        foreach (['security', 'cs'] as $category) {
+            \App\Models\MasterCategoryCertificate::create([
+                'title' => 'Kebersihan Gedung',
+                'category' => $category,
+                'level' => 1,
+                'parent_id' => null,
+                'is_tuk' => false,
+            ]);
+        }
         $this->seedLocations();
+    }
+
+    public function test_web_training_can_be_created_without_level(): void
+    {
+        Storage::fake('public');
+        $user = $this->companyAccount('web-training-without-level@example.com');
+
+        foreach (['draft', 'submitted'] as $status) {
+            $this->actingAs($user)
+                ->post(route('dashboard-user.training.store'), $this->payload(['status' => $status]))
+                ->assertOk()
+                ->assertJsonPath('status', true);
+
+            $training = Training::query()->latest('id')->firstOrFail();
+            $this->assertSame($user->user_company->company->id, $training->company_id);
+            $this->assertSame($status === 'submitted' ? 'published' : $status, $training->status);
+            $this->assertNull($training->level);
+        }
+    }
+
+    public function test_web_training_update_without_level_preserves_existing_level(): void
+    {
+        Storage::fake('public');
+        $user = $this->companyAccount('web-training-update-level@example.com');
+        $this->actingAs($user)
+            ->post(route('dashboard-user.training.store'), $this->payload())
+            ->assertOk();
+        $training = Training::query()->latest('id')->firstOrFail();
+        $training->update(['level' => 'Lanjutan']);
+
+        $this->actingAs($user)
+            ->patch(route('dashboard-user.training.update', $training->uuid), $this->payload([
+                'poster' => null,
+                'title' => 'Judul diperbarui',
+            ]))
+            ->assertOk()
+            ->assertJsonPath('status', true);
+
+        $this->assertSame('Judul diperbarui', $training->fresh()->title);
+        $this->assertSame('Lanjutan', $training->fresh()->level);
+    }
+
+    public function test_web_training_update_without_level_preserves_null_level(): void
+    {
+        Storage::fake('public');
+        $user = $this->companyAccount('web-training-update-null-level@example.com');
+        $this->actingAs($user)
+            ->post(route('dashboard-user.training.store'), $this->payload())
+            ->assertOk();
+        $training = Training::query()->latest('id')->firstOrFail();
+
+        $this->actingAs($user)
+            ->patch(route('dashboard-user.training.update', $training->uuid), $this->payload([
+                'poster' => null,
+                'title' => 'Judul diperbarui',
+            ]))
+            ->assertOk();
+
+        $this->assertNull($training->fresh()->level);
     }
 
     public function test_web_training_created_for_cs_audience_is_persisted_with_cs_category_role(): void
@@ -97,7 +165,6 @@ class WebTrainingAudienceTest extends TestCase
             'provider' => 'Penyelenggara Bersih',
             'category' => 'Kebersihan Gedung',
             'category_role' => 'cs',
-            'level' => 'Dasar',
             'description' => 'Pelatihan dasar kebersihan gedung.',
             'quota' => 20,
             'training_mode' => 'offline',

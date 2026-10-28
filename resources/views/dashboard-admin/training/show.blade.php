@@ -410,25 +410,13 @@
 
                                     <span class="job-location">
 
-                                        <i class="fas fa-signal me-1"></i>
-
-                                        {{ ucfirst($data->level) }}
-
-                                    </span>
-
-                                    <span class="mx-3 text-muted">|</span>
-
-                                    <span class="job-location">
-
-                                        <i class="fas fa-calendar-alt me-1"></i>
-
                                         {{ \Carbon\Carbon::parse($data->start_date)->format('d M Y') }}
 
                                         -
 
                                         {{ \Carbon\Carbon::parse($data->end_date)->format('d M Y') }}
-
                                     </span>
+
 
                                 </div>
 
@@ -742,10 +730,6 @@
                                 <th>{{ ucfirst($data->category) }}</th>
                             </tr>
 
-                            <tr>
-                                <td>Level</td>
-                                <th>{{ ucfirst($data->level) }}</th>
-                            </tr>
 
                             <tr>
                                 <td>Biaya</td>
