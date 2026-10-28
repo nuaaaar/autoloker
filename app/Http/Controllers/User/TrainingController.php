@@ -1166,7 +1166,7 @@ class TrainingController extends Controller
             'title'                 => 'required|max:255',
             'provider'              => 'required|max:255',
             'category'              => 'required',
-            'category_role'         => 'prohibited',
+            'category_role' => 'sometimes|in:security,cs',
             'level'                 => 'required',
 
             'description'           => 'required',
@@ -1444,6 +1444,10 @@ class TrainingController extends Controller
             'syllabus'              => $request->syllabus,
 
             'requirements'          => $request->requirements,
+
+            
+            'sub_category'          => $request->sub_category,
+            'tuk'                   => $request->tuk,
 
             /*
             |--------------------------------------------------------------------------

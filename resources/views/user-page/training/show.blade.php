@@ -1184,6 +1184,221 @@
 
     }
 
+    /* =========================================================
+    TRAINING HERO BANNER
+    ========================================================= */
+
+    .training-detail-banner {
+        position: relative;
+        height: 220px;
+        overflow: hidden;
+        margin-bottom: 14px;
+        border: 1px solid #263655;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #17243d, #465a72);
+    }
+
+    .training-detail-banner img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .training-detail-banner-overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: 20px;
+        color: #fff;
+        background: linear-gradient(
+            180deg,
+            transparent 15%,
+            rgba(10, 20, 35, .25) 45%,
+            rgba(10, 20, 35, .88) 100%
+        );
+    }
+
+    .training-detail-banner-label {
+        align-self: flex-start;
+        margin-bottom: 8px;
+        padding: 6px 10px;
+        border-radius: 6px;
+        background: #f5a900;
+        color: #171717;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .4px;
+    }
+
+    .training-detail-banner-overlay strong {
+        font-size: 18px;
+        line-height: 1.5;
+    }
+
+    /* =========================================================
+    KATEGORI, SUBKATEGORI, SASARAN, TUK
+    ========================================================= */
+
+    .training-taxonomy-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .training-taxonomy-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        min-width: 0;
+        padding: 12px;
+        border: 1px solid #293752;
+        border-radius: 10px;
+        background: #141f39;
+    }
+
+    .training-taxonomy-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        flex-shrink: 0;
+        border-radius: 8px;
+        color: #ffb000;
+        background: #252d3d;
+        font-size: 15px;
+    }
+
+    .training-taxonomy-content {
+        min-width: 0;
+    }
+
+    .training-taxonomy-content small {
+        display: block;
+        margin-bottom: 4px;
+        color: #71809c;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: .4px;
+    }
+
+    .training-taxonomy-content strong {
+        display: block;
+        color: #dce2ed;
+        font-size: 11px;
+        line-height: 1.6;
+        overflow-wrap: anywhere;
+    }
+
+    /* =========================================================
+    HARGA DISKON
+    ========================================================= */
+
+    .training-discount-box {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+
+    .training-discount-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 9px;
+        border: 1px solid #713535;
+        border-radius: 6px;
+        background: #351c24;
+        color: #ff8c8c;
+        font-size: 10px;
+        font-weight: 800;
+    }
+
+    .training-original-price {
+        color: #8996ad;
+        font-size: 11px;
+        text-decoration: line-through;
+    }
+
+    .training-final-price {
+        color: #ffb000;
+        font-size: 15px;
+        font-weight: 800;
+    }
+
+    .training-savings {
+        color: #19c997;
+        font-size: 10px;
+        font-weight: 600;
+    }
+
+    /* =========================================================
+    LIGHT MODE
+    ========================================================= */
+
+    [data-bs-theme="light"] .training-detail-banner {
+        border-color: #e2e8f0;
+    }
+
+    [data-bs-theme="light"] .training-taxonomy-item {
+        border-color: #e2e8f0;
+        background: #f8fafc;
+    }
+
+    [data-bs-theme="light"] .training-taxonomy-icon {
+        color: #c98d00;
+        background: #fff4d6;
+    }
+
+    [data-bs-theme="light"] .training-taxonomy-content small {
+        color: #94a3b8;
+    }
+
+    [data-bs-theme="light"] .training-taxonomy-content strong {
+        color: #334155;
+    }
+
+    [data-bs-theme="light"] .training-discount-badge {
+        border-color: #ffdada;
+        background: #fff0f0;
+        color: #c24141;
+    }
+
+    [data-bs-theme="light"] .training-original-price {
+        color: #94a3b8;
+    }
+
+    [data-bs-theme="light"] .training-final-price {
+        color: #c24141;
+    }
+
+    [data-bs-theme="light"] .training-savings {
+        color: #3b765c;
+    }
+
+    /* RESPONSIVE */
+
+    @media (max-width: 480px) {
+        .training-detail-banner {
+            height: 165px;
+        }
+
+        .training-detail-banner-overlay {
+            padding: 14px;
+        }
+
+        .training-detail-banner-overlay strong {
+            font-size: 15px;
+        }
+
+        .training-taxonomy-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
 </style>
 
 
@@ -1338,6 +1553,34 @@
                 ================================================== --}}
 
                 <div class="training-detail-card training-header-card">
+
+                    {{-- =================================================
+                        BANNER PELATIHAN
+                    ================================================= --}}
+
+                    <div class="training-detail-banner">
+
+                        @if(!empty($data->poster))
+                            <img
+                                src="{{ asset('storage/' . ltrim($data->poster, '/')) }}"
+                                alt="Poster {{ $data->title ?? 'Pelatihan' }}"
+                                onerror="this.style.display='none';"
+                            >
+                        @endif
+
+                        <div class="training-detail-banner-overlay">
+
+                            <span class="training-detail-banner-label">
+                                PROGRAM PELATIHAN
+                            </span>
+
+                            <strong>
+                                {{ $data->title ?? 'Detail Pelatihan' }}
+                            </strong>
+
+                        </div>
+
+                    </div>
 
 
                     <div class="training-header">
@@ -1565,6 +1808,188 @@
 
 
                     </div>
+
+                    {{-- BIAYA --}}
+                    @php
+                        $originalPrice = (float) ($data->price ?? 0);
+                        $discount = min(100, max(0, (float) ($data->discount ?? 0)));
+
+                        $hasDiscount = $discount > 0 && $originalPrice > 0;
+
+                        $discountAmount = $hasDiscount
+                            ? $originalPrice * $discount / 100
+                            : 0;
+
+                        $finalPrice = max(0, $originalPrice - $discountAmount);
+
+                        $isFree = (bool) ($data->is_free ?? false) || $finalPrice <= 0;
+                    @endphp
+
+                    <div class="training-summary-item">
+
+                        <span>Biaya</span>
+
+                        @if($hasDiscount)
+
+                            <div class="training-discount-box" style="align-items:center;">
+
+                                <span class="training-discount-badge">
+                                    DISKON {{ rtrim(rtrim(number_format($discount, 2, ',', '.'), '0'), ',') }}%
+                                </span>
+
+                                <small class="training-original-price">
+                                    Rp {{ number_format($originalPrice, 0, ',', '.') }}
+                                </small>
+
+                                <strong class="training-final-price">
+                                    @if($isFree)
+                                        GRATIS
+                                    @else
+                                        Rp {{ number_format($finalPrice, 0, ',', '.') }}
+                                    @endif
+                                </strong>
+
+                                <small class="training-savings">
+                                    Hemat Rp {{ number_format($discountAmount, 0, ',', '.') }}
+                                </small>
+
+                            </div>
+
+                        @elseif($isFree)
+
+                            <strong>Gratis</strong>
+
+                        @elseif($originalPrice > 0)
+
+                            <strong>
+                                Rp {{ number_format($originalPrice, 0, ',', '.') }}
+                            </strong>
+
+                        @else
+
+                            <strong>-</strong>
+
+                        @endif
+
+                    </div>
+
+                    {{-- =================================================
+                        KATEGORI DAN SASARAN PESERTA
+                    ================================================= --}}
+
+                    @php
+                        $categoryRole = strtolower(trim($data->category_role ?? ''));
+                        $tuk = strtolower(trim($data->tuk ?? ''));
+
+                        $categoryRoleLabels = [
+                            'security' => 'Security',
+                            'cs'       => 'Customer Service',
+                        ];
+
+                        $tukLabels = [
+                            'mandiri'      => 'Mandiri',
+                            'sewaktu'      => 'Sewaktu',
+                            'tempat kerja' => 'Tempat Kerja',
+                            'tempat_kerja' => 'Tempat Kerja',
+                        ];
+
+                        $categoryRoleLabel = $categoryRoleLabels[$categoryRole]
+                            ?? ($data->category_role ?? null);
+
+                        $tukLabel = $tukLabels[$tuk]
+                            ?? ($data->tuk ?? null);
+                    @endphp
+
+                    @if(
+                        !empty($data->category) ||
+                        !empty($data->sub_category) ||
+                        !empty($categoryRoleLabel) ||
+                        !empty($tukLabel)
+                    )
+                        <div class="training-detail-card">
+
+                            <div class="training-detail-title">
+                                KATEGORI & SASARAN PESERTA
+                            </div>
+
+                            <div class="training-taxonomy-grid">
+
+                                {{-- SASARAN PESERTA --}}
+                                @if(!empty($categoryRoleLabel))
+                                    <div class="training-taxonomy-item">
+
+                                        <div class="training-taxonomy-icon">
+                                            <i class="ki-duotone ki-people"></i>
+                                        </div>
+
+                                        <div class="training-taxonomy-content">
+                                            <small>SASARAN PESERTA</small>
+                                            <strong>{{ $categoryRoleLabel }}</strong>
+                                        </div>
+
+                                    </div>
+                                @endif
+
+                                {{-- KATEGORI --}}
+                                @if(!empty($data->category))
+                                    <div class="training-taxonomy-item">
+
+                                        <div class="training-taxonomy-icon">
+                                            <i class="ki-duotone ki-category"></i>
+                                        </div>
+
+                                        <div class="training-taxonomy-content">
+                                            <small>KATEGORI</small>
+                                            <strong>
+                                                {{ is_object($data->category)
+                                                    ? ($data->category->name ?? $data->category->title ?? '-')
+                                                    : $data->category }}
+                                            </strong>
+                                        </div>
+
+                                    </div>
+                                @endif
+
+                                {{-- SUBKATEGORI --}}
+                                @if(!empty($data->sub_category))
+                                    <div class="training-taxonomy-item">
+
+                                        <div class="training-taxonomy-icon">
+                                            <i class="ki-duotone ki-category"></i>
+                                        </div>
+
+                                        <div class="training-taxonomy-content">
+                                            <small>SUBKATEGORI</small>
+                                            <strong>
+                                                {{ is_object($data->sub_category)
+                                                    ? ($data->sub_category->name ?? $data->sub_category->title ?? '-')
+                                                    : $data->sub_category }}
+                                            </strong>
+                                        </div>
+
+                                    </div>
+                                @endif
+
+                                {{-- TUK --}}
+                                @if(!empty($tukLabel))
+                                    <div class="training-taxonomy-item">
+
+                                        <div class="training-taxonomy-icon">
+                                            <i class="ki-duotone ki-geolocation"></i>
+                                        </div>
+
+                                        <div class="training-taxonomy-content">
+                                            <small>TEMPAT UJI KOMPETENSI (TUK)</small>
+                                            <strong>{{ $tukLabel }}</strong>
+                                        </div>
+
+                                    </div>
+                                @endif
+
+                            </div>
+
+                        </div>
+                    @endif
 
 
                     {{-- =================================================

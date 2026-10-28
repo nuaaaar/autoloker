@@ -480,6 +480,33 @@
 
                                 </div>
 
+                                {{-- Sasaran Peserta --}}
+                                <div class="mb-3">
+                                    <span class="text-muted fw-semibold me-2">
+                                        <i class="fas fa-users me-1"></i>
+                                        Sasaran Peserta:
+                                    </span>
+
+                                    @php
+                                        $categoryRoleLabels = [
+                                            'security' => 'Security',
+                                            'cs'       => 'Customer Service',
+                                        ];
+
+                                        $categoryRole = strtolower($data->category_role ?? '');
+                                    @endphp
+
+                                    <span class="badge rounded-pill px-3 py-2"
+                                        style="
+                                            background: var(--job-accent-soft);
+                                            color: var(--job-title);
+                                            border: 1px solid var(--job-summary-border);
+                                            font-size: 13px;
+                                        ">
+                                        {{ $categoryRoleLabels[$categoryRole] ?? ucfirst($data->category_role ?? '-') }}
+                                    </span>
+                                </div>
+
                                 <div class="d-flex flex-wrap align-items-center">
 
                                     <span class="job-location">
@@ -807,6 +834,30 @@
                         <table class="table table-borderless detail-table">
 
                             <tr>
+                                <td>Sasaran Peserta</td>
+                                <th>
+                                    @php
+                                        $categoryRoleLabels = [
+                                            'security' => 'Security',
+                                            'cs'       => 'Customer Service',
+                                        ];
+
+                                        $categoryRole = strtolower($data->category_role ?? '');
+                                    @endphp
+
+                                    <span class="badge rounded-pill px-3 py-2"
+                                        style="
+                                            background: var(--job-accent-soft);
+                                            color: var(--job-title);
+                                            border: 1px solid var(--job-summary-border);
+                                            font-size: 12px;
+                                        ">
+                                        {{ $categoryRoleLabels[$categoryRole] ?? ucfirst($data->category_role ?? '-') }}
+                                    </span>
+                                </th>
+                            </tr>
+
+                            <tr>
                                 <td width="40%">Judul</td>
                                 <th>{{ $data->title }}</th>
                             </tr>
@@ -825,6 +876,18 @@
                                 <td>Kategori</td>
                                 <th>{{ ucfirst($data->category) }}</th>
                             </tr>
+
+                            <tr>
+                                <td>Sub Kategori</td>
+                                <th>{{ ucfirst($data->sub_category) }}</th>
+                            </tr>
+                            
+                            @if($data->tuk != null)
+                                <tr>
+                                    <td>TUK</td>
+                                    <th>{{ ucfirst($data->tuk) }}</th>
+                                </tr>
+                            @endif
 
                             <tr>
                                 <td>Level</td>

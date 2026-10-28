@@ -809,6 +809,28 @@
 
                     <div class="row">
 
+                        
+                        <div class="col-md-12 mb-7">
+                            <label class="form-label required">Sasaran Peserta</label>
+
+                            <select class="form-select form-select-dark" disabled>
+                                <option value="security" {{ $data->category_role === 'security' ? 'selected' : '' }}>
+                                    Security (Satpam)
+                                </option>
+                                <option value="cs" {{ $data->category_role === 'cs' ? 'selected' : '' }}>
+                                    Cleaning Service
+                                </option>
+                            </select>
+
+                            {{-- Tetap kirim nilainya meskipun select disabled --}}
+                            <input type="hidden" name="category_role" value="{{ $data->category_role }}">
+
+                            <small class="text-muted">
+                                Sasaran peserta tidak dapat diubah setelah pelatihan dibuat.
+                            </small>
+                        </div>
+
+
                         <div class="col-md-12 mb-7">
 
                             <label class="form-label required">
@@ -988,26 +1010,66 @@
 
                         </div>
 
-                        <div class="col-md-6 mb-7">
+                        @php
+                            $masterCategoryCertificates = \App\Models\MasterCategoryCertificate::select(
+                                'id',
+                                'title',
+                                'category',
+                                'parent_id',
+                                'is_tuk',
+                                'level'
+                            )->orderBy('level')->orderBy('title')->get();
 
-                            <label class="form-label required">
-                                Kategori Pelatihan
-                            </label>
+                            $selectedRole = $data->category_role;
+                            $selectedCategory = $data->category;
+                            $selectedSubCategory = $data->sub_category ?? '';
+                            $selectedTuk = $data->tuk ?? '';
+                        @endphp
+
+                        <div class="col-md-6 mb-7">
+                            <label class="form-label required">Kategori Pelatihan</label>
 
                             <select
                                 class="form-select form-select-dark"
-                                name="category">
-                                @php
-                                    $masterCategoryCertificates = \App\Models\MasterCategoryCertificate::all();
-                                @endphp
+                                name="category"
+                                id="trainingCategory"
+                                required>
                                 <option value="">Pilih Kategori</option>
-                                @foreach($masterCategoryCertificates as $certificate)
-                                    <option value="{{ $certificate->title }}" {{ $data->category == $certificate->title ? 'selected' : '' }}>{{ $certificate->title }}</option>
-                                @endforeach
-
                             </select>
 
+                            <small class="text-muted">
+                                Kategori utama disesuaikan dengan sasaran peserta.
+                            </small>
                         </div>
+
+                        <div class="col-md-6 mb-7 d-none" id="subCategoryWrapper">
+                            <label class="form-label required">Subkategori</label>
+
+                            <select
+                                class="form-select form-select-dark"
+                                name="sub_category"
+                                id="trainingSubCategory">
+                                <option value="">Pilih Subkategori</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-7 d-none" id="tukWrapper">
+                            <label class="form-label required">TUK</label>
+
+                            <select class="form-select form-select-dark" name="tuk" id="trainingTuk">
+                                <option value="">Pilih TUK</option>
+                                <option value="mandiri" {{ $selectedTuk === 'mandiri' ? 'selected' : '' }}>
+                                    Mandiri
+                                </option>
+                                <option value="sewaktu" {{ $selectedTuk === 'sewaktu' ? 'selected' : '' }}>
+                                    Sewaktu
+                                </option>
+                                <option value="tempat kerja" {{ $selectedTuk === 'tempat kerja' ? 'selected' : '' }}>
+                                    Tempat Kerja
+                                </option>
+                            </select>
+                        </div>
+
 
                         <div class="col-md-6 mb-7">
 
@@ -1026,23 +1088,6 @@
                                 <option value="Profesional" {{ $data->level == 'Profesional' ? 'selected' : '' }}>Profesional</option>
 
                             </select>
-
-                        </div>
-
-                        <div class="col-md-6 mb-7">
-
-                            <label class="form-label">
-                                Sasaran Peserta
-                            </label>
-
-                            <input
-                                type="text"
-                                class="form-control form-control-dark"
-                                value="{{ $data->category_role === 'cs' ? 'Cleaning Service' : 'Security (Satpam)' }}"
-                                disabled
-                                readonly>
-
-                            <small class="text-muted">Sasaran peserta tidak dapat diubah setelah pelatihan dibuat.</small>
 
                         </div>
 
@@ -1107,6 +1152,27 @@
                             </small>
 
                         </div>
+
+                        
+                        <div class="col-md-6 mb-7">
+                            <label class="form-label">Discount (%)</label>
+
+                            <input
+                                type="number"
+                                class="form-control form-control-dark"
+                                name="discount"
+                                id="trainingDiscount"
+                                min="1"
+                                max="100"
+                                step="1"
+                                value="{{ old('discount', $data->discount ?? '') }}"
+                                placeholder="Contoh: 10">
+
+                            <small class="text-muted">
+                                Masukkan diskon 1–100%. Kosongkan jika tidak ada diskon.
+                            </small>
+                        </div>
+
 
                         <div class="col-md-12 mb-7">
 
@@ -3594,6 +3660,123 @@
                     .text('');
 
             });
+
+            
+            $(document).ready(function () {
+                const certificates = @json($masterCategoryCertificates->values());
+
+                const selectedRole = @json($selectedRole);
+                const selectedCategory = @json($selectedCategory);
+                const selectedSubCategory = @json($selectedSubCategory);
+
+                const $category = $('#trainingCategory');
+                const $subCategory = $('#trainingSubCategory');
+                const $subCategoryWrapper = $('#subCategoryWrapper');
+                const $tuk = $('#trainingTuk');
+                const $tukWrapper = $('#tukWrapper');
+
+                function getRootCategories() {
+                    return certificates.filter(function (item) {
+                        return String(item.level) === '1'
+                            && (item.parent_id === null || item.parent_id === '')
+                            && item.category === selectedRole;
+                    });
+                }
+
+                function getChildren(parentTitle) {
+                    const parent = certificates.find(function (item) {
+                        return item.title === parentTitle
+                            && String(item.level) === '1'
+                            && item.category === selectedRole;
+                    });
+
+                    if (!parent) {
+                        return [];
+                    }
+
+                    return certificates.filter(function (item) {
+                        return String(item.parent_id) === String(parent.id)
+                            && item.category === selectedRole;
+                    });
+                }
+
+                function updateTukVisibility() {
+                    const subValue = $subCategory.val();
+                    const effectiveTitle = subValue || $category.val();
+
+                    const effectiveItem = certificates.find(function (item) {
+                        return item.title === effectiveTitle
+                            && item.category === selectedRole;
+                    });
+
+                    if (effectiveItem && Number(effectiveItem.is_tuk) === 1) {
+                        $tukWrapper.removeClass('d-none');
+                        $tuk.prop('required', true);
+                    } else {
+                        $tukWrapper.addClass('d-none');
+                        $tuk.prop('required', false).val('');
+                    }
+                }
+
+                function loadSubCategories(categoryTitle, preserveSelection) {
+                    const children = getChildren(categoryTitle);
+
+                    $subCategory.empty().append(
+                        $('<option>', {
+                            value: '',
+                            text: 'Pilih Subkategori'
+                        })
+                    );
+
+                    if (children.length > 0) {
+                        children.forEach(function (item) {
+                            $subCategory.append(
+                                $('<option>', {
+                                    value: item.title,
+                                    text: item.title
+                                })
+                            );
+                        });
+
+                        $subCategoryWrapper.removeClass('d-none');
+                        $subCategory.prop('required', true);
+
+                        if (preserveSelection && selectedSubCategory) {
+                            $subCategory.val(selectedSubCategory);
+                        }
+                    } else {
+                        $subCategoryWrapper.addClass('d-none');
+                        $subCategory.prop('required', false);
+                    }
+
+                    updateTukVisibility();
+                }
+
+                getRootCategories().forEach(function (item) {
+                    $category.append(
+                        $('<option>', {
+                            value: item.title,
+                            text: item.title
+                        })
+                    );
+                });
+
+                // Pulihkan kategori yang tersimpan saat halaman edit dibuka.
+                if (selectedCategory) {
+                    $category.val(selectedCategory);
+                    loadSubCategories(selectedCategory, true);
+                }
+
+                $category.on('change', function () {
+                    loadSubCategories($(this).val(), false);
+                    $tuk.val('');
+                });
+
+                $subCategory.on('change', function () {
+                    updateTukVisibility();
+                });
+            });
+
 
         });
     </script>
