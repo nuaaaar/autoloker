@@ -106,11 +106,11 @@
                                 Kata Sandi
                             </label>
 
-                            <a href="#"
-                               class="fw-bold text-decoration-none login-link">
-
+                            <a href="javascript:void(0)"
+                            class="fw-bold text-decoration-none login-link"
+                            data-bs-toggle="modal"
+                            data-bs-target="#forgotPasswordModal">
                                 Lupa kata sandi?
-
                             </a>
 
                         </div>
@@ -302,11 +302,11 @@
                                 Kata Sandi
                             </label>
 
-                            <a href="#"
-                               class="fw-bold text-decoration-none login-link">
-
+                            <a href="javascript:void(0)"
+                            class="fw-bold text-decoration-none login-link"
+                            data-bs-toggle="modal"
+                            data-bs-target="#forgotPasswordModal">
                                 Lupa kata sandi?
-
                             </a>
 
                         </div>

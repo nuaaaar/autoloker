@@ -777,6 +777,25 @@
                 window.top.location.replace(window.self.location.href);
             }
         </script>
+
+        @include('auth.passwords.forgot-modal')
+
+        @if (
+            session('forgot_success') ||
+            session('forgot_error') ||
+            session('show_forgot_modal') ||
+            $errors->has('email')
+        )
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    var modalElement = document.getElementById('forgotPasswordModal');
+
+                    if (modalElement && typeof bootstrap !== 'undefined') {
+                        bootstrap.Modal.getOrCreateInstance(modalElement).show();
+                    }
+                });
+            </script>
+        @endif
     </head>
 
     <body id="kt_body" class="app-blank bg-light"

@@ -68,6 +68,29 @@ use Laravolt\Indonesia\Models\District;
 use Laravolt\Indonesia\Models\Village;
 use App\Http\Controllers\LegalDocumentController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ForgotPasswordController;
+use App\Http\Controllers\ResetPasswordController;
+
+Route::middleware('guest')->group(function () {
+
+    // Forgot Password
+    Route::post('/forgot-password', [
+        ForgotPasswordController::class,
+        'sendResetLinkEmail'
+    ])->name('password.email');
+
+    // Reset Password
+    Route::get('/reset-password/{token}', [
+        ResetPasswordController::class,
+        'showResetForm'
+    ])->name('password.reset');
+
+    Route::post('/reset-password', [
+        ResetPasswordController::class,
+        'reset'
+    ])->name('password.update');
+
+});
 
 Route::get('/', function () {
     return view('auth.index');

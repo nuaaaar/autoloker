@@ -10,4 +10,5 @@
     @include('auth.partials.register')
     @include('auth.partials.register-security')
     @include('auth.partials.register-company')
+    @include('auth.passwords.forgot-modal')
 @endsection
