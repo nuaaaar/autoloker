@@ -797,44 +797,5 @@
 
 @section('script')
 
-<script>
-   // Toggle Password Baru
-    $('#toggleNewPassword').on('click', function () {
-        let password = $('#newPassword');
-
-        if (password.attr('type') === 'password') {
-            password.attr('type', 'text');
-
-            $(this).find('i')
-                .removeClass('bi-eye')
-                .addClass('bi-eye-slash');
-        } else {
-            password.attr('type', 'password');
-
-            $(this).find('i')
-                .removeClass('bi-eye-slash')
-                .addClass('bi-eye');
-        }
-    });
-
-    // Toggle Konfirmasi Password
-    $('#toggleConfirmPassword').on('click', function () {
-        let password = $('#confirmPassword');
-
-        if (password.attr('type') === 'password') {
-            password.attr('type', 'text');
-
-            $(this).find('i')
-                .removeClass('bi-eye')
-                .addClass('bi-eye-slash');
-        } else {
-            password.attr('type', 'password');
-
-            $(this).find('i')
-                .removeClass('bi-eye-slash')
-                .addClass('bi-eye');
-        }
-    });
-</script>
 
 @endsection
