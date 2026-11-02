@@ -28,7 +28,7 @@ class AuthenticationService
 
         if (! $user || ! Hash::check($data['password'], $user->password)) {
             RateLimiter::hit($key, 60);
-            throw ValidationException::withMessages(['identifier' => 'Kredensial tidak valid.']);
+            throw ValidationException::withMessages(['identifier' => 'Email, nomor HP, atau kata sandi salah. Silakan periksa kembali.']);
         }
 
         RateLimiter::clear($key);
