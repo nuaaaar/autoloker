@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\ForgotPasswordController;
+
 use App\Http\Controllers\Api\ChangePasswordController;
 use App\Http\Controllers\Api\ChangeRoleController;
 use App\Http\Controllers\Api\CleaningServiceCertificateController;
@@ -33,6 +35,7 @@ Route::post('/login', LoginController::class)->name('api.login');
 Route::post('/refresh-token', RefreshTokenController::class)->name('api.refresh-token');
 Route::post('/auth/google/login', [GoogleAuthController::class, 'login'])->name('api.auth.google.login');
 Route::post('/auth/google/register', [GoogleAuthController::class, 'register'])->name('api.auth.google.register');
+Route::post('/forgot-password', ForgotPasswordController::class)->middleware('throttle:password-reset-request')->name('api.password.email');
 Route::middleware('api.token')->group(function () {
     Route::delete('/account', DeleteAccountController::class)->name('api.account.destroy');
     Route::get('/company/job-vacancies', [OwnedJobVacancyController::class, 'index'])->name('api.company.job-vacancies.index');

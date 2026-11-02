@@ -764,6 +764,7 @@
 
         </style>
 
+        @unless(request()->routeIs('password.reset', 'password.update'))
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-52YZ3XGZJ6"></script>
         <script>
             window.dataLayer = window.dataLayer || [];
@@ -771,7 +772,8 @@
             gtag('js', new Date());
 
             gtag('config', 'G-52YZ3XGZJ6');
-        </script>        
+        </script>
+        @endunless
         <script>
             if (window.top != window.self) {
                 window.top.location.replace(window.self.location.href);

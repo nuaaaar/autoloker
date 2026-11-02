@@ -15,6 +15,47 @@
     }
   ],
   "paths": {
+    "/api/forgot-password": {
+      "post": {
+        "summary": "Request a password reset email",
+        "description": "Public, account-neutral request. A 202 response confirms queue acceptance only, not account existence or email delivery. Requests are limited to five per IP per minute; Retry-After is integer seconds.",
+        "operationId": "requestPasswordReset",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/ForgotPasswordRequest"},
+              "example": {"email": "user@example.com"}
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Request accepted without revealing account or delivery state",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ForgotPasswordResponse"},
+                "example": {"status": true, "message": "Jika alamat email terdaftar, kami akan mengirimkan tautan untuk mengatur ulang kata sandi."}
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid email input",
+            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ValidationErrorResponse"}}}
+          },
+          "429": {
+            "description": "Too many requests from this IP",
+            "headers": {"Retry-After": {"description": "Seconds until requests are allowed again", "schema": {"type": "integer"}}},
+            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}
+          },
+          "503": {
+            "description": "Request could not be queued",
+            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}
+          }
+        }
+      }
+    },
     "/api/login": {
       "post": {
         "summary": "Log in to a mobile account",
@@ -11156,6 +11197,21 @@
             "type": "string",
             "format": "email"
           }
+        }
+      },
+      "ForgotPasswordRequest": {
+        "type": "object",
+        "required": ["email"],
+        "properties": {
+          "email": {"type": "string", "format": "email", "maxLength": 255, "example": "user@example.com"}
+        }
+      },
+      "ForgotPasswordResponse": {
+        "type": "object",
+        "required": ["status", "message"],
+        "properties": {
+          "status": {"type": "boolean", "const": true},
+          "message": {"type": "string", "example": "Jika alamat email terdaftar, kami akan mengirimkan tautan untuk mengatur ulang kata sandi."}
         }
       },
       "ValidationErrorResponse": {
