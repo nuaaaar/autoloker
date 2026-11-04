@@ -878,288 +878,113 @@
                                     <div class="position-relative">
 
                                         <a href="#"
-                                            class="btn btn-icon btn-custom btn-icon-muted btn-active-light btn-active-color-primary w-35px h-35px header-notification-btn"
-                                            data-kt-menu-trigger="{default:'click', lg:'hover'}"
-                                            data-kt-menu-attach="parent"
-                                            data-kt-menu-placement="bottom-end">
+                                        class="btn btn-icon btn-custom btn-icon-muted btn-active-light btn-active-color-primary w-35px h-35px header-notification-btn"
+                                        data-kt-menu-trigger="{default:'click', lg:'hover'}"
+                                        data-kt-menu-attach="parent"
+                                        data-kt-menu-placement="bottom-end">
 
                                             <i class="ki-duotone ki-notification fs-1">
-
                                                 <span class="path1"></span>
                                                 <span class="path2"></span>
                                                 <span class="path3"></span>
-
                                             </i>
 
-
-                                            <!-- Notification Count -->
-                                            <span class="header-notification-badge">
-                                                3
-                                            </span>
+                                            {{-- Notification Count --}}
+                                            @if ($unreadNotificationCount > 0)
+                                                <span class="header-notification-badge">
+                                                    {{ $unreadNotificationCount > 99 ? '99+' : $unreadNotificationCount }}
+                                                </span>
+                                            @endif
 
                                         </a>
 
 
                                         <!--begin::Notification menu-->
-                                        <div
-                                            class="menu menu-sub menu-sub-dropdown menu-column notification-dropdown"
+                                        <div class="menu menu-sub menu-sub-dropdown menu-column notification-dropdown"
                                             data-kt-menu="true">
 
-
-                                            <!-- HEADER -->
+                                            {{-- HEADER --}}
                                             <div class="notification-dropdown-header">
-
                                                 <div>
-
                                                     <span class="notification-dropdown-title">
                                                         Notifikasi
                                                     </span>
 
                                                     <span class="notification-dropdown-count">
-                                                        3 belum dibaca
+                                                        {{ $unreadNotificationCount }} belum dibaca
                                                     </span>
-
                                                 </div>
 
-
-                                                <a href="javascript:;"
-                                                    class="notification-mark-read">
-
-                                                    Tandai semua dibaca
-
-                                                </a>
-
+                                                @if ($unreadNotificationCount > 0)
+                                                    <a href="javascript:;"
+                                                    class="notification-mark-read"
+                                                    id="notificationMarkAllRead">
+                                                        Tandai semua dibaca
+                                                    </a>
+                                                @endif
                                             </div>
 
-
-                                            <!-- LIST -->
+                                            {{-- LIST --}}
                                             <div class="notification-list">
 
+                                                @forelse ($headerNotifications as $notification)
 
-                                                <!-- =========================================
-                                                    NOTIFICATION 1
-                                                ========================================== -->
+                                                    <a href="{{ $notification->url_web ?: route('dashboard-user.notification.index') }}"
+                                                        data-read-url="{{ route('dashboard-user.notification.mark-read', $notification->uuid) }}"
+                                                        class="notification-dropdown-item {{ !$notification->is_read ? 'unread' : '' }}">
 
-                                                <a href="{{ url('/user-page/notification/1') }}"
-                                                    class="notification-dropdown-item unread">
+                                                            <div class="notification-dropdown-icon warning">
+                                                                <i class="ki-duotone ki-notification-on">
+                                                                    <span class="path1"></span>
+                                                                    <span class="path2"></span>
+                                                                </i>
+                                                            </div>
 
+                                                            <div class="notification-dropdown-content">
+                                                                <p class="notification-dropdown-text">
+                                                                    <strong>{{ $notification->title }}</strong>
+                                                                    {{ $notification->description }}
+                                                                </p>
 
-                                                    <div class="notification-dropdown-icon warning">
+                                                                <div class="notification-dropdown-time">
+                                                                    {{ $notification->created_at->diffForHumans() }}
+                                                                </div>
+                                                            </div>
 
-                                                        <i class="ki-duotone ki-briefcase">
+                                                            @if (!$notification->is_read)
+                                                                <span class="notification-unread-dot"></span>
+                                                            @endif
 
+                                                        </a>
+
+                                                @empty
+
+                                                    <div class="notification-empty text-center p-5">
+                                                        <i class="ki-duotone ki-notification-status fs-2x mb-3">
                                                             <span class="path1"></span>
                                                             <span class="path2"></span>
-
                                                         </i>
 
-                                                    </div>
-
-
-                                                    <div class="notification-dropdown-content">
-
-                                                        <p class="notification-dropdown-text">
-
-                                                            <strong>Lowongan baru tersedia</strong>
-
-                                                            yang sesuai dengan profil dan
-                                                            kualifikasi Anda.
-
-                                                        </p>
-
-                                                        <div class="notification-dropdown-time">
-
-                                                            5 menit lalu
-
+                                                        <div class="fw-semibold">
+                                                            Belum ada notifikasi
                                                         </div>
 
+                                                        <small class="text-muted">
+                                                            Notifikasi terbaru akan muncul di sini.
+                                                        </small>
                                                     </div>
 
-
-                                                    <span class="notification-unread-dot"></span>
-
-                                                </a>
-
-
-
-                                                <!-- =========================================
-                                                    NOTIFICATION 2
-                                                ========================================== -->
-
-                                                <a href="{{ url('/user-page/notification/2') }}"
-                                                    class="notification-dropdown-item unread">
-
-
-                                                    <div class="notification-dropdown-icon danger">
-
-                                                        <i class="ki-duotone ki-information-5">
-
-                                                            <span class="path1"></span>
-                                                            <span class="path2"></span>
-
-                                                        </i>
-
-                                                    </div>
-
-
-                                                    <div class="notification-dropdown-content">
-
-                                                        <p class="notification-dropdown-text">
-
-                                                            Sertifikat <strong>Gada Pratama</strong>
-                                                            Anda akan berakhir dalam 30 hari.
-
-                                                        </p>
-
-                                                        <div class="notification-dropdown-time">
-
-                                                            2 jam lalu
-
-                                                        </div>
-
-                                                    </div>
-
-
-                                                    <span class="notification-unread-dot"></span>
-
-                                                </a>
-
-
-
-                                                <!-- =========================================
-                                                    NOTIFICATION 3
-                                                ========================================== -->
-
-                                                <a href="{{ url('/user-page/notification/3') }}"
-                                                    class="notification-dropdown-item unread">
-
-
-                                                    <div class="notification-dropdown-icon purple">
-
-                                                        <i class="ki-duotone ki-book-open">
-
-                                                            <span class="path1"></span>
-                                                            <span class="path2"></span>
-
-                                                        </i>
-
-                                                    </div>
-
-
-                                                    <div class="notification-dropdown-content">
-
-                                                        <p class="notification-dropdown-text">
-
-                                                            Pelatihan <strong>K3 Dasar</strong>
-                                                            akan dimulai 3 hari lagi.
-
-                                                        </p>
-
-                                                        <div class="notification-dropdown-time">
-
-                                                            5 jam lalu
-
-                                                        </div>
-
-                                                    </div>
-
-
-                                                    <span class="notification-unread-dot"></span>
-
-                                                </a>
-
-
-
-                                                <!-- =========================================
-                                                    NOTIFICATION 4
-                                                ========================================== -->
-
-                                                <a href="{{ url('/user-page/notification/4') }}"
-                                                    class="notification-dropdown-item">
-
-
-                                                    <div class="notification-dropdown-icon success">
-
-                                                        <i class="ki-duotone ki-user-tick">
-
-                                                            <span class="path1"></span>
-                                                            <span class="path2"></span>
-
-                                                        </i>
-
-                                                    </div>
-
-
-                                                    <div class="notification-dropdown-content">
-
-                                                        <p class="notification-dropdown-text">
-
-                                                            <strong>Irwan Prasetyo</strong>
-                                                            menerima permintaan koneksi Anda.
-
-                                                        </p>
-
-                                                        <div class="notification-dropdown-time">
-
-                                                            1 hari lalu
-
-                                                        </div>
-
-                                                    </div>
-
-                                                </a>
-
-
-
-                                                <!-- =========================================
-                                                    NOTIFICATION 5
-                                                ========================================== -->
-
-                                                <a href="{{ url('/user-page/notification/5') }}"
-                                                    class="notification-dropdown-item">
-
-
-                                                    <img
-                                                        src="/assets/media/avatars/300-5.jpg"
-                                                        class="notification-dropdown-avatar"
-                                                        alt="User">
-
-
-                                                    <div class="notification-dropdown-content">
-
-                                                        <p class="notification-dropdown-text">
-
-                                                            <strong>Agus Priyatno</strong>
-                                                            ingin terhubung dengan Anda.
-
-                                                        </p>
-
-                                                        <div class="notification-dropdown-time">
-
-                                                            1 hari lalu
-
-                                                        </div>
-
-                                                    </div>
-
-                                                </a>
-
+                                                @endforelse
 
                                             </div>
 
-
-                                            <!-- FOOTER -->
+                                            {{-- FOOTER --}}
                                             <div class="notification-dropdown-footer">
-
-                                                <a href="{{ url('/dashboard-user/notification') }}"
-                                                    class="notification-view-all">
-
+                                                <a href="{{ route('dashboard-user.notification.index') }}"
+                                                class="notification-view-all">
                                                     Lihat semua notifikasi
-
                                                 </a>
-
                                             </div>
-
 
                                         </div>
                                         <!--end::Notification menu-->
@@ -1883,6 +1708,99 @@
     <script src="/assets/js/pages/datatables.init.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        $(document).on('click', '#notificationMarkAllRead', function (e) {
+            e.preventDefault();
+
+            $.ajax({
+                url: "{{ route('dashboard-user.notification.mark-all') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function (response) {
+                    if (response.success) {
+                        $('.notification-dropdown-item').removeClass('unread');
+
+                        $('.notification-unread-dot').remove();
+
+                        $('.notification-dropdown-count').text('0 belum dibaca');
+
+                        $('#notificationMarkAllRead').remove();
+                    }
+                },
+                error: function (xhr) {
+                    console.error(xhr.responseText);
+                }
+            });
+        });
+
+        $(document)
+        .off('click.notificationRead', '.notification-dropdown-item')
+        .on('click.notificationRead', '.notification-dropdown-item', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const item = $(this);
+            const redirectUrl = item.attr('href');
+            const readUrl = item.data('read-url');
+
+            // Cegah klik berulang saat request sedang berjalan
+            if (item.data('processing')) {
+                return;
+            }
+
+            // Jika sudah dibaca, langsung redirect
+            if (!item.hasClass('unread')) {
+                window.location.href = redirectUrl;
+                return;
+            }
+
+            item.data('processing', true);
+
+            $.ajax({
+                url: readUrl,
+                type: 'POST',
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function (response) {
+                    if (response.success) {
+                        // Perbarui jumlah notifikasi yang belum dibaca
+                        const unreadCount = parseInt(response.unread_count) || 0;
+
+                        $('.notification-dropdown-count')
+                            .text(unreadCount + ' belum dibaca');
+
+                        if (unreadCount > 0) {
+                            if ($('.header-notification-badge').length) {
+                                $('.header-notification-badge').text(
+                                    unreadCount > 99 ? '99+' : unreadCount
+                                );
+                            }
+                        } else {
+                            $('.header-notification-badge').remove();
+                            $('#notificationMarkAllRead').remove();
+                        }
+
+                        item.removeClass('unread');
+                        item.find('.notification-unread-dot').remove();
+
+                        window.location.href = response.url_web || redirectUrl;
+                    } else {
+                        window.location.href = redirectUrl;
+                    }
+                },
+                error: function (xhr) {
+                    console.error('Gagal membaca notifikasi:', xhr.responseText);
+
+                    // Tetap arahkan pengguna ke halaman tujuan
+                    window.location.href = redirectUrl;
+                }
+            });
+        });
+    </script>
 
     <script>
         // Mengambil tema aktif dari Bootstrap / Metronic

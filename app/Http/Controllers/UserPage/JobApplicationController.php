@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Models\Security;
 use App\Models\CleaningService;
 use App\Services\NotificationService;
+use App\Services\WebNotificationService;
 use Auth;
 
 class JobApplicationController extends Controller

@@ -7,6 +7,9 @@ use App\Models\MasterNotification;
 use App\Models\Notification;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Log;
+use Str;
+use App\Models\User;
+use Illuminate\Support\Facades\Mail;
 
 class NotificationService
 {
@@ -35,11 +38,13 @@ class NotificationService
      * Templates interpolate ":placeholder" params. Returns null (no row,
      * no push) when the master code is missing or inactive.
      */
+    
     public function send(
         int $userId,
         string $code,
         array $params = []
     ): ?Notification {
+
         /*
         |--------------------------------------------------------------------------
         | GET MASTER NOTIFICATION
@@ -64,8 +69,24 @@ class NotificationService
         */
 
         $replacements = collect($params)
-            ->mapWithKeys(fn ($value, $key) => [":{$key}" => (string) $value])
+            ->mapWithKeys(fn ($value, $key) => [
+                ":{$key}" => (string) $value
+            ])
             ->all();
+
+        /*
+        |--------------------------------------------------------------------------
+        | FLUTTER & WEB ROUTING
+        |--------------------------------------------------------------------------
+        */
+
+        $flutterUrl = $master->flutter_route
+            ? strtr($master->flutter_route, $replacements)
+            : null;
+
+        $webUrl = $master->dashboard_route
+            ? strtr($master->dashboard_route, $replacements)
+            : null;
 
         /*
         |--------------------------------------------------------------------------
@@ -73,18 +94,26 @@ class NotificationService
         |--------------------------------------------------------------------------
         */
 
-        $routeTemplate = $master->flutter_route ?: $master->dashboard_route;
-
         $notification = Notification::create([
+            'uuid' => (string) Str::uuid(),
+
             'user_id' => $userId,
 
             'notification_id' => $master->id,
 
-            'title' => strtr($master->title_template, $replacements),
+            'title' => strtr(
+                $master->title_template,
+                $replacements
+            ),
 
-            'description' => strtr($master->message_template, $replacements),
+            'description' => strtr(
+                $master->message_template,
+                $replacements
+            ),
 
-            'url' => $routeTemplate ? strtr($routeTemplate, $replacements) : null,
+            'url' => $flutterUrl,
+
+            'url_web' => $webUrl,
 
             'type' => $master->category,
 
@@ -103,8 +132,58 @@ class NotificationService
             SendFcmNotification::dispatch($notification->id);
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | SEND EMAIL
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $master->email_enabled &&
+            !empty($master->email_subject) &&
+            !empty($master->email_template)
+        ) {
+            try {
+                $user = User::find($userId);
+
+                if ($user && !empty($user->email)) {
+
+                    $emailSubject = strtr(
+                        $master->email_subject,
+                        $replacements
+                    );
+
+                    $emailBody = strtr(
+                        $master->email_template,
+                        $replacements
+                    );
+
+                    Mail::html($emailBody, function ($message) use (
+                        $user,
+                        $emailSubject
+                    ) {
+                        $message->to($user->email)
+                            ->subject($emailSubject);
+                    });
+
+                } else {
+                    Log::warning(
+                        "Notification email skipped. User [{$userId}] has no email address."
+                    );
+                }
+
+            } catch (\Throwable $e) {
+                Log::error('Failed to send notification email.', [
+                    'user_id' => $userId,
+                    'notification_code' => $code,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
         return $notification;
     }
+
 
     /**
      * Mark notification as read.

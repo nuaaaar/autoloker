@@ -7,12 +7,48 @@ use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    public function markRead($uuid)
+    {
+        $notification = Notification::where('uuid', $uuid)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        if (!$notification->is_read) {
+            $notification->update([
+                'is_read' => true,
+                'read_at' => now(),
+            ]);
+        }
+
+        if ($notification->url_web) {
+            return redirect()->to($notification->url_web);
+        }
+
+        return redirect()->route('user-page.notification.index');
+    }
+
+    public function markAllRead()
+    {
+        Notification::where('user_id', Auth::id())
+            ->where('is_read', false)
+            ->update([
+                'is_read' => true,
+                'read_at' => now(),
+            ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Semua notifikasi berhasil ditandai dibaca.',
+        ]);
+    }
+
     public function index()
     {
-        //
+        $notifications = Notification::where('user_id', Auth::id())
+            ->latest()
+            ->paginate(15);
+
+        return view('user-page.notification.index', compact('notifications'));
     }
 
     /**

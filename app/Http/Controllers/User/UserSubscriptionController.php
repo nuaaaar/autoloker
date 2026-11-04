@@ -320,7 +320,7 @@ class UserSubscriptionController extends Controller
 
             'redirect' =>
                 route(
-                    'user-page.subscription.index'
+                    'dashboard-user.subscription.index'
                 ),
 
             'order_uuid' =>

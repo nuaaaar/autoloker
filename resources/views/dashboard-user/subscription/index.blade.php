@@ -1790,7 +1790,7 @@
                 |--------------------------------------------------------------------------
                 */
                 if (result.redirect) {
-                    window.location.assign(result.redirect);
+                    window.location.assign('/dashboard-user/user-subscription');
                 } else {
                     window.location.reload();
                 }

@@ -374,8 +374,10 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/notification', [USRNotification::class, 'index'])
             ->name('notification.index');
+
         Route::post('/notification/read-all', [USRNotification::class, 'markAllRead'])
             ->name('notification.mark-all');
+
         Route::post('/notification/{uuid}/read', [USRNotification::class, 'markRead'])
             ->name('notification.mark-read');
 

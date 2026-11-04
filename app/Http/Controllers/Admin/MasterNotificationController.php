@@ -120,7 +120,7 @@ class MasterNotificationController extends Controller
             'code' => [
                 'required',
                 'max:100',
-                'regex:/^[A-Z0-9_]+$/',
+                // 'regex:/^[A-Z0-9_]+$/',
                 'unique:master_notifications,code'
             ],
 
@@ -267,7 +267,7 @@ class MasterNotificationController extends Controller
             'code' => [
                 'required',
                 'max:100',
-                'regex:/^[A-Z0-9_]+$/',
+                // 'regex:/^[A-Z0-9_]+$/',
                 'unique:master_notifications,code,' . $uuid . ',uuid'
             ],
 
