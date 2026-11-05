@@ -664,7 +664,7 @@
 @section('breadcrumb')
     <h1
         class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">
-        Pelatihan Saya</h1>
+        Pelatihan Anda</h1>
     <!--end::Title-->
     <!--begin::Breadcrumb-->
     <ul class="breadcrumb breadcrumb-separatorless fw-semibold fs-7 my-0 pt-1">
@@ -679,7 +679,7 @@
         <!--end::Item-->
         <!--begin::Item-->
         <li class="breadcrumb-item text-muted">
-            <a href="{{ route('dashboard-user.training.index') }}" class="text-muted text-hover-primary">Pelatihan Saya</a>
+            <a href="{{ route('dashboard-user.training.index') }}" class="text-muted text-hover-primary">Pelatihan Anda</a>
         </li>
         <!--end::Item-->
         <!--end::Item-->
@@ -2125,7 +2125,7 @@
                                     class="form-check-label ms-3"
                                     for="confirmTraining">
 
-                                    Saya memastikan seluruh informasi pelatihan yang saya isi sudah benar dan dapat dipublikasikan.
+                                    Anda memastikan seluruh informasi pelatihan yang Anda isi sudah benar dan dapat dipublikasikan.
 
                                 </label>
 

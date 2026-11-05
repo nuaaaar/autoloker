@@ -3,7 +3,7 @@
 @section('breadcrumb')
 
     <h1 class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">
-        Lowongan Saya
+        Lowongan Anda
     </h1>
 
     <ul class="breadcrumb breadcrumb-separatorless fw-semibold fs-7 my-0 pt-1">
@@ -23,7 +23,7 @@
                 href="{{ route('dashboard-user.job-vacancy.index') }}"
                 class="text-muted text-hover-primary"
             >
-                Lowongan Saya
+                Lowongan Anda
             </a>
         </li>
 

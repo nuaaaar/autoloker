@@ -769,6 +769,52 @@
         margin: 0;
     }
 
+    .sub-faq-item {
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .sub-faq-question {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 18px 0;
+        border: none;
+        background: transparent;
+        text-align: left;
+        cursor: pointer;
+        color: #182338;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    .sub-faq-question i {
+        font-size: 22px;
+        transition: transform .3s ease;
+        flex-shrink: 0;
+    }
+
+    .sub-faq-answer {
+        display: none;
+        padding: 0 30px 18px 0;
+    }
+
+    .sub-faq-answer p {
+        margin: 0;
+        color: #64748b;
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .sub-faq-item.active .sub-faq-answer {
+        display: block;
+    }
+
+    .sub-faq-item.active .sub-faq-question i {
+        transform: rotate(180deg);
+    }
+
     /* =========================================================
     DARK MODE OVERRIDES
     Memaksa komponen Bootstrap mengikuti warna tema gelap
@@ -1817,6 +1863,16 @@
                     button.innerHTML = originalButtonHtml;
                 }
             }
+        });
+
+        $(document).on('click', '.sub-faq-question', function () {
+            const $item = $(this).closest('.sub-faq-item');
+
+            // Tutup FAQ lain (accordion)
+            $item.siblings('.sub-faq-item').removeClass('active');
+
+            // Toggle FAQ yang diklik
+            $item.toggleClass('active');
         });
     });
 </script>

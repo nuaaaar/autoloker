@@ -8,56 +8,108 @@
         THEME VARIABLES
         ========================================================= */
 
+        :root,
         [data-bs-theme="light"] {
-            --vacancy-bg: #FFFFFF;
-            --vacancy-bg-secondary: #F8FAFC;
-            --vacancy-bg-input: #FFFFFF;
-            --vacancy-bg-input-addon: #F1F5F9;
+            --vacancy-bg: #ffffff;
+            --vacancy-surface: #ffffff;
+            --vacancy-surface-soft: #f8fafc;
 
-            --vacancy-text: #263247;
-            --vacancy-text-strong: #172033;
-            --vacancy-text-muted: #64748B;
+            --vacancy-text: #182338;
+            --vacancy-text-secondary: #64748b;
+            --vacancy-text-muted: #94a3b8;
 
-            --vacancy-border: #E2E8F0;
-            --vacancy-border-soft: #EDF1F6;
+            --vacancy-border: #e2e8f0;
+            --vacancy-border-soft: rgba(15, 23, 42, .07);
 
-            --vacancy-accent: #C99A1A;
-            --vacancy-accent-hover: #B88712;
-            --vacancy-accent-text: #FFFFFF;
-            --vacancy-accent-soft: rgba(201, 154, 26, .10);
+            --vacancy-step-bg: #f8fafc;
+            --vacancy-step-text: #64748b;
+            --vacancy-step-hover: #eef2f7;
 
-            --vacancy-hover: #F1F5F9;
-            --vacancy-number-bg: #FFF7DF;
-            --vacancy-number-text: #A8790B;
+            --vacancy-gold: #e8a801;
+            --vacancy-gold-hover: #f2b600;
+            --vacancy-gold-text: #111827;
+            --vacancy-gold-soft: rgba(232, 168, 1, .10);
+            --vacancy-gold-border: rgba(232, 168, 1, .40);
 
-            --vacancy-empty-bg: #F8FAFC;
-            --vacancy-shadow: 0 8px 24px rgba(38, 50, 71, .06);
+            --vacancy-footer-bg: #f8fafc;
+
+            --builder-bg: #ffffff;
+            --builder-input-bg: #f8fafc;
+            --builder-item-bg: #f8fafc;
+            --builder-action-bg: #eef2f7;
+
+            --builder-text: #182338;
+            --builder-text-secondary: #64748b;
+            --builder-text-muted: #94a3b8;
+
+            --builder-border: #e2e8f0;
+            --builder-border-soft: rgba(15, 23, 42, .07);
+
+            --builder-gold: #c7932b;
+            --builder-gold-light: #f5b942;
+            --builder-gold-soft: rgba(199, 147, 43, .10);
+
+            --option-bg: #f8fafc;
+            --option-text: #64748b;
+            --option-border: #e2e8f0;
+
+            --certificate-bg: #f8fafc;
+            --certificate-text: #64748b;
+            --certificate-border: #e2e8f0;
+
+            --danger: #dc3545;
         }
 
+
         [data-bs-theme="dark"] {
-            --vacancy-bg: #11192C;
-            --vacancy-bg-secondary: #182338;
-            --vacancy-bg-input: #0B1020;
-            --vacancy-bg-input-addon: #0B1020;
+            --vacancy-bg: #11192c;
+            --vacancy-surface: #11192c;
+            --vacancy-surface-soft: #0b1020;
 
-            --vacancy-text: #DCE4F2;
-            --vacancy-text-strong: #FFFFFF;
-            --vacancy-text-muted: #95A2BD;
+            --vacancy-text: #ffffff;
+            --vacancy-text-secondary: #95a2bd;
+            --vacancy-text-muted: #73819d;
 
-            --vacancy-border: rgba(255, 255, 255, .10);
-            --vacancy-border-soft: rgba(255, 255, 255, .06);
+            --vacancy-border: rgba(255, 255, 255, .06);
+            --vacancy-border-soft: rgba(255, 255, 255, .05);
 
-            --vacancy-accent: #E8A801;
-            --vacancy-accent-hover: #F2B600;
-            --vacancy-accent-text: #121212;
-            --vacancy-accent-soft: rgba(232, 168, 1, .12);
+            --vacancy-step-bg: #182338;
+            --vacancy-step-text: #94a3b8;
+            --vacancy-step-hover: #182338;
 
-            --vacancy-hover: #18243D;
-            --vacancy-number-bg: rgba(199, 147, 43, .15);
-            --vacancy-number-text: #F5B942;
+            --vacancy-gold: #e8a801;
+            --vacancy-gold-hover: #f2b600;
+            --vacancy-gold-text: #121212;
+            --vacancy-gold-soft: rgba(232, 168, 1, .12);
+            --vacancy-gold-border: rgba(232, 168, 1, .45);
 
-            --vacancy-empty-bg: #0B1020;
-            --vacancy-shadow: 0 8px 24px rgba(0, 0, 0, .18);
+            --vacancy-footer-bg: #121c33;
+
+            --builder-bg: #11192c;
+            --builder-input-bg: #0b1020;
+            --builder-item-bg: #0b1020;
+            --builder-action-bg: #18243d;
+
+            --builder-text: #ffffff;
+            --builder-text-secondary: #8c98b3;
+            --builder-text-muted: #73819d;
+
+            --builder-border: rgba(255, 255, 255, .06);
+            --builder-border-soft: rgba(255, 255, 255, .05);
+
+            --builder-gold: #c7932b;
+            --builder-gold-light: #f5b942;
+            --builder-gold-soft: rgba(199, 147, 43, .15);
+
+            --option-bg: #0b1020;
+            --option-text: #93a3be;
+            --option-border: rgba(255, 255, 255, .08);
+
+            --certificate-bg: #0d1426;
+            --certificate-text: #97a5bf;
+            --certificate-border: rgba(255, 255, 255, .10);
+
+            --danger: #dc3545;
         }
 
 
@@ -69,22 +121,18 @@
             display: flex;
             align-items: center;
             gap: 12px;
-
             padding: 20px 24px;
 
             border-top: 1px solid var(--vacancy-border-soft);
             border-bottom: 1px solid var(--vacancy-border-soft);
 
+            background: var(--vacancy-surface);
+
             overflow-x: auto;
             overflow-y: hidden;
-
             white-space: nowrap;
 
             scrollbar-width: none;
-
-            background: var(--vacancy-bg);
-
-            transition: background .25s, border-color .25s;
         }
 
         .vacancy-step-wrapper::-webkit-scrollbar {
@@ -104,18 +152,16 @@
 
             min-width: max-content;
             height: 52px;
-
             padding: 0 22px;
 
             border-radius: 14px;
+            border: 1px solid transparent;
 
             cursor: pointer;
-
             transition: .25s;
 
-            color: var(--vacancy-text-muted);
-
-            border: 1px solid transparent;
+            color: var(--vacancy-step-text);
+            background: transparent;
 
             font-size: 15px;
             font-weight: 600;
@@ -127,8 +173,8 @@
         }
 
         .vacancy-step:hover {
-            background: var(--vacancy-hover);
-            color: var(--vacancy-text-strong);
+            background: var(--vacancy-step-hover);
+            color: var(--vacancy-text);
         }
 
 
@@ -137,18 +183,18 @@
         ========================================================= */
 
         .vacancy-step.active {
-            background: var(--vacancy-accent-soft);
-            border: 1px solid var(--vacancy-accent);
-            color: var(--vacancy-accent);
+            background: var(--vacancy-gold-soft);
+            border-color: var(--vacancy-gold-border);
+            color: var(--vacancy-gold);
         }
 
         .vacancy-step.active i {
-            color: var(--vacancy-accent);
+            color: var(--vacancy-gold);
         }
 
 
         /* =========================================================
-        SECTION BODY
+        BODY
         ========================================================= */
 
         .vacancy-section {
@@ -169,20 +215,17 @@
 
 
         /* =========================================================
-        CARD FOOTER
+        FOOTER
         ========================================================= */
 
         .card-footer {
             border-top: 1px solid var(--vacancy-border-soft);
-            background: var(--vacancy-bg);
-            color: var(--vacancy-text);
-
-            transition: background .25s, border-color .25s;
+            background: var(--vacancy-footer-bg);
         }
 
 
         /* =========================================================
-        BUTTONS
+        BUTTON
         ========================================================= */
 
         #btnBack,
@@ -191,47 +234,36 @@
         #btnSubmit {
             min-width: 170px;
             height: 48px;
-
             border-radius: 12px;
-
             font-weight: 600;
-
-            transition: .25s;
         }
 
-        #btnBack {
-            color: var(--vacancy-text);
-            background: var(--vacancy-bg);
-            border: 1px solid var(--vacancy-border);
-        }
 
-        #btnBack:hover {
-            background: var(--vacancy-hover);
-            color: var(--vacancy-text-strong);
-        }
+        /* Draft */
 
         #btnDraft {
-            background: var(--vacancy-bg-secondary);
+            background: var(--builder-action-bg);
             color: var(--vacancy-text);
             border: 1px solid var(--vacancy-border);
         }
 
         #btnDraft:hover {
-            background: var(--vacancy-hover);
-            color: var(--vacancy-text-strong);
+            background: var(--vacancy-step-hover);
         }
+
+
+        /* Next / Submit */
 
         #btnNext,
         #btnSubmit {
-            background: var(--vacancy-accent);
-            border: 1px solid var(--vacancy-accent);
-            color: var(--vacancy-accent-text);
+            background: var(--vacancy-gold);
+            border: none;
+            color: var(--vacancy-gold-text);
         }
 
         #btnNext:hover,
         #btnSubmit:hover {
-            background: var(--vacancy-accent-hover);
-            border-color: var(--vacancy-accent-hover);
+            background: var(--vacancy-gold-hover);
         }
 
 
@@ -240,15 +272,16 @@
         ========================================================= */
 
         .job-builder {
-            background: var(--vacancy-bg);
-            border: 1px solid var(--vacancy-border);
+            background: var(--builder-bg);
+            border: 1px solid var(--builder-border);
             border-radius: 16px;
             padding: 24px;
-
-            box-shadow: var(--vacancy-shadow);
-
-            transition: background .25s, border-color .25s;
         }
+
+
+        /* =========================================================
+        BUILDER HEADER
+        ========================================================= */
 
         .builder-header {
             display: flex;
@@ -258,66 +291,53 @@
         }
 
         .builder-title {
-            color: var(--vacancy-text-strong);
+            color: var(--builder-text);
             font-size: 18px;
             font-weight: 700;
             margin-bottom: 4px;
         }
 
         .builder-subtitle {
-            color: var(--vacancy-text-muted);
+            color: var(--builder-text-secondary);
             font-size: 13px;
         }
+
+
+        /* =========================================================
+        BUILDER INPUT
+        ========================================================= */
 
         .builder-input {
             margin-bottom: 20px;
         }
 
         .builder-input .input-group {
-            background: var(--vacancy-bg-input);
+            background: var(--builder-input-bg);
             border-radius: 12px;
             overflow: hidden;
-
-            border: 1px solid var(--vacancy-border);
-
-            transition: border-color .2s, background .2s;
-        }
-
-        .builder-input .input-group:focus-within {
-            border-color: var(--vacancy-accent);
+            border: 1px solid var(--builder-border);
         }
 
         .builder-input .input-group-text {
-            background: var(--vacancy-bg-input-addon);
+            background: var(--builder-input-bg);
             border: none;
-            color: var(--vacancy-text-muted);
+            color: var(--builder-text-secondary);
         }
 
-        .builder-input input,
-        .builder-input textarea,
-        .builder-input select {
-            background: var(--vacancy-bg-input);
+        .builder-input input {
+            background: var(--builder-input-bg);
             border: none;
-            color: var(--vacancy-text-strong);
+            color: var(--builder-text);
             height: 54px;
         }
 
-        .builder-input textarea {
-            height: auto;
-            min-height: 100px;
+        .builder-input input::placeholder {
+            color: var(--builder-text-muted);
         }
 
-        .builder-input input::placeholder,
-        .builder-input textarea::placeholder {
-            color: var(--vacancy-text-muted);
-            opacity: .8;
-        }
-
-        .builder-input input:focus,
-        .builder-input textarea:focus,
-        .builder-input select:focus {
-            background: var(--vacancy-bg-input);
-            color: var(--vacancy-text-strong);
+        .builder-input input:focus {
+            background: var(--builder-input-bg);
+            color: var(--builder-text);
             box-shadow: none;
         }
 
@@ -338,32 +358,43 @@
             gap: 14px;
         }
 
+
+        /* =========================================================
+        BUILDER ITEM
+        ========================================================= */
+
         .builder-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
 
-            background: var(--vacancy-bg-secondary);
-
-            border: 1px solid var(--vacancy-border-soft);
+            background: var(--builder-item-bg);
+            border: 1px solid var(--builder-border-soft);
             border-radius: 14px;
 
             padding: 16px 18px;
-
             transition: .25s;
         }
 
         .builder-item:hover {
-            border-color: var(--vacancy-accent);
+            border-color: var(--builder-gold);
         }
+
+
+        /* =========================================================
+        BUILDER LEFT
+        ========================================================= */
 
         .builder-left {
             display: flex;
             align-items: center;
             gap: 15px;
-
-            min-width: 0;
         }
+
+
+        /* =========================================================
+        BUILDER NUMBER
+        ========================================================= */
 
         .builder-number {
             width: 34px;
@@ -371,27 +402,34 @@
 
             border-radius: 50%;
 
-            background: var(--vacancy-number-bg);
-            border: 1px solid var(--vacancy-accent);
+            background: var(--builder-gold-soft);
+            border: 1px solid rgba(199, 147, 43, .40);
 
-            color: var(--vacancy-number-text);
+            color: var(--builder-gold-light);
 
             display: flex;
             align-items: center;
             justify-content: center;
 
             font-weight: 700;
-
             flex-shrink: 0;
         }
 
+
+        /* =========================================================
+        BUILDER TEXT
+        ========================================================= */
+
         .builder-text {
-            color: var(--vacancy-text);
+            color: var(--builder-text);
             font-size: 15px;
             line-height: 1.5;
-
-            overflow-wrap: anywhere;
         }
+
+
+        /* =========================================================
+        BUILDER ACTION
+        ========================================================= */
 
         .builder-action {
             display: flex;
@@ -402,34 +440,37 @@
             width: 38px;
             height: 38px;
 
-            border: 1px solid var(--vacancy-border);
+            border: none;
             border-radius: 10px;
 
-            background: var(--vacancy-hover);
-            color: var(--vacancy-text-muted);
+            background: var(--builder-action-bg);
+            color: var(--builder-text-secondary);
 
             transition: .25s;
         }
 
         .builder-action button:hover {
-            background: var(--vacancy-accent);
-            border-color: var(--vacancy-accent);
-            color: var(--vacancy-accent-text);
+            background: var(--builder-gold);
+            color: #fff;
         }
+
+
+        /* =========================================================
+        BUILDER EMPTY
+        ========================================================= */
 
         .builder-empty {
             text-align: center;
             padding: 50px 20px;
 
-            border: 2px dashed var(--vacancy-border);
+            border: 2px dashed var(--builder-border);
             border-radius: 14px;
 
-            color: var(--vacancy-text-muted);
-            background: var(--vacancy-empty-bg);
+            color: var(--builder-text-muted);
         }
 
         .builder-empty h6 {
-            color: var(--vacancy-text-strong);
+            color: var(--builder-text);
             margin-top: 10px;
         }
 
@@ -440,24 +481,16 @@
 
         .section-card {
             padding: 30px;
-
-            background: var(--vacancy-bg);
-            color: var(--vacancy-text);
-
-            border: 1px solid var(--vacancy-border-soft);
-            border-radius: 16px;
-
-            transition: background .25s, border-color .25s;
         }
 
         .section-title {
-            color: var(--vacancy-text-strong);
+            color: var(--vacancy-text);
             font-size: 24px;
             font-weight: 700;
         }
 
         .section-subtitle {
-            color: var(--vacancy-text-muted);
+            color: var(--vacancy-text-secondary);
             margin-top: 5px;
             margin-bottom: 35px;
         }
@@ -473,24 +506,26 @@
             flex-wrap: wrap;
         }
 
+
+        /* =========================================================
+        OPTION CARD
+        ========================================================= */
+
         .option-card {
             min-width: 140px;
             height: 52px;
 
-            padding: 0 16px;
-
             border-radius: 14px;
+            border: 1px solid var(--option-border);
 
-            border: 1px solid var(--vacancy-border);
-            background: var(--vacancy-bg-input);
-            color: var(--vacancy-text-muted);
+            background: var(--option-bg);
+            color: var(--option-text);
 
             display: flex;
             justify-content: center;
             align-items: center;
 
             cursor: pointer;
-
             transition: .25s;
 
             font-size: 15px;
@@ -502,19 +537,19 @@
         }
 
         .option-card:hover {
-            border-color: var(--vacancy-accent);
-            color: var(--vacancy-text-strong);
+            border-color: var(--builder-gold);
+            color: var(--vacancy-text);
         }
 
         .option-card.active {
-            background: var(--vacancy-accent-soft);
-            color: var(--vacancy-accent);
-            border-color: var(--vacancy-accent);
+            background: var(--builder-gold-soft);
+            color: var(--builder-gold-light);
+            border-color: var(--builder-gold);
         }
 
 
         /* =========================================================
-        CERTIFICATE & COMPETENCY SCHEME
+        CERTIFICATE / COMPETENCY SCHEME
         ========================================================= */
 
         .certificate-group,
@@ -524,18 +559,22 @@
             gap: 10px;
         }
 
+
+        /* =========================================================
+        CERTIFICATE ITEM
+        ========================================================= */
+
         .certificate-item,
         .competency-scheme-item {
             padding: 14px 22px;
 
-            border: 1px solid var(--vacancy-border);
+            border: 1px solid var(--certificate-border);
             border-radius: 14px;
 
-            background: var(--vacancy-bg-input);
-            color: var(--vacancy-text-muted);
+            background: var(--certificate-bg);
+            color: var(--certificate-text);
 
             cursor: pointer;
-
             transition: .25s;
 
             font-weight: 600;
@@ -554,17 +593,16 @@
 
         .certificate-item:hover,
         .competency-scheme-item:hover {
-            border-color: var(--vacancy-accent);
-            color: var(--vacancy-text-strong);
+            border-color: #d6a13b;
+            color: var(--vacancy-text);
         }
 
         .certificate-item.active,
         .competency-scheme-item.active {
-            background: var(--vacancy-accent-soft);
-            border-color: var(--vacancy-accent);
-            color: var(--vacancy-accent);
-
-            box-shadow: 0 0 15px var(--vacancy-accent-soft);
+            background: rgba(214, 161, 59, .12);
+            border-color: #d6a13b;
+            color: #ffc84d;
+            box-shadow: 0 0 15px rgba(214, 161, 59, .12);
         }
 
 
@@ -576,11 +614,11 @@
             display: block;
             margin-top: 6px;
             font-size: 13px;
-            color: #DC3545;
+            color: var(--danger);
         }
 
         .is-invalid {
-            border-color: #DC3545 !important;
+            border-color: var(--danger) !important;
         }
 
 
@@ -589,6 +627,7 @@
         ========================================================= */
 
         @media (max-width: 768px) {
+
             .vacancy-step {
                 padding: 0 16px;
                 height: 46px;
@@ -613,6 +652,7 @@
                 flex-wrap: wrap;
             }
 
+
             .builder-item {
                 flex-direction: column;
                 align-items: flex-start;
@@ -623,6 +663,31 @@
                 width: 100%;
                 justify-content: flex-end;
             }
+
+
+            .section-card {
+                padding: 20px;
+            }
+
+            .section-title {
+                font-size: 21px;
+            }
+
+            .section-subtitle {
+                margin-bottom: 25px;
+            }
+
+
+            .option-card {
+                min-width: 120px;
+                flex: 1;
+            }
+
+
+            .certificate-item,
+            .competency-scheme-item {
+                padding: 12px 16px;
+            }
         }
     </style>
 @endsection
@@ -630,7 +695,7 @@
 @section('breadcrumb')
     <h1
         class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">
-        Lowongan Saya</h1>
+        Lowongan Anda</h1>
     <!--end::Title-->
     <!--begin::Breadcrumb-->
     <ul class="breadcrumb breadcrumb-separatorless fw-semibold fs-7 my-0 pt-1">
@@ -645,7 +710,7 @@
         <!--end::Item-->
         <!--begin::Item-->
         <li class="breadcrumb-item text-muted">
-            <a href="{{ route('dashboard-user.job-vacancy.index') }}" class="text-muted text-hover-primary">Lowongan Saya</a>
+            <a href="{{ route('dashboard-user.job-vacancy.index') }}" class="text-muted text-hover-primary">Lowongan Anda</a>
         </li>
         <!--end::Item-->
         <!--end::Item-->
@@ -754,30 +819,66 @@
 
                     <div class="row">
 
-                        <!-- Posisi -->
+                        {{-- KATEGORI LOWONGAN --}}
+                        <div class="col-md-12 mb-7">
 
+                            <label class="form-label required">
+                                Lowongan Untuk
+                            </label>
+
+                            <select
+                                name="category"
+                                id="category"
+                                class="form-select form-control-dark"
+                                required>
+
+                                <option value="">Pilih Kategori Lowongan</option>
+
+                                <option
+                                    value="security"
+                                    {{ old('category', $data->category) == 'security' ? 'selected' : '' }}>
+                                    Satpam
+                                </option>
+
+                                <option
+                                    value="cs"
+                                    {{ old('category', $data->category) == 'cs' ? 'selected' : '' }}>
+                                    Cleaning Service
+                                </option>
+
+                            </select>
+
+                            <small class="text-muted">
+                                Pilih kategori lowongan terlebih dahulu.
+                            </small>
+
+                        </div>
+
+                        {{-- POSISI PEKERJAAN --}}
                         <div class="col-md-12 mb-7">
 
                             <label class="form-label required">
                                 Posisi Pekerjaan
                             </label>
 
-                            <div class="input-icon">
+                            <select
+                                name="position"
+                                id="position"
+                                class="form-select form-control-dark"
+                                disabled>
 
-                                <input
-                                    type="text"
-                                    class="form-control form-control-dark"
-                                    name="position"
-                                    value="{{ old('position', $data->position) }}"
-                                    placeholder="Contoh: Satpam Gedung Perkantoran">
+                                <option value="">
+                                    Memuat posisi pekerjaan...
+                                </option>
 
-                            </div>
+                            </select>
 
                             <small class="text-muted">
-                                Nama posisi yang akan ditampilkan kepada pelamar.
+                                Pilih posisi pekerjaan yang tersedia.
                             </small>
 
                         </div>
+
 
 
                         <!-- Status Urgent -->
@@ -823,6 +924,7 @@
 
                             <textarea
                                 name="description_work"
+                                id="description_work"
                                 rows="6"
                                 class="form-control form-control-dark"
                                 placeholder="Jelaskan gambaran umum pekerjaan">{{ old('description_work', $data->description_work) }}</textarea>
@@ -1955,18 +2057,14 @@
 
                 <!-- ========================= -->
 
-                <section id="step5"
-                    class="vacancy-section d-none">
+                <section id="step5" class="vacancy-section d-none">
 
                     <div class="row">
 
-                        {{-- =====================================================
-                            SERTIFIKASI
-                        ====================================================== --}}
-
+                        {{-- SERTIFIKASI WAJIB --}}
                         <div class="col-lg-12 mb-8">
 
-                            <label class="form-label">
+                            <label class="form-label required">
                                 Sertifikasi Wajib
                             </label>
 
@@ -1974,43 +2072,11 @@
                                 Pilih sertifikat yang wajib dimiliki pelamar.
                             </div>
 
-                            @php
-
-                                $selectedCertificates = json_decode(
-                                    old('certificate', $data->certificate),
-                                    true
-                                ) ?? [];
-
-                                $masterCertificates =
-                                    \App\Models\MasterCertificate::orderBy('title')
-                                        ->get();
-
-                            @endphp
-
-
                             <div class="certificate-group">
-
-                                @foreach($masterCertificates as $certificate)
-
-                                    <div
-                                        class="certificate-item
-                                        {{ in_array(
-                                            $certificate->title,
-                                            $selectedCertificates
-                                        ) ? 'active' : '' }}"
-                                        data-type="certificate"
-                                        data-value="{{ $certificate->title }}">
-
-                                        <i class="fas fa-shield-alt"></i>
-
-                                        {{ $certificate->title }}
-
-                                    </div>
-
-                                @endforeach
-
+                                <div class="text-muted">
+                                    Memuat sertifikat berdasarkan kategori lowongan...
+                                </div>
                             </div>
-
 
                             <input
                                 type="hidden"
@@ -2020,15 +2086,10 @@
 
                         </div>
 
+                        {{-- KOMPETENSI SKEMA --}}
+                        <div class="col-lg-12 mt-8" id="competencySchemeSection">
 
-
-                        {{-- =====================================================
-                            KOMPETENSI SKEMA
-                        ====================================================== --}}
-
-                        <div class="col-lg-12">
-
-                            <label class="form-label">
+                            <label class="form-label required">
                                 Kompetensi Skema
                             </label>
 
@@ -2036,56 +2097,17 @@
                                 Pilih kompetensi skema yang wajib dimiliki pelamar.
                             </div>
 
-
-                            @php
-
-                                $selectedCompetencySchemes = json_decode(
-                                    old(
-                                        'competency_scheme',
-                                        $data->competency_scheme
-                                    ),
-                                    true
-                                ) ?? [];
-
-                                $masterCompetencySchemes =
-                                    \App\Models\MasterCompetencyScheme::orderBy('title')
-                                        ->get();
-
-                            @endphp
-
-
-                            <div class="certificate-group">
-
-                                @foreach($masterCompetencySchemes as $scheme)
-
-                                    <div
-                                        class="certificate-item
-                                        {{ in_array(
-                                            $scheme->title,
-                                            $selectedCompetencySchemes
-                                        ) ? 'active' : '' }}"
-                                        data-type="competency"
-                                        data-value="{{ $scheme->title }}">
-
-                                        <i class="fas fa-award"></i>
-
-                                        {{ $scheme->title }}
-
-                                    </div>
-
-                                @endforeach
-
+                            <div class="competency-scheme-group">
+                                <div class="text-muted">
+                                    Memuat kompetensi skema...
+                                </div>
                             </div>
-
 
                             <input
                                 type="hidden"
                                 id="competency_scheme_json"
                                 name="competency_scheme"
-                                value="{{ old(
-                                    'competency_scheme',
-                                    $data->competency_scheme
-                                ) }}">
+                                value="{{ old('competency_scheme', $data->competency_scheme) }}">
 
                         </div>
 
@@ -2140,7 +2162,7 @@
             </button>
 
             <button
-                type="submit"
+                type="button"
                 id="btnSubmit"
                 class="btn btn-warning d-none">
 
@@ -2166,7 +2188,7 @@
 
                 <h5 class="modal-title">
 
-                    Batalkan Pembuatan Lowongan?
+                    Batalkan Perubahan Lowongan?
 
                 </h5>
 
@@ -2195,7 +2217,7 @@
 
                 <p class="text-muted mb-0">
 
-                    Semua data yang sudah Anda isi akan <b>hilang</b> apabila keluar dari halaman ini.
+                    Perubahan yang belum disimpan akan <b>hilang</b> apabila keluar dari halaman ini.
 
                     <br><br>
 
@@ -2329,6 +2351,26 @@
         ==============================================================*/
 
         let responsibilityItems = [];
+        let facilityItems = [];
+
+        // Muat fasilitas/benefit yang sudah tersimpan.
+        $(document).ready(function () {
+
+            let oldFacility = $("#facilityJson").val();
+
+            if (oldFacility) {
+                try {
+                    let parsedFacility = JSON.parse(oldFacility);
+                    facilityItems = Array.isArray(parsedFacility) ? parsedFacility : [];
+                } catch (error) {
+                    console.error("Gagal membaca facility:", error);
+                    facilityItems = [];
+                }
+            }
+
+            renderFacility();
+
+        });
 
 
         /*
@@ -3207,12 +3249,12 @@
 
         $("#is_show_fee").change(function(){
 
-            let show=$(this).is(":checked");
+            let show = $(this).is(":checked");
 
-            $("#min_price").prop("readonly", !checked);
-            $("#max_price").prop("readonly", !checked);
+            $("#min_price").prop("readonly", !show);
+            $("#max_price").prop("readonly", !show);
 
-            $(".fee-wrapper").toggleClass("opacity-50", !checked);
+            $(".fee-wrapper").toggleClass("opacity-50", !show);
 
         });
 
@@ -3466,12 +3508,18 @@
 
         });
 
+        /* ==========================================================
+           FEE VISIBILITY
+        ========================================================== */
+
         function toggleFee() {
 
-            $("#min_price").prop("readonly", !checked);
-            $("#max_price").prop("readonly", !checked);
+            let show = $("#is_show_fee").is(":checked");
 
-            $(".fee-wrapper").toggleClass("opacity-50", !checked);
+            $("#min_price").prop("readonly", !show);
+            $("#max_price").prop("readonly", !show);
+
+            $(".fee-wrapper").toggleClass("opacity-50", !show);
 
         }
 
@@ -3479,61 +3527,315 @@
 
         $("#is_show_fee").on("change", toggleFee);
 
-        $(document).on('change','input[type=radio]',function(){
 
-            const name = $(this).attr('name');
+        /* ==========================================================
+           OPTION CARD
+        ========================================================== */
 
-            $('input[name="'+name+'"]').closest('.option-card').removeClass('active');
+        $(document).on("change", 'input[type="radio"]', function () {
 
-            $(this).closest('.option-card').addClass('active');
+            const name = $(this).attr("name");
+
+            $('input[name="' + name + '"]')
+                .closest(".option-card")
+                .removeClass("active");
+
+            $(this)
+                .closest(".option-card")
+                .addClass("active");
 
         });
 
-        let certificates = [];
 
-        try{
+        /* ==========================================================
+           FORMAT GAJI
+        ========================================================== */
 
-            certificates = JSON.parse($("#certificate_json").val());
+        $(document).on("keyup", ".money", function () {
 
-        }catch(e){
+            let angka = $(this).val().replace(/\D/g, "");
+            angka = angka.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            $(this).val(angka);
 
-            certificates = [];
+        });
 
-        }
 
-        renderCertificate();
+        /* ==========================================================
+           JSON HELPERS
+        ========================================================== */
 
-        $(document).on("click",".certificate-item",function(){
+        function parseJsonArray(value) {
 
-            let value = $(this).data("value");
+            if (!value) return [];
 
-            if(certificates.includes(value)){
-
-                certificates = certificates.filter(v => v !== value);
-
-            }else{
-
-                certificates.push(value);
-
+            try {
+                let parsed = JSON.parse(value);
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (error) {
+                return [];
             }
 
-            renderCertificate();
+        }
+
+        let selectedCertificates = parseJsonArray($("#certificate_json").val());
+        let selectedCompetencySchemes = parseJsonArray($("#competency_scheme_json").val());
+
+
+        function updateCertificateJSON() {
+            $("#certificate_json").val(JSON.stringify(selectedCertificates));
+        }
+
+        function updateCompetencySchemeJSON() {
+            $("#competency_scheme_json").val(JSON.stringify(selectedCompetencySchemes));
+        }
+
+
+        /* ==========================================================
+           CERTIFICATE / COMPETENCY CLICK
+        ========================================================== */
+
+        $(document).on("click", ".certificate-item[data-type='certificate']", function () {
+
+            let value = String($(this).data("value"));
+
+            if (selectedCertificates.includes(value)) {
+                selectedCertificates = selectedCertificates.filter(item => item !== value);
+            } else {
+                selectedCertificates.push(value);
+            }
+
+            $(this).toggleClass("active", selectedCertificates.includes(value));
+            updateCertificateJSON();
+
+        });
+
+        $(document).on("click", ".competency-scheme-item", function () {
+
+            let value = String($(this).data("value"));
+
+            if (selectedCompetencySchemes.includes(value)) {
+                selectedCompetencySchemes = selectedCompetencySchemes.filter(item => item !== value);
+            } else {
+                selectedCompetencySchemes.push(value);
+            }
+
+            $(this).toggleClass("active", selectedCompetencySchemes.includes(value));
+            updateCompetencySchemeJSON();
 
         });
 
 
-        function renderCertificate(){
+        /* ==========================================================
+           CATEGORY / MASTER DATA
+        ========================================================== */
 
-            $(".certificate-item").removeClass("active");
+        function escapeHtml(value) {
 
-            certificates.forEach(function(item){
+            if (value === null || value === undefined) return "";
 
-                $('.certificate-item[data-value="'+item+'"]').addClass("active");
-
-            });
-
-            $("#certificate_json").val(JSON.stringify(certificates));
+            return $("<div>").text(value).html();
 
         }
+
+        function toggleCompetencyScheme(category) {
+
+            if (category === "cs") {
+                $("#competencySchemeSection").addClass("d-none");
+                selectedCompetencySchemes = [];
+                updateCompetencySchemeJSON();
+            } else {
+                $("#competencySchemeSection").removeClass("d-none");
+            }
+
+        }
+
+        function loadCategoryMasterData(category, selectedPosition, preserveSelections) {
+
+            toggleCompetencyScheme(category);
+
+            $("#position")
+                .prop("disabled", true)
+                .html('<option value="">Memuat posisi pekerjaan...</option>');
+
+            $(".certificate-group").html('<div class="text-muted">Memuat sertifikat...</div>');
+            $(".competency-scheme-group").html('<div class="text-muted">Memuat kompetensi skema...</div>');
+
+            if (!category) {
+                $("#position").html('<option value="">Pilih kategori lowongan terlebih dahulu</option>');
+                $(".certificate-group").html('<div class="text-muted">Pilih kategori lowongan terlebih dahulu.</div>');
+                $(".competency-scheme-group").html('<div class="text-muted">Pilih kategori lowongan terlebih dahulu.</div>');
+                return;
+            }
+
+            $.ajax({
+                url: "{{ route('dashboard-user.job-vacancy.master-data') }}",
+                type: "GET",
+                data: { category: category },
+
+                success: function (response) {
+
+                    let positionHtml = '<option value="">Pilih Posisi Pekerjaan</option>';
+
+                    if (response.positions && response.positions.length) {
+                        $.each(response.positions, function (index, position) {
+                            positionHtml += `
+                                <option value="${escapeHtml(position.title)}"
+                                    data-uuid="${escapeHtml(position.uuid)}">
+                                    ${escapeHtml(position.title)}
+                                </option>
+                            `;
+                        });
+                    } else {
+                        positionHtml = '<option value="">Belum ada posisi untuk kategori ini</option>';
+                    }
+
+                    $("#position").html(positionHtml).prop("disabled", false);
+
+                    if (selectedPosition) {
+                        if ($("#position option").filter(function () {
+                            return $(this).val() === selectedPosition;
+                        }).length === 0) {
+                            $("#position").append(
+                                new Option(selectedPosition, selectedPosition, true, true)
+                            );
+                        }
+
+                        $("#position").val(selectedPosition);
+                    }
+
+                    let certificateHtml = "";
+                    if (response.master_certificates && response.master_certificates.length) {
+                        $.each(response.master_certificates, function (index, certificate) {
+                            let value = String(certificate.title);
+                            let active = preserveSelections && selectedCertificates.includes(value) ? "active" : "";
+                            certificateHtml += `
+                                <div class="certificate-item ${active}"
+                                    data-type="certificate"
+                                    data-value="${escapeHtml(value)}">
+                                    <i class="fas fa-shield-alt"></i>
+                                    ${escapeHtml(value)}
+                                </div>
+                            `;
+                        });
+                    } else {
+                        certificateHtml = '<div class="text-muted">Belum ada sertifikat untuk kategori ini.</div>';
+                    }
+                    $(".certificate-group").html(certificateHtml);
+
+                    let competencyHtml = "";
+                    if (response.master_competency_schemes && response.master_competency_schemes.length) {
+                        $.each(response.master_competency_schemes, function (index, scheme) {
+                            let value = String(scheme.title);
+                            let active = preserveSelections && selectedCompetencySchemes.includes(value) ? "active" : "";
+                            competencyHtml += `
+                                <div class="competency-scheme-item ${active}"
+                                    data-value="${escapeHtml(value)}">
+                                    <i class="fas fa-award"></i>
+                                    ${escapeHtml(value)}
+                                </div>
+                            `;
+                        });
+                    } else {
+                        competencyHtml = '<div class="text-muted">Belum ada kompetensi skema untuk kategori ini.</div>';
+                    }
+                    $(".competency-scheme-group").html(competencyHtml);
+
+                    if (category === "cs") {
+                        selectedCompetencySchemes = [];
+                    }
+
+                    updateCertificateJSON();
+                    updateCompetencySchemeJSON();
+
+                },
+
+                error: function (xhr) {
+                    console.error("Master Data Error:", xhr.responseText);
+                    $("#position").prop("disabled", true).html('<option value="">Gagal memuat posisi</option>');
+                    $(".certificate-group").html('<div class="text-danger">Gagal memuat sertifikat.</div>');
+                    $(".competency-scheme-group").html('<div class="text-danger">Gagal memuat kompetensi skema.</div>');
+                }
+            });
+
+        }
+
+        // Ketika kategori diganti manual, reset pilihan sertifikat dan posisi.
+        $("#category").on("change", function () {
+
+            selectedCertificates = [];
+            selectedCompetencySchemes = [];
+            updateCertificateJSON();
+            updateCompetencySchemeJSON();
+
+            loadCategoryMasterData($(this).val(), "", false);
+
+        });
+
+
+        /* ==========================================================
+           POSITION MASTER DETAIL
+        ========================================================== */
+
+        $("#position").on("change", function () {
+
+            let uuid = $(this).find(":selected").data("uuid");
+            if (!uuid) return;
+
+            $("#description_work").val("Memuat deskripsi pekerjaan...");
+            $(this).prop("disabled", true);
+
+            $.ajax({
+                url: "{{ url('dashboard-user/job-vacancy/position') }}/" + uuid,
+                type: "GET",
+                data: { category: $("#category").val() },
+
+                success: function (response) {
+
+                    if (!response.status) return;
+
+                    let data = response.data || {};
+                    $("#description_work").val(data.description || "");
+
+                    let responsibilities = data.responsibility || [];
+                    if (!Array.isArray(responsibilities)) {
+                        try { responsibilities = JSON.parse(responsibilities); }
+                        catch (error) { responsibilities = []; }
+                    }
+
+                    responsibilityItems = [];
+                    responsibilities.forEach(function (item) {
+                        if (item !== null && item !== undefined && String(item).trim() !== "") {
+                            responsibilityItems.push(String(item));
+                        }
+                    });
+
+                    renderResponsibility();
+
+                },
+
+                error: function (xhr) {
+                    console.error("Position Detail Error:", xhr.responseText);
+                },
+
+                complete: function () {
+                    $("#position").prop("disabled", false);
+                }
+            });
+
+        });
+
+
+        /* ==========================================================
+           INITIALIZE EDIT DATA
+        ========================================================== */
+
+        let initialCategory = @json(old('category', $data->category));
+        let initialPosition = @json(old('position', $data->position));
+
+        loadCategoryMasterData(initialCategory, initialPosition, true);
+
+        updateCertificateJSON();
+        updateCompetencySchemeJSON();
+
     </script>
 @endsection

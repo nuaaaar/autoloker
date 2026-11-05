@@ -1613,16 +1613,22 @@ class JobVacancyController extends Controller
                 true
             );
 
-            if (
-                !is_array($competencyScheme) ||
-                count($competencyScheme) === 0
-            ) {
+            if ($request->category !== 'cs') {
 
-                $validator->errors()->add(
-                    'competency_scheme',
-                    'Minimal pilih satu kompetensi skema.'
+                $competencyScheme = json_decode(
+                    $request->competency_scheme,
+                    true
                 );
 
+                if (
+                    !is_array($competencyScheme) ||
+                    count($competencyScheme) === 0
+                ) {
+                    $validator->errors()->add(
+                        'competency_scheme',
+                        'Minimal pilih satu kompetensi skema.'
+                    );
+                }
             }
 
         });
@@ -1682,7 +1688,7 @@ class JobVacancyController extends Controller
         $isShowFee = $request->boolean('is_show_fee');
 
         $job->update([
-
+            'category'           => $request->category,
             'position'           => $request->position,
             'description_work'   => $request->description_work,
 

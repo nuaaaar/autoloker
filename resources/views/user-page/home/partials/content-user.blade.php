@@ -909,15 +909,16 @@
 
 </style>
 
-<!-- Search -->
+
+{{-- ============================================================= --}}
+{{-- SEARCH & FILTER LOWONGAN --}}
+{{-- ============================================================= --}}
+
 <div class="card job-filter-card mb-4">
 
     <div class="card-body p-4">
 
-        {{-- ===================================================== --}}
         {{-- SEARCH --}}
-        {{-- ===================================================== --}}
-
         <div class="job-search">
 
             <i class="ki-duotone ki-magnifier fs-4">
@@ -935,34 +936,22 @@
         </div>
 
 
-        {{-- ===================================================== --}}
         {{-- FILTER UTAMA --}}
-        {{-- ===================================================== --}}
-
         <div class="mt-4 job-filter-row">
 
-
-            {{-- =============================================== --}}
             {{-- LOKASI --}}
-            {{-- =============================================== --}}
-
             <div class="job-filter-dropdown">
 
                 <select
                     id="filterLocation"
                     class="job-filter-select">
 
-                    <option value="">
-                        Lokasi
-                    </option>
+                    <option value="">Semua Lokasi</option>
 
                     @foreach(\Laravolt\Indonesia\Models\Province::orderBy('name')->get() as $data_province)
 
-                        <option
-                            value="{{ $data_province->name }}">
-
+                        <option value="{{ $data_province->name }}">
                             {{ $data_province->name }}
-
                         </option>
 
                     @endforeach
@@ -972,104 +961,25 @@
             </div>
 
 
-            {{-- =============================================== --}}
-            {{-- JENIS PEKERJAAN --}}
-            {{-- =============================================== --}}
-
-            <div class="job-filter-dropdown">
-
-                <select
-                    id="filterWorkingType"
-                    class="job-filter-select">
-
-                    <option value="">
-                        Jenis Pekerjaan
-                    </option>
-
-                    <option value="permanent">
-                        Tetap
-                    </option>
-
-                    <option value="contract">
-                        Kontrak
-                    </option>
-
-                    <option value="intenrship">
-                        Internship
-                    </option>
-
-                    <option value="freelance">
-                        Freelance
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            {{-- =============================================== --}}
             {{-- SISTEM KERJA --}}
-            {{-- =============================================== --}}
-
             <div class="job-filter-dropdown">
 
                 <select
                     id="filterWorkingSystem"
                     class="job-filter-select">
 
-                    <option value="">
-                        Sistem Kerja
-                    </option>
+                    <option value="">Semua Sistem Kerja</option>
 
-                    <option value="shift">
-                        Shift
-                    </option>
-
-                    <option value="non-shift">
-                        Non-Shift
-                    </option>
-
-                    <option value="reliever">
-                        Reliever
-                    </option>
+                    <option value="shift">Shift</option>
+                    <option value="non-shift">Non-Shift</option>
+                    <option value="reliever">Reliever</option>
 
                 </select>
 
             </div>
 
 
-            {{-- =============================================== --}}
-            {{-- SERTIFIKAT --}}
-            {{-- =============================================== --}}
-
-            <div class="job-filter-dropdown">
-
-                <select
-                    id="filterCertificate"
-                    class="job-filter-select">
-
-                    <option value="">
-                        Sertifikat
-                    </option>
-
-                    @foreach(\App\Models\MasterCertificate::orderBy('title')->get() as $certificate)
-                        <option
-                            value="{{ $certificate->title }}">
-
-                            {{ $certificate->title }}
-
-                        </option>
-                    @endforeach
-
-                </select>
-
-            </div>
-
-
-            {{-- =============================================== --}}
             {{-- FILTER LAINNYA --}}
-            {{-- =============================================== --}}
-
             <button
                 type="button"
                 class="btn-more-filter"
@@ -1077,15 +987,11 @@
                 data-bs-target="#jobFilterModal">
 
                 <i class="ki-duotone ki-setting-4">
-
                     <span class="path1"></span>
                     <span class="path2"></span>
-
                 </i>
 
-                <span>
-                    Filter
-                </span>
+                <span>Filter</span>
 
             </button>
 
@@ -1095,11 +1001,13 @@
 
 </div>
 
+
 {{-- ============================================================= --}}
 {{-- MODAL FILTER LANJUTAN --}}
 {{-- ============================================================= --}}
 
-<div class="modal fade"
+<div
+    class="modal fade"
     id="jobFilterModal"
     tabindex="-1"
     aria-hidden="true">
@@ -1108,6 +1016,7 @@
 
         <div class="modal-content job-filter-modal">
 
+            {{-- HEADER --}}
             <div class="modal-header">
 
                 <h5 class="modal-title">
@@ -1123,7 +1032,87 @@
             </div>
 
 
+            {{-- BODY --}}
             <div class="modal-body">
+
+
+                {{-- ============================================= --}}
+                {{-- JENIS PEKERJAAN --}}
+                {{-- ============================================= --}}
+
+                <div class="mb-4">
+
+                    <label class="job-filter-label">
+                        Jenis Pekerjaan
+                    </label>
+
+                    <select
+                        id="modalWorkingType"
+                        class="form-select job-modal-select">
+
+                        <option value="">
+                            Semua Jenis Pekerjaan
+                        </option>
+
+                        <option value="permanent">
+                            Tetap
+                        </option>
+
+                        <option value="contract">
+                            Kontrak
+                        </option>
+
+                        <option value="intenrship">
+                            Internship
+                        </option>
+
+                        <option value="freelance">
+                            Freelance
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                {{-- ============================================= --}}
+                {{-- SERTIFIKAT --}}
+                {{-- ============================================= --}}
+
+                <div class="mb-4">
+
+                    <label class="job-filter-label">
+                        Sertifikat
+                    </label>
+
+                    <select
+                        id="modalCertificate"
+                        class="form-select job-modal-select">
+
+                        <option value="">
+                            Semua Sertifikat
+                        </option>
+
+                        @php
+                            $roleUserNow = null;
+                            if(Auth::user()->role == 'satpam'){
+                                $roleUserNow = 'security';
+                            } else {
+                                $roleUserNow = 'cs';
+                            }
+                        @endphp
+
+                        @foreach(\App\Models\MasterCertificate::where('category', $roleUserNow)->orderBy('title')->get() as $certificate)
+
+                            <option value="{{ $certificate->title }}">
+                                {{ $certificate->title }}
+                            </option>
+
+                        @endforeach
+
+                    </select>
+
+                </div>
 
 
                 {{-- ============================================= --}}
@@ -1140,9 +1129,7 @@
                         id="modalMinSalary"
                         class="form-select job-modal-select">
 
-                        <option value="">
-                            Semua
-                        </option>
+                        <option value="">Semua</option>
 
                         <option value="3000000">
                             Rp 3 Juta+
@@ -1166,10 +1153,10 @@
 
 
                 {{-- ============================================= --}}
-                {{-- URGENT --}}
+                {{-- STATUS LOWONGAN --}}
                 {{-- ============================================= --}}
 
-                <div class="mb-4">
+                {{-- <div class="mb-4">
 
                     <label class="job-filter-label">
                         Status Lowongan
@@ -1193,7 +1180,7 @@
 
                     </select>
 
-                </div>
+                </div> --}}
 
 
                 {{-- ============================================= --}}
@@ -1253,9 +1240,7 @@
                         id="modalGender"
                         class="form-select job-modal-select">
 
-                        <option value="">
-                            Semua
-                        </option>
+                        <option value="">Semua</option>
 
                         <option value="laki-laki">
                             Laki-laki
@@ -1273,6 +1258,7 @@
             </div>
 
 
+            {{-- FOOTER --}}
             <div class="modal-footer">
 
                 <button
@@ -1302,32 +1288,49 @@
 
 </div>
 
+
+{{-- ============================================================= --}}
+{{-- JOB LIST --}}
+{{-- ============================================================= --}}
+
 <div id="jobListWrapper">
+
     <div id="jobList">
+
         <div class="text-center py-5">
 
             <span class="spinner-border"></span>
 
         </div>
+
         {{-- AJAX job list masuk di sini --}}
+
     </div>
 
+
+    {{-- LOADING --}}
     <div
         id="jobLoading"
-        class="text-center py-4 d-none"
-    >
+        class="text-center py-4 d-none">
+
         <div class="spinner-border spinner-border-sm text-warning"></div>
+
         <span class="ms-2 apply-info">
             Memuat lowongan...
         </span>
+
     </div>
 
+
+    {{-- END LIST --}}
     <div
         id="jobEnd"
-        class="text-center py-4 d-none"
-    >
+        class="text-center py-4 d-none">
+
         <span class="apply-info">
             Semua lowongan sudah ditampilkan.
         </span>
+
     </div>
+
 </div>

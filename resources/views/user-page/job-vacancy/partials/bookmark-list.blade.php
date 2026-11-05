@@ -584,9 +584,9 @@
                 <div class="bookmark-company-content">
 
                     @if($job->is_urgent)
-                        <div class="bookmark-urgent">
+                        {{-- <div class="bookmark-urgent">
                             ⚡ URGENT
-                        </div>
+                        </div> --}}
                     @endif
 
                     <h3 class="bookmark-job-title">

@@ -841,95 +841,63 @@
 
         });
 
-        $('#btnApplyJobFilter').on('click', function () {
-
-            loadJobs();
-
-            const modalElement = document.getElementById(
-                'jobFilterModal'
-            );
-
-            const modal = bootstrap.Modal.getInstance(
-                modalElement
-            );
-
-            if (modal) {
-
-                modal.hide();
-
-            }
-
-        });
+        /*
+        |--------------------------------------------------------------------------
+        | RESET FILTER MODAL
+        |--------------------------------------------------------------------------
+        */
 
         $('#btnResetJobFilter').on('click', function () {
 
-            /*
-            |--------------------------------------------------------------------------
-            | RESET SEARCH
-            |--------------------------------------------------------------------------
-            */
-
-            $('#jobSearch').val('');
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | RESET FILTER UTAMA
-            |--------------------------------------------------------------------------
-            */
-
-            $('#filterLocation').val('');
-
-            $('#filterWorkingType').val('');
-
-            $('#filterWorkingSystem').val('');
-
-            $('#filterCertificate').val('');
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | RESET FILTER MODAL
-            |--------------------------------------------------------------------------
-            */
+            $('#modalWorkingType').val('');
+            $('#modalCertificate').val('');
 
             $('#modalMinSalary').val('');
-
             $('#modalUrgent').val('');
-
             $('#modalExperience').val('');
-
             $('#modalGender').val('');
 
+        });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | APPLY FILTER
+        |--------------------------------------------------------------------------
+        |
+        | Mengambil nilai filter modal.
+        | Sesuaikan dengan fungsi AJAX yang sudah digunakan sebelumnya.
+        |
+        */
+
+        $('#btnApplyJobFilter').on('click', function () {
+
+            const filters = {
+                working_type: $('#modalWorkingType').val(),
+                certificate: $('#modalCertificate').val(),
+
+                min_salary: $('#modalMinSalary').val(),
+                urgent: $('#modalUrgent').val(),
+                experience: $('#modalExperience').val(),
+                gender: $('#modalGender').val(),
+
+                location: $('#filterLocation').val(),
+                working_system: $('#filterWorkingSystem').val(),
+
+                search: $('#jobSearch').val()
+            };
 
             /*
-            |--------------------------------------------------------------------------
-            | LOAD ULANG
-            |--------------------------------------------------------------------------
+            * Jika fungsi loadJob() sudah tersedia,
+            * panggil kembali fungsi tersebut dengan filters.
+            *
+            * Contoh:
+            * loadJob(true);
             */
 
-            loadJobs();
+            $('#jobFilterModal').modal('hide');
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | CLOSE MODAL
-            |--------------------------------------------------------------------------
-            */
-
-            const modalElement = document.getElementById(
-                'jobFilterModal'
-            );
-
-            const modal = bootstrap.Modal.getInstance(
-                modalElement
-            );
-
-            if (modal) {
-
-                modal.hide();
-
-            }
+            $(document).trigger('jobFilterApplied', [filters]);
 
         });
     </script>

@@ -101,11 +101,11 @@
 
                             @if($job->is_urgent ?? false)
 
-                                <span class="badge-urgent">
+                                {{-- <span class="badge-urgent">
 
                                     ⚡ Urgent
 
-                                </span>
+                                </span> --}}
 
                             @endif
 

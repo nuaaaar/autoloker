@@ -860,13 +860,13 @@
             {{-- URGENT SUMMARY --}}
             @if($totalUrgent > 0)
 
-                <div class="urgent-summary">
+                {{-- <div class="urgent-summary">
 
                     <span>⚡</span>
 
                     {{ $totalUrgent }} lowongan urgent
 
-                </div>
+                </div> --}}
 
             @endif
 

@@ -695,7 +695,7 @@
 @section('breadcrumb')
     <h1
         class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">
-        Lowongan Saya</h1>
+        Lowongan Anda</h1>
     <!--end::Title-->
     <!--begin::Breadcrumb-->
     <ul class="breadcrumb breadcrumb-separatorless fw-semibold fs-7 my-0 pt-1">
@@ -710,7 +710,7 @@
         <!--end::Item-->
         <!--begin::Item-->
         <li class="breadcrumb-item text-muted">
-            <a href="{{ route('dashboard-user.job-vacancy.index') }}" class="text-muted text-hover-primary">Lowongan Saya</a>
+            <a href="{{ route('dashboard-user.job-vacancy.index') }}" class="text-muted text-hover-primary">Lowongan Anda</a>
         </li>
         <!--end::Item-->
         <!--end::Item-->
@@ -896,7 +896,7 @@
 
                         </div>
 
-                        <div class="col-md-12 mb-7">
+                        {{-- <div class="col-md-12 mb-7">
 
                             <label class="form-label fw-semibold">
                                 Status Lowongan
@@ -922,7 +922,7 @@
                                 Lowongan urgent akan ditampilkan dengan tanda khusus agar lebih mudah diperhatikan pencari kerja.
                             </div>
 
-                        </div>
+                        </div> --}}
 
 
                         <!-- Deskripsi -->

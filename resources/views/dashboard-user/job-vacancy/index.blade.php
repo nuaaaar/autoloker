@@ -1,6 +1,6 @@
 @extends('layouts.dashboard-user')
 
-@section('title', 'Lowongan Saya')
+@section('title', 'Lowongan Anda')
 
 @section('css')
 
@@ -11,7 +11,7 @@
     <h1
         class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">
 
-        Lowongan Saya
+        Lowongan Anda
 
     </h1>
 
@@ -49,7 +49,7 @@
                 href="{{ route('dashboard-user.job-vacancy.index') }}?status=all"
                 class="text-muted text-hover-primary">
 
-                Lowongan Saya
+                Lowongan Anda
 
             </a>
 

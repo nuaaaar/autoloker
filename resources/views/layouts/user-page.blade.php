@@ -1853,6 +1853,19 @@
             border-color: #4b8967;
             color: #ffffff;
         }
+
+        .role-switch-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .role-text-icon {
+            font-size: 13px;
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -0.5px;
+        }
     </style>
 
     @yield('style')
@@ -2043,7 +2056,7 @@
                                                 style="object-fit: cover;">
 
                                             <div>
-                                                <div class="fw-bold fs-3 text-white">
+                                                <div class="fw-bold fs-3">
                                                     {{ $userName }}
                                                 </div>
 
@@ -2149,10 +2162,7 @@
                                                         title="Satpam"
                                                         onclick="event.stopPropagation();"
                                                     >
-                                                        <i class="ki-duotone ki-shield-tick fs-3">
-                                                            <span class="path1"></span>
-                                                            <span class="path2"></span>
-                                                        </i>
+                                                        <span class="role-text-icon">S</span>
                                                     </button>
                                                 </form>
 
@@ -2178,10 +2188,7 @@
                                                         title="Cleaning Service"
                                                         onclick="event.stopPropagation();"
                                                     >
-                                                        <i class="ki-duotone ki-brush fs-3">
-                                                            <span class="path1"></span>
-                                                            <span class="path2"></span>
-                                                        </i>
+                                                        <span class="role-text-icon">CS</span>
                                                     </button>
                                                 </form>
 
