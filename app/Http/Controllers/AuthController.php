@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Facades\Http;
+
 
 class AuthController extends Controller
 {
@@ -25,20 +27,31 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
+        // Tentukan action berdasarkan jenis login
+        $expectedAction = $request->role === 'company'
+            ? 'login-company'
+            : 'login-security';
+
+        // Verifikasi Turnstile cukup satu kali
+        if (!$this->verifyTurnstile($request, $expectedAction)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Verifikasi keamanan gagal. Silakan coba kembali.',
+            ], 422);
+        }
+
         $login = trim($request->email);
 
-        // Cari berdasarkan email ATAU nomor HP
+        // Cari berdasarkan email atau nomor HP
         $user = User::where('email', $login)
             ->orWhere('phone_number', $login)
             ->first();
 
-        if (! $user || ! Hash::check($request->password, $user->password)) {
-
+        if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
                 'status' => false,
                 'message' => 'Email/No. WhatsApp atau password salah.',
             ], 422);
-
         }
 
         // Cek role
@@ -47,13 +60,15 @@ class AuthController extends Controller
             'company' => ['company', 'bujp'],
         ];
 
-        if (! in_array($user->role, $allowedRoles[$request->role])) {
+        $roleGroup = $request->role === 'company'
+            ? 'company'
+            : 'satpam';
 
+        if (!in_array($user->role, $allowedRoles[$roleGroup])) {
             return response()->json([
                 'status' => false,
                 'message' => 'Akun tidak sesuai dengan jenis login yang dipilih.',
             ], 422);
-
         }
 
         Auth::login($user);
@@ -62,14 +77,8 @@ class AuthController extends Controller
 
         $redirect = route('user-page.home');
 
-        if (Auth::user()->role == 'satpam') {
-
-            $redirect = route('user-page.home');
-
-        } elseif (in_array(Auth::user()->role, ['bujp', 'company'])) {
-
+        if (in_array(Auth::user()->role, ['bujp', 'company'])) {
             $redirect = route('dashboard-user.index');
-
         }
 
         return response()->json([
@@ -296,5 +305,44 @@ class AuthController extends Controller
             'message' => 'Berhasil logout.',
             'redirect' => route('login'),
         ]);
+    }
+
+    private function verifyTurnstile(Request $request, string $expectedAction = ''): bool
+    {
+        $token = $request->input('cf-turnstile-response');
+
+        if (!$token || !is_string($token)) {
+            \Log::warning('Turnstile token tidak ditemukan.');
+            return false;
+        }
+
+        try {
+            $response = Http::asForm()
+                ->timeout(10)
+                ->post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
+                    'secret' => config('services.turnstile.secret_key'),
+                    'response' => $token,
+                    'remoteip' => $request->ip(),
+                ]);
+
+            $result = $response->json();
+
+            \Log::info('Turnstile Verification Result', [
+                'success' => $result['success'] ?? false,
+                'action' => $result['action'] ?? null,
+                'hostname' => $result['hostname'] ?? null,
+                'errors' => $result['error-codes'] ?? [],
+            ]);
+
+            return $response->successful()
+                && ($result['success'] ?? false) === true;
+
+        } catch (\Throwable $e) {
+            \Log::error('Turnstile Exception', [
+                'message' => $e->getMessage(),
+            ]);
+
+            return false;
+        }
     }
 }

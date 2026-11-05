@@ -1,3 +1,15 @@
+<style>
+    .login-page-light .login-captcha {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    .login-page-light .login-captcha iframe {
+        max-width: 100%;
+    }
+</style>
 
 <div id="loginPage" class="validate-form login-page-light">
 
@@ -141,6 +153,17 @@
 
                         </div>
 
+                    </div>
+
+                    <!-- Cloudflare Turnstile -->
+                    <div class="mb-4 login-captcha">
+                        <div
+                            class="cf-turnstile"
+                            data-sitekey="{{ config('services.turnstile.site_key') }}"
+                            data-theme="light"
+                            data-size="flexible"
+                            data-action="login-security">
+                        </div>
                     </div>
 
                     <!-- Login Button -->
@@ -337,6 +360,17 @@
 
                         </div>
 
+                    </div>
+
+                    <!-- Cloudflare Turnstile -->
+                    <div class="mb-4 login-captcha">
+                        <div
+                            class="cf-turnstile"
+                            data-sitekey="{{ config('services.turnstile.site_key') }}"
+                            data-theme="light"
+                            data-size="flexible"
+                            data-action="login-company">
+                        </div>
                     </div>
 
                     <!-- Login Company -->
@@ -557,3 +591,9 @@
         }
     }
 </style>
+
+<script
+    src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+    async
+    defer>
+</script>

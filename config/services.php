@@ -40,4 +40,8 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI'),
         'server_client_id' => env('GOOGLE_SERVER_CLIENT_ID'),
     ],
+    'turnstile' => [
+        'site_key' => env('TURNSTILE_SITE_KEY'),
+        'secret_key' => env('TURNSTILE_SECRET_KEY'),
+    ],
 ];
