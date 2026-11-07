@@ -1297,29 +1297,79 @@
                     className: "text-end",
 
                     render: function(data) {
-                        const isCurrentlyPublished = data.status === "published"
-                            && data.publication_expires_at
-                            && new Date(data.publication_expires_at) > new Date();
-                        const canPublish = !isCurrentlyPublished
-                            && ["draft", "rejected", "closed", "expired", "published"].includes(data.status);
+                            const isCurrentlyPublished = data.status === "published"
+                                && data.publication_expires_at
+                                && new Date(data.publication_expires_at) > new Date();
 
-                        let action = `
-                            <a href="/dashboard-user/job-vacancy/${data.uuid}" class="btn btn-outline-info btn-sm me-1" aria-label="Detail lowongan">Detail</a>
-                            <a href="/dashboard-user/job-application/${data.uuid}/applicants" class="btn btn-outline-primary btn-sm me-1" aria-label="Lihat pelamar">Pelamar</a>
-                        `;
+                            const canPublish = !isCurrentlyPublished
+                                && ["draft", "rejected", "closed", "expired", "published"].includes(data.status);
 
-                        if (!isCurrentlyPublished && ["draft", "rejected", "closed", "expired", "published"].includes(data.status)) {
-                            action += `<a href="/dashboard-user/job-vacancy/${data.uuid}/edit" class="btn btn-outline-warning btn-sm me-1">Edit</a>`;
+                            let action = `
+                                <a href="/dashboard-user/job-vacancy/${data.uuid}"
+                                    class="btn btn-outline-info btn-sm me-1"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    title="Detail Lowongan">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+
+                                <a href="/dashboard-user/job-application/${data.uuid}/applicants"
+                                    class="btn btn-outline-primary btn-sm me-1"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    title="Lihat Pelamar">
+                                    <i class="fas fa-users"></i>
+                                </a>
+                            `;
+
+                            // EDIT
+                            if (!isCurrentlyPublished && canPublish) {
+                                action += `
+                                    <a href="/dashboard-user/job-vacancy/${data.uuid}/edit"
+                                        class="btn btn-outline-warning btn-sm me-1"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top"
+                                        title="Edit Lowongan">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                `;
+                            }
+
+                            // HENTIKAN MASA TAYANG
+                            if (isCurrentlyPublished) {
+                                action += `
+                                    <button type="button"
+                                        class="btn btn-outline-secondary btn-sm me-1"
+                                        onclick="closeVacancy('${data.uuid}')"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top"
+                                        title="Hentikan Masa Tayang">
+                                        <i class="fas fa-stop-circle"></i>
+                                    </button>
+                                `;
+                            }
+                            // TERBITKAN
+                            else if (canPublish) {
+                                action += `
+                                    <form method="POST"
+                                        action="/dashboard-user/job-vacancy/${data.uuid}/publish"
+                                        class="d-inline">
+
+                                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+
+                                        <button type="submit"
+                                            class="btn btn-outline-success btn-sm"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-placement="top"
+                                            title="Terbitkan Lowongan">
+                                            <i class="fas fa-paper-plane"></i>
+                                        </button>
+                                    </form>
+                                `;
+                            }
+
+                            return action;
                         }
-
-                        if (isCurrentlyPublished) {
-                            action += `<button type="button" class="btn btn-outline-secondary btn-sm me-1" onclick="closeVacancy('${data.uuid}')">Hentikan masa tayang</button>`;
-                        } else if (canPublish) {
-                            action += `<form method="POST" action="/dashboard-user/job-vacancy/${data.uuid}/publish" class="d-inline"><input type="hidden" name="_token" value="{{ csrf_token() }}"><button type="submit" class="btn btn-warning btn-sm">Terbitkan</button></form>`;
-                        }
-
-                        return action;
-                    }
 
 
                 }

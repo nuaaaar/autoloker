@@ -982,274 +982,254 @@
 
                         render: function(data) {
 
-
                             let action = `
-
                                 <!-- Detail -->
-
-                                <a
-                                    href="/dashboard-user/training/${data.uuid}"
+                                <a href="/dashboard-user/training/${data.uuid}"
                                     class="btn btn-outline-info btn-sm me-1"
-                                    title="Detail"
+                                    title="Detail Pelatihan"
                                     data-bs-toggle="tooltip"
-                                >
-
+                                    data-bs-placement="top">
                                     <i class="fas fa-eye"></i>
-
                                 </a>
-
                             `;
-
 
                             const isCurrentlyPublished = data.status === "published"
                                 && data.publication_expires_at
                                 && new Date(data.publication_expires_at) > new Date();
+
                             const canPublish = !isCurrentlyPublished
                                 && ["draft", "rejected", "closed", "expired", "published"].includes(data.status)
                                 && data.start_date
                                 && moment(data.start_date).isAfter(moment(), "day");
+
                             switch(data.status) {
 
-
-                                /*=========================================
-                                =                 DRAFT                   =
-                                =========================================*/
-
+                                /* =========================================
+                                DRAFT
+                                ========================================= */
                                 case "draft":
 
                                     action += `
-
                                         <!-- Edit -->
-
-                                        <a
-                                            href="/dashboard-user/training/${data.uuid}/edit"
+                                        <a href="/dashboard-user/training/${data.uuid}/edit"
                                             class="btn btn-outline-primary btn-sm me-1"
-                                            title="Edit"
+                                            title="Edit Pelatihan"
                                             data-bs-toggle="tooltip"
-                                        >
-
-                                            <i class="fas fa-pencil-alt"></i>
-
+                                            data-bs-placement="top">
+                                            <i class="fas fa-edit"></i>
                                         </a>
 
-
                                         <!-- Hapus -->
-
                                         <button
+                                            type="button"
                                             class="btn btn-outline-danger btn-sm"
                                             onclick="deleteData('${data.uuid}')"
-                                            title="Hapus"
+                                            title="Hapus Pelatihan"
                                             data-bs-toggle="tooltip"
-                                        >
-
+                                            data-bs-placement="top">
                                             <i class="fas fa-trash-alt"></i>
-
                                         </button>
-
                                     `;
 
                                 break;
 
 
-
-
-                                /*=========================================
-                                =               PUBLISHED                 =
-                                =========================================*/
-
+                                /* =========================================
+                                PUBLISHED
+                                ========================================= */
                                 case "published":
 
                                     action += `
-
                                         <!-- Peserta -->
-
-                                        <a
-                                            href="/dashboard-user/training/${data.uuid}/participants"
+                                        <a href="/dashboard-user/training/${data.uuid}/participants"
                                             class="btn btn-outline-success btn-sm me-1"
-                                            title="Peserta"
+                                            title="Lihat Peserta"
                                             data-bs-toggle="tooltip"
-                                        >
-
+                                            data-bs-placement="top">
                                             <i class="fas fa-users"></i>
-
                                         </a>
 
-
                                         <!-- Mulai -->
-
                                         <button
+                                            type="button"
                                             class="btn btn-outline-primary btn-sm me-1"
                                             onclick="startTraining('${data.uuid}')"
                                             title="Mulai Pelatihan"
                                             data-bs-toggle="tooltip"
-                                        >
-
+                                            data-bs-placement="top">
                                             <i class="fas fa-play"></i>
-
                                         </button>
 
-
                                         <!-- Batalkan -->
-
                                         <button
+                                            type="button"
                                             class="btn btn-outline-danger btn-sm"
                                             onclick="cancelTraining('${data.uuid}')"
                                             title="Batalkan Pelatihan"
                                             data-bs-toggle="tooltip"
-                                        >
-
+                                            data-bs-placement="top">
                                             <i class="fas fa-times"></i>
-
                                         </button>
-
                                     `;
 
                                 break;
 
 
-                                /*=========================================
-                                =                 RUNNING                 =
-                                =========================================*/
-
+                                /* =========================================
+                                RUNNING
+                                ========================================= */
                                 case "running":
 
                                     action += `
-
                                         <!-- Peserta -->
-
-                                        <a
-                                            href="/dashboard-user/training/${data.uuid}/participants"
+                                        <a href="/dashboard-user/training/${data.uuid}/participants"
                                             class="btn btn-outline-success btn-sm me-1"
-                                            title="Peserta"
+                                            title="Lihat Peserta"
                                             data-bs-toggle="tooltip"
-                                        >
-
+                                            data-bs-placement="top">
                                             <i class="fas fa-users"></i>
-
                                         </a>
 
-
                                         <!-- Selesaikan -->
-
                                         <button
+                                            type="button"
                                             class="btn btn-outline-primary btn-sm"
                                             onclick="completeTraining('${data.uuid}')"
                                             title="Selesaikan Pelatihan"
                                             data-bs-toggle="tooltip"
-                                        >
-
+                                            data-bs-placement="top">
                                             <i class="fas fa-check"></i>
-
                                         </button>
-
                                     `;
 
                                 break;
 
 
-                                /*=========================================
-                                =                 CLOSED                  =
-                                =========================================*/
-
+                                /* =========================================
+                                CLOSED
+                                ========================================= */
                                 case "closed":
 
-                                    // action += `
-
-                                    //     <!-- Buka Kembali -->
-
-                                    //     <button
-                                    //         class="btn btn-outline-success btn-sm"
-                                    //         onclick="reopenTraining('${data.uuid}')"
-                                    //         title="Buka Kembali">
-
-                                    //         <i class="fas fa-lock-open"></i>
-
-                                    //     </button>
-
-                                    // `;
+                                    // Tombol buka kembali tetap dinonaktifkan
+                                    // sesuai kode sebelumnya.
 
                                 break;
 
 
-                                /*=========================================
-                                =                REJECTED                 =
-                                =========================================*/
-
+                                /* =========================================
+                                REJECTED
+                                ========================================= */
                                 case "rejected":
 
                                     action += `
-
                                         <!-- Perbaiki -->
-
-                                        <a
-                                            href="/dashboard-user/training/${data.uuid}/edit"
+                                        <a href="/dashboard-user/training/${data.uuid}/edit"
                                             class="btn btn-outline-primary btn-sm me-1"
                                             title="Perbaiki Pelatihan"
                                             data-bs-toggle="tooltip"
-                                        >
-
-                                            <i class="fas fa-pencil-alt"></i>
-
+                                            data-bs-placement="top">
+                                            <i class="fas fa-edit"></i>
                                         </a>
 
-
                                         <!-- Hapus -->
-
                                         <button
+                                            type="button"
                                             class="btn btn-outline-danger btn-sm"
                                             onclick="deleteData('${data.uuid}')"
-                                            title="Hapus"
+                                            title="Hapus Pelatihan"
                                             data-bs-toggle="tooltip"
-                                        >
-
+                                            data-bs-placement="top">
                                             <i class="fas fa-trash-alt"></i>
-
                                         </button>
-
                                     `;
 
                                 break;
 
 
-                                /*=========================================
-                                =                CANCELLED                =
-                                =========================================*/
-
+                                /* =========================================
+                                CANCELLED
+                                ========================================= */
                                 case "cancelled":
 
                                     action += `
-
                                         <!-- Hapus -->
-
                                         <button
+                                            type="button"
                                             class="btn btn-outline-danger btn-sm"
                                             onclick="deleteData('${data.uuid}')"
-                                            title="Hapus"
+                                            title="Hapus Pelatihan"
                                             data-bs-toggle="tooltip"
-                                        >
-
+                                            data-bs-placement="top">
                                             <i class="fas fa-trash-alt"></i>
-
                                         </button>
-
                                     `;
 
                                 break;
-
                             }
 
 
+                            /* =========================================
+                            EDIT UNTUK CLOSED / EXPIRED / PUBLISHED
+                            ========================================= */
                             if (!isCurrentlyPublished && ["closed", "expired", "published"].includes(data.status)) {
-                                action += `<a href="/dashboard-user/training/${data.uuid}/edit" class="btn btn-outline-primary btn-sm me-1">Edit</a>`;
+
+                                action += `
+                                    <a href="/dashboard-user/training/${data.uuid}/edit"
+                                        class="btn btn-outline-primary btn-sm me-1"
+                                        title="Edit Pelatihan"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                `;
                             }
 
+
+                            /* =========================================
+                            HENTIKAN MASA TAYANG
+                            ========================================= */
                             if (isCurrentlyPublished) {
-                                action += `<button type="button" class="btn btn-outline-secondary btn-sm me-1" onclick="closeVacancy('${data.uuid}')">Hentikan masa tayang</button>`;
-                            } else if (canPublish) {
-                                action += `<form method="POST" action="/dashboard-user/training/${data.uuid}/publish" class="d-inline"><input type="hidden" name="_token" value="{{ csrf_token() }}"><button type="submit" class="btn btn-warning btn-sm">Terbitkan</button></form>`;
-                            }
-                            return action;
 
+                                action += `
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline-secondary btn-sm me-1"
+                                        onclick="closeVacancy('${data.uuid}')"
+                                        title="Hentikan Masa Tayang"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top">
+                                        <i class="fas fa-stop-circle"></i>
+                                    </button>
+                                `;
+
+                            }
+
+                            /* =========================================
+                            TERBITKAN
+                            ========================================= */
+                            else if (canPublish) {
+
+                                action += `
+                                    <form method="POST"
+                                        action="/dashboard-user/training/${data.uuid}/publish"
+                                        class="d-inline">
+
+                                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+
+                                        <button
+                                            type="submit"
+                                            class="btn btn-outline-warning btn-sm"
+                                            title="Terbitkan Pelatihan"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-placement="top">
+                                            <i class="fas fa-paper-plane"></i>
+                                        </button>
+
+                                    </form>
+                                `;
+                            }
+
+                            return action;
                         }
 
                     }

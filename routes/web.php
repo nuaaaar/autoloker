@@ -42,6 +42,7 @@ use App\Http\Controllers\UserPage\JobBookmarkController as UPPJobBookmark;
 use App\Http\Controllers\UserPage\JobApplicationController as UPPJobApplication;
 use App\Http\Controllers\UserPage\TrainingController as UPPTraining;
 use App\Http\Controllers\UserPage\TrainingApplicationController as UPPTrainingApplication;
+use App\Http\Controllers\NotificationController;
 
 use App\Http\Controllers\User\DashboardUserController as USRDashboard;
 use App\Http\Controllers\User\ProfileController as USRProfile;
@@ -547,9 +548,14 @@ Route::middleware(['auth'])->group(function () {
             return view('user-page.coming-soon.index');
         })->name('certificate');
 
-        Route::get('/notif', function () {
-            return view('user-page.notif.index');
-        })->name('notif');
+        Route::get('/notifikasi', [NotificationController::class, 'index'])
+            ->name('notif');
+
+        Route::get('/notifikasi/{uuid}/read', [NotificationController::class, 'markRead'])
+            ->name('notif.read');
+
+        Route::post('/notifikasi/read-all', [NotificationController::class, 'markAllRead'])
+            ->name('notif.read-all');
 
         Route::prefix('job-vacancy')->name('job-vacancy.')->group(function () {
             Route::get('list',[UPPJobVacancy::class, 'list'])->name('list');

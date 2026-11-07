@@ -342,236 +342,287 @@
     }
 </style>
 
-<!-- Header -->
+<style>
+    .notification-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #181c32;
+        margin-bottom: 0;
+    }
+
+    .read-all {
+        font-size: 13px;
+        font-weight: 600;
+        color: #f1a900;
+        text-decoration: none;
+        transition: .2s;
+    }
+
+    .read-all:hover {
+        color: #d89500;
+    }
+
+    .notification-card {
+        border: 1px solid #eff0f5;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 3px 15px rgba(0, 0, 0, .03);
+    }
+
+    .notification-item {
+        display: block;
+        padding: 20px 24px;
+        text-decoration: none;
+        color: inherit;
+        border-bottom: 1px solid #f1f1f4;
+        transition: background .2s ease;
+        position: relative;
+    }
+
+    .notification-item:last-child {
+        border-bottom: none;
+    }
+
+    .notification-item:hover {
+        background: #fafbfc;
+    }
+
+    .notification-item.unread {
+        background: #fffcf4;
+    }
+
+    .notification-item.unread:hover {
+        background: #fff8e8;
+    }
+
+    .notification-icon {
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .notification-icon.warning {
+        background: #fff4d9;
+        color: #e6a000;
+    }
+
+    .notification-icon.danger {
+        background: #fff0f0;
+        color: #e74c3c;
+    }
+
+    .notification-icon.success {
+        background: #e8f8ef;
+        color: #28a76b;
+    }
+
+    .notification-icon.primary {
+        background: #eaf2ff;
+        color: #3699ff;
+    }
+
+    .notification-icon.purple {
+        background: #f2eaff;
+        color: #8950fc;
+    }
+
+    .notification-text {
+        font-size: 14px;
+        line-height: 1.6;
+        color: #5e6278;
+    }
+
+    .notification-text strong {
+        color: #181c32;
+        font-weight: 600;
+    }
+
+    .notification-time {
+        margin-top: 5px;
+        font-size: 12px;
+        color: #a1a5b7;
+    }
+
+    .dot-unread {
+        width: 9px;
+        height: 9px;
+        min-width: 9px;
+        border-radius: 50%;
+        background: #e74c3c;
+        margin-left: 15px;
+    }
+
+    .notification-empty {
+        padding: 75px 20px;
+        text-align: center;
+    }
+
+    .notification-empty-icon {
+        width: 85px;
+        height: 85px;
+        border-radius: 50%;
+        background: #fff7e6;
+        color: #e6a000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto 20px;
+    }
+
+    .notification-empty-icon i {
+        font-size: 38px !important;
+    }
+
+    .notification-empty-title {
+        font-size: 17px;
+        font-weight: 700;
+        color: #181c32;
+        margin-bottom: 8px;
+    }
+
+    .notification-empty-text {
+        font-size: 13px;
+        line-height: 1.7;
+        color: #a1a5b7;
+        max-width: 350px;
+        margin: auto;
+    }
+
+    .notification-pagination {
+        padding: 18px 24px;
+        border-top: 1px solid #f1f1f4;
+    }
+
+    @media (max-width: 576px) {
+        .notification-item {
+            padding: 16px;
+        }
+
+        .notification-icon {
+            width: 42px;
+            height: 42px;
+            min-width: 42px;
+        }
+
+        .notification-title {
+            font-size: 19px;
+        }
+
+        .notification-empty {
+            padding: 55px 15px;
+        }
+    }
+</style>
+
 <div class="d-flex justify-content-between align-items-center mb-4">
 
-    <h4 class="notification-title">
-        Notifikasi
-    </h4>
+    <div>
+        <h4 class="notification-title">
+            Notifikasi
+        </h4>
 
-    <a href="#" class="read-all">
-        Tandai semua dibaca
-    </a>
+        <small class="text-muted">
+            {{ $notifications->total() }} notifikasi
+            @if ($unreadNotificationCount > 0)
+                · {{ $unreadNotificationCount }} belum dibaca
+            @endif
+        </small>
+    </div>
+
+    @if ($unreadNotificationCount > 0)
+        <button type="button" class="read-all border-0 bg-transparent"
+            id="btnReadAll">
+            <i class="fas fa-check-double me-1"></i>
+            Tandai semua dibaca
+        </button>
+    @endif
 
 </div>
 
-
-<!-- Notification Card -->
-{{-- <div class="card notification-card">
-
-    <div class="list-group list-group-flush">
-
-        <!-- ITEM -->
-        <a href="#" class="notification-item unread">
-
-            <div class="d-flex align-items-center">
-
-                <img src="/assets/media/avatars/300-3.jpg"
-                    class="notification-avatar">
-
-                <div class="ms-4 flex-grow-1">
-
-                    <div class="notification-text">
-                        <strong>Agus Priyatno</strong>
-                        ingin terhubung dengan Anda
-                    </div>
-
-                    <div class="notification-time">
-                        5 menit lalu
-                    </div>
-
-                </div>
-
-                <span class="dot-unread"></span>
-
-            </div>
-
-        </a>
-
-
-        <!-- ITEM -->
-        <a href="#" class="notification-item unread">
-
-            <div class="d-flex align-items-center">
-
-                <div class="notification-icon danger">
-
-                    <i class="ki-duotone ki-information-5 fs-3"></i>
-
-                </div>
-
-                <div class="ms-4 flex-grow-1">
-
-                    <div class="notification-text">
-
-                        Sertifikat Gada Pratama Anda akan berakhir
-                        dalam 30 hari. Segera perpanjang.
-
-                    </div>
-
-                    <div class="notification-time">
-                        2 jam lalu
-                    </div>
-
-                </div>
-
-                <span class="dot-unread"></span>
-
-            </div>
-
-        </a>
-
-
-        <!-- ITEM -->
-        <a href="#" class="notification-item unread">
-
-            <div class="d-flex align-items-center">
-
-                <div class="notification-icon warning">
-
-                    <i class="ki-duotone ki-gift fs-3"></i>
-
-                </div>
-
-                <div class="ms-4 flex-grow-1">
-
-                    <div class="notification-text">
-
-                        PT BCA membuka lowongan Satpam cocok
-                        dengan profil Anda
-
-                    </div>
-
-                    <div class="notification-time">
-                        5 jam lalu
-                    </div>
-
-                </div>
-
-                <span class="dot-unread"></span>
-
-            </div>
-
-        </a>
-
-
-        <!-- ITEM -->
-        <a href="#" class="notification-item">
-
-            <div class="d-flex align-items-center">
-
-                <img src="/assets/media/avatars/300-5.jpg"
-                    class="notification-avatar">
-
-                <div class="ms-4 flex-grow-1">
-
-                    <div class="notification-text">
-
-                        Irwan Prasetyo dan 14 orang lainnya
-                        menyukai komentar Anda
-
-                    </div>
-
-                    <div class="notification-time">
-                        1 hari lalu
-                    </div>
-
-                </div>
-
-            </div>
-
-        </a>
-
-
-        <!-- ITEM -->
-        <a href="#" class="notification-item">
-
-            <div class="d-flex align-items-center">
-
-                <div class="notification-icon purple">
-
-                    <i class="ki-duotone ki-book-open fs-3"></i>
-
-                </div>
-
-                <div class="ms-4 flex-grow-1">
-
-                    <div class="notification-text">
-
-                        Pelatihan K3 Dasar - LSP Sekuriti
-                        dimulai 3 hari lagi. Anda terdaftar.
-
-                    </div>
-
-                    <div class="notification-time">
-                        1 hari lalu
-                    </div>
-
-                </div>
-
-            </div>
-
-        </a>
-
-
-        <!-- ITEM -->
-        <a href="#" class="notification-item">
-
-            <div class="d-flex align-items-center">
-
-                <img src="/assets/media/avatars/300-2.jpg"
-                    class="notification-avatar">
-
-                <div class="ms-4 flex-grow-1">
-
-                    <div class="notification-text">
-
-                        Drs. Soetrisno menerima permintaan
-                        koneksi Anda
-
-                    </div>
-
-                    <div class="notification-time">
-                        2 hari lalu
-                    </div>
-
-                </div>
-
-            </div>
-
-        </a>
-
-    </div>
-
-</div> --}}
 
 <div class="card notification-card">
 
     <div class="list-group list-group-flush">
 
-        {{-- EMPTY NOTIFICATION --}}
-        <div class="notification-empty">
+        @forelse ($notifications as $notification)
 
-            <div class="notification-empty-icon">
-                <i class="ki-duotone ki-notification-on fs-1">
-                    <span class="path1"></span>
-                    <span class="path2"></span>
-                    <span class="path3"></span>
-                    <span class="path4"></span>
-                </i>
+            <a href="{{ route('user-page.notif.read', $notification->uuid) }}"
+                class="notification-item {{ !$notification->is_read ? 'unread' : '' }}">
+
+                <div class="d-flex align-items-center">
+
+                    <div class="notification-icon primary">
+                        <i class="ki-duotone ki-notification-on fs-2">
+                            <span class="path1"></span>
+                            <span class="path2"></span>
+                            <span class="path3"></span>
+                            <span class="path4"></span>
+                        </i>
+                    </div>
+
+                    <div class="ms-4 flex-grow-1">
+
+                        <div class="notification-text">
+                            <strong>
+                                {{ $notification->title }}
+                            </strong>
+
+                            <div>
+                                {{ $notification->message }}
+                            </div>
+                        </div>
+
+                        <div class="notification-time">
+                            <i class="far fa-clock me-1"></i>
+                            {{ $notification->created_at->diffForHumans() }}
+                        </div>
+
+                    </div>
+
+                    @if (!$notification->is_read)
+                        <span class="dot-unread"></span>
+                    @endif
+
+                </div>
+
+            </a>
+
+        @empty
+
+            <div class="notification-empty">
+
+                <div class="notification-empty-icon">
+                    <i class="ki-duotone ki-notification-on">
+                        <span class="path1"></span>
+                        <span class="path2"></span>
+                        <span class="path3"></span>
+                        <span class="path4"></span>
+                    </i>
+                </div>
+
+                <div class="notification-empty-title">
+                    Belum ada notifikasi
+                </div>
+
+                <div class="notification-empty-text">
+                    Saat ini belum ada notifikasi untuk Anda.
+                    Notifikasi baru akan muncul di sini.
+                </div>
+
             </div>
 
-            <div class="notification-empty-title">
-                Belum ada notifikasi
-            </div>
-
-            <div class="notification-empty-text">
-                Saat ini belum ada notifikasi untuk Anda.
-                Notifikasi baru akan muncul di sini.
-            </div>
-
-        </div>
+        @endforelse
 
     </div>
+
+    @if ($notifications->hasPages())
+        <div class="notification-pagination">
+            {{ $notifications->links() }}
+        </div>
+    @endif
 
 </div>

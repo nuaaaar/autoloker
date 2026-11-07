@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Auth;
 use App\Models\Notification;
 use Illuminate\Http\Request;
 
@@ -48,7 +49,14 @@ class NotificationController extends Controller
             ->latest()
             ->paginate(15);
 
-        return view('user-page.notification.index', compact('notifications'));
+        $unreadNotificationCount = Notification::where('user_id', Auth::id())
+            ->where('is_read', false)
+            ->count();
+
+        return view('user-page.notif.index', compact(
+            'notifications',
+            'unreadNotificationCount'
+        ));
     }
 
     /**

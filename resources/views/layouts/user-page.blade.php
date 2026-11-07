@@ -1866,6 +1866,34 @@
             line-height: 1;
             letter-spacing: -0.5px;
         }
+        
+        .notification-nav-item {
+        position: relative !important;
+    }
+
+    .notification-nav-item .notification-badge {
+        position: absolute !important;
+        top: 10px;
+        right: 10px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        min-width: 22px;
+        height: 22px;
+        padding: 0 6px;
+
+        border-radius: 50px;
+        background-color: #e74c3c;
+        color: #fff !important;
+
+        font-size: 11px;
+        font-weight: 600;
+        line-height: 1;
+
+        z-index: 10;
+    }
     </style>
 
     @yield('style')
@@ -1977,9 +2005,25 @@
                                 <span>Pesan</span>
                             </a> --}}
 
-                            <a href="{{ route('user-page.notif') }}" class="nav-item {{ Route::is('user-page.notif') ? 'active' : '' }}">
+                            @php
+                                $totalNotification = \App\Models\Notification::where('user_id', Auth::id())
+                                    ->where('is_read', false)
+                                    ->count();
+                            @endphp
+
+                            <a href="{{ route('user-page.notif') }}"
+                                class="nav-item notification-nav-item {{ Route::is('user-page.notif') ? 'active' : '' }}">
+
                                 <i class="ki-duotone ki-notification"></i>
+
                                 <span>Notifikasi</span>
+
+                                @if ($totalNotification > 0)
+                                    <span class="notification-badge">
+                                        {{ $totalNotification > 99 ? '99+' : $totalNotification }}
+                                    </span>
+                                @endif
+
                             </a>
 
                             <div class="nav-item position-relative"
