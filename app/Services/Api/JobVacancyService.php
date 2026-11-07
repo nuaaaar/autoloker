@@ -3,12 +3,12 @@
 namespace App\Services\Api;
 
 use App\Models\JobVacancy;
+use App\Services\TokenBillingService;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Laravolt\Indonesia\Models\City;
 use Laravolt\Indonesia\Models\Province;
-
 class JobVacancyService
 {
     public function create(array $owner, array $data): JobVacancy
@@ -16,58 +16,56 @@ class JobVacancyService
         $action = $data['workflow_action'] ?? 'save_draft';
         unset($data['workflow_action']);
 
-        $data = $this->validatePayload($data, $action === 'submit', true);
-
+        $data = $this->validatePayload($data, $action === 'publish', true);
         $attributes = $this->attributes($data);
         $attributes['b_u_j_p_id'] = null;
         $attributes['company_id'] = null;
         $attributes[$owner['column']] = $owner['id'];
-        $attributes['status'] = $action === 'submit' ? 'submitted' : 'draft';
+        $attributes['status'] = 'draft';
         $attributes['reason_rejected'] = null;
 
-        return DB::transaction(fn (): JobVacancy => JobVacancy::create($attributes));
+        return DB::transaction(function () use ($attributes, $action): JobVacancy {
+            $vacancy = JobVacancy::create($attributes);
+
+            return $action === 'publish'
+                ? app(TokenBillingService::class)->publish($vacancy)
+                : $vacancy;
+        });
     }
 
     public function update(JobVacancy $vacancy, array $data): JobVacancy
     {
-        $merged = array_merge($this->payload($vacancy), $data);
-        $validateLocation = array_key_exists('province', $data) || array_key_exists('city', $data);
-        $validationPayload = $merged;
-        unset($validationPayload['category'], $validationPayload['workflow_action']);
-        $normalized = $this->validatePayload(array_merge(['category' => $vacancy->category], $validationPayload), false, $validateLocation);
+        return DB::transaction(function () use ($vacancy, $data): JobVacancy {
+            $vacancy = JobVacancy::query()->whereKey($vacancy->getKey())->lockForUpdate()->firstOrFail();
+            app(TokenBillingService::class)->assertEditable($vacancy);
 
-        foreach (['province', 'city'] as $field) {
-            if (array_key_exists($field, $data)) {
-                $data[$field] = $normalized[$field];
+            $merged = array_merge($this->payload($vacancy), $data);
+            $validateLocation = array_key_exists('province', $data) || array_key_exists('city', $data);
+            $validationPayload = $merged;
+            unset($validationPayload['category'], $validationPayload['workflow_action']);
+            $normalized = $this->validatePayload(array_merge(['category' => $vacancy->category], $validationPayload), false, $validateLocation);
+
+            foreach (['province', 'city'] as $field) {
+                if (array_key_exists($field, $data)) {
+                    $data[$field] = $normalized[$field];
+                }
             }
-        }
 
-        $attributes = $this->attributes($data);
+            $attributes = $this->attributes($data);
+            if ($attributes !== []) {
+                $vacancy->fill($attributes);
+                $vacancy->save();
+            }
 
-        if ($attributes !== []) {
-            $vacancy->fill($attributes);
-            $vacancy->save();
-        }
-
-        return $vacancy->fresh();
+            return $vacancy->fresh();
+        });
     }
 
-    public function submit(JobVacancy $vacancy): JobVacancy
+    public function publish(JobVacancy $vacancy): JobVacancy
     {
-        if (! in_array($vacancy->status, ['draft', 'rejected'], true)) {
-            $this->throwErrors([
-                'status' => ['Hanya lowongan kerja berstatus draf atau ditolak yang dapat diajukan.'],
-            ]);
-        }
-
         $this->validatePayload($this->payload($vacancy), true, true);
 
-        $vacancy->forceFill([
-            'status' => 'submitted',
-            'reason_rejected' => null,
-        ])->save();
-
-        return $vacancy->fresh();
+        return app(TokenBillingService::class)->publish($vacancy);
     }
 
     private function validatePayload(array $data, bool $complete, bool $validateLocation = false): array
@@ -175,7 +173,6 @@ class JobVacancyService
             'is_show_fee' => 'is_show_fee',
             'is_urgent' => 'is_urgent',
             'quota' => 'kuota',
-            'end_date' => 'end_date',
         ];
         $attributes = [];
 
@@ -224,7 +221,6 @@ class JobVacancyService
             'is_show_fee' => $vacancy->is_show_fee,
             'is_urgent' => $vacancy->is_urgent,
             'quota' => $vacancy->kuota,
-            'end_date' => $vacancy->end_date,
         ];
     }
 

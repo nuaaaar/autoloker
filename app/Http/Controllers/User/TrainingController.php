@@ -13,6 +13,8 @@ use App\Models\TrainingApplication;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\Training;
+use App\Services\TokenBillingService;
+use App\Models\TokenSetting;
 use App\Services\NotificationService;
 use Carbon\Carbon;
 use Auth;
@@ -66,7 +68,7 @@ class TrainingController extends Controller
         $totalTrainings = (clone $trainingQuery)->count();
 
         $totalPublished = (clone $trainingQuery)
-            ->where('status', 'published')
+            ->currentlyPublished()
             ->count();
 
         $totalDraft = (clone $trainingQuery)
@@ -583,8 +585,9 @@ class TrainingController extends Controller
                 'is_tuk',
                 'level',
             ]);
+        $settings = TokenSetting::current();
 
-        return view('dashboard-user.training.create', compact('masterCategoryCertificates'));
+        return view('dashboard-user.training.create', compact('masterCategoryCertificates', 'settings'));
     }
 
     /**
@@ -938,9 +941,7 @@ class TrainingController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $status = ($request->status === 'submitted')
-            ? 'published'
-            : ($request->status ?? 'draft');
+        $status = 'draft';
 
 
         /*
@@ -949,7 +950,8 @@ class TrainingController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $training = Training::create([
+        $training = DB::transaction(function () use ($request, $posterPath, $price, $status, $bujpId, $companyId, $province, $city, $district, $village): Training {
+            $training = Training::create([
 
             /*
             |--------------------------------------------------------------------------
@@ -1100,7 +1102,13 @@ class TrainingController extends Controller
 
             'total_clicked'         => 0,
 
-        ]);
+            ]);
+            if ($request->input('workflow_action') === 'publish') {
+                $this->publishWithTokens($training);
+            }
+
+            return $training;
+        });
 
 
         /*
@@ -1132,16 +1140,15 @@ class TrainingController extends Controller
     public function show($id)
     {
         $data['data'] = Training::where('uuid', $id)->first();
+        $data['settings'] = TokenSetting::current();
 
         return view('dashboard-user.training.show', $data);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit($id)
     {
         $data['data'] = Training::where('uuid', $id)->first();
+        $data['settings'] = TokenSetting::current();
 
         return view('dashboard-user.training.edit', $data);
     }
@@ -1152,6 +1159,13 @@ class TrainingController extends Controller
     public function update(Request $request, $uuid)
     {
         $training = Training::where('uuid', $uuid)->firstOrFail();
+        $user = Auth::user();
+        $ownerColumn = $user->role === 'bujp' ? 'b_u_j_p_id' : 'company_id';
+        $ownerId = $user->role === 'bujp'
+            ? $user->user_bujp->bujp->id
+            : $user->user_company->company->id;
+        abort_unless((int) $training->{$ownerColumn} === (int) $ownerId, 403);
+        app(TokenBillingService::class)->assertEditable($training);
 
 
         /*
@@ -1384,7 +1398,7 @@ class TrainingController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $training->update([
+        $attributes = [
 
             'title'                 => $request->title,
 
@@ -1456,17 +1470,16 @@ class TrainingController extends Controller
 
             'poster'                => $poster,
 
-            /*
-            |--------------------------------------------------------------------------
-            | STATUS
-            |--------------------------------------------------------------------------
-            */
 
-            'status' => $request->status === 'submitted'
-                ? 'published'
-                : ($request->status ?? $training->status),
-
-        ]);
+        ];
+        DB::transaction(function () use ($training, $attributes, $request): void {
+            $locked = Training::query()->whereKey($training->getKey())->lockForUpdate()->firstOrFail();
+            app(TokenBillingService::class)->assertEditable($locked);
+            $locked->update($attributes);
+            if ($request->input('workflow_action') === 'publish') {
+                $this->publishWithTokens($locked);
+            }
+        });
 
 
         /*
@@ -1657,6 +1670,56 @@ class TrainingController extends Controller
             'success' => true,
             'message' => 'Pelatihan berhasil diselesaikan.'
         ]);
+    }
+    public function publish(Request $request, string $uuid)
+    {
+        $owner = app(TokenBillingService::class)->ownerFor($request->user());
+        $training = Training::where('uuid', $uuid)
+            ->where($owner['column'], $owner['id'])
+            ->firstOrFail();
+        $this->publishWithTokens($training);
+
+        return $request->expectsJson()
+            ? response()->json(['status' => true, 'message' => 'Pelatihan berhasil dipublikasikan.'])
+            : redirect()->route('dashboard-user.training.show', $uuid)->with('success', 'Pelatihan berhasil dipublikasikan.');
+    }
+
+    private function publishWithTokens(Training $training): Training
+    {
+        try {
+            return app(TokenBillingService::class)->publish($training);
+        } catch (\Illuminate\Validation\ValidationException $exception) {
+            if (request()->expectsJson()) {
+                throw new \Illuminate\Http\Exceptions\HttpResponseException(response()->json([
+                    'status' => false,
+                    'message' => $exception->getMessage(),
+                    'errors' => $exception->errors(),
+                ], 422));
+            }
+
+            throw $exception;
+        }
+    }
+
+    public function closePublication($uuid)
+    {
+        $user = Auth::user();
+        $owner = $user->role === 'bujp'
+            ? ['b_u_j_p_id' => $user->user_bujp->bujp->id]
+            : ['company_id' => $user->user_company->company->id];
+
+        DB::transaction(function () use ($uuid, $owner): void {
+            $training = Training::query()
+                ->where('uuid', $uuid)
+                ->where(key($owner), current($owner))
+                ->lockForUpdate()
+                ->firstOrFail();
+            $training->forceFill(['publication_expires_at' => now()])->save();
+        });
+
+        return request()->expectsJson()
+            ? response()->json(['status' => true, 'message' => 'Publikasi pelatihan berhasil ditutup.'])
+            : back()->with('success', 'Publikasi pelatihan berhasil ditutup.');
     }
 
     public function participants(Request $request, $uuid)

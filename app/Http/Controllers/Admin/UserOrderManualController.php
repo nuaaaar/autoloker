@@ -3,801 +3,132 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\BUJP;
+use App\Models\Company;
 use App\Models\UserOrderManual;
-use Carbon\Carbon;
+use App\Services\NotificationService;
+use App\Services\TokenBillingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use App\Models\UserSubscription;
-use Illuminate\Support\Str;
-use App\Services\NotificationService;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class UserOrderManualController extends Controller
 {
-    private function calculateExpiredAt(
-        $startDate,
-        $duration,
-        $durationType
-    ) {
-        $date = $startDate->copy();
-
-        switch ($durationType) {
-
-            case 'day':
-
-                return $date->addDays(
-                    $duration
-                );
-
-            case 'month':
-
-                return $date->addMonthsNoOverflow(
-                    $duration
-                );
-
-            case 'year':
-
-                return $date->addYearsNoOverflow(
-                    $duration
-                );
-
-            default:
-
-                throw new \Exception(
-                    'Tipe durasi subscription tidak valid.'
-                );
-        }
+    private function authorizeAdmin(): void
+    {
+        abort_unless(strtolower((string) Auth::user()?->role) === 'admin', 403);
     }
 
-    /**
-     * List pembayaran manual
-     */
     public function index(Request $request)
     {
-        /*
-        |--------------------------------------------------------------------------
-        | DATATABLE REQUEST
-        |--------------------------------------------------------------------------
-        */
-
-        if ($request->ajax()) {
-
-            $query = UserOrderManual::query()
-                ->with([
-                    'user',
-                    'subscription',
-                ])
-
-                /*
-                |--------------------------------------------------------------------------
-                | JANGAN TAMPILKAN ORDER YANG SUDAH EXPIRED
-                |--------------------------------------------------------------------------
-                */
-
-                ->where(function ($q) {
-
-                    $q->whereNull('expired_at')
-                        ->orWhere(
-                            'expired_at',
-                            '>',
-                            now()
-                        );
-
-                });
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | FILTER STATUS
-            |--------------------------------------------------------------------------
-            |
-            | Status:
-            |
-            | pending_payment
-            | verification
-            | approved
-            | rejected
-            |
-            */
-
-            if ($request->filled('status')) {
-
-                $query->where(
-                    'status',
-                    $request->status
-                );
-
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | FILTER START DATE
-            |--------------------------------------------------------------------------
-            */
-
-            if ($request->filled('start_date')) {
-
-                $startDate = Carbon::parse(
-                    $request->start_date
-                )->startOfDay();
-
-                $query->where(
-                    'payment_date',
-                    '>=',
-                    $startDate
-                );
-
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | FILTER END DATE
-            |--------------------------------------------------------------------------
-            */
-
-            if ($request->filled('end_date')) {
-
-                $endDate = Carbon::parse(
-                    $request->end_date
-                )->endOfDay();
-
-                $query->where(
-                    'payment_date',
-                    '<=',
-                    $endDate
-                );
-
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | SEARCH
-            |--------------------------------------------------------------------------
-            */
-
-            if ($request->filled('search')) {
-
-                $search = $request->search;
-
-                $query->where(function ($q) use ($search) {
-
-                    $q->where(
-                        'order_number',
-                        'like',
-                        '%' . $search . '%'
-                    )
-
-                    ->orWhere(
-                        'payment_method',
-                        'like',
-                        '%' . $search . '%'
-                    )
-
-                    ->orWhere(
-                        'role',
-                        'like',
-                        '%' . $search . '%'
-                    )
-
-                    ->orWhereHas(
-                        'user',
-                        function ($userQuery) use ($search) {
-
-                            $userQuery
-                                ->where(
-                                    'name',
-                                    'like',
-                                    '%' . $search . '%'
-                                )
-                                ->orWhere(
-                                    'email',
-                                    'like',
-                                    '%' . $search . '%'
-                                );
-
-                        }
-                    )
-
-                    ->orWhereHas(
-                        'subscription',
-                        function ($subscriptionQuery) use ($search) {
-
-                            $subscriptionQuery->where(
-                                'name',
-                                'like',
-                                '%' . $search . '%'
-                            );
-
-                        }
-                    );
-
-                });
-
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | ORDER
-            |--------------------------------------------------------------------------
-            */
-
-            $query->orderBy(
-                'created_at',
-                'desc'
-            );
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | PAGINATION DATATABLE
-            |--------------------------------------------------------------------------
-            */
-
-            $page = $request->get(
-                'page',
-                1
-            );
-
-            $length = $request->get(
-                'length',
-                10
-            );
-
-
-            $results = $query->paginate(
-                $length,
-                ['*'],
-                'page',
-                $page
-            );
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | RESPONSE
-            |--------------------------------------------------------------------------
-            */
-
-            return response()->json([
-                'results' => [
-                    'total' => $results->total(),
-                    'data' => $results->items(),
-                ],
-            ]);
+        $this->authorizeAdmin();
+        if (! $request->ajax()) {
+            return view('dashboard-admin.payment.index');
         }
+        $query = UserOrderManual::with(['user', 'subscription', 'tokenWallet'])->latest('id');
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
+        if ($request->filled('start_date')) {
+            $query->where('payment_date', '>=', $request->date('start_date')->startOfDay());
+        }
+        if ($request->filled('end_date')) {
+            $query->where('payment_date', '<=', $request->date('end_date')->endOfDay());
+        }
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('order_number', 'like', "%{$search}%")->orWhere('payment_method', 'like', "%{$search}%")->orWhere('role', 'like', "%{$search}%")->orWhereHas('user', fn ($u) => $u->where('name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%"))->orWhereHas('subscription', fn ($s) => $s->where('name', 'like', "%{$search}%"));
+            });
+        }
+        $page = max(1, (int) $request->input('page', 1));
+        $results = $query->paginate(min(100, max(1, (int) $request->input('length', 10))), ['*'], 'page', $page);
+        $items = collect($results->items())->map(function (UserOrderManual $order) {
+            $organization = null;
+            if ($order->tokenWallet) {
+                $organization = $order->tokenWallet->owner_type === 'company' ? Company::find($order->tokenWallet->owner_id) : BUJP::find($order->tokenWallet->owner_id);
+            }
+            $order->setAttribute('organization', $organization ? ['name' => $organization->company_name ?? ''] : null);
 
+            return $order;
+        });
 
-        /*
-        |--------------------------------------------------------------------------
-        | VIEW
-        |--------------------------------------------------------------------------
-        */
-
-        return view(
-            'dashboard-admin.payment.index'
-        );
+        return response()->json(['results' => ['total' => $results->total(), 'data' => $items]]);
     }
 
-
-    public function approve($uuid)
+    public function approve(Request $request, string $uuid, TokenBillingService $billing)
     {
-        $order = UserOrderManual::with('subscription')
-            ->where('uuid', $uuid)
-            ->firstOrFail();
-
-        /*
-        |--------------------------------------------------------------------------
-        | VALIDASI
-        |--------------------------------------------------------------------------
-        */
-
-        if ($order->status !== 'verification') {
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Order ini sudah diproses.'
-            ], 422);
-
-        }
-
-        if ($order->expired_at && $order->expired_at->isPast()) {
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Order ini sudah expired.'
-            ], 422);
-
-        }
-
-        if (!$order->subscription) {
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Master subscription tidak ditemukan.'
-            ], 422);
-
-        }
-
-
-        DB::beginTransaction();
-
+        $this->authorizeAdmin();
+        $order = UserOrderManual::where('uuid', $uuid)->firstOrFail();
         try {
+            $wasApproved = DB::transaction(function () use ($order, $billing) {
+                $locked = UserOrderManual::whereKey($order->id)->lockForUpdate()->firstOrFail();
+                if ($locked->status === 'approved' && $locked->token_wallet_id) {
+                    $billing->creditOrder($locked);
 
-            /*
-            |--------------------------------------------------------------------------
-            | LOCK ORDER
-            |--------------------------------------------------------------------------
-            */
-
-            $order = UserOrderManual::with('subscription')
-                ->where('id', $order->id)
-                ->lockForUpdate()
-                ->first();
-
-            if ($order->status !== 'verification') {
-
-                DB::rollBack();
-
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Order ini sudah diproses.'
-                ], 422);
-
-            }
-
-
-            $masterSubscription = $order->subscription;
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | DURASI SUBSCRIPTION
-            |--------------------------------------------------------------------------
-            |
-            | Mengikuti struktur:
-            |
-            | duration      = 30
-            | duration_type = day
-            |
-            */
-
-            $duration = (int) $masterSubscription->duration;
-
-            $durationType = $masterSubscription->duration_type;
-
-
-            if ($duration <= 0) {
-
-                throw new \Exception(
-                    'Durasi subscription belum dikonfigurasi.'
-                );
-
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | CARI SUBSCRIPTION AKTIF USER
-            |--------------------------------------------------------------------------
-            */
-
-            $currentSubscription = UserSubscription::query()
-                ->where('user_id', $order->user_id)
-                ->where('role', $order->role)
-                ->where('status', 'active')
-                ->whereNotNull('expired_at')
-                ->where('expired_at', '>', now())
-                ->orderByDesc('expired_at')
-                ->lockForUpdate()
-                ->first();
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | BELUM ADA SUBSCRIPTION AKTIF
-            |--------------------------------------------------------------------------
-            */
-
-            if (!$currentSubscription) {
-
-                $startedAt = now();
-
-                $expiredAt = $this->calculateExpiredAt(
-                    $startedAt,
-                    $duration,
-                    $durationType
-                );
-
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | SUDAH ADA SUBSCRIPTION AKTIF
-            |--------------------------------------------------------------------------
-            */
-
-            else {
-
-                /*
-                |--------------------------------------------------------------------------
-                | CEK PAKET YANG SAMA
-                |--------------------------------------------------------------------------
-                */
-
-                $isSameSubscription =
-                    (int) $currentSubscription->master_subscription_id
-                    ===
-                    (int) $order->master_subscription_id;
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | RENEW / PERPANJANG
-                |--------------------------------------------------------------------------
-                |
-                | Paket sama:
-                |
-                | Lama:
-                | 01 Sep - 30 Sep
-                |
-                | Beli lagi:
-                | 20 Sep
-                |
-                | Hasil:
-                | 01 Sep - 30 Okt
-                |--------------------------------------------------------------------------
-                */
-
-                if ($isSameSubscription) {
-
-                    $startedAt =
-                        $currentSubscription->started_at;
-
-                    $expiredAt =
-                        $this->calculateExpiredAt(
-                            $currentSubscription->expired_at,
-                            $duration,
-                            $durationType
-                        );
-
+                    return true;
                 }
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | UPGRADE / GANTI PAKET
-                |--------------------------------------------------------------------------
-                |
-                | Paket lama:
-                |
-                | Basic
-                | 01 Sep - 30 Sep
-                |
-                | Upgrade:
-                |
-                | Premium
-                | 20 Sep
-                |
-                | Hasil:
-                |
-                | Premium
-                | 20 Sep - 30 Okt
-                |
-                |--------------------------------------------------------------------------
-                */
-
-                else {
-
-                    $startedAt = now();
-
-                    /*
-                    | Tambahkan durasi baru dari expiry
-                    | subscription lama.
-                    */
-
-                    $expiredAt =
-                        $this->calculateExpiredAt(
-                            $currentSubscription->expired_at,
-                            $duration,
-                            $durationType
-                        );
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | NONAKTIFKAN SUBSCRIPTION LAMA
-                    |--------------------------------------------------------------------------
-                    */
-
-                    $currentSubscription->update([
-
-                        'status' => 'cancelled',
-
-                        'cancelled_at' => now(),
-
-                        'notes' => trim(
-                            ($currentSubscription->notes
-                                ? $currentSubscription->notes . "\n"
-                                : '')
-                            .
-                            'Digantikan oleh subscription baru melalui order '
-                            .
-                            $order->order_number
-                        ),
-
-                    ]);
-
+                if ($locked->status !== 'verification' || ($locked->expired_at && ! $locked->expired_at->isFuture())) {
+                    throw ValidationException::withMessages(['order' => 'Pembayaran tidak dapat diproses.']);
                 }
+                $locked->verified_by = Auth::id();
+                $locked->save();
+                $billing->creditOrder($locked);
 
+                return false;
+            });
+            if (! $wasApproved && $order->master_subscription_id === null) {
+                try {
+                    app(NotificationService::class)->send($order->user_id, 'order_token_approved', ['tokens' => (string) $order->token_quantity, 'order_uuid' => rawurlencode((string) $order->uuid)]);
+                } catch (\Throwable $e) {
+                    Log::warning('Token approval notification failed', ['order_id' => $order->id]);
+                }
             }
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | CREATE USER SUBSCRIPTION
-            |--------------------------------------------------------------------------
-            */
-
-            $userSubscription = UserSubscription::create([
-
-                'uuid' =>
-                    (string) Str::uuid(),
-
-                'user_id' =>
-                    $order->user_id,
-
-                'master_subscription_id' =>
-                    $order->master_subscription_id,
-
-                'user_order_manual_id' =>
-                    $order->id,
-
-                'role' =>
-                    $order->role,
-
-                /*
-                |--------------------------------------------------------------------------
-                | SNAPSHOT MASTER
-                |--------------------------------------------------------------------------
-                */
-
-                'subscription_name' =>
-                    $masterSubscription->name,
-
-                'price' =>
-                    $order->price,
-
-                /*
-                |--------------------------------------------------------------------------
-                | PERIODE
-                |--------------------------------------------------------------------------
-                */
-
-                'started_at' =>
-                    $startedAt,
-
-                'expired_at' =>
-                    $expiredAt,
-
-                'status' =>
-                    'active',
-
-                /*
-                |--------------------------------------------------------------------------
-                | SNAPSHOT FEATURES
-                |--------------------------------------------------------------------------
-                */
-
-                'limits' =>
-                    $masterSubscription->features,
-
-                'notes' =>
-                    $order->notes,
-
-            ]);
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | APPROVE ORDER
-            |--------------------------------------------------------------------------
-            */
-
-            $order->update([
-
-                'status' =>
-                    'approved',
-
-                'verified_by' =>
-                    Auth::id(),
-
-                'verified_at' =>
-                    now(),
-
-                'rejected_reason' =>
-                    null,
-
-            ]);
-
-
-            DB::commit();
-
-            app(NotificationService::class)->send($order->user_id, 'order_subscription_approved', [
-                'package' => $order->subscription->name,
-                'order_uuid' => rawurlencode((string) $order->uuid),
-            ]);
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | RESPONSE
-            |--------------------------------------------------------------------------
-            */
-
-            return response()->json([
-
-                'success' => true,
-
-                'message' =>
-                    'Pembayaran berhasil disetujui dan subscription user telah diaktifkan.',
-
-                'data' => [
-
-                    'subscription_uuid' =>
-                        $userSubscription->uuid,
-
-                    'subscription_name' =>
-                        $userSubscription->subscription_name,
-
-                    'started_at' =>
-                        $userSubscription->started_at
-                            ? $userSubscription->started_at
-                                ->format('d-m-Y H:i')
-                            : null,
-
-                    'expired_at' =>
-                        $userSubscription->expired_at
-                            ? $userSubscription->expired_at
-                                ->format('d-m-Y H:i')
-                            : null,
-
-                    'status' =>
-                        $userSubscription->status,
-
-                ]
-
-            ]);
-
-        } catch (\Throwable $e) {
-
-            DB::rollBack();
-
-            return response()->json([
-
-                'success' => false,
-
-                'message' =>
-                    'Gagal mengaktifkan subscription.',
-
-                'error' =>
-                    $e->getMessage(),
-
-            ], 500);
-
+            return response()->json(['success' => true, 'message' => 'Pembayaran disetujui dan token telah ditambahkan.']);
+        } catch (ValidationException $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
         }
     }
 
-    /**
-     * Reject pembayaran
-     */
-    public function reject(
-        Request $request,
-        $uuid
-    ) {
-
-        $request->validate([
-            'rejected_reason' => 'required|string|max:1000'
-        ], [
-            'rejected_reason.required' =>
-                'Alasan penolakan wajib diisi.'
-        ]);
-
-
-        $payment = UserOrderManual::where(
-            'uuid',
-            $uuid
-        )->firstOrFail();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Jangan proses jika expired
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-            $payment->expired_at &&
-            Carbon::parse($payment->expired_at)->isPast()
-        ) {
-
-            return response()->json([
-                'message' => 'Pembayaran sudah expired dan tidak dapat diproses.'
-            ], 422);
-
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Hanya pending yang dapat di-reject
-        |--------------------------------------------------------------------------
-        */
-
-        if ($payment->status !== 'verification') {
-
-            return response()->json([
-                'message' => 'Pembayaran sudah diproses sebelumnya.'
-            ], 422);
-
-        }
-
-
-        DB::beginTransaction();
-
-        try {
-
-            $payment->status = 'rejected';
-
-            $payment->rejected_reason =
-                $request->rejected_reason;
-
-            $payment->verified_by = Auth::id();
-
-            $payment->verified_at = now();
-
-            $payment->save();
-
-
-            DB::commit();
-
-            app(NotificationService::class)->send($payment->user_id, 'order_subscription_rejected', [
-                'package' => $payment->subscription?->name ?? '',
-                'reason' => $payment->rejected_reason ?? '',
-                'order_uuid' => rawurlencode((string) $payment->uuid),
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Pembayaran berhasil ditolak.'
-            ]);
-
-        } catch (\Throwable $e) {
-
-            DB::rollBack();
-
-            return response()->json([
-                'message' => 'Gagal menolak pembayaran.'
-            ], 500);
-        }
-    }
-
-    public function show($uuid)
+    public function reject(Request $request, string $uuid)
     {
-        $payment = UserOrderManual::with([
-            'user',
-            'subscription'
-        ])
-            ->where('uuid', $uuid)
-            ->firstOrFail();
+        $this->authorizeAdmin();
+        $data = $request->validate(['rejected_reason' => ['required', 'string', 'max:1000']]);
+        $order = DB::transaction(function () use ($uuid, $data) {
+            $order = UserOrderManual::where('uuid', $uuid)->lockForUpdate()->firstOrFail();
+            if ($order->master_subscription_id !== null || $order->token_wallet_id === null || $order->token_quantity === null) {
+                abort(422, 'Riwayat pesanan lama hanya dapat dibaca.');
+            }
+            if ($order->status !== 'verification' || ($order->expired_at && ! $order->expired_at->isFuture())) {
+                abort(422, 'Pembayaran tidak dapat diproses.');
+            }
+            $order->update(['status' => 'rejected', 'rejected_reason' => $data['rejected_reason'], 'verified_by' => Auth::id(), 'verified_at' => now()]);
 
-        return response()->json([
-            'success' => true,
-            'data' => $payment
-        ]);
+            return $order;
+        });
+        if ($order->master_subscription_id === null) {
+            try {
+                app(NotificationService::class)->send($order->user_id, 'order_token_rejected', ['tokens' => (string) $order->token_quantity, 'reason' => $order->rejected_reason, 'order_uuid' => rawurlencode((string) $order->uuid)]);
+            } catch (\Throwable $e) {
+                Log::warning('Token rejection notification failed', ['order_id' => $order->id]);
+            }
+        }
+
+        return response()->json(['success' => true, 'message' => 'Pembayaran berhasil ditolak.']);
+    }
+
+    public function show(Request $request, string $uuid)
+    {
+        $this->authorizeAdmin();
+        $payment = UserOrderManual::with(['user', 'subscription', 'tokenWallet'])->where('uuid', $uuid)->firstOrFail();
+        $organization = null;
+        if ($payment->tokenWallet) {
+            $organization = $payment->tokenWallet->owner_type === 'company' ? Company::find($payment->tokenWallet->owner_id) : BUJP::find($payment->tokenWallet->owner_id);
+        }
+        $payment->setAttribute('organization', $organization ? ['name' => $organization->company_name ?? ''] : null);
+
+        return response()->json(['success' => true, 'data' => $payment]);
     }
 }

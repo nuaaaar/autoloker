@@ -349,97 +349,6 @@
     <!--end::Close Modal-->
 
 
-    <!--begin::Withdraw Modal-->
-    <div
-        class="modal fade"
-        id="withdrawModal"
-        tabindex="-1">
-
-        <div class="modal-dialog modal-dialog-centered">
-
-            <div class="modal-content">
-
-                <div class="modal-header">
-
-                    <h5 class="modal-title">
-                        Tarik Pengajuan
-                    </h5>
-
-                    <button
-                        type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal">
-                    </button>
-
-                </div>
-
-
-                <div class="modal-body text-center">
-
-                    <div class="mb-5">
-
-                        <i
-                            class="fas fa-undo text-warning"
-                            style="font-size:60px">
-                        </i>
-
-                    </div>
-
-
-                    <h4 class="mb-3">
-                        Tarik pengajuan lowongan?
-                    </h4>
-
-
-                    <p class="text-muted mb-0">
-
-                        Status lowongan akan dikembalikan menjadi
-                        <strong>Draft</strong>.
-
-                        Anda dapat melakukan perubahan sebelum
-                        mengajukan kembali.
-
-                    </p>
-
-
-                    <input
-                        type="hidden"
-                        id="withdrawUuid">
-
-                </div>
-
-
-                <div class="modal-footer">
-
-                    <button
-                        type="button"
-                        class="btn btn-light"
-                        data-bs-dismiss="modal">
-
-                        Batal
-
-                    </button>
-
-
-                    <button
-                        type="button"
-                        class="btn btn-warning"
-                        id="btnWithdrawVacancy">
-
-                        <i class="fas fa-undo me-2"></i>
-
-                        Tarik Pengajuan
-
-                    </button>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-    <!--end::Withdraw Modal-->
 
 
     <!--begin::Delete Modal-->
@@ -667,7 +576,7 @@
             url:
                 "/dashboard-user/job-vacancy/"
                 + uuid
-                + "/close",
+                + "/close-publication",
 
             type: "POST",
 
@@ -743,116 +652,6 @@
                     .html(
                         '<i class="fas fa-lock me-2"></i>'
                         + 'Tutup Lowongan'
-                    );
-
-            }
-
-        });
-
-    });
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Withdraw Vacancy
-    |--------------------------------------------------------------------------
-    */
-
-    function withdrawVacancy(uuid)
-    {
-        $("#withdrawUuid").val(uuid);
-
-        $("#withdrawModal").modal("show");
-    }
-
-
-    $("#btnWithdrawVacancy").click(function(){
-
-        let uuid =
-            $("#withdrawUuid").val();
-
-
-        $.ajax({
-
-            url:
-                "/dashboard-user/job-vacancy/"
-                + uuid
-                + "/withdraw",
-
-            type: "POST",
-
-            data: {
-
-                _token:
-                    $('meta[name="csrf-token"]').attr("content")
-
-            },
-
-
-            beforeSend: function(){
-
-                $("#btnWithdrawVacancy")
-                    .prop("disabled", true)
-                    .html(
-                        '<span class="spinner-border spinner-border-sm me-2"></span>'
-                        + 'Memproses...'
-                    );
-
-            },
-
-
-            success: function(res){
-
-                $("#withdrawModal").modal("hide");
-
-
-                Swal.fire({
-
-                    icon: "success",
-
-                    title: "Berhasil",
-
-                    text: res.message,
-
-                    timer: 1800,
-
-                    showConfirmButton: false
-
-                });
-
-
-                $('#datatable')
-                    .DataTable()
-                    .ajax
-                    .reload(null, false);
-
-            },
-
-
-            error: function(xhr){
-
-                Swal.fire({
-
-                    icon: "error",
-
-                    title: "Gagal",
-
-                    text:
-                        xhr.responseJSON?.message
-                        ?? "Terjadi kesalahan."
-
-                });
-
-            },
-
-
-            complete: function(){
-
-                $("#btnWithdrawVacancy")
-                    .prop("disabled", false)
-                    .html(
-                        '<i class="fas fa-undo me-2"></i>'
-                        + 'Tarik Pengajuan'
                     );
 
             }
@@ -1279,52 +1078,21 @@
                 */
 
                 {
-
                     data: null,
-
                     render: function(data) {
-
-                        if (
-                            !data.start_date ||
-                            !data.end_date
-                        ) {
-
-                            return `
-                                <span
-                                    class="badge badge-light-warning">
-
-                                    Belum Diatur
-
-                                </span>
-                            `;
-
+                        if (!data.published_at) {
+                            return '<span class="text-muted">Belum diterbitkan</span>';
                         }
 
+                        const publishedAt = moment(data.published_at).format("DD-MM-YYYY HH:mm");
+                        const expiresAt = data.publication_expires_at
+                            ? moment(data.publication_expires_at).format("DD-MM-YYYY HH:mm")
+                            : "Tidak tersedia";
+                        const cost = Number(data.publication_token_cost || 0);
+                        const costLabel = cost > 0 ? `${cost} token` : "Gratis transisi";
 
-                        let start =
-                            moment(data.start_date)
-                                .format("DD-MM-YYYY");
-
-
-                        let end =
-                            moment(data.end_date)
-                                .format("DD-MM-YYYY");
-
-
-                        return `
-                            ${start}
-
-                            <br>
-
-                            <small class="text-muted">
-
-                                s/d ${end}
-
-                            </small>
-                        `;
-
+                        return `${publishedAt}<br><small class="text-muted">Berakhir ${expiresAt} · ${costLabel}</small>`;
                     }
-
                 },
 
 
@@ -1336,82 +1104,25 @@
 
                 {
 
-                    data: "status",
-
+                    data: null,
                     className: "text-center",
-
                     render: function(data) {
-
-                        switch(data) {
-
-                            case "draft":
-
-                                return `
-                                    <span
-                                        class="badge badge-light-secondary">
-
-                                        Draft
-
-                                    </span>
-                                `;
-
-
-                            case "submitted":
-
-                                return `
-                                    <span
-                                        class="badge badge-light-warning">
-
-                                        Submitted
-
-                                    </span>
-                                `;
-
-
-                            case "published":
-
-                                return `
-                                    <span
-                                        class="badge badge-light-success">
-
-                                        Published
-
-                                    </span>
-                                `;
-
-
-                            case "closed":
-
-                                return `
-                                    <span
-                                        class="badge badge-light-danger">
-
-                                        Closed
-
-                                    </span>
-                                `;
-
-
-                            case "rejected":
-
-                                return `
-                                    <span
-                                        class="badge badge-light-dark">
-
-                                        Rejected
-
-                                    </span>
-                                `;
-
-
-                            default:
-
-                                return "-";
-
+                        if (data.status === "published"
+                            && data.publication_expires_at
+                            && new Date(data.publication_expires_at) <= new Date()) {
+                            return '<span class="badge badge-light-secondary">Berakhir</span>';
                         }
 
+                        const labels = {
+                            draft: ["Draft", "secondary"],
+                            published: ["Tayang", "success"],
+                            closed: ["Ditutup", "danger"],
+                            rejected: ["Ditolak", "dark"],
+                            expired: ["Berakhir", "secondary"]
+                        };
+                        const [label, style] = labels[data.status] || ["-", "secondary"];
+                        return `<span class="badge badge-light-${style}">${label}</span>`;
                     }
-
                 },
 
 
@@ -1586,118 +1297,30 @@
                     className: "text-end",
 
                     render: function(data) {
+                        const isCurrentlyPublished = data.status === "published"
+                            && data.publication_expires_at
+                            && new Date(data.publication_expires_at) > new Date();
+                        const canPublish = !isCurrentlyPublished
+                            && ["draft", "rejected", "closed", "expired", "published"].includes(data.status);
 
                         let action = `
-
-                            <!-- DETAIL -->
-                            <a
-                                href="/dashboard-user/job-vacancy/${data.uuid}"
-                                class="btn btn-outline-info btn-sm me-1"
-                                title="Detail"
-                                data-bs-toggle="tooltip">
-
-                                <i class="fas fa-eye"></i>
-
-                            </a>
-
-
-                            <!-- EDIT -->
-                            ${
-                                data.status === "draft" ||
-                                data.status === "rejected"
-
-                                ? `
-
-                                    <a
-                                        href="/dashboard-user/job-vacancy/${data.uuid}/edit"
-                                        class="btn btn-outline-warning btn-sm me-1"
-                                        title="Edit"
-                                        data-bs-toggle="tooltip">
-
-                                        <i class="fas fa-edit"></i>
-
-                                    </a>
-
-                                `
-
-                                : ''
-
-                            }
-
-
-                            <!-- PELAMAR -->
-                            <a
-                                href="/dashboard-user/job-application/${data.uuid}/applicants"
-                                class="btn btn-outline-primary btn-sm me-1"
-                                title="Lihat Pelamar"
-                                data-bs-toggle="tooltip">
-
-                                <i class="fas fa-users"></i>
-
-                            </a>
-
+                            <a href="/dashboard-user/job-vacancy/${data.uuid}" class="btn btn-outline-info btn-sm me-1" aria-label="Detail lowongan">Detail</a>
+                            <a href="/dashboard-user/job-application/${data.uuid}/applicants" class="btn btn-outline-primary btn-sm me-1" aria-label="Lihat pelamar">Pelamar</a>
                         `;
 
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | SUBMITTED
-                        |--------------------------------------------------------------------------
-                        */
-
-                        if (
-                            data.status === "submitted"
-                        ) {
-
-                            action += `
-
-                                <button
-                                    type="button"
-                                    class="btn btn-outline-warning btn-sm me-1"
-                                    onclick="withdrawVacancy('${data.uuid}')"
-                                    title="Tarik Kembali ke Draft"
-                                    data-bs-toggle="tooltip">
-
-                                    <i class="fas fa-undo"></i>
-
-                                </button>
-
-                            `;
-
+                        if (!isCurrentlyPublished && ["draft", "rejected", "closed", "expired", "published"].includes(data.status)) {
+                            action += `<a href="/dashboard-user/job-vacancy/${data.uuid}/edit" class="btn btn-outline-warning btn-sm me-1">Edit</a>`;
                         }
 
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | PUBLISHED
-                        |--------------------------------------------------------------------------
-                        */
-
-                        if (
-                            data.status === "published"
-                        ) {
-
-                            action += `
-
-                                <button
-                                    type="button"
-                                    class="btn btn-outline-danger btn-sm"
-                                    onclick="closeVacancy('${data.uuid}')"
-                                    title="Tutup Lowongan"
-                                    data-bs-toggle="tooltip">
-
-                                    <i class="fas fa-lock"></i>
-
-                                </button>
-
-                            `;
-
+                        if (isCurrentlyPublished) {
+                            action += `<button type="button" class="btn btn-outline-secondary btn-sm me-1" onclick="closeVacancy('${data.uuid}')">Hentikan masa tayang</button>`;
+                        } else if (canPublish) {
+                            action += `<form method="POST" action="/dashboard-user/job-vacancy/${data.uuid}/publish" class="d-inline"><input type="hidden" name="_token" value="{{ csrf_token() }}"><button type="submit" class="btn btn-warning btn-sm">Terbitkan</button></form>`;
                         }
-
 
                         return action;
-
                     }
+
 
                 }
 

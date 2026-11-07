@@ -808,6 +808,7 @@
 
         <form id="formCreateJobVacancy">
 
+            <fieldset @disabled($data->isCurrentlyPublished())>
             @csrf
             @method('PUT')
 
@@ -1151,37 +1152,6 @@
                             </div>
 
 
-                            <!-- Status -->
-
-                            {{-- <div class="col-md-4 mb-7">
-
-                                <label class="form-label required">
-                                    Status
-                                </label>
-
-                                <select
-                                    name="status"
-                                    class="form-select form-select-dark">
-
-                                    <option
-                                        value="draft"
-                                        @selected(old('status',$data->status)=='draft')>
-
-                                        Draft
-
-                                    </option>
-
-                                    <option
-                                        value="submitted"
-                                        @selected(old('status',$data->status)=='submitted')>
-
-                                        Ajukan Review
-
-                                    </option>
-
-                                </select>
-
-                            </div> --}}
 
 
                             <!-- Total Dilihat -->
@@ -1208,48 +1178,15 @@
 
 
                         <div class="row">
-
-                            <!-- Mulai -->
-
-                            <div class="col-md-6 mb-7">
-
-                                <label class="form-label required">
-                                    Tanggal Dibuka
-                                </label>
-
-                                <div class="input-icon">
-
-                                    <input
-                                    type="date"
-                                    name="start_date"
-                                    class="form-control form-control-dark"
-                                    value="{{ old('start_date',$data->start_date) }}">
-
+                            <div class="col-12">
+                                <div class="alert alert-warning" role="note">
+                                    @if($data->isCurrentlyPublished())
+                                        Lowongan ini sedang tayang sampai {{ $data->publication_expires_at->format('d M Y H:i') }}. Edit dinonaktifkan selama tayang.
+                                    @else
+                                        Publikasi atau publikasi ulang memerlukan {{ number_format($settings->job_post_tokens, 0, ',', '.') }} token dan tayang selama {{ number_format($settings->job_post_days, 0, ',', '.') }} hari.
+                                    @endif
                                 </div>
-
                             </div>
-
-
-                            <!-- Tutup -->
-
-                            <div class="col-md-6 mb-7">
-
-                                <label class="form-label required">
-                                    Tanggal Ditutup
-                                </label>
-
-                                <div class="input-icon">
-
-                                    <input
-                                    type="date"
-                                    name="end_date"
-                                    class="form-control form-control-dark"
-                                    value="{{ old('end_date',$data->end_date) }}">
-
-                                </div>
-
-                            </div>
-
                         </div>
 
 
@@ -2117,6 +2054,7 @@
 
             </div>
 
+            </fieldset>
         </form>
 
     </div>
@@ -2137,6 +2075,12 @@
 
         </button>
 
+        @if($data->isCurrentlyPublished())
+            <form method="POST" action="{{ route('dashboard-user.job-vacancy.close-publication', $data->uuid) }}">
+                @csrf
+                <button type="submit" class="btn btn-outline-secondary">Hentikan masa tayang</button>
+            </form>
+        @else
         <div class="ms-auto">
 
             <button
@@ -2168,11 +2112,12 @@
 
                 <i class="fas fa-paper-plane me-2"></i>
 
-                Submit Lowongan
+                Terbitkan lowongan
 
             </button>
 
         </div>
+        @endif
 
     </div>
 
@@ -3103,6 +3048,10 @@
 
 
             function loadVillages(district, selected=""){
+                if (!district) {
+                    $("#village").prop("disabled", true).html('<option value="">Pilih kecamatan terlebih dahulu</option>');
+                    return;
+                }
 
                 $("#village")
                     .prop("disabled", true)
@@ -3378,7 +3327,7 @@
 
                 e.preventDefault();
 
-                submitJob("submitted");
+                submitJob("publish");
 
             });
 
@@ -3389,13 +3338,13 @@
 
             $("#btnDraft").click(function(){
 
-                submitJob("draft");
+                submitJob("save_draft");
 
             });
 
             $("#btnSubmit").click(function(){
 
-                submitJob("submitted");
+                submitJob("publish");
 
             });
 
@@ -3408,7 +3357,7 @@
 
                 let formData = new FormData($("#formCreateJobVacancy")[0]);
 
-                formData.append("status",status);
+                formData.append("workflow_action", status);
 
                 $("#btnSubmit").prop("disabled",true);
                 $("#btnDraft").prop("disabled",true);

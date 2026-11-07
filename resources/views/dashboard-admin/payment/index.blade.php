@@ -214,9 +214,7 @@
                                     User
                                 </th>
 
-                                <th>
-                                    Paket
-                                </th>
+                                <th>Token / riwayat paket</th>
 
                                 <th>
                                     Role
@@ -481,20 +479,12 @@
                         </div>
 
 
-                        {{-- PAKET --}}
-
+                        {{-- TOKEN / RIWAYAT PAKET --}}
                         <div class="col-md-6 mb-5">
-
-                            <label class="text-muted fs-7">
-                                Paket
-                            </label>
-
-                            <div
-                                class="fw-bold"
-                                id="detail_subscription">
-                            </div>
-
+                            <label class="text-muted fs-7">Token / riwayat paket</label>
+                            <div class="fw-bold" id="detail_subscription"></div>
                         </div>
+
 
 
                         {{-- HARGA --}}
@@ -612,23 +602,13 @@
                                 Bukti Pembayaran
                             </label>
 
-                            <div
-                                class="border rounded p-3 text-center">
-
-                                <a
-                                    href="#"
-                                    id="detail_file_link"
-                                    target="_blank">
-
-                                    <img
-                                        src=""
-                                        id="detail_file"
-                                        class="img-fluid rounded"
-                                        style="max-height:400px;"
-                                        alt="Bukti Pembayaran">
-
+                            <div class="border rounded p-3 text-center">
+                                <a href="#" id="detail_file_link" target="_blank" rel="noopener" class="d-inline-block">
+                                    <img src="" id="detail_file" class="img-fluid rounded" style="max-height:400px;" alt="Pratinjau bukti pembayaran">
                                 </a>
-
+                                <a href="#" id="detail_file_pdf" target="_blank" rel="noopener" class="btn btn-outline-primary" style="display:none;">
+                                    Buka bukti pembayaran PDF
+                                </a>
                             </div>
 
                         </div>
@@ -826,15 +806,15 @@ $(document).ready(function () {
 
 
             {
-                data: "subscription",
+                data: null,
 
                 render: function (data) {
 
-                    if (!data) {
-                        return '-';
+                    if (data.token_quantity) {
+                        return `${data.token_quantity} token`;
                     }
 
-                    return data.name ?? '-';
+                    return data.subscription?.name ?? '-';
 
                 }
 
@@ -1011,7 +991,7 @@ $(document).ready(function () {
                     |--------------------------------------------------------------------------
                     */
 
-                    if (data.status === 'verification') {
+                    if (data.status === 'verification' && data.token_quantity) {
 
                         action += `
 
@@ -1291,9 +1271,10 @@ function approveData(uuid)
 {
     Swal.fire({
 
-        title: 'Approve Pembayaran?',
+        title: 'Setujui pembayaran?',
 
-        text: 'Pembayaran ini akan disetujui dan subscription user akan diaktifkan.',
+        text: 'Pembayaran ini akan disetujui dan token organisasi akan ditambahkan ke saldo.',
+
 
         icon: 'question',
 
@@ -1482,13 +1463,15 @@ function detailData(uuid)
 
             /*
             |--------------------------------------------------------------------------
-            | SUBSCRIPTION
+            | TOKEN / LEGACY PACKAGE
             |--------------------------------------------------------------------------
             */
 
             $('#detail_subscription')
                 .text(
-                    data.subscription?.name ?? '-'
+                    data.token_quantity
+                        ? `${data.token_quantity} token`
+                        : (data.subscription?.name ?? '-')
                 );
 
 
@@ -1658,39 +1641,21 @@ function detailData(uuid)
             */
 
             if (data.file) {
+                const fileUrl = "/uploads/payment/" + data.file;
+                const fileName = String(data.file).split(/[?#]/)[0];
 
-                let fileUrl =
-                    "/uploads/payment/" +
-                    data.file;
-
-
-                $('#detail_file')
-                    .attr(
-                        'src',
-                        fileUrl
-                    );
-
-
-                $('#detail_file_link')
-                    .attr(
-                        'href',
-                        fileUrl
-                    )
-                    .show();
-
-            }
-            else {
-
-                $('#detail_file')
-                    .attr(
-                        'src',
-                        ''
-                    );
-
-
-                $('#detail_file_link')
-                    .hide();
-
+                if (/\.pdf$/i.test(fileName)) {
+                    $('#detail_file_link').hide();
+                    $('#detail_file_pdf').attr('href', fileUrl).show();
+                } else {
+                    $('#detail_file_pdf').hide();
+                    $('#detail_file').attr('src', fileUrl);
+                    $('#detail_file_link').attr('href', fileUrl).show();
+                }
+            } else {
+                $('#detail_file').attr('src', '');
+                $('#detail_file_link').hide();
+                $('#detail_file_pdf').hide();
             }
 
 

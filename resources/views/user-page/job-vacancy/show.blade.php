@@ -1097,17 +1097,20 @@
 
                                     </span>
 
-                                    @if($job->updated_at)
-
+                                    @if($job->published_at)
                                         <span>
                                             <i class="ki-duotone ki-calendar"></i>
-                                            Diposting
-                                            {{ $job->updated_at->diffForHumans() }}
+                                            Diposting {{ $job->published_at->diffForHumans() }}
                                         </span>
-
                                     @endif
 
                                 </div>
+
+                        @unless($isCurrentlyPublished)
+                            <div class="alert alert-warning" role="status">
+                                Lowongan ini sudah berakhir atau ditutup. Lamaran baru tidak dapat dikirim.
+                            </div>
+                        @endunless
 
                             </div>
 
@@ -1158,21 +1161,11 @@
                             </div>
 
 
-                            @if($job->end_date)
-
+                            @if($job->publication_expires_at)
                                 <div class="summary-item">
-
-                                    <span>Deadline</span>
-
-                                    <strong>
-
-                                        {{ \Carbon\Carbon::parse($job->end_date)
-                                            ->translatedFormat('d M Y') }}
-
-                                    </strong>
-
+                                    <span>Masa Tayang Sampai</span>
+                                    <strong>{{ $job->publication_expires_at->translatedFormat('d M Y H:i') }}</strong>
                                 </div>
-
                             @endif
 
                         </div>
@@ -1234,6 +1227,11 @@
 
                                 </button>
 
+
+                            @elseif(!$isCurrentlyPublished)
+                                <button type="button" class="btn-apply flex-grow-1" disabled>
+                                    Lowongan berakhir
+                                </button>
 
                             @else
 
@@ -1429,20 +1427,20 @@
                         </div>
 
 
-                        {{-- PERIODE KERJA --}}
-                        @if($job->start_date || $job->end_date)
+                        {{-- MASA TAYANG --}}
+                        @if($job->published_at || $job->publication_expires_at)
 
                             <div class="detail-info-row mt-3">
 
                                 <span class="detail-info-label">
-                                    Periode
+                                    Masa tayang
                                 </span>
 
                                 <span class="detail-info-value">
 
-                                    @if($job->start_date)
+                                    @if($job->published_at)
 
-                                        {{ \Carbon\Carbon::parse($job->start_date)
+                                        {{ $job->published_at
                                             ->translatedFormat('d M Y') }}
 
                                     @else
@@ -1455,9 +1453,9 @@
                                         s/d
                                     </span>
 
-                                    @if($job->end_date)
+                                    @if($job->publication_expires_at)
 
-                                        {{ \Carbon\Carbon::parse($job->end_date)
+                                        {{ $job->publication_expires_at
                                             ->translatedFormat('d M Y') }}
 
                                     @else
@@ -2063,14 +2061,14 @@
                                 Tertarik dengan posisi ini?
                             </strong>
 
-                            @if($job->end_date)
+                            @if($job->publication_expires_at)
 
                                 <span>
 
                                     Deadline:
 
                                     <b>
-                                        {{ \Carbon\Carbon::parse($job->end_date)
+                                        {{ $job->publication_expires_at
                                             ->translatedFormat('d M Y') }}
                                     </b>
 
@@ -2133,6 +2131,11 @@
 
                             </button>
 
+
+                        @elseif(!$isCurrentlyPublished)
+                            <button type="button" class="btn-apply flex-grow-1" disabled>
+                                Lowongan berakhir
+                            </button>
 
                         @else
 
@@ -2394,6 +2397,10 @@
                             */
 
                             $buttons.each(function() {
+                                @unless($isCurrentlyPublished)
+                                    $(this).text('Lowongan berakhir').prop('disabled', true).removeAttr('onclick');
+                                    return;
+                                @endunless
 
                                 $(this)
                                     .html('Lamar Sekarang')

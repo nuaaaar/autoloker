@@ -3,18 +3,13 @@
 namespace App\Http\Controllers\UserPage;
 
 use App\Models\TrainingApplication;
-
 use App\Http\Controllers\Controller;
-
 use Illuminate\Http\Request;
-
 use App\Models\Training;
-
 use App\Models\Security;
-
 use App\Models\CleaningService;
 use App\Services\NotificationService;
-
+use Illuminate\Support\Facades\DB;
 use Auth;
 
 class TrainingApplicationController extends Controller
@@ -127,82 +122,64 @@ class TrainingApplicationController extends Controller
         | CEK APAKAH SUDAH MEMILIKI PENDAFTARAN AKTIF
         |--------------------------------------------------------------------------
         */
-        $application = TrainingApplication::where(
-            $ownerColumn,
-            $profile->id
-        )
-            ->where('training_id', $training->id)
-            ->whereIn('status', [
-                'pending',
-                'approved'
-            ])
-            ->first();
+        $securityId = Auth::user()->user_security?->security?->id;
+        $cleaningServiceId = Auth::user()->user_cleaning_service?->cleaning_service?->id;
+        $result = DB::transaction(function () use ($training, $ownerColumn, $profile, $securityId, $cleaningServiceId): array {
+            $training = Training::query()->lockForUpdate()->findOrFail($training->id);
 
-        if ($application) {
-
-            if ($application->status === 'approved') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Anda sudah terdaftar pada pelatihan ini.'
-                ], 422);
+            $application = TrainingApplication::where('training_id', $training->id)
+                ->where(function ($profiles) use ($securityId, $cleaningServiceId) {
+                    if ($securityId !== null) {
+                        $profiles->where('security_id', $securityId);
+                    }
+                    if ($cleaningServiceId !== null) {
+                        $method = $securityId !== null ? 'orWhere' : 'where';
+                        $profiles->{$method}('cleaning_service_id', $cleaningServiceId);
+                    }
+                })
+                ->first();
+            if ($application) {
+                return [
+                    'error' => match ($application->status) {
+                        'approved' => 'Anda sudah terdaftar pada pelatihan ini.',
+                        'pending' => 'Pendaftaran Anda masih menunggu persetujuan.',
+                        default => 'Anda sudah pernah mendaftar pada pelatihan ini.',
+                    },
+                ];
             }
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Pendaftaran Anda masih menunggu persetujuan.'
-            ], 422);
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | CEK TANGGAL MULAI
-        |--------------------------------------------------------------------------
-        */
-        if (
-            $training->start_date &&
-            now()->startOfDay()->gt($training->start_date)
-        ) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Pendaftaran pelatihan sudah ditutup.'
-            ], 422);
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | CEK KUOTA
-        |--------------------------------------------------------------------------
-        | HANYA YANG APPROVED
-        |--------------------------------------------------------------------------
-        */
-        if ($training->quota > 0) {
-
-            $totalApproved = TrainingApplication::where(
-                'training_id',
-                $training->id
-            )
-                ->where('status', 'approved')
-                ->count();
-
-            if ($totalApproved >= $training->quota) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Kuota peserta pelatihan sudah penuh.'
-                ], 422);
+            if (
+                !$training->isCurrentlyPublished()
+                || ($training->start_date && now()->gte($training->start_date))
+            ) {
+                return ['error' => 'Pendaftaran pelatihan sudah ditutup.'];
             }
+
+            if ($training->quota > 0) {
+                $totalApproved = TrainingApplication::where('training_id', $training->id)
+                    ->where('status', 'approved')
+                    ->count();
+                if ($totalApproved >= $training->quota) {
+                    return ['error' => 'Kuota peserta pelatihan sudah penuh.'];
+                }
+            }
+
+            TrainingApplication::create([
+                $ownerColumn => $profile->id,
+                'training_id' => $training->id,
+                'status' => 'pending',
+            ]);
+
+            return ['training' => $training];
+        });
+
+        if (isset($result['error'])) {
+            return response()->json([
+                'success' => false,
+                'message' => $result['error'],
+            ], 422);
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | BUAT PENDAFTARAN
-        |--------------------------------------------------------------------------
-        */
-        TrainingApplication::create([
-            $ownerColumn => $profile->id,
-            'training_id' => $training->id,
-            'status' => 'pending',
-        ]);
-
+        $training = $result['training'];
         $owner = $training->company?->userCompany?->user ?? $training->bujp?->userBujp?->user;
 
         if ($owner) {

@@ -800,6 +800,14 @@
 
             @csrf
             @method('PUT')
+            <div class="alert alert-warning mx-10 mt-6" role="note">
+                @if($data->isCurrentlyPublished())
+                    Pelatihan ini sedang tayang sampai {{ $data->publication_expires_at->format('d M Y H:i') }}. Jadwal kegiatan tidak dapat diedit selama publikasi aktif.
+                @else
+                    Publikasi atau publikasi ulang memerlukan {{ number_format($settings->training_post_tokens, 0, ',', '.') }} token dan masa tayang iklan {{ number_format($settings->training_post_days, 0, ',', '.') }} hari. Jadwal kegiatan tetap terpisah.
+                @endif
+            </div>
+            <fieldset @disabled($data->isCurrentlyPublished())>
 
             <div class="p-10">
 
@@ -1273,29 +1281,6 @@
 
                         </div>
 
-                        {{-- <div class="col-md-4 mb-7">
-
-                            <label class="form-label required">
-                                Status
-                            </label>
-
-                            <select
-                                class="form-select form-select-dark"
-                                name="status">
-
-                                <option value="draft"
-                                    {{ $data->status=='draft'?'selected':'' }}>
-                                    Draft
-                                </option>
-
-                                <option value="submitted"
-                                    {{ $data->status=='submitted'?'selected':'' }}>
-                                    Ajukan Review
-                                </option>
-
-                            </select> --}}
-
-                        {{-- </div> --}}
 
                         <div class="col-md-4 mb-7">
 
@@ -2033,37 +2018,6 @@
 
                     <div class="row">
 
-                        <!-- Status -->
-
-                        {{-- <div class="col-lg-6 mb-8">
-
-                            <label class="form-label required">
-                                Status Publikasi
-                            </label>
-
-                            <select
-                                name="status"
-                                class="form-select">
-
-                                <option
-                                    value="draft"
-                                    {{ $data->status=='draft' ? 'selected' : '' }}>
-                                    Simpan sebagai Draft
-                                </option>
-
-                                <option
-                                    value="submitted"
-                                    {{ $data->status=='submitted' ? 'selected' : '' }}>
-                                    Ajukan untuk Dipublikasikan
-                                </option>
-
-                            </select>
-
-                            <small class="text-muted">
-                                Draft dapat diedit kembali kapan saja. Pengajuan akan direview oleh Admin.
-                            </small>
-
-                        </div> --}}
 
 
                         <!-- Total Dilihat -->
@@ -2269,6 +2223,7 @@
 
             </div>
 
+            </fieldset>
         </form>
 
     </div>
@@ -2289,6 +2244,12 @@
 
         </button>
 
+        @if($data->isCurrentlyPublished())
+            <form method="POST" action="{{ route('dashboard-user.training.close-publication', $data->uuid) }}">
+                @csrf
+                <button type="submit" class="btn btn-outline-secondary">Hentikan masa tayang</button>
+            </form>
+        @else
         <div class="ms-auto">
 
             <button
@@ -2320,11 +2281,12 @@
 
                 <i class="fas fa-paper-plane me-2"></i>
 
-                Submit Lowongan
+                Terbitkan pelatihan
 
             </button>
 
         </div>
+        @endif
 
     </div>
 
@@ -2726,6 +2688,10 @@
 
 
             function loadVillages(district, selected=""){
+                if (!district) {
+                    $("#village").prop("disabled", true).html('<option value="">Pilih kecamatan terlebih dahulu</option>');
+                    return;
+                }
 
                 $("#village")
                     .prop("disabled", true)
@@ -3335,7 +3301,7 @@
 
                 e.preventDefault();
 
-                submitTraining("submitted");
+                submitTraining("publish");
 
             });
 
@@ -3346,13 +3312,13 @@
 
             $("#btnDraft").click(function(){
 
-                submitTraining("draft");
+                submitTraining("save_draft");
 
             });
 
             $("#btnSubmit").click(function(){
 
-                submitTraining("submitted");
+                submitTraining("publish");
 
             });
 
@@ -3363,7 +3329,7 @@
 
             function submitTraining(status){
 
-                if(status=="submitted" && !$("#confirmTraining").is(":checked")){
+                if(status=="publish" && !$("#confirmTraining").is(":checked")){
 
                     Swal.fire({
                         icon:"warning",
@@ -3376,7 +3342,7 @@
 
                 let formData = new FormData($("#formCreateTraining")[0]);
 
-                formData.set("status", status);
+                formData.set("workflow_action", status);
 
                 $("#btnSubmit").prop("disabled", true);
                 $("#btnDraft").prop("disabled", true);

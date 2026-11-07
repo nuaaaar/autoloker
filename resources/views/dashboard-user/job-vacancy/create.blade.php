@@ -1154,29 +1154,6 @@
                             </div>
 
 
-                            <!-- Status -->
-
-                            {{-- <div class="col-md-4 mb-7">
-
-                                <label class="form-label required">
-                                    Status
-                                </label>
-
-                                <select
-                                    name="status"
-                                    class="form-select form-select-dark">
-
-                                    <option value="draft">
-                                        Draft
-                                    </option>
-
-                                    <option value="submitted">
-                                        Ajukan Review
-                                    </option>
-
-                                </select>
-
-                            </div> --}}
 
 
                             <!-- Total Dilihat -->
@@ -1203,46 +1180,11 @@
 
 
                         <div class="row">
-
-                            <!-- Mulai -->
-
-                            <div class="col-md-6 mb-7">
-
-                                <label class="form-label required">
-                                    Tanggal Dibuka
-                                </label>
-
-                                <div class="input-icon">
-
-                                    <input
-                                        type="date"
-                                        name="start_date"
-                                        class="form-control form-control-dark">
-
+                            <div class="col-12">
+                                <div class="alert alert-warning" role="note">
+                                    Publikasi langsung memerlukan {{ number_format($settings->job_post_tokens, 0, ',', '.') }} token dan tayang selama {{ number_format($settings->job_post_days, 0, ',', '.') }} hari. Masa tayang dimulai saat lowongan diterbitkan.
                                 </div>
-
                             </div>
-
-
-                            <!-- Tutup -->
-
-                            <div class="col-md-6 mb-7">
-
-                                <label class="form-label required">
-                                    Tanggal Ditutup
-                                </label>
-
-                                <div class="input-icon">
-
-                                    <input
-                                        type="date"
-                                        name="end_date"
-                                        class="form-control form-control-dark">
-
-                                </div>
-
-                            </div>
-
                         </div>
 
 
@@ -2107,7 +2049,7 @@
 
                 <i class="fas fa-paper-plane me-2"></i>
 
-                Submit Lowongan
+                Terbitkan lowongan
 
             </button>
 
@@ -3682,7 +3624,7 @@
 
                 e.preventDefault();
 
-                submitJob("submitted");
+                submitJob("publish");
 
             });
 
@@ -3693,13 +3635,13 @@
 
             $("#btnDraft").click(function(){
 
-                submitJob("draft");
+                submitJob("save_draft");
 
             });
 
             $("#btnSubmit").click(function(){
 
-                submitJob("submitted");
+                submitJob("publish");
 
             });
 
@@ -3712,7 +3654,7 @@
 
                 let formData = new FormData($("#formCreateJobVacancy")[0]);
 
-                formData.append("status",status);
+                formData.append("workflow_action", status);
 
                 $("#btnSubmit").prop("disabled",true);
                 $("#btnDraft").prop("disabled",true);

@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests\Api;
 
-use App\Services\Api\TrainingRules;
+use App\Services\Api\JobVacancyRules;
 
-class OwnedTrainingSubmitRequest extends ApiFormRequest
+class OwnedJobVacancyPublishRequest extends ApiFormRequest
 {
     public function authorize(): bool
     {
@@ -13,6 +13,6 @@ class OwnedTrainingSubmitRequest extends ApiFormRequest
 
     public function rules(): array
     {
-        return TrainingRules::submit();
+        return JobVacancyRules::publish();
     }
 }

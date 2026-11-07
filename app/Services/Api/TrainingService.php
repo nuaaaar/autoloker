@@ -4,6 +4,7 @@ namespace App\Services\Api;
 
 use App\Models\Company;
 use App\Models\Training;
+use App\Services\TokenBillingService;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +20,7 @@ class TrainingService
         unset($data['workflow_action']);
         $data = TrainingRules::normalizeArrayInputs($data);
         [$data, $locationErrors] = $this->normalizeLocation($data);
-        $this->validatePayload($data, $action === 'submit', $locationErrors);
+        $this->validatePayload($data, $action === 'publish', $locationErrors);
 
         $company = Company::query()->findOrFail($owner['id']);
         $data['discount'] = $data['discount'] ?? 0;
@@ -30,37 +31,47 @@ class TrainingService
         $attributes['registered'] = 0;
         $attributes['total_clicked'] = 0;
         $attributes['duration_day'] = $this->durationDay($data['start_date'] ?? null, $data['end_date'] ?? null);
-        $attributes['status'] = $action === 'submit' ? 'submitted' : 'draft';
+        $attributes['status'] = 'draft';
         $attributes['reason_rejected'] = null;
 
-        return DB::transaction(fn (): Training => Training::create($attributes));
+        return DB::transaction(function () use ($attributes, $action): Training {
+            $training = Training::create($attributes);
+
+            return $action === 'publish'
+                ? app(TokenBillingService::class)->publish($training)
+                : $training;
+        });
     }
 
     public function update(Training $training, array $data): Training
     {
         $data = TrainingRules::normalizeArrayInputs($data);
-        $merged = array_merge($this->payload($training), $data);
-        [$merged, $locationErrors] = $this->normalizeLocation($merged);
-        $this->validatePayload($merged, false, $locationErrors);
-        if (array_key_exists('discount', $data)) {
-            $data['discount'] = $data['discount'] ?? 0;
-        }
 
-        foreach (['province', 'city'] as $field) {
-            if (array_key_exists($field, $data)) {
-                $data[$field] = $merged[$field];
+        return DB::transaction(function () use ($training, $data): Training {
+            $training = Training::query()->whereKey($training->getKey())->lockForUpdate()->firstOrFail();
+            app(TokenBillingService::class)->assertEditable($training);
+
+            $merged = array_merge($this->payload($training), $data);
+            [$merged, $locationErrors] = $this->normalizeLocation($merged);
+            $this->validatePayload($merged, false, $locationErrors);
+            if (array_key_exists('discount', $data)) {
+                $data['discount'] = $data['discount'] ?? 0;
             }
-        }
 
-        $attributes = $this->attributes($data);
-        if (array_key_exists('start_date', $data) || array_key_exists('end_date', $data)) {
-            $attributes['duration_day'] = $this->durationDay(
-                $merged['start_date'] ?? null,
-                $merged['end_date'] ?? null,
-            );
-        }
+            foreach (['province', 'city'] as $field) {
+                if (array_key_exists($field, $data)) {
+                    $data[$field] = $merged[$field];
+                }
+            }
 
-        return DB::transaction(function () use ($training, $attributes): Training {
+            $attributes = $this->attributes($data);
+            if (array_key_exists('start_date', $data) || array_key_exists('end_date', $data)) {
+                $attributes['duration_day'] = $this->durationDay(
+                    $merged['start_date'] ?? null,
+                    $merged['end_date'] ?? null,
+                );
+            }
+
             if (array_key_exists('quota', $attributes)) {
                 $this->ensureQuotaAllowsActiveParticipants($training, $attributes['quota']);
             }
@@ -74,28 +85,18 @@ class TrainingService
         });
     }
 
-    public function submit(Training $training): Training
+    public function publish(Training $training): Training
     {
-        if (! in_array($training->status, ['draft', 'rejected'], true)) {
-            $this->throwValidation([
-                'status' => ['Hanya pelatihan berstatus draf atau ditolak yang dapat diajukan.'],
-            ]);
-        }
-
         $payload = $this->payload($training);
         [$payload, $locationErrors] = $this->normalizeLocation($payload);
         $this->validatePayload($payload, true, $locationErrors);
 
-        $durationDay = $this->durationDay($payload['start_date'] ?? null, $payload['end_date'] ?? null);
+        return DB::transaction(function () use ($training): Training {
+            $training = Training::query()->whereKey($training->getKey())->lockForUpdate()->firstOrFail();
+            $training->duration_day = $this->durationDay($training->start_date, $training->end_date);
+            $training->save();
 
-        return DB::transaction(function () use ($training, $durationDay): Training {
-            $training->forceFill([
-                'status' => 'submitted',
-                'reason_rejected' => null,
-                'duration_day' => $durationDay,
-            ])->save();
-
-            return $training->fresh();
+            return app(TokenBillingService::class)->publish($training);
         });
     }
 

@@ -13,10 +13,12 @@ class UserOrderManualResource extends JsonResource
             'id' => $this->id,
             'uuid' => $this->uuid,
             'user_id' => $this->user_id,
-            'master_subscription_id' => $this->master_subscription_id,
+            'token_wallet_id' => $this->token_wallet_id,
+            'token_quantity' => $this->token_quantity,
+            'idr_per_token' => $this->idr_per_token,
             'role' => $this->role,
             'order_number' => $this->order_number,
-            'price' => $this->price,
+            'price' => $this->token_quantity !== null ? (int) $this->price : $this->price,
             'payment_method' => $this->payment_method,
             'payment_account' => $this->payment_account,
             'payment_date' => $this->payment_date,
@@ -29,15 +31,6 @@ class UserOrderManualResource extends JsonResource
             'expired_at' => $this->expired_at,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-            'subscription' => $this->whenLoaded('subscription', function (): ?array {
-                $subscription = $this->subscription;
-
-                if (! $subscription) {
-                    return null;
-                }
-
-                return MasterSubscriptionResource::shape($subscription);
-            }),
         ];
     }
 }

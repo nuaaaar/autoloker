@@ -113,6 +113,9 @@ class TrainingListingTest extends TestCase
         return array_merge([
             'title' => 'Security Training', 'provider' => 'Training Provider',
             'category_role' => 'security', 'status' => 'published', 'quota' => 10,
+            'published_at' => now()->subDay(),
+            'publication_expires_at' => now()->addDays(29),
+            'publication_token_cost' => 0, 'publication_cycle' => 1,
             'start_date' => now()->addDays(7)->toDateString(),
         ], $overrides);
     }

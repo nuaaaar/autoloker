@@ -41,11 +41,7 @@ class JobVacancyController extends Controller
                 },
             ])
             ->where('category', $category)
-            ->where('status', 'published')
-            ->where(function (Builder $query): void {
-                $query->whereNull('end_date')
-                    ->orWhereDate('end_date', '>=', now()->toDateString());
-            });
+            ->currentlyPublished();
         if (filled($filters['search'] ?? null)) {
             $search = $filters['search'];
 
@@ -126,35 +122,16 @@ class JobVacancyController extends Controller
         $query = JobVacancy::query()->where('uuid', $uuid);
 
         if ($user->role === 'company') {
-            $companyId = $user->user_company?->company?->id;
-            $query->where('company_id', $companyId ?? 0);
-        } else {
-            $securityId = $user->user_security?->security?->id;
-            $cleaningServiceId = $user->user_cleaning_service?->cleaning_service?->id;
-            $query->whereHas('applications', function (Builder $applications) use ($securityId, $cleaningServiceId): void {
-                if ($securityId === null && $cleaningServiceId === null) {
-                    $applications->whereRaw('1 = 0');
-                    return;
-                }
-                $applications->where(function (Builder $profiles) use ($securityId, $cleaningServiceId): void {
-                    if ($securityId !== null) {
-                        $profiles->where('security_id', $securityId);
-                    }
-                    if ($cleaningServiceId !== null) {
-                        $method = $securityId !== null ? 'orWhere' : 'where';
-                        $profiles->{$method}('cleaning_service_id', $cleaningServiceId);
-                    }
-                });
-            });
+            $query->where('company_id', $user->user_company?->company?->id ?? 0);
         }
 
         $vacancy = $query->with(['bujp:id,company_name,logo', 'company:id,company_name,logo'])->firstOrFail();
 
         if ($user->role !== 'company') {
+            $securityId = $user->user_security?->security?->id;
+            $cleaningServiceId = $user->user_cleaning_service?->cleaning_service?->id;
             $application = $vacancy->applications()
-                ->where(function (Builder $profiles) use ($user): void {
-                    $securityId = $user->user_security?->security?->id;
-                    $cleaningServiceId = $user->user_cleaning_service?->cleaning_service?->id;
+                ->where(function (Builder $profiles) use ($securityId, $cleaningServiceId): void {
                     if ($securityId !== null) {
                         $profiles->where('security_id', $securityId);
                     }
@@ -163,12 +140,27 @@ class JobVacancyController extends Controller
                         $profiles->{$method}('cleaning_service_id', $cleaningServiceId);
                     }
                 })
-                ->firstOrFail();
-            $vacancy->setAttribute('is_applied', true);
-            $vacancy->setAttribute('application_uuid', $application->uuid);
-            $vacancy->setAttribute('application_status', $application->status);
-            $vacancy->setAttribute('applied_at', $application->created_at);
-            $vacancy->setAttribute('application_updated_at', $application->updated_at);
+                ->first();
+
+            $roleCategory = match ($user->role) {
+                'satpam' => 'security',
+                'cs' => 'cs',
+                default => null,
+            };
+            if (
+                !in_array($vacancy->status, ['published', 'closed'], true)
+                || ($vacancy->category !== $roleCategory && !$application)
+            ) {
+                abort(404);
+            }
+
+            if ($application) {
+                $vacancy->setAttribute('is_applied', true);
+                $vacancy->setAttribute('application_uuid', $application->uuid);
+                $vacancy->setAttribute('application_status', $application->status);
+                $vacancy->setAttribute('applied_at', $application->created_at);
+                $vacancy->setAttribute('application_updated_at', $application->updated_at);
+            }
         }
 
         return response()->json([

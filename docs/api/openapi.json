@@ -3,7 +3,7 @@
   "info": {
     "title": "Autoloker API",
     "version": "1.0.0",
-    "description": "API documentation for mobile authentication, profile editing, security work history CRUD, security certificate CRUD, public job vacancy and training listings, company- and company-owned job vacancy and training management, job vacancy and training applications, paginated vacancy, published training, registered training listings, owned application status follow-up, active subscription plans, manual subscription order payments and proof uploads, bank references, hierarchical location references, and FCM device token enrollment and removal.",
+    "description": "API documentation for authentication, profile editing, public listings and applications, organization-managed job vacancies and trainings, token wallets and manual token purchases, references, and device tokens.",
     "license": {
       "name": "Proprietary"
     }
@@ -25,8 +25,12 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": {"$ref": "#/components/schemas/ForgotPasswordRequest"},
-              "example": {"email": "user@example.com"}
+              "schema": {
+                "$ref": "#/components/schemas/ForgotPasswordRequest"
+              },
+              "example": {
+                "email": "user@example.com"
+              }
             }
           }
         },
@@ -35,23 +39,53 @@
             "description": "Request accepted without revealing account or delivery state",
             "content": {
               "application/json": {
-                "schema": {"$ref": "#/components/schemas/ForgotPasswordResponse"},
-                "example": {"status": true, "message": "Jika alamat email terdaftar, kami akan mengirimkan tautan untuk mengatur ulang kata sandi."}
+                "schema": {
+                  "$ref": "#/components/schemas/ForgotPasswordResponse"
+                },
+                "example": {
+                  "status": true,
+                  "message": "Jika alamat email terdaftar, kami akan mengirimkan tautan untuk mengatur ulang kata sandi."
+                }
               }
             }
           },
           "422": {
             "description": "Invalid email input",
-            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ValidationErrorResponse"}}}
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too many requests from this IP",
-            "headers": {"Retry-After": {"description": "Seconds until requests are allowed again", "schema": {"type": "integer"}}},
-            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until requests are allowed again",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           },
           "503": {
             "description": "Request could not be queued",
-            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}}
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -89,6 +123,94 @@
           },
           "422": {
             "description": "Invalid credentials, role mismatch, inactive account, or validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/auth/google/login": {
+      "post": {
+        "summary": "Log in with a Google ID token",
+        "description": "Verifies the Google ID token against the configured server client ID. Authenticates an already linked Google subject, or automatically links a verified Google email to an existing local account with the same email. It does not create users; Google account registration remains available through the separate register endpoint.",
+        "operationId": "loginWithGoogle",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoogleAuthRequest"
+              },
+              "example": {
+                "role": "security",
+                "id_token": "<Google OAuth ID token>"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthenticationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid ID token, unregistered Google account, role mismatch, or inactive account",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/auth/google/register": {
+      "post": {
+        "summary": "Register and log in with a Google ID token",
+        "description": "Creates a security, cleaning service, or company account from verified Google identity claims and returns API tokens immediately. The Google server client ID must match the Flutter serverClientId.",
+        "operationId": "registerWithGoogle",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoogleAuthRequest"
+              },
+              "example": {
+                "role": "security",
+                "id_token": "<Google OAuth ID token>"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Account registered and logged in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthenticationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid ID token, duplicate email or Google subject, or invalid role",
             "content": {
               "application/json": {
                 "schema": {
@@ -278,12 +400,52 @@
         "summary": "Get a vacancy owned by the company or applied to by the authenticated worker",
         "description": "Requires bearer authentication. Companies may read only their own vacancy. Workers may read only a vacancy with their application linked to either their security or cleaning-service profile, including unpublished vacancies only when they have an application. Other records return 404. Applicant deep links `autoloker://job-vacancies/{uuid}` map here; owner notifications remain under `/api/company/job-vacancies/{uuid}`.",
         "operationId": "showJobVacancy",
-        "security": [{"bearerAuth": []}],
-        "parameters": [{"name": "uuid", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "responses": {
-          "200": {"description": "Public vacancy resource, including application fields for an authorized applicant"},
-          "401": {"$ref": "#/components/responses/Unauthenticated"},
-          "404": {"description": "Vacancy not found or not owned/applied to"}
+          "200": {
+            "description": "Public vacancy resource, including application fields for an authorized applicant",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "job_vacancy": {
+                          "type": "object"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "404": {
+            "description": "Vacancy not found or not owned/applied to"
+          }
         }
       }
     },
@@ -321,7 +483,6 @@
                 "all",
                 "draft",
                 "rejected",
-                "submitted",
                 "published",
                 "closed"
               ],
@@ -367,7 +528,7 @@
       },
       "post": {
         "summary": "Create a job vacancy for the authenticated company",
-        "description": "Creates a company-owned job vacancy as a draft by default. For save_draft, only position is required. Set workflow_action to submit to validate and submit the vacancy directly for review; submit requires every field listed in the complete request example. Ownership, status, timestamps, provider, and application counters are server-managed. The request uses responsibilities and quota; these map to responsibility and kuota in storage and response data. The response-only fields start_date, fee_type, gender, district, and village are not accepted in this request.",
+        "description": "Creates a company-owned job vacancy as a free draft by default. Use workflow_action=publish to validate complete publication fields and publish directly, deducting the current configured token cost atomically. Insufficient balance does not leave a new draft behind. Ownership, status and publication dates are server-managed. Publication duration is configured by the administrator; start_date and end_date are not accepted as posting expiry inputs.",
         "operationId": "createOwnedJobVacancy",
         "security": [
           {
@@ -379,13 +540,16 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateOwnedJobVacancyRequest"
+                "$ref": "#/components/schemas/CreateOwnedJobVacancyRequest",
+                "description": "For security publication, send an active title from GET /api/masters/positions?category=security. Komandan Regu is an example; replace it with an actual returned title."
               },
               "examples": {
                 "draft": {
                   "summary": "Create a complete draft from a real vacancy",
                   "value": {
                     "position": "Satpam Objek Vital (Obvit) - Test 10",
+                    "category": "security",
+                    "security_position": "Komandan Regu",
                     "description_work": "Pengamanan pada objek vital seperti pembangkit listrik, pelabuhan, bandara dan kilang minyak.",
                     "province": "KALIMANTAN TIMUR",
                     "city": "KOTA BALIKPAPAN",
@@ -426,14 +590,15 @@
                     "is_show_fee": true,
                     "is_urgent": true,
                     "quota": 2,
-                    "end_date": "2026-12-31",
                     "workflow_action": "save_draft"
                   }
                 },
-                "submit": {
-                  "summary": "Create and submit a complete vacancy",
+                "publish": {
+                  "summary": "Create and publish a complete vacancy",
                   "value": {
                     "position": "Satpam Objek Vital (Obvit) - Test 10",
+                    "category": "security",
+                    "security_position": "Komandan Regu",
                     "description_work": "Pengamanan pada objek vital seperti pembangkit listrik, pelabuhan, bandara dan kilang minyak.",
                     "province": "KALIMANTAN TIMUR",
                     "city": "KOTA BALIKPAPAN",
@@ -474,8 +639,7 @@
                     "is_show_fee": true,
                     "is_urgent": true,
                     "quota": 2,
-                    "end_date": "2026-12-31",
-                    "workflow_action": "submit"
+                    "workflow_action": "publish"
                   }
                 }
               }
@@ -548,7 +712,7 @@
       },
       "patch": {
         "summary": "Update an owned job vacancy",
-        "description": "Partially updates a job vacancy owned by the authenticated company. Omitted fields remain unchanged and null clears nullable fields. responsibilities, certificate, competency_scheme, and facility replace their complete existing arrays. For every minimum/maximum pair, the minimum must be less than or equal to the maximum. Province and city must identify a valid location pair when supplied. workflow_action, start_date, fee_type, gender, ownership, status, timestamps, and application counters are not accepted; submit the vacancy separately using the submit endpoint.",
+        "description": "Partially updates a job vacancy owned by the authenticated company. Omitted fields remain unchanged and null clears nullable fields. responsibilities, certificate, competency_scheme, and facility replace their complete existing arrays. For every minimum/maximum pair, the minimum must be less than or equal to the maximum. Province and city must identify a valid location pair when supplied. workflow_action, start_date, fee_type, gender, ownership, status, timestamps, and application counters are not accepted; publish the vacancy separately using the publish endpoint. Active publications cannot be edited. Close the listing or wait until its publication period ends before editing; edits never reset expiry or create free publication rights.",
         "operationId": "updateOwnedJobVacancy",
         "security": [
           {
@@ -637,13 +801,12 @@
         }
       }
     },
-    "/api/company/job-vacancies/{uuid}/submit": {
+    "/api/company/job-vacancies/{uuid}/publish": {
       "parameters": [
         {
           "name": "uuid",
           "in": "path",
           "required": true,
-          "description": "UUID of a draft or rejected job vacancy owned by the authenticated company.",
           "schema": {
             "type": "string",
             "format": "uuid"
@@ -651,9 +814,8 @@
         }
       ],
       "post": {
-        "summary": "Submit an owned job vacancy for review",
-        "description": "Submits a draft or rejected job vacancy owned by the authenticated company for review. The complete vacancy payload is validated before the status changes to `submitted`.",
-        "operationId": "submitOwnedJobVacancy",
+        "summary": "Publish or republish a job vacancy using tokens",
+        "description": "Publishes a complete draft or republishes the same expired/closed listing at the current full token cost, with a new configured period starting now. Retries of an already-active publication do not spend again. Applicant/participant records remain attached and cannot register twice. No automatic renewal or refund is provided.",
         "security": [
           {
             "bearerAuth": []
@@ -661,7 +823,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Job vacancy submitted for review successfully",
+            "description": "Publication and token debit succeeded",
             "content": {
               "application/json": {
                 "schema": {
@@ -679,7 +841,8 @@
           "422": {
             "$ref": "#/components/responses/ValidationError"
           }
-        }
+        },
+        "operationId": "publishOwnedJobVacancy"
       }
     },
     "/api/company/job-vacancies/{uuid}/applicants": {
@@ -880,7 +1043,7 @@
       },
       "patch": {
         "summary": "Partially update an owned training",
-        "description": "Updates only submitted fields. Omitted fields remain unchanged, null clears nullable fields, and tags, syllabus, or requirements replace their complete existing array. The start and end dates must use YYYY-MM-DD, and duration_day is recalculated from them. Legacy level input is ignored and never changes stored values. Training responses omit level. UUID, ownership, provider, workflow_action, status, timestamps, counters, and duration_day are immutable. For multipart/form-data, arrays may be sent as JSON-encoded array strings.",
+        "description": "Updates only submitted fields. Omitted fields remain unchanged, null clears nullable fields, and tags, syllabus, or requirements replace their complete existing array. The start and end dates must use YYYY-MM-DD, and duration_day is recalculated from them. Legacy level input is ignored and never changes stored values. Training responses omit level. UUID, ownership, provider, workflow_action, status, timestamps, counters, and duration_day are immutable. For multipart/form-data, arrays may be sent as JSON-encoded array strings. Active publications cannot be edited. Close the listing or wait until its publication period ends before editing; edits never reset expiry or create free publication rights.",
         "operationId": "updateOwnedTraining",
         "security": [
           {
@@ -1013,51 +1176,6 @@
           },
           "409": {
             "$ref": "#/components/responses/Conflict"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationError"
-          }
-        }
-      }
-    },
-    "/api/company/trainings/{uuid}/submit": {
-      "parameters": [
-        {
-          "name": "uuid",
-          "in": "path",
-          "required": true,
-          "description": "UUID of a training owned by the authenticated company.",
-          "schema": {
-            "type": "string",
-            "format": "uuid"
-          }
-        }
-      ],
-      "post": {
-        "summary": "Submit an owned training for review",
-        "description": "Submits a draft or rejected training after complete validation. Level is not required. Validation failure leaves the draft unchanged.",
-        "operationId": "submitOwnedTraining",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Training submitted for review successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/OwnedTrainingResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthenticated"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
           },
           "422": {
             "$ref": "#/components/responses/ValidationError"
@@ -1253,7 +1371,6 @@
                 "all",
                 "draft",
                 "rejected",
-                "submitted",
                 "published",
                 "closed",
                 "running",
@@ -1301,7 +1418,7 @@
       },
       "post": {
         "summary": "Create an owned training",
-        "description": "Creates a company-owned training as a draft by default. For save_draft, only title is required. Set workflow_action to submit to validate and submit the new training directly for review; submit requires category, description, start_date, end_date, total_jp, training_mode, province, city, address, at least one syllabus item, at least one requirement, and quota. Legacy level input is ignored and never changes stored values. Training responses omit level. is_certificate, tags, instructor, price, and poster are optional. Provider and ownership are derived from the authenticated company and must not be sent. Send multipart/form-data with a poster file to upload a new poster; poster files must be JPG, JPEG, PNG, or WEBP and no larger than 5 MB. JSON requests may send an existing public poster storage path. For multipart/form-data, arrays may be sent as JSON-encoded array strings.",
+        "description": "Creates a company-owned training as a free draft by default. Use workflow_action=publish to validate complete publication fields and publish directly, deducting the current configured token cost atomically. Insufficient balance does not leave a new draft behind. Ownership, status and publication dates are server-managed. Event start/end dates and duration_day remain distinct from publication_expires_at; publishing at or after event start is forbidden.",
         "operationId": "createOwnedTraining",
         "security": [
           {
@@ -1358,8 +1475,8 @@
                     "workflow_action": "save_draft"
                   }
                 },
-                "submit": {
-                  "summary": "Create and submit a complete training",
+                "publish": {
+                  "summary": "Create and publish a complete training",
                   "value": {
                     "title": "Pelatihan Gada Pratama Angkatan 12 - Test 10",
                     "category": "Keamanan",
@@ -1397,7 +1514,7 @@
                     "quota": 30,
                     "price": 750000,
                     "poster": "training/posters/ZMA1dfKYh1TSmNyMGoTPwzqR4tqwzqLsKtPFtnB8.png",
-                    "workflow_action": "submit"
+                    "workflow_action": "publish"
                   }
                 }
               }
@@ -1455,9 +1572,9 @@
                     "workflow_action": "save_draft"
                   }
                 },
-                "submit": {
-                  "summary": "Create and submit a complete training with a poster file",
-                  "description": "Use workflow_action submit only when all submit-required fields are present.",
+                "publish": {
+                  "summary": "Create and publish a complete training with a poster file",
+                  "description": "Use workflow_action publish only when all publish-required fields are present.",
                   "value": {
                     "title": "Pelatihan Gada Pratama Angkatan 12 - Test 10",
                     "category": "Keamanan",
@@ -1495,7 +1612,7 @@
                     "quota": 30,
                     "price": 750000,
                     "poster": "poster.png",
-                    "workflow_action": "submit"
+                    "workflow_action": "publish"
                   }
                 }
               }
@@ -1530,12 +1647,52 @@
         "summary": "Get a training owned by the company or applied to by the authenticated worker",
         "description": "Requires bearer authentication. Companies may read only their own training. Workers may read only a training with their application linked to either their security or cleaning-service profile, including unpublished trainings only when they have an application. Other records return 404. Applicant deep links `autoloker://trainings/{uuid}` map here; owner notifications remain under `/api/company/trainings/{uuid}`.",
         "operationId": "showTraining",
-        "security": [{"bearerAuth": []}],
-        "parameters": [{"name": "uuid", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "responses": {
-          "200": {"description": "Public training resource, including application fields for an authorized applicant"},
-          "401": {"$ref": "#/components/responses/Unauthenticated"},
-          "404": {"description": "Training not found or not owned/applied to"}
+          "200": {
+            "description": "Public training resource, including application fields for an authorized applicant",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "training": {
+                          "type": "object"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "404": {
+            "description": "Training not found or not owned/applied to"
+          }
         }
       }
     },
@@ -2220,62 +2377,6 @@
         }
       }
     },
-    "/api/masters/subscriptions": {
-      "get": {
-        "summary": "List active subscription plans for the authenticated user's role",
-        "description": "Returns active master_subscriptions matching the authenticated user's role. User roles map to subscription roles as follows: satpam and cs to security, and company or perusahaan to client. Results are ordered by sort_order and id. The features field is returned as a decoded JSON object containing feature limits.",
-        "operationId": "listMasterSubscriptions",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Active subscription plans",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MasterSubscriptionListResponse"
-                },
-                "examples": {
-                  "valid": {
-                    "summary": "Active subscription plans",
-                    "value": {
-                      "status": true,
-                      "data": [
-                        {
-                          "id": 1,
-                          "uuid": "8b1f4f8a-5d6f-4a4d-a43d-5f3c9f8c2a11",
-                          "name": "Profesional",
-                          "slug": "profesional",
-                          "role": "security",
-                          "price": 49000.0,
-                          "duration": 1,
-                          "duration_type": "month",
-                          "description": "Untuk satpam aktif yang ingin melamar lebih banyak.",
-                          "features": {
-                            "active_applications": {
-                              "enabled": true,
-                              "limit": 5
-                            }
-                          },
-                          "is_active": true,
-                          "sort_order": 1
-                        }
-                      ]
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthenticated"
-          }
-        }
-      }
-    },
     "/api/locations/provinces": {
       "get": {
         "summary": "List provinces",
@@ -2635,37 +2736,10 @@
         }
       }
     },
-    "/api/user-subscriptions/active": {
-      "get": {
-        "summary": "Get the authenticated user's active subscription or default plan",
-        "description": "Returns the authenticated user's active subscription for the user's mapped role. satpam and cs both map to the security plan, so a role switch keeps the same entitlement. When no active subscription exists, returns the active price-zero default plan for that same role. It returns `user_subscription: null` only when the role is unsupported or no matching active default plan is configured. The `limit_usage` counters are role-specific: security counters combine applications from the account's security and cleaning service profiles, counted when they belong to published jobs or trainings, so switching role does not reset quota usage; BUJP legacy accounts' job and training posts and company users' job and training posts count when their status is `submitted` or `published`.",
-        "operationId": "getActiveUserSubscription",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Active user subscription or same-role default free plan",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ActiveUserSubscriptionResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthenticated"
-          }
-        }
-      }
-    },
     "/api/notifications": {
       "get": {
         "summary": "List the authenticated user's notification history",
-        "description": "Returns only the caller's notifications, newest first. Optional filters are `is_read`, `type`, `date_from`, and `date_to`; results use ten notifications per page. Account-status notifications use `autoloker://notifications` to return to this screen and have no resource-detail endpoint. Subscription deep links `autoloker://subscription-orders/{uuid}` map to `GET /api/user-order-manuals/{uuid}`, which is scoped to the current user.",
+        "description": "Returns only the caller’s notification history, newest first. Filters are is_read, type, date_from and date_to; results use ten notifications per page. Token-order notifications use autoloker://token-orders/{uuid}, resolved through the organization-scoped GET /api/user-order-manuals/{uuid}. Account-status notifications use autoloker://notifications. Historical notifications retain their original content.",
         "operationId": "listNotifications",
         "security": [
           {
@@ -2916,8 +2990,8 @@
     },
     "/api/user-order-manuals": {
       "get": {
-        "summary": "List the authenticated user's manual subscription orders",
-        "description": "Returns the authenticated user's manual subscription order history, newest first, with five orders per page. Payment, verification, and expiration fields that are not yet set are returned as `null`, not empty strings. Each order includes the selected subscription plan.",
+        "summary": "List the employer organization’s token orders",
+        "description": "Returns only the authenticated employer organization’s token orders, newest first, five per page. Access follows the organization wallet rather than the original buyer account. Individual job seekers cannot purchase tokens. Historical subscription payments remain available through administrator history, not this token-order API.",
         "operationId": "listUserOrderManuals",
         "security": [
           {
@@ -2940,76 +3014,48 @@
         ],
         "responses": {
           "200": {
-            "description": "Manual subscription order history",
+            "description": "Organization token order history",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UserOrderManualListResponse"
                 },
-                "examples": {
-                  "verifiedOrderHistory": {
-                    "summary": "Verified manual subscription order history",
-                    "value": {
-                      "status": true,
-                      "data": {
-                        "user_order_manuals": [
-                          {
-                            "id": 1,
-                            "uuid": "4c6f5d8a-0c2d-4f4b-a4b6-1f5a0e2c7d91",
-                            "user_id": 12,
-                            "master_subscription_id": 2,
-                            "role": "security",
-                            "order_number": "ORD-20260924-00001",
-                            "price": "49000.00",
-                            "payment_method": "transfer",
-                            "payment_account": "BCA 1234567890 a.n. PT Example",
-                            "payment_date": "2026-09-24T03:15:00.000000Z",
-                            "file": "payment_ORD-20260924-00001_1727147700.jpg",
-                            "status": "approved",
-                            "notes": "Payment verified by the administrator.",
-                            "rejected_reason": null,
-                            "verified_by": "7",
-                            "verified_at": "2026-09-24T04:00:00.000000Z",
-                            "expired_at": "2026-10-24T03:15:00.000000Z",
-                            "created_at": "2026-09-24T03:00:00.000000Z",
-                            "updated_at": "2026-09-24T04:00:00.000000Z",
-                            "subscription": {
-                              "id": 2,
-                              "uuid": "8b1f4f8a-5d6f-4a4d-a43d-5f3c9f8c2a11",
-                              "name": "Profesional",
-                              "slug": "profesional",
-                              "role": "security",
-                              "price": "49000.00",
-                              "duration": 1,
-                              "duration_type": "month",
-                              "description": "Untuk satpam aktif yang ingin melamar lebih banyak.",
-                              "features": {
-                                "job_vacancy": {
-                                  "enabled": true,
-                                  "limit": 5
-                                },
-                                "training": {
-                                  "enabled": true,
-                                  "limit": 5
-                                }
-                              },
-                              "is_active": true,
-                              "sort_order": 1
-                            }
-                          }
-                        ],
-                        "pagination": {
-                          "current_page": 1,
-                          "last_page": 1,
-                          "per_page": 5,
-                          "total": 1,
-                          "from": 1,
-                          "to": 1,
-                          "has_more": false,
-                          "next_page_url": null,
-                          "previous_page_url": null
-                        }
+                "example": {
+                  "status": true,
+                  "data": {
+                    "user_order_manuals": [
+                      {
+                        "id": 1,
+                        "uuid": "11111111-1111-4111-8111-111111111111",
+                        "user_id": 7,
+                        "token_wallet_id": 1,
+                        "token_quantity": 4,
+                        "idr_per_token": 10000,
+                        "role": "client",
+                        "order_number": "ORD-20261107090000-ABCDE",
+                        "price": 40000,
+                        "payment_method": null,
+                        "payment_account": null,
+                        "payment_date": null,
+                        "file": null,
+                        "status": "pending_payment",
+                        "notes": null,
+                        "rejected_reason": null,
+                        "verified_by": null,
+                        "verified_at": null,
+                        "expired_at": null,
+                        "created_at": "2026-11-07T09:00:00.000000Z",
+                        "updated_at": "2026-11-07T09:00:00.000000Z"
                       }
+                    ],
+                    "pagination": {
+                      "current_page": 1,
+                      "last_page": 1,
+                      "per_page": 5,
+                      "total": 1,
+                      "from": 1,
+                      "to": 1,
+                      "has_more_pages": false
                     }
                   }
                 }
@@ -3021,12 +3067,30 @@
           },
           "422": {
             "$ref": "#/components/responses/ValidationError"
+          },
+          "403": {
+            "description": "Only an authorized employer organization may use token purchases",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       },
       "post": {
-        "summary": "Create a manual subscription order",
-        "description": "Creates a pending manual subscription order for the authenticated user's role. Payment and verification fields are `null` until the user submits proof and an administrator reviews the payment. A `pending_payment` order blocks creation of another order for this account, regardless of the selected plan. A conflict returns HTTP 409 with the existing order details.",
+        "summary": "Create a manual token order",
+        "description": "Creates a pending manual-transfer token order for the caller’s employer organization. The server freezes token_quantity, idr_per_token and the integer rupiah price. One non-expired pending_payment order per organization blocks another purchase with HTTP 409; the response includes that existing order. New orders have expired_at=null. Uploading proof changes the order to verification; tokens are credited exactly once only after administrator approval. Other features do not require subscription payment.",
         "operationId": "createUserOrderManual",
         "security": [
           {
@@ -3041,71 +3105,45 @@
                 "$ref": "#/components/schemas/UserOrderManualStoreRequest"
               },
               "example": {
-                "subscription_uuid": "8b1f4f8a-5d6f-4a4d-a43d-5f3c9f8c2a11"
+                "token_quantity": 4
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "Manual subscription order created",
+            "description": "Token purchase awaiting manual payment",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UserOrderManualResponse"
                 },
-                "examples": {
-                  "createdPendingOrder": {
-                    "summary": "Newly created order awaiting payment",
-                    "value": {
-                      "status": true,
-                      "message": "Pesanan paket langganan berhasil dibuat.",
-                      "data": {
-                        "user_order_manual": {
-                          "id": 2,
-                          "uuid": "9d2e4f6a-6c5b-4a2d-9f3e-7b1c8d0a5e64",
-                          "user_id": 12,
-                          "master_subscription_id": 2,
-                          "role": "security",
-                          "order_number": "ORD-20260926031500-AB12C",
-                          "price": "49000.00",
-                          "payment_method": null,
-                          "payment_account": null,
-                          "payment_date": null,
-                          "file": null,
-                          "status": "pending_payment",
-                          "notes": null,
-                          "rejected_reason": null,
-                          "verified_by": null,
-                          "verified_at": null,
-                          "expired_at": null,
-                          "created_at": "2026-09-26T03:15:00.000000Z",
-                          "updated_at": "2026-09-26T03:15:00.000000Z",
-                          "subscription": {
-                            "id": 2,
-                            "uuid": "8b1f4f8a-5d6f-4a4d-a43d-5f3c9f8c2a11",
-                            "name": "Profesional",
-                            "slug": "profesional",
-                            "role": "security",
-                            "price": "49000.00",
-                            "duration": 1,
-                            "duration_type": "month",
-                            "description": "Untuk satpam aktif yang ingin melamar lebih banyak.",
-                            "features": {
-                              "job_vacancy": {
-                                "enabled": true,
-                                "limit": 5
-                              },
-                              "training": {
-                                "enabled": true,
-                                "limit": 5
-                              }
-                            },
-                            "is_active": true,
-                            "sort_order": 1
-                          }
-                        }
-                      }
+                "example": {
+                  "status": true,
+                  "message": "Pesanan token berhasil dibuat.",
+                  "data": {
+                    "user_order_manual": {
+                      "id": 1,
+                      "uuid": "11111111-1111-4111-8111-111111111111",
+                      "user_id": 7,
+                      "token_wallet_id": 1,
+                      "token_quantity": 4,
+                      "idr_per_token": 10000,
+                      "role": "client",
+                      "order_number": "ORD-20261107090000-ABCDE",
+                      "price": 40000,
+                      "payment_method": null,
+                      "payment_account": null,
+                      "payment_date": null,
+                      "file": null,
+                      "status": "pending_payment",
+                      "notes": null,
+                      "rejected_reason": null,
+                      "verified_by": null,
+                      "verified_at": null,
+                      "expired_at": null,
+                      "created_at": "2026-11-07T09:00:00.000000Z",
+                      "updated_at": "2026-11-07T09:00:00.000000Z"
                     }
                   }
                 }
@@ -3113,40 +3151,52 @@
             }
           },
           "409": {
-            "description": "The authenticated user already has an order awaiting payment.",
+            "description": "An existing pending order must be paid or cancelled first",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "required": [
-                    "status",
-                    "code",
-                    "message",
-                    "data"
-                  ],
-                  "properties": {
-                    "status": {
-                      "type": "boolean",
-                      "example": false
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/UserOrderManualResponse"
                     },
-                    "code": {
-                      "type": "string",
-                      "example": "pending_payment_order_exists"
-                    },
-                    "message": {
-                      "type": "string",
-                      "example": "Masih ada pesanan paket yang menunggu pembayaran. Selesaikan atau batalkan pesanan tersebut sebelum membuat pesanan baru."
-                    },
-                    "data": {
+                    {
                       "type": "object",
-                      "required": [
-                        "user_order_manual"
-                      ],
                       "properties": {
-                        "user_order_manual": {
-                          "$ref": "#/components/schemas/UserOrderManual"
+                        "code": {
+                          "type": "string",
+                          "const": "pending_payment_order_exists"
                         }
                       }
+                    }
+                  ]
+                },
+                "example": {
+                  "status": false,
+                  "code": "pending_payment_order_exists",
+                  "message": "Masih ada pesanan token yang menunggu pembayaran.",
+                  "data": {
+                    "user_order_manual": {
+                      "id": 1,
+                      "uuid": "11111111-1111-4111-8111-111111111111",
+                      "user_id": 7,
+                      "token_wallet_id": 1,
+                      "token_quantity": 4,
+                      "idr_per_token": 10000,
+                      "role": "client",
+                      "order_number": "ORD-20261107090000-ABCDE",
+                      "price": 40000,
+                      "payment_method": null,
+                      "payment_account": null,
+                      "payment_date": null,
+                      "file": null,
+                      "status": "pending_payment",
+                      "notes": null,
+                      "rejected_reason": null,
+                      "verified_by": null,
+                      "verified_at": null,
+                      "expired_at": null,
+                      "created_at": "2026-11-07T09:00:00.000000Z",
+                      "updated_at": "2026-11-07T09:00:00.000000Z"
                     }
                   }
                 }
@@ -3161,14 +3211,32 @@
           },
           "422": {
             "$ref": "#/components/responses/ValidationError"
+          },
+          "403": {
+            "description": "Only an authorized employer organization may use token purchases",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
     },
     "/api/user-order-manuals/{uuid}": {
       "get": {
-        "summary": "Get a manual subscription order",
-        "description": "Returns an order owned by the authenticated user with its subscription details and current payment status. Subscription notification deep links `autoloker://subscription-orders/{uuid}` resolve to this endpoint. Repeat this request to poll for status changes. Every response includes `Cache-Control: no-store` so a cached response does not mask an updated payment status.",
+        "summary": "Get a manual token order",
+        "description": "Returns a token order belonging to the caller’s employer organization. Token notification links autoloker://token-orders/{uuid} resolve here. Repeat this request to observe verification or approval; responses include Cache-Control: no-store. Unrelated organization and legacy subscription orders are not exposed.",
         "operationId": "getUserOrderManual",
         "security": [
           {
@@ -3189,20 +3257,39 @@
         ],
         "responses": {
           "200": {
-            "description": "Manual order details with its latest payment status",
-            "headers": {
-              "Cache-Control": {
-                "description": "Prevents caching the payment status response.",
-                "schema": {
-                  "type": "string",
-                  "example": "no-store, private"
-                }
-              }
-            },
+            "description": "Token order and payment status",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UserOrderManualResponse"
+                },
+                "example": {
+                  "status": true,
+                  "data": {
+                    "user_order_manual": {
+                      "id": 1,
+                      "uuid": "11111111-1111-4111-8111-111111111111",
+                      "user_id": 7,
+                      "token_wallet_id": 1,
+                      "token_quantity": 4,
+                      "idr_per_token": 10000,
+                      "role": "client",
+                      "order_number": "ORD-20261107090000-ABCDE",
+                      "price": 40000,
+                      "payment_method": null,
+                      "payment_account": null,
+                      "payment_date": null,
+                      "file": null,
+                      "status": "pending_payment",
+                      "notes": null,
+                      "rejected_reason": null,
+                      "verified_by": null,
+                      "verified_at": null,
+                      "expired_at": null,
+                      "created_at": "2026-11-07T09:00:00.000000Z",
+                      "updated_at": "2026-11-07T09:00:00.000000Z"
+                    }
+                  }
                 }
               }
             }
@@ -3246,14 +3333,32 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Only an authorized employer organization may use token purchases",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
     },
     "/api/user-order-manuals/{uuid}/cancel": {
       "post": {
-        "summary": "Cancel a pending manual subscription order",
-        "description": "Cancels an order owned by the authenticated user only while its status is `pending_payment`. The order is retained with status `cancelled`; a later manual order can then be created. Orders in other statuses cannot be cancelled.",
+        "summary": "Cancel a pending manual token order",
+        "description": "Cancels only a pending_payment token order belonging to the authenticated employer organization. The change is atomic with proof/status checks. Verification, approved, rejected and already-cancelled orders cannot be cancelled through this endpoint. No wallet credit or refund occurs.",
         "operationId": "cancelUserOrderManual",
         "security": [
           {
@@ -3274,11 +3379,39 @@
         ],
         "responses": {
           "200": {
-            "description": "Manual order cancelled",
+            "description": "Pending token order cancelled",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UserOrderManualResponse"
+                },
+                "example": {
+                  "status": true,
+                  "data": {
+                    "user_order_manual": {
+                      "id": 1,
+                      "uuid": "11111111-1111-4111-8111-111111111111",
+                      "user_id": 7,
+                      "token_wallet_id": 1,
+                      "token_quantity": 4,
+                      "idr_per_token": 10000,
+                      "role": "client",
+                      "order_number": "ORD-20261107090000-ABCDE",
+                      "price": 40000,
+                      "payment_method": null,
+                      "payment_account": null,
+                      "payment_date": null,
+                      "file": null,
+                      "status": "cancelled",
+                      "notes": null,
+                      "rejected_reason": null,
+                      "verified_by": null,
+                      "verified_at": null,
+                      "expired_at": null,
+                      "created_at": "2026-11-07T09:00:00.000000Z",
+                      "updated_at": "2026-11-07T09:00:00.000000Z"
+                    }
+                  }
                 }
               }
             }
@@ -3346,14 +3479,32 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Only an authorized employer organization may use token purchases",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
     },
     "/api/user-order-manuals/{uuid}/upload-proof": {
       "post": {
-        "summary": "Upload payment proof for a manual subscription order",
-        "description": "Uploads a payment proof for an order belonging to the authenticated user. Orders in `pending_payment` or `rejected` status can accept a new proof. A successful upload moves the order to `verification` and clears any rejection reason.",
+        "summary": "Upload payment proof for a manual token order",
+        "description": "Uploads JPG, JPEG, PNG or PDF proof (maximum 5 MB) for an organization-owned pending_payment or rejected token order. payment_method and payment_date are required; payment_account is optional. A non-null expired_at must be strictly in the future. Success changes status to verification and clears the rejection reason, without crediting tokens. Administrator approval is required to credit the frozen quantity.",
         "operationId": "uploadUserOrderManualProof",
         "security": [
           {
@@ -3383,11 +3534,40 @@
         },
         "responses": {
           "200": {
-            "description": "Proof received and awaiting administrator verification",
+            "description": "Proof awaiting administrator verification",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UserOrderManualResponse"
+                },
+                "example": {
+                  "status": true,
+                  "message": "Bukti pembayaran menunggu verifikasi.",
+                  "data": {
+                    "user_order_manual": {
+                      "id": 1,
+                      "uuid": "11111111-1111-4111-8111-111111111111",
+                      "user_id": 7,
+                      "token_wallet_id": 1,
+                      "token_quantity": 4,
+                      "idr_per_token": 10000,
+                      "role": "client",
+                      "order_number": "ORD-20261107090000-ABCDE",
+                      "price": 40000,
+                      "payment_method": "Bank transfer",
+                      "payment_account": null,
+                      "payment_date": "2026-11-07T09:30:00.000000Z",
+                      "file": "payment-example.pdf",
+                      "status": "verification",
+                      "notes": null,
+                      "rejected_reason": null,
+                      "verified_by": null,
+                      "verified_at": null,
+                      "expired_at": null,
+                      "created_at": "2026-11-07T09:00:00.000000Z",
+                      "updated_at": "2026-11-07T09:00:00.000000Z"
+                    }
+                  }
                 }
               }
             }
@@ -3400,6 +3580,24 @@
           },
           "422": {
             "$ref": "#/components/responses/ValidationError"
+          },
+          "403": {
+            "description": "Only an authorized employer organization may use token purchases",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -3479,8 +3677,7 @@
     },
     "/api/register": {
       "post": {
-        "summary": "Register a user",
-        "description": "Registers email/password accounts with role `security`, `cs`, or `company`. Job seekers choose `security` or `cs` before submitting; no role switch is required after registration.",
+        "description": "Supports email/password registration for `security`, `cs`, and `company`.\nJob seekers choose `security` or `cs` before submitting; no role switch\nis required after registration.\n",
         "operationId": "registerUser",
         "security": [],
         "requestBody": {
@@ -3515,9 +3712,15 @@
             "multipart/form-data": {
               "schema": {
                 "oneOf": [
-                  {"$ref": "#/components/schemas/RegisterCleaningServiceRequest"},
-                  {"$ref": "#/components/schemas/RegisterSecurityRequest"},
-                  {"$ref": "#/components/schemas/RegisterCompanyRequest"}
+                  {
+                    "$ref": "#/components/schemas/RegisterCleaningServiceRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RegisterSecurityRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RegisterCompanyRequest"
+                  }
                 ]
               },
               "examples": {
@@ -3532,9 +3735,7 @@
                 }
               }
             }
-          }
-        },
-        "responses": {
+          },
           "201": {
             "description": "Registration successful",
             "content": {
@@ -4956,29 +5157,322 @@
       "delete": {
         "summary": "Delete the authenticated account and its owned data",
         "operationId": "deleteAuthenticatedAccount",
-        "security": [{"bearerAuth": []}],
-        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "required": ["confirm_delete"], "properties": {"confirm_delete": {"type": "boolean", "const": true}}}}}},
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "confirm_delete"
+                ],
+                "properties": {
+                  "confirm_delete": {
+                    "type": "boolean",
+                    "const": true
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
-          "200": {"description": "Account and associated data and files deleted", "content": {"application/json": {"schema": {"type": "object", "required": ["status", "message", "data"], "properties": {"status": {"type": "boolean", "const": true}, "message": {"type": "string", "const": "Akun dan data terkait berhasil dihapus."}, "data": {"type": "object", "required": ["files_pending"], "properties": {"files_pending": {"type": "boolean", "const": false}}}}}}}},
-          "202": {"description": "Account deleted; file cleanup remains pending", "content": {"application/json": {"schema": {"type": "object", "required": ["status", "message", "data"], "properties": {"status": {"type": "boolean", "const": true}, "message": {"type": "string", "const": "Akun telah dihapus. Penghapusan berkas terkait masih diproses."}, "data": {"type": "object", "required": ["files_pending"], "properties": {"files_pending": {"type": "boolean", "const": true}}}}}}}},
-          "401": {"$ref": "#/components/responses/Unauthenticated"},
-          "403": {"$ref": "#/components/responses/Forbidden"},
+          "200": {
+            "description": "Account and associated data and files deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ],
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "const": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "const": "Akun dan data terkait berhasil dihapus."
+                    },
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "files_pending"
+                      ],
+                      "properties": {
+                        "files_pending": {
+                          "type": "boolean",
+                          "const": false
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Account deleted; file cleanup remains pending",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ],
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "const": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "const": "Akun telah dihapus. Penghapusan berkas terkait masih diproses."
+                    },
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "files_pending"
+                      ],
+                      "properties": {
+                        "files_pending": {
+                          "type": "boolean",
+                          "const": true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
           "409": {
             "description": "Request conflicts with shared ownership or contains an invalid local file location",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": ["status", "message"],
+                  "required": [
+                    "status",
+                    "message"
+                  ],
                   "properties": {
-                    "status": {"type": "boolean", "const": false},
-                    "message": {"type": "string", "enum": ["Akun tidak dapat dihapus karena ada data atau berkas yang dipakai bersama akun lain.", "Akun tidak dapat dihapus karena lokasi berkas tidak valid."]}
+                    "status": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "enum": [
+                        "Akun tidak dapat dihapus karena ada data atau berkas yang dipakai bersama akun lain.",
+                        "Akun tidak dapat dihapus karena lokasi berkas tidak valid."
+                      ]
+                    }
                   }
                 }
               }
             }
           },
-          "422": {"$ref": "#/components/responses/ValidationError"}
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      }
+    },
+    "/api/company/trainings/{uuid}/publish": {
+      "parameters": [
+        {
+          "name": "uuid",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "post": {
+        "summary": "Publish or republish a training using tokens",
+        "description": "Publishes a complete draft or republishes the same expired/closed listing at the current full token cost, with a new configured period starting now. Retries of an already-active publication do not spend again. Applicant/participant records remain attached and cannot register twice. Trainings that have begun, completed or been cancelled cannot be republished; a new cohort requires a new posting.",
+        "operationId": "publishOwnedTraining",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Publication and token debit succeeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OwnedTrainingResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      }
+    },
+    "/api/tokens": {
+      "get": {
+        "summary": "Get organization token balance, current costs and ledger",
+        "description": "Employer-only endpoint. Returns current singleton admin pricing and the authenticated organization’s non-expiring balance and transaction ledger, newest first, twenty entries per page. Ownership is resolved server-side; workers cannot access another role’s retained organization profile to spend tokens. Settings do not recalculate existing token balances or active posting entitlements.",
+        "operationId": "getTokenWallet",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Organization balance, prices and ledger",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenWalletResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "403": {
+            "description": "An employer organization is required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/company/job-vacancies/{uuid}/close-publication": {
+      "parameters": [
+        {
+          "name": "uuid",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "post": {
+        "summary": "End the job vacancy listing period early",
+        "description": "Ends this organization-owned listing without refunding tokens. The public detail becomes an archive and no new applications are accepted. Existing applicants remain attached.",
+        "operationId": "closeOwnedJobVacancyPublication",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listing period ended",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OwnedJobVacancyResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "404": {
+            "description": "Owned posting not found"
+          }
+        }
+      }
+    },
+    "/api/company/trainings/{uuid}/close-publication": {
+      "parameters": [
+        {
+          "name": "uuid",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "post": {
+        "summary": "End the training listing period early",
+        "description": "Ends this organization-owned listing without refunding tokens. The public detail becomes an archive and no new applications are accepted. This closes only the advertisement, not the training activity or existing participant records.",
+        "operationId": "closeOwnedTrainingPublication",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listing period ended",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OwnedTrainingResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "404": {
+            "description": "Owned posting not found"
+          }
         }
       }
     }
@@ -5528,8 +6022,7 @@
           "poster",
           "created_at",
           "updated_at",
-          "bujp",
-          "company"
+          "bujp"
         ],
         "properties": {
           "id": {
@@ -5586,14 +6079,34 @@
             ],
             "example": "Security"
           },
+          "category_role": {
+            "type": "string",
+            "enum": [
+              "security",
+              "cs"
+            ],
+            "description": "Audience of the training. security targets satpam profiles, cs targets cleaning service profiles.",
+            "example": "security"
+          },
           "sub_category": {
-            "type": ["string", "null"],
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Direct-child certificate category title, or null.",
             "example": "Patroli"
           },
           "tuk": {
-            "type": ["string", "null"],
-            "enum": ["mandiri", "sewaktu", "tempat kerja", null],
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "mandiri",
+              "sewaktu",
+              "tempat kerja",
+              null
+            ],
             "description": "TUK selection required for a root or subcategory marked is_tuk=true.",
             "example": "mandiri"
           },
@@ -5604,15 +6117,6 @@
             "multipleOf": 0.01,
             "description": "Discount percentage, from 0 to 100, with at most two decimal places.",
             "example": 12.5
-          },
-          "category_role": {
-            "type": "string",
-            "enum": [
-              "security",
-              "cs"
-            ],
-            "description": "Audience of the training. security targets satpam profiles, cs targets cleaning service profiles.",
-            "example": "security"
           },
           "price": {
             "type": [
@@ -5794,7 +6298,6 @@
             "enum": [
               "draft",
               "rejected",
-              "submitted",
               "published",
               "closed",
               "running",
@@ -5863,6 +6366,41 @@
                 "type": "null"
               }
             ]
+          },
+          "published_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "readOnly": true
+          },
+          "publication_cycle": {
+            "type": "integer",
+            "minimum": 0,
+            "readOnly": true
+          },
+          "is_currently_published": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "publication_expires_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "readOnly": true
+          },
+          "publication_token_cost": {
+            "type": "integer",
+            "minimum": 0,
+            "readOnly": true
+          },
+          "is_registration_open": {
+            "type": "boolean",
+            "readOnly": true,
+            "description": "Publication is active and the event start has not been reached."
           }
         }
       },
@@ -6026,7 +6564,7 @@
       },
       "OwnedTraining": {
         "type": "object",
-        "description": "Canonical company-owned training resource returned by create, update, submit, and show operations. The `category_role` audience is fixed at creation and cannot be changed through PATCH.",
+        "description": "Canonical company-owned training resource returned by create, update, publish, and show operations. The `category_role` audience is fixed at creation and cannot be changed through PATCH.",
         "required": [
           "uuid",
           "title",
@@ -6037,10 +6575,10 @@
           "reason_rejected",
           "poster",
           "category",
-          "is_certificate",
           "sub_category",
           "tuk",
           "discount",
+          "is_certificate",
           "tags",
           "description",
           "start_date",
@@ -6108,7 +6646,6 @@
             "enum": [
               "draft",
               "rejected",
-              "submitted",
               "published",
               "closed",
               "running",
@@ -6142,12 +6679,23 @@
             "example": "Keamanan"
           },
           "sub_category": {
-            "type": ["string", "null"],
+            "type": [
+              "string",
+              "null"
+            ],
             "example": "Patroli"
           },
           "tuk": {
-            "type": ["string", "null"],
-            "enum": ["mandiri", "sewaktu", "tempat kerja", null],
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "mandiri",
+              "sewaktu",
+              "tempat kerja",
+              null
+            ],
             "example": "mandiri"
           },
           "discount": {
@@ -6363,6 +6911,36 @@
             ],
             "format": "date-time",
             "readOnly": true
+          },
+          "published_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "readOnly": true
+          },
+          "publication_expires_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "readOnly": true
+          },
+          "publication_token_cost": {
+            "type": "integer",
+            "minimum": 0,
+            "readOnly": true
+          },
+          "publication_cycle": {
+            "type": "integer",
+            "minimum": 0,
+            "readOnly": true
+          },
+          "is_currently_published": {
+            "type": "boolean",
+            "readOnly": true
           }
         }
       },
@@ -6397,7 +6975,7 @@
       },
       "CreateOwnedTrainingRequest": {
         "type": "object",
-        "description": "Accepted request fields for a company-owned training. `category` is the exact active root title for `category_role`; `sub_category` is the exact direct-child title. Drafts may omit taxonomy selections, but submission requires a subcategory when the root has children and requires `tuk` when the selected source has is_tuk=true. TUK is one of mandiri, sewaktu, or tempat kerja. PATCH validates merged stored and submitted fields; conflicts fail without mutation, so send compatible replacements or explicit nulls. `discount` is a percentage from 0 to 100 with at most two decimal places; null stores as zero. Drafts require title and category_role (security or cs audience); submission additionally requires description, start_date, end_date, total_jp, training_mode, province, city, address, syllabus, requirements, and quota. category_role is immutable. Do not send provider or ownership fields. Legacy level input is ignored and never changes stored values. Training responses omit level.",
+        "description": "Accepted request fields for a company-owned training. `category` is the exact active root title for `category_role`; `sub_category` is the exact direct-child title. Drafts may omit taxonomy selections, but submission requires a subcategory when the root has children and requires `tuk` when the selected source has is_tuk=true. TUK is one of mandiri, sewaktu, or tempat kerja. PATCH validates merged stored and submitted fields; conflicts fail without mutation, so send compatible replacements or explicit nulls. `discount` is a percentage from 0 to 100 with at most two decimal places; null stores as zero. Drafts require title and category_role (security or cs audience); publication additionally requires description, start_date, end_date, total_jp, training_mode, province, city, address, syllabus, requirements, and quota. category_role is immutable. Do not send provider or ownership fields. Legacy level input is ignored and never changes stored values. Training responses omit level.",
         "additionalProperties": false,
         "required": [
           "title"
@@ -6416,28 +6994,8 @@
               "null"
             ],
             "maxLength": 255,
-            "description": "Training topic category. Required when workflow_action is submit.",
+            "description": "Training topic category. Required when workflow_action is publish.",
             "example": "Keamanan"
-          },
-          "sub_category": {
-            "type": ["string", "null"],
-            "maxLength": 255,
-            "description": "Direct child title from the selected audience-matching master root. Drafts may omit it; submit requires it when the root has children.",
-            "example": "Patroli"
-          },
-          "tuk": {
-            "type": ["string", "null"],
-            "enum": ["mandiri", "sewaktu", "tempat kerja", null],
-            "description": "Required on submit when the selected root or child is_tuk=true; drafts may omit it.",
-            "example": "mandiri"
-          },
-          "discount": {
-            "type": ["number", "null"],
-            "minimum": 0,
-            "maximum": 100,
-            "multipleOf": 0.01,
-            "description": "Percentage discount; null stores as zero.",
-            "example": 12.5
           },
           "category_role": {
             "type": "string",
@@ -6475,7 +7033,7 @@
               "string",
               "null"
             ],
-            "description": "Training description. Required when workflow_action is submit.",
+            "description": "Training description. Required when workflow_action is publish.",
             "example": "Pelatihan untuk membekali calon anggota satpam dengan pengetahuan dasar pengamanan."
           },
           "start_date": {
@@ -6484,7 +7042,7 @@
               "null"
             ],
             "format": "date",
-            "description": "Training start date in YYYY-MM-DD format. Required when workflow_action is submit.",
+            "description": "Training start date in YYYY-MM-DD format. Required when workflow_action is publish.",
             "example": "2026-09-26"
           },
           "end_date": {
@@ -6502,7 +7060,7 @@
               "null"
             ],
             "minimum": 1,
-            "description": "Total learning hours. Required when workflow_action is submit.",
+            "description": "Total learning hours. Required when workflow_action is publish.",
             "example": 40
           },
           "training_mode": {
@@ -6516,7 +7074,7 @@
               "hybrid",
               null
             ],
-            "description": "Delivery mode. Required when workflow_action is submit.",
+            "description": "Delivery mode. Required when workflow_action is publish.",
             "example": "offline"
           },
           "province": {
@@ -6525,7 +7083,7 @@
               "null"
             ],
             "maxLength": 255,
-            "description": "Province name. Must be provided together with a valid city when workflow_action is submit.",
+            "description": "Province name. Must be provided together with a valid city when workflow_action is publish.",
             "example": "KALIMANTAN TIMUR"
           },
           "city": {
@@ -6534,7 +7092,7 @@
               "null"
             ],
             "maxLength": 255,
-            "description": "City name in the selected province. Required when workflow_action is submit.",
+            "description": "City name in the selected province. Required when workflow_action is publish.",
             "example": "KOTA BALIKPAPAN"
           },
           "district": {
@@ -6560,7 +7118,7 @@
               "string",
               "null"
             ],
-            "description": "Training address. Required when workflow_action is submit.",
+            "description": "Training address. Required when workflow_action is publish.",
             "example": "Jl. Jend Sudirman"
           },
           "syllabus": {
@@ -6568,7 +7126,7 @@
               "array",
               "null"
             ],
-            "description": "Ordered syllabus items; at least one item is required when workflow_action is submit.",
+            "description": "Ordered syllabus items; at least one item is required when workflow_action is publish.",
             "items": {
               "type": "string",
               "minLength": 1,
@@ -6585,7 +7143,7 @@
               "array",
               "null"
             ],
-            "description": "Participant requirements; at least one item is required when workflow_action is submit.",
+            "description": "Participant requirements; at least one item is required when workflow_action is publish.",
             "items": {
               "type": "string",
               "minLength": 1,
@@ -6612,7 +7170,7 @@
               "null"
             ],
             "minimum": 1,
-            "description": "Maximum number of approved participants. Required when workflow_action is submit.",
+            "description": "Maximum number of approved participants. Required when workflow_action is publish.",
             "example": 30
           },
           "price": {
@@ -6623,6 +7181,40 @@
             "minimum": 0,
             "description": "Training price; use 0 for a free training.",
             "example": 0
+          },
+          "sub_category": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 255,
+            "description": "Direct child title from the selected audience-matching master root. Drafts may omit it; publish requires it when the root has children.",
+            "example": "Patroli"
+          },
+          "tuk": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "mandiri",
+              "sewaktu",
+              "tempat kerja",
+              null
+            ],
+            "description": "Required on publication when the selected root or child is_tuk=true; drafts may omit it.",
+            "example": "mandiri"
+          },
+          "discount": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 100,
+            "multipleOf": 0.01,
+            "description": "Percentage discount; null stores as zero.",
+            "example": 12.5
           },
           "poster": {
             "anyOf": [
@@ -6644,10 +7236,10 @@
           },
           "workflow_action": {
             "type": "string",
-            "description": "Save as draft by default, or validate and submit immediately.",
+            "description": "Save a free draft, or validate and publish directly using the organization’s token balance. No administrator publication approval is required.",
             "enum": [
               "save_draft",
-              "submit"
+              "publish"
             ],
             "default": "save_draft",
             "example": "save_draft"
@@ -6674,26 +7266,6 @@
             "maxLength": 255,
             "description": "Training topic category.",
             "example": "Keamanan"
-          },
-          "sub_category": {
-            "type": ["string", "null"],
-            "maxLength": 255,
-            "description": "Direct child title. Must remain compatible with the merged category; send null explicitly to clear.",
-            "example": "Patroli"
-          },
-          "tuk": {
-            "type": ["string", "null"],
-            "enum": ["mandiri", "sewaktu", "tempat kerja", null],
-            "description": "Must remain compatible with the merged category and subcategory.",
-            "example": "mandiri"
-          },
-          "discount": {
-            "type": ["number", "null"],
-            "minimum": 0,
-            "maximum": 100,
-            "multipleOf": 0.01,
-            "description": "Percentage discount; null stores as zero.",
-            "example": 12.5
           },
           "category_role": {
             "description": "Audience cannot be changed after creation; sending it fails validation with a prohibited rule.",
@@ -6789,14 +7361,6 @@
             "description": "City name in the selected province.",
             "example": "KOTA BALIKPAPAN"
           },
-          "address": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "Training address.",
-            "example": "Jl. Jend Sudirman"
-          },
           "district": {
             "type": [
               "string",
@@ -6814,6 +7378,14 @@
             "maxLength": 255,
             "description": "Optional village or urban-village name.",
             "example": "Sepinggan"
+          },
+          "address": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Training address.",
+            "example": "Jl. Jend Sudirman"
           },
           "syllabus": {
             "type": [
@@ -6875,6 +7447,40 @@
             "minimum": 0,
             "description": "Training price; use 0 for a free training.",
             "example": 0
+          },
+          "sub_category": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 255,
+            "description": "Direct child title. Must remain compatible with the merged category; send null explicitly to clear.",
+            "example": "Patroli"
+          },
+          "tuk": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "mandiri",
+              "sewaktu",
+              "tempat kerja",
+              null
+            ],
+            "description": "Must remain compatible with the merged category and subcategory.",
+            "example": "mandiri"
+          },
+          "discount": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 100,
+            "multipleOf": 0.01,
+            "description": "Percentage discount; null stores as zero.",
+            "example": 12.5
           },
           "poster": {
             "anyOf": [
@@ -7375,6 +7981,7 @@
           "b_u_j_p_id",
           "company_id",
           "position",
+          "security_position",
           "category",
           "description_work",
           "responsibility",
@@ -7447,6 +8054,15 @@
             ],
             "example": "Satpam Objek Vital (Obvit)"
           },
+          "security_position": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 150,
+            "description": "Active master_positions title in category security, stored as a snapshot. Always returned; null for legacy rows and CS vacancies.",
+            "example": "Komandan Regu"
+          },
           "category": {
             "type": "string",
             "enum": [
@@ -7501,7 +8117,6 @@
             "enum": [
               "draft",
               "rejected",
-              "submitted",
               "published",
               "closed"
             ],
@@ -7551,14 +8166,18 @@
               "string",
               "null"
             ],
-            "example": null
+            "maxLength": 255,
+            "description": "Optional district name.",
+            "example": "Balikpapan Selatan"
           },
           "village": {
             "type": [
               "string",
               "null"
             ],
-            "example": null
+            "maxLength": 255,
+            "description": "Optional village or urban-village name.",
+            "example": "Sepinggan"
           },
           "address": {
             "type": [
@@ -7757,6 +8376,415 @@
                 "type": "null"
               }
             ]
+          },
+          "published_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "readOnly": true
+          },
+          "publication_cycle": {
+            "type": "integer",
+            "minimum": 0,
+            "readOnly": true
+          },
+          "is_currently_published": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "publication_expires_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "readOnly": true
+          },
+          "publication_token_cost": {
+            "type": "integer",
+            "minimum": 0,
+            "readOnly": true
+          }
+        }
+      },
+      "OwnedJobVacancy": {
+        "type": "object",
+        "description": "Exact company-owned vacancy resource. Uses responsibilities and quota fields and organization objects with uuid/name; does not inherit public raw-model fields.",
+        "properties": {
+          "uuid": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "example": "ffa4dca1-0ae2-412a-80ff-f7c8a2a4adae"
+          },
+          "position": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "Satpam Objek Vital (Obvit)"
+          },
+          "security_position": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 150,
+            "description": "Active master_positions title in category security, stored as a snapshot. Always returned; null for legacy rows and CS vacancies.",
+            "example": "Komandan Regu"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "security",
+              "cs"
+            ],
+            "description": "Applicant category the vacancy targets. Fixed at creation.",
+            "example": "security"
+          },
+          "status": {
+            "type": "string",
+            "description": "Current vacancy state. General vacancy listings return published vacancies; application history may include later states.",
+            "enum": [
+              "draft",
+              "rejected",
+              "published",
+              "closed"
+            ],
+            "example": "published"
+          },
+          "bujp": {
+            "oneOf": [
+              {
+                "type": "object",
+                "required": [
+                  "uuid",
+                  "name"
+                ],
+                "properties": {
+                  "uuid": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "name": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "company": {
+            "oneOf": [
+              {
+                "type": "object",
+                "required": [
+                  "uuid",
+                  "name"
+                ],
+                "properties": {
+                  "uuid": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "name": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "province": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Province name returned directly as a string.",
+            "example": "KALIMANTAN TIMUR"
+          },
+          "city": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "City name returned directly as a string, not a nested object.",
+            "example": "KOTA BALIKPAPAN"
+          },
+          "district": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 255,
+            "description": "Optional district name.",
+            "example": "Balikpapan Selatan"
+          },
+          "village": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 255,
+            "description": "Optional village or urban-village name.",
+            "example": "Sepinggan"
+          },
+          "address": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "Jl. Jend Sudirman"
+          },
+          "working_type": {
+            "type": "string",
+            "enum": [
+              "permanent",
+              "contract",
+              "intenrship",
+              "freelance"
+            ],
+            "example": "permanent"
+          },
+          "working_system": {
+            "type": "string",
+            "enum": [
+              "shift",
+              "non-shift",
+              "reliever"
+            ],
+            "example": "shift"
+          },
+          "description_work": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "Pengamanan pada objek vital seperti pembangkit listrik, pelabuhan, bandara dan kilang minyak."
+          },
+          "responsibilities": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "min_age": {
+            "type": [
+              "integer",
+              "number",
+              "null"
+            ]
+          },
+          "max_age": {
+            "type": [
+              "integer",
+              "number",
+              "null"
+            ]
+          },
+          "min_height": {
+            "type": [
+              "integer",
+              "number",
+              "null"
+            ]
+          },
+          "max_height": {
+            "type": [
+              "integer",
+              "number",
+              "null"
+            ]
+          },
+          "min_weight": {
+            "type": [
+              "integer",
+              "number",
+              "null"
+            ]
+          },
+          "max_weight": {
+            "type": [
+              "integer",
+              "number",
+              "null"
+            ]
+          },
+          "last_education": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "D3"
+          },
+          "min_experience": {
+            "type": [
+              "integer",
+              "number",
+              "null"
+            ]
+          },
+          "gender": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "laki-laki",
+              "perempuan",
+              null
+            ],
+            "example": null
+          },
+          "certificate": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "competency_scheme": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "facility": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "min_price": {
+            "type": [
+              "integer",
+              "number",
+              "null"
+            ]
+          },
+          "max_price": {
+            "type": [
+              "integer",
+              "number",
+              "null"
+            ]
+          },
+          "is_show_fee": {
+            "type": "boolean"
+          },
+          "is_urgent": {
+            "type": "boolean"
+          },
+          "quota": {
+            "type": [
+              "integer",
+              "number",
+              "null"
+            ]
+          },
+          "start_date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "end_date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "fee_type": {
+            "type": "string",
+            "enum": [
+              "daily",
+              "monthly"
+            ],
+            "example": "monthly"
+          },
+          "reason_rejected": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": null
+          },
+          "created_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "published_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "readOnly": true
+          },
+          "publication_expires_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "readOnly": true
+          },
+          "publication_token_cost": {
+            "type": "integer",
+            "minimum": 0,
+            "readOnly": true
+          },
+          "publication_cycle": {
+            "type": "integer",
+            "minimum": 0,
+            "readOnly": true
+          },
+          "is_currently_published": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "total_applications": {
+            "type": "integer",
+            "minimum": 0,
+            "readOnly": true,
+            "description": "Included when application totals are loaded."
           }
         }
       },
@@ -7783,7 +8811,7 @@
             ],
             "properties": {
               "job_vacancy": {
-                "$ref": "#/components/schemas/JobVacancy"
+                "$ref": "#/components/schemas/OwnedJobVacancy"
               }
             }
           }
@@ -7796,7 +8824,7 @@
           "category"
         ],
         "additionalProperties": false,
-        "description": "Accepted request fields for a company-owned vacancy. Drafts require position and category (security or cs); category is immutable after creation. Using workflow_action submit additionally requires description_work, province, city, address, working_type, working_system, at least one responsibility, all age/height/weight ranges, last_education, min_experience, at least one certificate, competency scheme, facility, min_price, max_price, is_show_fee, is_urgent, quota, and end_date. Do not send ownership, status, provider, counters, start_date, fee_type, or other response-only fields.",
+        "description": "Accepted request fields for a company-owned vacancy. Drafts require position and category (security or cs); category is immutable after creation. Using workflow_action publish additionally requires description_work, province, city, address, working_type, working_system, at least one responsibility, all age/height/weight ranges, Security publications require security_position to match an active title from GET /api/masters/positions?category=security. It is optional for drafts and PATCH; CS may omit it or send null. This reference is distinct from template positions in company master-data. last_education, min_experience, at least one certificate, competency scheme, facility, min_price, max_price, is_show_fee, is_urgent, quota, and end_date. Do not send ownership, status, provider, counters, start_date, fee_type, or other response-only fields.",
         "properties": {
           "position": {
             "type": "string",
@@ -7809,15 +8837,24 @@
               "security",
               "cs"
             ],
-            "description": "Vacancy position title.",
-            "example": "Satpam Objek Vital (Obvit) - Test 10"
+            "description": "Applicant category the vacancy targets. Required on create; prohibited on PATCH.",
+            "example": "security"
+          },
+          "security_position": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 150,
+            "description": "Optional for drafts/PATCH; required for security publication. Must match an active title from GET /api/masters/positions?category=security. CS may omit it or send null.",
+            "example": "Komandan Regu"
           },
           "description_work": {
             "type": [
               "string",
               "null"
             ],
-            "description": "Work description. Required when workflow_action is submit.",
+            "description": "Work description. Required when workflow_action is publish.",
             "example": "Pengamanan pada objek vital seperti pembangkit listrik, pelabuhan, bandara dan kilang minyak."
           },
           "province": {
@@ -7826,7 +8863,7 @@
               "null"
             ],
             "maxLength": 255,
-            "description": "Province name. Required with city when workflow_action is submit.",
+            "description": "Province name. Required with city when workflow_action is publish.",
             "example": "KALIMANTAN TIMUR"
           },
           "city": {
@@ -7835,7 +8872,7 @@
               "null"
             ],
             "maxLength": 255,
-            "description": "City name in the selected province. Required when workflow_action is submit.",
+            "description": "City name in the selected province. Required when workflow_action is publish.",
             "example": "KOTA BALIKPAPAN"
           },
           "district": {
@@ -7861,7 +8898,7 @@
               "string",
               "null"
             ],
-            "description": "Work location address. Required when workflow_action is submit.",
+            "description": "Work location address. Required when workflow_action is publish.",
             "example": "Jl. Jend Sudirman"
           },
           "working_type": {
@@ -7890,7 +8927,7 @@
               "array",
               "null"
             ],
-            "description": "Responsibilities. At least one item is required when workflow_action is submit.",
+            "description": "Responsibilities. At least one item is required when workflow_action is publish.",
             "items": {
               "type": "string",
               "maxLength": 255
@@ -7981,7 +9018,7 @@
               "array",
               "null"
             ],
-            "description": "Required certificates. At least one item is required when workflow_action is submit.",
+            "description": "Required certificates. At least one item is required when workflow_action is publish.",
             "items": {
               "type": "string",
               "maxLength": 255
@@ -7996,7 +9033,7 @@
               "array",
               "null"
             ],
-            "description": "Required competency schemes. At least one item is required when workflow_action is submit.",
+            "description": "Required competency schemes. At least one item is required when workflow_action is publish.",
             "items": {
               "type": "string",
               "maxLength": 255
@@ -8011,7 +9048,7 @@
               "array",
               "null"
             ],
-            "description": "Benefits or facilities. At least one item is required when workflow_action is submit.",
+            "description": "Benefits or facilities. At least one item is required when workflow_action is publish.",
             "items": {
               "type": "string",
               "maxLength": 255
@@ -8057,24 +9094,15 @@
               "null"
             ],
             "minimum": 1,
-            "description": "Maximum number of applicants. Required when workflow_action is submit.",
+            "description": "Maximum number of applicants. Required when workflow_action is publish.",
             "example": 2
-          },
-          "end_date": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "date",
-            "description": "Vacancy closing date in YYYY-MM-DD format. Required when workflow_action is submit.",
-            "example": "2026-12-31"
           },
           "workflow_action": {
             "type": "string",
-            "description": "Save as draft by default, or validate and submit immediately.",
+            "description": "Save a free draft, or validate and publish directly using the organization’s token balance. No administrator publication approval is required.",
             "enum": [
               "save_draft",
-              "submit"
+              "publish"
             ],
             "default": "save_draft",
             "example": "save_draft"
@@ -8092,6 +9120,15 @@
             "maxLength": 150,
             "description": "Vacancy position title.",
             "example": "Satpam Objek Vital (Obvit) - Test 10"
+          },
+          "security_position": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 150,
+            "description": "Optional title from active security master positions; PATCH may set null. CS values are prohibited.",
+            "example": "Komandan Regu"
           },
           "category": {
             "description": "Vacancy category cannot be changed after creation; sending it fails validation with a prohibited rule.",
@@ -8345,15 +9382,6 @@
             "minimum": 1,
             "description": "Maximum number of applicants.",
             "example": 2
-          },
-          "end_date": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "date",
-            "description": "Vacancy closing date in YYYY-MM-DD format.",
-            "example": "2026-12-31"
           }
         }
       },
@@ -8505,7 +9533,7 @@
               "job_vacancies": {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/JobVacancy"
+                  "$ref": "#/components/schemas/OwnedJobVacancy"
                 }
               },
               "pagination": {
@@ -9169,6 +10197,30 @@
           }
         }
       },
+      "GoogleAuthRequest": {
+        "type": "object",
+        "required": [
+          "role",
+          "id_token"
+        ],
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "security",
+              "cs",
+              "company"
+            ],
+            "description": "Requested API role. Security maps to stored satpam; worker accounts may switch between security and cs."
+          },
+          "id_token": {
+            "type": "string",
+            "minLength": 101,
+            "maxLength": 8192,
+            "description": "Google OAuth ID token signed for the server client ID configured on the API. Google access tokens and Firebase ID tokens are not accepted."
+          }
+        }
+      },
       "RefreshTokenRequest": {
         "type": "object",
         "required": [
@@ -9283,211 +10335,19 @@
           }
         }
       },
-      "ActiveUserSubscriptionResponse": {
-        "type": "object",
-        "required": [
-          "status",
-          "data"
-        ],
-        "properties": {
-          "status": {
-            "type": "boolean",
-            "example": true
-          },
-          "data": {
-            "type": "object",
-            "required": [
-              "user_subscription"
-            ],
-            "properties": {
-              "user_subscription": {
-                "anyOf": [
-                  {
-                    "$ref": "#/components/schemas/UserSubscription"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            }
-          }
-        }
-      },
-      "UserSubscription": {
-        "type": "object",
-        "required": [
-          "id",
-          "uuid",
-          "user_id",
-          "master_subscription_id",
-          "user_order_manual_id",
-          "role",
-          "subscription_name",
-          "price",
-          "started_at",
-          "expired_at",
-          "status",
-          "limits",
-          "notes",
-          "cancelled_at",
-          "remaining_days",
-          "is_active",
-          "limit_usage",
-          "created_at",
-          "updated_at"
-        ],
-        "properties": {
-          "id": {
-            "type": [
-              "integer",
-              "null"
-            ],
-            "description": "Persisted user subscription ID; null for the non-persisted default plan fallback."
-          },
-          "uuid": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "user_id": {
-            "type": "integer",
-            "example": 12
-          },
-          "master_subscription_id": {
-            "type": "integer",
-            "example": 2
-          },
-          "user_order_manual_id": {
-            "type": [
-              "integer",
-              "null"
-            ],
-            "example": 8
-          },
-          "role": {
-            "type": "string",
-            "enum": [
-              "security",
-              "bujp",
-              "client"
-            ]
-          },
-          "subscription_name": {
-            "type": "string",
-            "example": "Profesional"
-          },
-          "price": {
-            "type": "number",
-            "format": "double",
-            "description": "Subscription price as a JSON number.",
-            "example": 49000.0
-          },
-          "started_at": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "date-time"
-          },
-          "expired_at": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "date-time"
-          },
-          "status": {
-            "type": "string",
-            "example": "active"
-          },
-          "limits": {
-            "type": [
-              "object",
-              "null"
-            ],
-            "description": "Feature limits keyed by feature name; returned as a JSON object.",
-            "additionalProperties": true
-          },
-          "notes": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "cancelled_at": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "date-time"
-          },
-          "remaining_days": {
-            "type": "integer",
-            "minimum": 0,
-            "example": 29
-          },
-          "is_active": {
-            "type": "boolean",
-            "example": true
-          },
-          "limit_usage": {
-            "type": "object",
-            "required": [
-              "total_active_job_applications",
-              "total_active_training_applications",
-              "total_active_job_posts",
-              "total_active_training_posts"
-            ],
-            "properties": {
-              "total_active_job_applications": {
-                "type": "integer",
-                "minimum": 0,
-                "description": "Security user's applications on published job vacancies; zero for other roles."
-              },
-              "total_active_training_applications": {
-                "type": "integer",
-                "minimum": 0,
-                "description": "Security user's applications on published trainings; zero for other roles."
-              },
-              "total_active_job_posts": {
-                "type": "integer",
-                "minimum": 0,
-                "description": "Company job posts with submitted or published status; zero for other roles."
-              },
-              "total_active_training_posts": {
-                "type": "integer",
-                "minimum": 0,
-                "description": "Company training posts with submitted or published status; zero for worker roles."
-              }
-            }
-          },
-          "created_at": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "date-time"
-          },
-          "updated_at": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "date-time"
-          }
-        }
-      },
       "UserOrderManualStoreRequest": {
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "subscription_uuid"
+          "token_quantity"
         ],
         "properties": {
-          "subscription_uuid": {
-            "type": "string",
-            "format": "uuid",
-            "description": "UUID of an active subscription plan for the authenticated user's role."
+          "token_quantity": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4294967295,
+            "description": "Whole tokens to purchase. The server also rejects totals above the payment storage limit. Organization ownership and the rupiah total are server-derived.",
+            "example": 4
           }
         }
       },
@@ -9549,7 +10409,7 @@
                 }
               },
               "pagination": {
-                "$ref": "#/components/schemas/TrainingPagination"
+                "$ref": "#/components/schemas/UserOrderPagination"
               }
             }
           }
@@ -9559,7 +10419,6 @@
         "type": "object",
         "required": [
           "status",
-          "message",
           "data"
         ],
         "properties": {
@@ -9583,124 +10442,16 @@
           }
         }
       },
-      "UserOrderManualSubscription": {
-        "type": "object",
-        "description": "Subscription plan snapshot embedded in a manual order. Uses the same normalized shape as the\nplan listing endpoint: `features` is a JSON object or null (never a JSON string), `price` is\nnumeric, and `is_active` and `is_highlight` are booleans.\n",
-        "required": [
-          "id",
-          "uuid",
-          "name",
-          "slug",
-          "role",
-          "price",
-          "duration",
-          "duration_type",
-          "description",
-          "features",
-          "is_active",
-          "is_highlight",
-          "sort_order"
-        ],
-        "properties": {
-          "id": {
-            "type": "integer",
-            "example": 2
-          },
-          "uuid": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid",
-            "example": "8b1f4f8a-5d6f-4a4d-a43d-5f3c9f8c2a11"
-          },
-          "name": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "example": "Profesional"
-          },
-          "slug": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "example": "profesional"
-          },
-          "role": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "enum": [
-              "security",
-              "bujp",
-              "client",
-              null
-            ]
-          },
-          "price": {
-            "type": "number",
-            "format": "double",
-            "description": "Subscription price snapshot as a JSON number.",
-            "example": 49000.0
-          },
-          "duration": {
-            "type": "integer",
-            "example": 1
-          },
-          "duration_type": {
-            "type": "string",
-            "enum": [
-              "day",
-              "month",
-              "year"
-            ],
-            "example": "month"
-          },
-          "description": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "example": "Untuk satpam aktif yang ingin melamar lebih banyak."
-          },
-          "features": {
-            "type": [
-              "object",
-              "null"
-            ],
-            "additionalProperties": true,
-            "example": {
-              "job_vacancy": {
-                "enabled": true,
-                "limit": 5
-              },
-              "training": {
-                "enabled": true,
-                "limit": 5
-              }
-            }
-          },
-          "is_active": {
-            "type": "boolean",
-            "example": true
-          },
-          "sort_order": {
-            "type": "integer",
-            "minimum": 0,
-            "example": 1
-          }
-        }
-      },
       "UserOrderManual": {
         "type": "object",
+        "description": "Organization-owned manual token purchase. Quantity, conversion and total are fixed when created; proof upload alone does not credit the wallet.",
         "required": [
           "id",
           "uuid",
           "user_id",
-          "master_subscription_id",
+          "token_wallet_id",
+          "token_quantity",
+          "idr_per_token",
           "role",
           "order_number",
           "price",
@@ -9715,107 +10466,104 @@
           "verified_at",
           "expired_at",
           "created_at",
-          "updated_at",
-          "subscription"
+          "updated_at"
         ],
         "properties": {
           "id": {
             "type": "integer",
-            "example": 1
+            "minimum": 1
           },
           "uuid": {
             "type": "string",
-            "format": "uuid",
-            "example": "4c6f5d8a-0c2d-4f4b-a4b6-1f5a0e2c7d91"
+            "format": "uuid"
           },
           "user_id": {
             "type": "integer",
-            "example": 12
+            "minimum": 1
           },
-          "master_subscription_id": {
+          "token_wallet_id": {
             "type": "integer",
-            "example": 2
+            "minimum": 1
+          },
+          "token_quantity": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "idr_per_token": {
+            "type": "integer",
+            "minimum": 1
           },
           "role": {
             "type": "string",
-            "enum": [
-              "security",
-              "bujp",
-              "client"
-            ]
+            "description": "Historical financial role label: client for a company organization, bujp for a BUJP organization."
           },
           "order_number": {
-            "type": "string",
-            "example": "ORD-20260924-00001"
+            "type": "string"
           },
           "price": {
-            "type": "string",
-            "description": "Order price as a decimal string with two fractional digits.",
-            "example": "49000.00"
+            "type": "integer",
+            "minimum": 0
           },
           "payment_method": {
             "type": [
               "string",
               "null"
-            ],
-            "example": "transfer"
+            ]
           },
           "payment_account": {
             "type": [
               "string",
               "null"
-            ],
-            "example": "BCA 1234567890 a.n. PT Example"
+            ]
           },
           "payment_date": {
             "type": [
               "string",
               "null"
             ],
-            "format": "date-time",
-            "example": "2026-09-24T03:15:00.000000Z"
+            "format": "date-time"
           },
           "file": {
             "type": [
               "string",
               "null"
             ],
-            "description": "Stored payment proof filename, when uploaded.",
-            "example": "payment_ORD-20260924-00001_1727147700.jpg"
+            "description": "Payment-proof filename under /uploads/payment/, or null before proof upload."
           },
           "status": {
             "type": "string",
-            "description": "Order lifecycle status: pending_payment, verification, approved, rejected, or cancelled."
+            "enum": [
+              "pending_payment",
+              "verification",
+              "approved",
+              "rejected",
+              "cancelled"
+            ]
           },
           "notes": {
             "type": [
               "string",
               "null"
-            ],
-            "example": "Pembayaran sedang ditinjau oleh administrator."
+            ]
           },
           "rejected_reason": {
             "type": [
               "string",
               "null"
-            ],
-            "example": null
+            ]
           },
           "verified_by": {
             "type": [
               "string",
               "null"
-            ],
-            "description": "Authenticated administrator user ID that reviewed the order.",
-            "example": null
+            ]
           },
           "verified_at": {
             "type": [
               "string",
               "null"
             ],
-            "format": "date-time",
-            "example": null
+            "format": "date-time"
           },
           "expired_at": {
             "type": [
@@ -9823,33 +10571,15 @@
               "null"
             ],
             "format": "date-time",
-            "example": null
+            "description": "New token orders have no automatic payment deadline (null). If a deadline is explicitly set, proof and approval require it to be strictly in the future. Token balances themselves never expire."
           },
           "created_at": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "date-time",
-            "example": "2026-09-24T03:00:00.000000Z"
+            "type": "string",
+            "format": "date-time"
           },
           "updated_at": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "date-time",
-            "example": "2026-09-24T03:00:00.000000Z"
-          },
-          "subscription": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/UserOrderManualSubscription"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -9936,24 +10666,57 @@
       },
       "CategoryCertificate": {
         "type": "object",
-        "required": ["id", "title", "category", "parent_id", "is_tuk", "level"],
+        "required": [
+          "id",
+          "title",
+          "category",
+          "parent_id",
+          "is_tuk",
+          "level"
+        ],
         "properties": {
-          "id": {"type": "integer"},
-          "title": {"type": "string"},
-          "category": {"type": "string", "enum": ["security", "cs"]},
-          "parent_id": {"type": ["integer", "null"]},
-          "is_tuk": {"type": "boolean"},
-          "level": {"type": "integer"}
+          "id": {
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "security",
+              "cs"
+            ]
+          },
+          "parent_id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "is_tuk": {
+            "type": "boolean"
+          },
+          "level": {
+            "type": "integer"
+          }
         }
       },
       "CategoryCertificateListResponse": {
         "type": "object",
-        "required": ["status", "data"],
+        "required": [
+          "status",
+          "data"
+        ],
         "properties": {
-          "status": {"type": "boolean"},
+          "status": {
+            "type": "boolean"
+          },
           "data": {
             "type": "array",
-            "items": {"$ref": "#/components/schemas/CategoryCertificate"}
+            "items": {
+              "$ref": "#/components/schemas/CategoryCertificate"
+            }
           }
         }
       },
@@ -10032,145 +10795,6 @@
           "bank_name": {
             "type": "string",
             "example": "BCA"
-          }
-        }
-      },
-      "MasterSubscriptionListResponse": {
-        "type": "object",
-        "required": [
-          "status",
-          "data"
-        ],
-        "properties": {
-          "status": {
-            "type": "boolean",
-            "example": true
-          },
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MasterSubscription"
-            }
-          }
-        }
-      },
-      "MasterSubscription": {
-        "type": "object",
-        "required": [
-          "id",
-          "uuid",
-          "name",
-          "slug",
-          "role",
-          "price",
-          "duration",
-          "duration_type",
-          "description",
-          "features",
-          "is_active",
-          "is_highlight",
-          "sort_order"
-        ],
-        "properties": {
-          "id": {
-            "type": "integer",
-            "example": 1
-          },
-          "uuid": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
-          },
-          "name": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "example": "Profesional"
-          },
-          "slug": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "example": "profesional"
-          },
-          "role": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "enum": [
-              "security",
-              "bujp",
-              "client",
-              null
-            ]
-          },
-          "price": {
-            "type": "number",
-            "format": "double",
-            "description": "Subscription price as a JSON number.",
-            "example": 49000.0
-          },
-          "duration": {
-            "type": "integer",
-            "example": 1
-          },
-          "duration_type": {
-            "type": "string",
-            "enum": [
-              "day",
-              "month",
-              "year"
-            ],
-            "example": "month"
-          },
-          "description": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "features": {
-            "type": [
-              "object",
-              "null"
-            ],
-            "description": "Feature definitions keyed by feature name.",
-            "additionalProperties": {
-              "type": "object",
-              "required": [
-                "enabled",
-                "limit"
-              ],
-              "properties": {
-                "enabled": {
-                  "type": "boolean"
-                },
-                "limit": {
-                  "type": "integer",
-                  "minimum": 0
-                }
-              },
-              "additionalProperties": false
-            }
-          },
-          "is_active": {
-            "type": "boolean",
-            "example": true
-          },
-          "is_highlight": {
-            "type": "boolean",
-            "description": "Whether the plan is highlighted in the mobile plan list.",
-            "example": false
-          },
-          "sort_order": {
-            "type": "integer",
-            "minimum": 0,
-            "example": 1
           }
         }
       },
@@ -11027,6 +11651,54 @@
           }
         }
       },
+      "RegisterCleaningServiceRequest": {
+        "type": "object",
+        "required": [
+          "role",
+          "name",
+          "email",
+          "password",
+          "password_confirmation",
+          "agree"
+        ],
+        "properties": {
+          "role": {
+            "type": "string",
+            "const": "cs"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 150
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 100
+          },
+          "password": {
+            "$ref": "#/components/schemas/Password"
+          },
+          "password_confirmation": {
+            "type": "string",
+            "format": "password"
+          },
+          "agree": {
+            "type": "boolean",
+            "const": true
+          },
+          "phone_number": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 10,
+            "maxLength": 15,
+            "pattern": "^\\d{10,15}$",
+            "description": "Optional and unique; non-digit characters are stripped before validation."
+          }
+        }
+      },
       "RegisterSecurityRequest": {
         "type": "object",
         "required": [
@@ -11116,25 +11788,6 @@
           }
         }
       },
-      "RegisterCleaningServiceRequest": {
-        "type": "object",
-        "required": ["role", "name", "email", "password", "password_confirmation", "agree"],
-        "properties": {
-          "role": {"type": "string", "const": "cs"},
-          "name": {"type": "string", "minLength": 3, "maxLength": 150},
-          "email": {"type": "string", "format": "email", "maxLength": 100},
-          "password": {"$ref": "#/components/schemas/Password"},
-          "password_confirmation": {"type": "string", "format": "password"},
-          "agree": {"type": "boolean", "const": true},
-          "phone_number": {
-            "type": ["string", "null"],
-            "minLength": 10,
-            "maxLength": 15,
-            "pattern": "^\\d{10,15}$",
-            "description": "Optional and unique; non-digit characters are stripped before validation."
-          }
-        }
-      },
       "Password": {
         "type": "string",
         "format": "password",
@@ -11201,21 +11854,24 @@
       },
       "ForgotPasswordRequest": {
         "type": "object",
-        "required": ["email"],
+        "required": [
+          "email"
+        ],
         "properties": {
-          "email": {"type": "string", "format": "email", "maxLength": 255, "example": "user@example.com"}
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 255,
+            "example": "user@example.com"
+          }
         }
       },
       "ForgotPasswordResponse": {
         "type": "object",
-        "required": ["status", "message"],
-        "properties": {
-          "status": {"type": "boolean", "const": true},
-          "message": {"type": "string", "example": "Jika alamat email terdaftar, kami akan mengirimkan tautan untuk mengatur ulang kata sandi."}
-        }
-      },
-      "ValidationErrorResponse": {
-        "type": "object",
+        "required": [
+          "status",
+          "message"
+        ],
         "properties": {
           "message": {
             "type": "string"
@@ -11240,6 +11896,231 @@
           },
           "message": {
             "type": "string"
+          }
+        }
+      },
+      "UserOrderPagination": {
+        "type": "object",
+        "required": [
+          "current_page",
+          "last_page",
+          "per_page",
+          "total",
+          "from",
+          "to",
+          "has_more_pages"
+        ],
+        "properties": {
+          "current_page": {
+            "type": "integer"
+          },
+          "last_page": {
+            "type": "integer"
+          },
+          "per_page": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          },
+          "from": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "to": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "has_more_pages": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TokenBillingSettings": {
+        "type": "object",
+        "required": [
+          "idr_per_token",
+          "job_post_tokens",
+          "job_post_days",
+          "training_post_tokens",
+          "training_post_days"
+        ],
+        "properties": {
+          "idr_per_token": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "job_post_tokens": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "job_post_days": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "training_post_tokens": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "training_post_days": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "TokenLedgerEntry": {
+        "type": "object",
+        "required": [
+          "id",
+          "token_wallet_id",
+          "amount",
+          "balance_after",
+          "kind",
+          "event_key",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "token_wallet_id": {
+            "type": "integer"
+          },
+          "amount": {
+            "type": "integer",
+            "description": "Positive for approved purchases; negative for publication spending."
+          },
+          "balance_after": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "topup",
+              "job_publication",
+              "training_publication"
+            ]
+          },
+          "event_key": {
+            "type": "string"
+          },
+          "subject_type": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "subject_id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TokenWalletResponse": {
+        "type": "object",
+        "required": [
+          "status",
+          "data"
+        ],
+        "properties": {
+          "status": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object",
+            "required": [
+              "settings",
+              "wallet",
+              "transactions",
+              "pagination"
+            ],
+            "properties": {
+              "settings": {
+                "$ref": "#/components/schemas/TokenBillingSettings"
+              },
+              "wallet": {
+                "type": "object",
+                "required": [
+                  "balance"
+                ],
+                "properties": {
+                  "balance": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Whole tokens owned by the employer organization. They never expire and cannot be transferred or cashed out."
+                  }
+                }
+              },
+              "transactions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/TokenLedgerEntry"
+                }
+              },
+              "pagination": {
+                "type": "object",
+                "properties": {
+                  "current_page": {
+                    "type": "integer"
+                  },
+                  "last_page": {
+                    "type": "integer"
+                  },
+                  "per_page": {
+                    "type": "integer"
+                  },
+                  "total": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "ValidationErrorResponse": {
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "status": {
+            "type": "boolean",
+            "example": false
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
           }
         }
       }

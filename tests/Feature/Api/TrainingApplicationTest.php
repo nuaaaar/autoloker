@@ -40,6 +40,49 @@ class TrainingApplicationTest extends TestCase
             ->assertJsonPath('status', false);
     }
 
+    public function test_registration_is_rejected_at_publication_expiry(): void
+    {
+        [$user] = $this->securityAccount('expired-training-publication@example.com');
+        $training = Training::create($this->trainingAttributes([
+            'publication_expires_at' => now(),
+        ]));
+        $token = app(TokenService::class)->issue($user)['access_token'];
+
+        $this->withToken($token)
+            ->postJson("/api/trainings/{$training->uuid}/apply")
+            ->assertUnprocessable();
+    }
+
+    public function test_registration_is_rejected_at_event_start(): void
+    {
+        [$user] = $this->securityAccount('training-started@example.com');
+        $training = Training::create($this->trainingAttributes([
+            'start_date' => now()->toDateString(),
+        ]));
+        $token = app(TokenService::class)->issue($user)['access_token'];
+
+        $this->withToken($token)
+            ->postJson("/api/trainings/{$training->uuid}/apply")
+            ->assertUnprocessable();
+    }
+
+    public function test_rejected_historic_application_still_prevents_duplicate_registration(): void
+    {
+        [$user, $security] = $this->securityAccount('rejected-training-duplicate@example.com');
+        $training = Training::create($this->trainingAttributes());
+        TrainingApplication::create([
+            'security_id' => $security->id,
+            'training_id' => $training->id,
+            'status' => 'rejected',
+        ]);
+        $token = app(TokenService::class)->issue($user)['access_token'];
+
+        $this->withToken($token)
+            ->postJson("/api/trainings/{$training->uuid}/apply")
+            ->assertUnprocessable()
+            ->assertJsonPath('status', false);
+    }
+
     public function test_application_is_rejected_when_approved_quota_is_full(): void
     {
         [$user] = $this->securityAccount('training-quota-applicant@example.com');
@@ -138,15 +181,10 @@ class TrainingApplicationTest extends TestCase
         $this->assertDatabaseMissing('training_applications', ['id' => $application->id]);
     }
 
-    public function test_applicant_can_read_only_its_applied_training_detail(): void
+    public function test_applicant_can_read_public_and_expired_training_details(): void
     {
-        [$user, $security] = $this->securityAccount('training-detail@example.com');
+        [$user] = $this->securityAccount('training-detail@example.com');
         $training = Training::create($this->trainingAttributes());
-        $application = TrainingApplication::create([
-            'security_id' => $security->id,
-            'training_id' => $training->id,
-            'status' => 'pending',
-        ]);
         $token = app(TokenService::class)->issue($user)['access_token'];
 
         $this->withToken($token)
@@ -154,18 +192,25 @@ class TrainingApplicationTest extends TestCase
             ->assertOk()
             ->assertJsonPath('status', true)
             ->assertJsonPath('data.training.uuid', (string) $training->uuid)
-            ->assertJsonPath('data.training.application_uuid', (string) $application->uuid)
-            ->assertJsonPath('data.training.application_status', 'pending');
+            ->assertJsonPath('data.training.is_currently_published', true);
 
-        [$otherUser] = $this->securityAccount('unrelated-training@example.com');
-        $otherToken = app(TokenService::class)->issue($otherUser)['access_token'];
-        $this->withToken($otherToken)
-            ->getJson("/api/trainings/{$training->uuid}")
-            ->assertNotFound()
-            ->assertJsonPath('status', false)
-            ->assertJsonMissingPath('data.training');
+        $archived = Training::create($this->trainingAttributes([
+            'title' => 'Archived Training',
+            'publication_expires_at' => now()->subSecond(),
+        ]));
+        $this->withToken($token)
+            ->getJson("/api/trainings/{$archived->uuid}")
+            ->assertOk()
+            ->assertJsonPath('data.training.is_currently_published', false);
+
+        $draft = Training::create($this->trainingAttributes([
+            'title' => 'Draft Training',
+            'status' => 'draft',
+        ]));
+        $this->withToken($token)
+            ->getJson("/api/trainings/{$draft->uuid}")
+            ->assertNotFound();
     }
-
     /** @return array{0: User, 1: Security} */
     private function securityAccount(string $email): array
     {
@@ -214,6 +259,10 @@ class TrainingApplicationTest extends TestCase
             'category_role' => 'security',
             'status' => 'published',
             'quota' => 10,
+            'published_at' => now()->subDay(),
+            'publication_expires_at' => now()->addDays(29),
+            'publication_token_cost' => 0,
+            'publication_cycle' => 1,
             'start_date' => now()->addDays(7)->toDateString(),
         ], $overrides);
     }

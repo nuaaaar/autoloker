@@ -556,15 +556,6 @@
 
                             @break
 
-                            @case('submitted')
-
-                                <span class="badge badge-status badge-warning">
-
-                                    Menunggu Persetujuan
-
-                                </span>
-
-                            @break
 
                             @case('published')
 
@@ -655,6 +646,39 @@
 
             </div>
 
+        </div>
+        @if(session('success'))
+            <div class="alert alert-success mt-4" role="status">{{ session('success') }}</div>
+        @endif
+        @if($errors->any())
+            <div class="alert alert-danger mt-4" role="alert">
+                <p>Publikasi belum berhasil.</p>
+                <ul class="mb-0">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
+                <a href="{{ route('dashboard-user.tokens.index') }}">Buka saldo token</a>
+            </div>
+        @endif
+
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-body">
+                @if($data->isCurrentlyPublished())
+                    <p class="mb-2">Masa tayang berakhir {{ optional($data->publication_expires_at)->format('d M Y') }}. Biaya: {{ number_format((int) $data->publication_token_cost) }} token. Jadwal kegiatan tetap {{ \Carbon\Carbon::parse($data->start_date)->format('d M Y') }}–{{ \Carbon\Carbon::parse($data->end_date)->format('d M Y') }}.</p>
+                    <form method="POST" action="{{ route('dashboard-user.training.close-publication', $data->uuid) }}">
+                        @csrf
+                        <button type="submit" class="btn btn-outline-secondary">Hentikan masa tayang</button>
+                    </form>
+                @else
+                    <p class="mb-2">Terbitkan dengan {{ number_format((int) $settings->training_post_tokens) }} token untuk masa tayang {{ (int) $settings->training_post_days }} hari. Token tidak kedaluwarsa; tanggal kegiatan di atas tetap menjadi jadwal pelatihan.</p>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{{ route('dashboard-user.training.edit', $data->uuid) }}" class="btn btn-light">Edit pelatihan</a>
+                        @if(in_array($data->status, ['draft', 'rejected', 'published'], true) && $data->start_date && \Carbon\Carbon::parse($data->start_date)->isFuture())
+                            <form method="POST" action="{{ route('dashboard-user.training.publish', $data->uuid) }}">
+                                @csrf
+                                <button type="submit" class="btn btn-warning">Terbitkan / terbitkan ulang</button>
+                            </form>
+                        @endif
+                    </div>
+                @endif
+            </div>
         </div>
 
         @if($data->status=='rejected')
@@ -914,12 +938,9 @@
                                             <span class="badge bg-secondary">Draft</span>
                                         @break
 
-                                        @case('submitted')
-                                            <span class="badge bg-warning">Menunggu Review</span>
-                                        @break
 
                                         @case('published')
-                                            <span class="badge bg-success">Dipublikasikan</span>
+                                            <span class="badge bg-success">{{ $data->isCurrentlyPublished() ? 'Iklan tayang' : 'Iklan berakhir' }}</span>
                                         @break
 
                                         @case('running')

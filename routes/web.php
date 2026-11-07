@@ -18,18 +18,16 @@ use App\Http\Controllers\Admin\BUJPController as ADMBUJP;
 use App\Http\Controllers\Admin\PartnerController as ADMPartner;
 use App\Http\Controllers\Admin\JobVacancyController as ADMJobVacancy;
 use App\Http\Controllers\Admin\JobApplicationController as ADMJobApplication;
-use App\Http\Controllers\Admin\JobVacancySubmittedController as ADMJobVacancySubmitted;
 use App\Http\Controllers\Admin\JobVacancyRejectedController as ADMJobVacancyRejected;
 use App\Http\Controllers\Admin\JobVacancyPublishedController as ADMJobVacancyPublished;
 use App\Http\Controllers\Admin\JobVacancyClosedController as ADMJobVacancyClosed;
 use App\Http\Controllers\Admin\TrainingController as ADMTraining;
-use App\Http\Controllers\Admin\TrainingSubmittedController as ADMTrainingSubmitted;
 use App\Http\Controllers\Admin\TrainingRejectedController as ADMTrainingRejected;
 use App\Http\Controllers\Admin\TrainingPublishedController as ADMTrainingPublished;
 use App\Http\Controllers\Admin\TrainingClosedController as ADMTrainingClosed;
 use App\Http\Controllers\Admin\TrainingCancelledController as ADMTrainingCancelled;
 use App\Http\Controllers\Admin\TrainingRunningController as ADMTrainingRunning;
-use App\Http\Controllers\Admin\MasterSubscriptionController as ADMMasterSubscription;
+use App\Http\Controllers\Admin\TokenSettingController as ADMTokenSetting;
 use App\Http\Controllers\Admin\MasterFAQController as ADMMasterFAQ;
 use App\Http\Controllers\Admin\MasterNotificationController as ADMMasterNotification;
 use App\Http\Controllers\Admin\MasterBankController as ADMMasterBank;
@@ -44,9 +42,6 @@ use App\Http\Controllers\UserPage\JobBookmarkController as UPPJobBookmark;
 use App\Http\Controllers\UserPage\JobApplicationController as UPPJobApplication;
 use App\Http\Controllers\UserPage\TrainingController as UPPTraining;
 use App\Http\Controllers\UserPage\TrainingApplicationController as UPPTrainingApplication;
-use App\Http\Controllers\UserPage\SubscriptionController as UPPSubscription;
-use App\Http\Controllers\UserPage\UserOrderManualController as UPPUserOrderManual;
-use App\Http\Controllers\UserPage\UserSubscriptionController as UPPUserSubscription;
 
 use App\Http\Controllers\User\DashboardUserController as USRDashboard;
 use App\Http\Controllers\User\ProfileController as USRProfile;
@@ -54,9 +49,8 @@ use App\Http\Controllers\User\JobVacancyController as USRJobVacancy;
 use App\Http\Controllers\User\TrainingController as USRTraining;
 use App\Http\Controllers\User\JobApplicationController as USRJobApplication;
 use App\Http\Controllers\User\NotificationController as USRNotification;
-use App\Http\Controllers\User\SubscriptionController as USRSubscription;
+use App\Http\Controllers\User\TokenController as USRToken;
 use App\Http\Controllers\User\UserOrderManualController as USRUserOrderManual;
-use App\Http\Controllers\User\UserSubscriptionController as USRUserSubscription;
 
 use App\Http\Controllers\RegisterSecurityController;
 use App\Http\Controllers\RegisterCompanyController;
@@ -144,6 +138,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::prefix('dashboard-admin')->name('dashboard-admin.')->group(function () {
         Route::get('/', [ADMDashboard::class,'index'])->name('index');
+        Route::get('/token-settings', [ADMTokenSetting::class, 'index'])->name('token-settings.index');
+        Route::put('/token-settings', [ADMTokenSetting::class, 'update'])->name('token-settings.update');
         
         Route::prefix('master')->name('master.')->group(function () {
             Route::prefix('placement/{category}')->group(function () {
@@ -272,7 +268,6 @@ Route::middleware(['auth'])->group(function () {
             Route::resource('position-security', ADMMasterPositionSecurity::class); 
             Route::resource('position-cleaning-service', ADMMasterPositionCleaningService::class); 
             Route::resource('competency-scheme', ADMMasterCompetencyScheme::class); 
-            Route::resource('subscription', ADMMasterSubscription::class);
             Route::resource('faq', ADMMasterFAQ::class); 
             Route::resource('notification', ADMMasterNotification::class); 
             Route::resource('bank', ADMMasterBank::class); 
@@ -293,14 +288,9 @@ Route::middleware(['auth'])->group(function () {
 
         Route::prefix('job-vacancy')->name('job-vacancy.')->group(function () {
             Route::resource('published', ADMJobVacancyPublished::class);
-            Route::resource('submitted', ADMJobVacancySubmitted::class);
             Route::resource('rejected', ADMJobVacancyRejected::class);
             Route::resource('closed', ADMJobVacancyClosed::class);
             Route::get('{id}', [ADMJobVacancy::class,'show'])->name('show');
-            Route::post('/{uuid}/publish', [ADMJobVacancy::class, 'publish'])
-            ->name('publish');
-            Route::post('/{uuid}/reject', [ADMJobVacancy::class, 'reject'])
-                ->name('reject');
 
             Route::delete('destroy',[ADMJobVacancy::class, 'destroy'])->name('destroy');
         });
@@ -315,21 +305,17 @@ Route::middleware(['auth'])->group(function () {
 
         Route::prefix('training')->name('training.')->group(function () {
             Route::resource('published', ADMTrainingPublished::class);
-            Route::resource('submitted', ADMTrainingSubmitted::class);
             Route::resource('rejected', ADMTrainingRejected::class);
             Route::resource('closed', ADMTrainingClosed::class);
             Route::resource('cancelled', ADMTrainingCancelled::class);
             Route::resource('running', ADMTrainingRunning::class);
             Route::get('{id}', [ADMTraining::class,'show'])->name('show');
 
-            Route::post('/{uuid}/publish', [ADMTraining::class, 'publish'])->name('publish');
-            Route::post('/{uuid}/reject', [ADMTraining::class, 'reject'])->name('reject');
 
             Route::post('/{uuid}/start',[ADMTraining::class, 'start'])->name('start');
             Route::post('/{uuid}/close',[ADMTraining::class, 'close'])->name('close');
             Route::post('/{uuid}/cancel',[ADMTraining::class, 'cancel'])->name('cancel');
 
-            Route::post('/{uuid}/restore',[ADMTraining::class, 'restore'])->name('restore');
             Route::delete('/{uuid}',[ADMTraining::class, 'destroy'])->name('destroy');
         });
 
@@ -418,6 +404,8 @@ Route::middleware(['auth'])->group(function () {
             */
 
             Route::get('job-vacancy/statistic',[USRJobVacancy::class, 'statistic'])->name('job-vacancy.statistic');
+            Route::post('job-vacancy/{uuid}/publish', [USRJobVacancy::class, 'publish'])->name('job-vacancy.publish');
+            Route::post('job-vacancy/{uuid}/close-publication', [USRJobVacancy::class, 'closePublication'])->name('job-vacancy.close-publication');
 
             Route::get(
                 'job-vacancy/master-data',
@@ -431,15 +419,7 @@ Route::middleware(['auth'])->group(function () {
                 [USRJobVacancy::class, 'getPosition']
             )->name('job-vacancy.position');
 
-            Route::post(
-                '/job-vacancy/{uuid}/withdraw',
-                [USRJobVacancy::class, 'withdraw']
-            )->name('job-vacancy.withdraw');
 
-            Route::post(
-                '/job-vacancy/{uuid}/close',
-                [USRJobVacancy::class, 'close']
-            )->name('job-vacancy.close');
 
 
             /*
@@ -448,6 +428,8 @@ Route::middleware(['auth'])->group(function () {
             |--------------------------------------------------------------------------
             */
 
+            Route::post('training/{uuid}/publish', [USRTraining::class, 'publish'])->name('training.publish');
+            Route::post('training/{uuid}/close-publication', [USRTraining::class, 'closePublication'])->name('training.close-publication');
             Route::get(
                 'training/statistic',
                 [USRTraining::class, 'statistic']
@@ -530,32 +512,11 @@ Route::middleware(['auth'])->group(function () {
 
             });
 
-            Route::prefix('subscription')->name('subscription.')->group(function () {
-
-                Route::get(
-                    '',
-                    [USRSubscription::class, 'index']
-                )->name('index');
-
-                Route::post(
-                    '/order',
-                    [USRUserOrderManual::class, 'store']
-                )->name('order.store');
-
-            });
-
-            Route::prefix('user-subscription')->name('user-subscription.')->group(function () {
-
-                Route::get(
-                    '',
-                    [USRUserSubscription::class, 'index']
-                )->name('index');
-
-                Route::post(
-                    '/order/{uuid}/upload-proof',
-                    [USRUserOrderManual::class, 'uploadProof']
-                )->name('order.upload-proof');
-
+            Route::prefix('tokens')->name('tokens.')->group(function () {
+                Route::get('/', [USRToken::class, 'index'])->name('index');
+                Route::post('/orders', [USRUserOrderManual::class, 'store'])->name('orders.store');
+                Route::post('/orders/{uuid}/upload-proof', [USRUserOrderManual::class, 'uploadProof'])->name('orders.upload-proof');
+                Route::post('/orders/{uuid}/cancel', [USRUserOrderManual::class, 'cancel'])->name('orders.cancel');
             });
 
         });
@@ -651,33 +612,6 @@ Route::middleware(['auth'])->group(function () {
 
         });
 
-        Route::prefix('subscription')->name('subscription.')->group(function () {
-
-            Route::get(
-                '',
-                [UPPSubscription::class, 'index']
-            )->name('index');
-
-            Route::post(
-                '/order',
-                [UPPUserOrderManual::class, 'store']
-            )->name('order.store');
-
-            Route::post(
-                '/order/{uuid}/upload-proof',
-                [UPPUserOrderManual::class, 'uploadProof']
-            )->name('order.upload-proof');
-
-        });
-
-        Route::prefix('user-subscription')->name('user-subscription.')->group(function () {
-
-            Route::get(
-                '',
-                [UPPUserSubscription::class, 'index']
-            )->name('index');
-
-        });
     });
 
 });

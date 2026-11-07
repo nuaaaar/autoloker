@@ -16,6 +16,9 @@ use App\Http\Controllers\Controller;
 use App\Models\JobApplication;
 use Illuminate\Http\Request;
 use App\Models\JobVacancy;
+use App\Services\TokenBillingService;
+use App\Models\TokenSetting;
+use Illuminate\Support\Facades\DB;
 use Auth;
 
 class JobVacancyController extends Controller
@@ -74,7 +77,7 @@ class JobVacancyController extends Controller
         $totalJobs = (clone $jobQuery)->count();
 
         $publishedJobs = (clone $jobQuery)
-            ->where('status', 'published')
+            ->currentlyPublished()
             ->count();
 
         $draftJobs = (clone $jobQuery)
@@ -231,7 +234,7 @@ class JobVacancyController extends Controller
             ->count();
 
         $securityPublishedJobs = (clone $securityJobQuery)
-            ->where('status', 'published')
+            ->currentlyPublished()
             ->count();
 
         $securityDraftJobs = (clone $securityJobQuery)
@@ -324,7 +327,7 @@ class JobVacancyController extends Controller
             ->count();
 
         $csPublishedJobs = (clone $csJobQuery)
-            ->where('status', 'published')
+            ->currentlyPublished()
             ->count();
 
         $csDraftJobs = (clone $csJobQuery)
@@ -893,12 +896,14 @@ class JobVacancyController extends Controller
 
         $master_competency_schemes = collect();
 
+        $settings = TokenSetting::current();
         return view(
             'dashboard-user.job-vacancy.create',
             compact(
                 'positions',
                 'master_certificates',
-                'master_competency_schemes'
+                'master_competency_schemes',
+                'settings'
             )
         );
     }
@@ -1074,8 +1079,6 @@ class JobVacancyController extends Controller
 
             'kuota'             => 'required|integer|min:1',
 
-            'start_date'        => 'required|date',
-            'end_date'          => 'required|date|after_or_equal:start_date',
 
             'province'          => 'required',
             'city'              => 'required',
@@ -1320,7 +1323,8 @@ class JobVacancyController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        JobVacancy::create([
+        $job = DB::transaction(function () use ($request, $bujpId, $companyId, $province, $city, $district, $village): JobVacancy {
+            $job = JobVacancy::create([
 
             'b_u_j_p_id'       => $bujpId,
             'company_id'       => $companyId,
@@ -1332,12 +1336,8 @@ class JobVacancyController extends Controller
 
             'kuota'            => $request->kuota,
 
-            'status'           => ($request->status === 'submitted')
-                ? 'published'
-                : ($request->status ?? 'draft'),
+            'status'           => 'draft',
 
-            'start_date'       => $request->start_date,
-            'end_date'         => $request->end_date,
 
             'province'         => $province?->name,
             'city'             => $city?->name,
@@ -1380,7 +1380,13 @@ class JobVacancyController extends Controller
 
             'is_urgent'        => $request->boolean('is_urgent'),
 
-        ]);
+            ]);
+            if ($request->input('workflow_action') === 'publish') {
+                $this->publishWithTokens($job);
+            }
+
+            return $job;
+        });
 
         /*
         |--------------------------------------------------------------------------
@@ -1396,22 +1402,18 @@ class JobVacancyController extends Controller
         ]);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show($id)
     {
         $data['data'] = JobVacancy::where('uuid', $id)->first();
+        $data['settings'] = TokenSetting::current();
 
         return view('dashboard-user.job-vacancy.show', $data);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit($id)
     {
         $data['data'] = JobVacancy::where('uuid', $id)->first();
+        $data['settings'] = TokenSetting::current();
 
         return view('dashboard-user.job-vacancy.edit', $data);
     }
@@ -1430,8 +1432,6 @@ class JobVacancyController extends Controller
 
             'kuota'             => 'required|integer|min:1',
 
-            'start_date'        => 'required|date',
-            'end_date'          => 'required|date|after_or_equal:start_date',
 
             'province'          => 'required',
             'city'              => 'required',
@@ -1680,6 +1680,7 @@ class JobVacancyController extends Controller
 
         }
 
+        app(TokenBillingService::class)->assertEditable($job);
         $province = Province::where('code',$request->province)->first();
         $city = City::where('code',$request->city)->first();
         $district = District::where('code',$request->district)->first();
@@ -1687,7 +1688,7 @@ class JobVacancyController extends Controller
 
         $isShowFee = $request->boolean('is_show_fee');
 
-        $job->update([
+        $attributes = [
             'category'           => $request->category,
             'position'           => $request->position,
             'description_work'   => $request->description_work,
@@ -1705,12 +1706,7 @@ class JobVacancyController extends Controller
 
             'kuota'              => $request->kuota,
 
-            'status' => ($request->status === 'submitted')
-            ? 'published'
-            : ($request->status ?? $job->status),
 
-            'start_date'         => $request->start_date,
-            'end_date'           => $request->end_date,
 
             'province'           => $province?->name,
             'city'               => $city?->name,
@@ -1769,7 +1765,15 @@ class JobVacancyController extends Controller
 
             'is_urgent'          => $request->boolean('is_urgent'),
 
-        ]);
+        ];
+        DB::transaction(function () use ($job, $attributes, $request): void {
+            $locked = JobVacancy::query()->whereKey($job->getKey())->lockForUpdate()->firstOrFail();
+            app(TokenBillingService::class)->assertEditable($locked);
+            $locked->update($attributes);
+            if ($request->input('workflow_action') === 'publish') {
+                $this->publishWithTokens($locked);
+            }
+        });
 
         return response()->json([
 
@@ -1802,135 +1806,54 @@ class JobVacancyController extends Controller
         ]);
     }
 
-    public function close($uuid)
+    public function publish(Request $request, string $uuid)
     {
-        $job = JobVacancy::where('uuid', $uuid)->firstOrFail();
+        $owner = app(TokenBillingService::class)->ownerFor($request->user());
+        $job = JobVacancy::where('uuid', $uuid)
+            ->where($owner['column'], $owner['id'])
+            ->firstOrFail();
+        $this->publishWithTokens($job);
 
-        /*
-        |--------------------------------------------------------------------------
-        | CEK OWNER
-        |--------------------------------------------------------------------------
-        */
-
-        if (Auth::user()->role == 'bujp') {
-
-            abort_if(
-                $job->b_u_j_p_id != Auth::user()->user_bujp->bujp->id,
-                403
-            );
-
-        } else {
-
-            abort_if(
-                $job->company_id != Auth::user()->user_company->company->id,
-                403
-            );
-
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | CEK STATUS
-        |--------------------------------------------------------------------------
-        */
-
-        if ($job->status != 'published') {
-
-            return response()->json([
-
-                'status' => false,
-
-                'message' => 'Hanya lowongan yang sudah dipublikasikan yang dapat ditutup.'
-
-            ], 422);
-
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | TUTUP LOWONGAN
-        |--------------------------------------------------------------------------
-        */
-
-        $job->update([
-
-            'status' => 'closed'
-
-        ]);
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | REJECT PELAMAR YANG MASIH APPLIED
-        |--------------------------------------------------------------------------
-        */
-
-        JobApplication::where('job_vacancy_id', $job->id)
-            ->where('status', 'applied')
-            ->update([
-                'status' => 'rejected'
-            ]);
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | RESPONSE
-        |--------------------------------------------------------------------------
-        */
-
-        return response()->json([
-
-            'status' => true,
-
-            'message' => 'Lowongan berhasil ditutup dan pelamar yang masih dalam status applied otomatis ditolak.'
-
-        ]);
+        return $request->expectsJson()
+            ? response()->json(['status' => true, 'message' => 'Lowongan berhasil dipublikasikan.'])
+            : redirect()->route('dashboard-user.job-vacancy.show', $uuid)->with('success', 'Lowongan berhasil dipublikasikan.');
     }
 
-    public function withdraw($uuid)
+    private function publishWithTokens(JobVacancy $job): JobVacancy
     {
-        $job = JobVacancy::where('uuid', $uuid)->firstOrFail();
+        try {
+            return app(TokenBillingService::class)->publish($job);
+        } catch (\Illuminate\Validation\ValidationException $exception) {
+            if (request()->expectsJson()) {
+                throw new \Illuminate\Http\Exceptions\HttpResponseException(response()->json([
+                    'status' => false,
+                    'message' => $exception->getMessage(),
+                    'errors' => $exception->errors(),
+                ], 422));
+            }
 
-        if(Auth::user()->role == 'bujp')
-        {
-            abort_if(
-                $job->b_u_j_p_id != Auth::user()->user_bujp->bujp->id,
-                403
-            );
+            throw $exception;
         }
-        else
-        {
-            abort_if(
-                $job->company_id != Auth::user()->user_company->company->id,
-                403
-            );
-        }
-
-        if($job->status != 'submitted')
-        {
-            return response()->json([
-
-                'status' => false,
-
-                'message' => 'Hanya lowongan yang sedang diajukan yang dapat ditarik.'
-
-            ],422);
-        }
-
-        $job->update([
-
-            'status' => 'draft'
-
-        ]);
-
-        return response()->json([
-
-            'status' => true,
-
-            'message' => 'Pengajuan berhasil ditarik. Status lowongan kembali menjadi Draft.'
-
-        ]);
     }
+
+    public function closePublication($uuid)
+    {
+        $owner = Auth::user()->role === 'bujp'
+            ? ['b_u_j_p_id' => Auth::user()->user_bujp->bujp->id]
+            : ['company_id' => Auth::user()->user_company->company->id];
+
+        DB::transaction(function () use ($uuid, $owner): void {
+            $job = JobVacancy::query()
+                ->where('uuid', $uuid)
+                ->where(key($owner), current($owner))
+                ->lockForUpdate()
+                ->firstOrFail();
+            $job->forceFill(['status' => 'closed', 'publication_expires_at' => now()])->save();
+        });
+
+        return request()->expectsJson()
+            ? response()->json(['status' => true, 'message' => 'Publikasi lowongan berhasil ditutup.'])
+            : back()->with('success', 'Publikasi lowongan berhasil ditutup.');
+    }
+
 }

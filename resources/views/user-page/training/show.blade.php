@@ -2045,6 +2045,16 @@
 
                     <div class="training-header-action">
 
+                    @unless($isCurrentlyPublished)
+                        <div class="alert alert-warning" role="status">
+                            Masa tayang pelatihan ini telah berakhir atau ditutup.
+                        </div>
+                    @elseif(!$isRegistrationOpen)
+                        <div class="alert alert-warning" role="status">
+                            Pendaftaran ditutup karena kegiatan telah dimulai.
+                        </div>
+                    @endunless
+
 
                         @if($application && $application->status === 'approved')
 
@@ -2086,18 +2096,14 @@
                             </button>
 
                         @else
-
-                            <button
-                                type="button"
-                                class="btn-training-register"
-                                onclick="registerTraining('{{ $data->uuid }}')">
-
-                                <i class="ki-duotone ki-user-tick me-1"></i>
-
-                                Daftar Pelatihan
-
-                            </button>
-
+                            @if($isRegistrationOpen)
+                                <button type="button" class="btn-training-register" onclick="registerTraining('{{ $data->uuid }}')">
+                                    <i class="ki-duotone ki-user-tick me-1"></i>
+                                    Daftar Pelatihan
+                                </button>
+                            @else
+                                <button type="button" class="btn-training-register" disabled>Pendaftaran Ditutup</button>
+                            @endif
                         @endif
 
 
@@ -2953,18 +2959,14 @@
                         </button>
 
                     @else
-
-                        <button
-                            type="button"
-                            class="btn-training-register"
-                            onclick="registerTraining('{{ $data->uuid }}')">
-
-                            <i class="ki-duotone ki-user-tick me-1"></i>
-
-                            Daftar Pelatihan
-
-                        </button>
-
+                        @if($isRegistrationOpen)
+                            <button type="button" class="btn-training-register" onclick="registerTraining('{{ $data->uuid }}')">
+                                <i class="ki-duotone ki-user-tick me-1"></i>
+                                Daftar Pelatihan
+                            </button>
+                        @else
+                            <button type="button" class="btn-training-register" disabled>Pendaftaran Ditutup</button>
+                        @endif
                     @endif
 
 

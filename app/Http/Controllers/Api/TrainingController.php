@@ -47,7 +47,7 @@ class TrainingController extends Controller
                 },
             ])
             ->where('category_role', $applicant['category'])
-            ->where('status', 'published');
+            ->currentlyPublished();
 
         if (filled($filters['search'] ?? null)) {
             $search = $filters['search'];
@@ -90,26 +90,7 @@ class TrainingController extends Controller
         $query = Training::query()->where('uuid', $uuid);
 
         if ($user->role === 'company') {
-            $companyId = $user->user_company?->company?->id;
-            $query->where('company_id', $companyId ?? 0);
-        } else {
-            $securityId = $user->user_security?->security?->id;
-            $cleaningServiceId = $user->user_cleaning_service?->cleaning_service?->id;
-            $query->whereHas('applications', function (Builder $applications) use ($securityId, $cleaningServiceId): void {
-                if ($securityId === null && $cleaningServiceId === null) {
-                    $applications->whereRaw('1 = 0');
-                    return;
-                }
-                $applications->where(function (Builder $profiles) use ($securityId, $cleaningServiceId): void {
-                    if ($securityId !== null) {
-                        $profiles->where('security_id', $securityId);
-                    }
-                    if ($cleaningServiceId !== null) {
-                        $method = $securityId !== null ? 'orWhere' : 'where';
-                        $profiles->{$method}('cleaning_service_id', $cleaningServiceId);
-                    }
-                });
-            });
+            $query->where('company_id', $user->user_company?->company?->id ?? 0);
         }
 
         $training = $query
@@ -120,10 +101,10 @@ class TrainingController extends Controller
             ->firstOrFail();
 
         if ($user->role !== 'company') {
+            $securityId = $user->user_security?->security?->id;
+            $cleaningServiceId = $user->user_cleaning_service?->cleaning_service?->id;
             $application = $training->applications()
-                ->where(function (Builder $profiles) use ($user): void {
-                    $securityId = $user->user_security?->security?->id;
-                    $cleaningServiceId = $user->user_cleaning_service?->cleaning_service?->id;
+                ->where(function (Builder $profiles) use ($securityId, $cleaningServiceId): void {
                     if ($securityId !== null) {
                         $profiles->where('security_id', $securityId);
                     }
@@ -132,12 +113,28 @@ class TrainingController extends Controller
                         $profiles->{$method}('cleaning_service_id', $cleaningServiceId);
                     }
                 })
-                ->firstOrFail();
-            $training->setAttribute('is_applied', true);
-            $training->setAttribute('application_uuid', $application->uuid);
-            $training->setAttribute('application_status', $application->status);
-            $training->setAttribute('applied_at', $application->created_at);
-            $training->setAttribute('application_updated_at', $application->updated_at);
+                ->first();
+
+            $roleCategory = match ($user->role) {
+                'satpam' => 'security',
+                'cs' => 'cs',
+                default => null,
+            };
+            $archivableStatuses = ['published', 'closed', 'running', 'cancelled'];
+            if (
+                !in_array($training->status, $archivableStatuses, true)
+                || ($training->category_role !== $roleCategory && !$application)
+            ) {
+                abort(404);
+            }
+
+            if ($application) {
+                $training->setAttribute('is_applied', true);
+                $training->setAttribute('application_uuid', $application->uuid);
+                $training->setAttribute('application_status', $application->status);
+                $training->setAttribute('applied_at', $application->created_at);
+                $training->setAttribute('application_updated_at', $application->updated_at);
+            }
         }
 
         return response()->json([
@@ -153,7 +150,6 @@ class TrainingController extends Controller
         $training = Training::query()
             ->where('uuid', $uuid)
             ->where('category_role', $applicant['category'])
-            ->where('status', 'published')
             ->firstOrFail();
 
         $profile = $applicant['profile'];
@@ -174,8 +170,10 @@ class TrainingController extends Controller
 
         $column = $applicant['column'];
         $profileId = $applicant['profile_id'];
+        $securityId = $request->user()->user_security?->security?->id;
+        $cleaningServiceId = $request->user()->user_cleaning_service?->cleaning_service?->id;
 
-        $result = DB::transaction(function () use ($training, $column, $profileId): array {
+        $result = DB::transaction(function () use ($training, $column, $profileId, $securityId, $cleaningServiceId): array {
             $training = Training::query()
                 ->lockForUpdate()
                 ->findOrFail($training->id);
@@ -188,21 +186,30 @@ class TrainingController extends Controller
             }
 
             $application = TrainingApplication::query()
-                ->where($column, $profileId)
                 ->where('training_id', $training->id)
-                ->whereIn('status', ['pending', 'approved'])
+                ->where(function (Builder $profiles) use ($securityId, $cleaningServiceId): void {
+                    if ($securityId !== null) {
+                        $profiles->where('security_id', $securityId);
+                    }
+                    if ($cleaningServiceId !== null) {
+                        $method = $securityId !== null ? 'orWhere' : 'where';
+                        $profiles->{$method}('cleaning_service_id', $cleaningServiceId);
+                    }
+                })
                 ->first();
 
             if ($application) {
                 return [
-                    'error' => $application->status === 'approved'
-                        ? 'Anda sudah terdaftar dalam pelatihan ini.'
-                        : 'Pendaftaran pelatihan Anda sedang menunggu persetujuan.',
+                    'error' => match ($application->status) {
+                        'approved' => 'Anda sudah terdaftar dalam pelatihan ini.',
+                        'pending' => 'Pendaftaran pelatihan Anda sedang menunggu persetujuan.',
+                        default => 'Anda sudah pernah mendaftar pada pelatihan ini.',
+                    },
                     'status' => 422,
                 ];
             }
 
-            if ($training->start_date && now()->startOfDay()->gt($training->start_date)) {
+            if (!$training->isCurrentlyPublished() || ($training->start_date && now()->gte($training->start_date))) {
                 return [
                     'error' => 'Pendaftaran pelatihan telah ditutup.',
                     'status' => 422,

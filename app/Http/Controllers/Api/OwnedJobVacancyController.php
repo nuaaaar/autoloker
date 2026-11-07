@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Requests\Api\OwnedJobVacancyIndexRequest;
 use App\Http\Requests\Api\OwnedJobVacancyStoreRequest;
-use App\Http\Requests\Api\OwnedJobVacancySubmitRequest;
+use App\Http\Requests\Api\OwnedJobVacancyPublishRequest;
 use App\Http\Requests\Api\OwnedJobVacancyUpdateRequest;
 use App\Http\Resources\Api\JobVacancyResource;
 use App\Http\Resources\Api\OwnedJobVacancyResource;
@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class OwnedJobVacancyController extends OwnedOrganizationController
 {
@@ -182,18 +183,37 @@ class OwnedJobVacancyController extends OwnedOrganizationController
         );
     }
 
-    public function submit(
-        OwnedJobVacancySubmitRequest $request,
+    public function publish(
+        OwnedJobVacancyPublishRequest $request,
         JobVacancyService $service,
         string $uuid,
     ): JsonResponse {
         $vacancy = $this->ownedVacancy($request, $uuid);
-        $vacancy = $service->submit($vacancy);
+        $vacancy = $service->publish($vacancy);
 
         return $this->mutationResponse(
             $vacancy,
-            'Lowongan kerja berhasil diajukan untuk ditinjau.',
+            'Lowongan kerja berhasil dipublikasikan.',
         );
+    }
+    public function closePublication(Request $request, string $uuid): JsonResponse
+    {
+        $owner = $this->owner($request);
+
+        $vacancy = DB::transaction(function () use ($owner, $uuid): JobVacancy {
+            $vacancy = JobVacancy::query()
+                ->where('uuid', $uuid)
+                ->where($owner['column'], $owner['id'])
+                ->lockForUpdate()
+                ->firstOrFail();
+
+
+            $vacancy->forceFill(['status' => 'closed', 'publication_expires_at' => now()])->save();
+
+            return $vacancy->fresh();
+        });
+
+        return $this->mutationResponse($vacancy, 'Publikasi lowongan berhasil ditutup.');
     }
 
     private function ownedVacancy(Request $request, string $uuid): JobVacancy

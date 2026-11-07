@@ -7,7 +7,6 @@ use App\Models\Company;
 use App\Models\JobVacancy;
 use App\Models\MasterAbility;
 use App\Models\MasterCategoryCertificate;
-use App\Models\MasterSubscription;
 use App\Models\Security;
 use App\Models\Training;
 use App\Models\User;
@@ -36,20 +35,8 @@ class RoleCutoverSmokeTest extends TestCase
         $this->seedLocations();
     }
 
-    public function test_worker_switches_role_without_losing_profiles_applications_or_quota_usage(): void
+    public function test_worker_switches_role_without_losing_profiles_or_applications_without_subscriptions(): void
     {
-        MasterSubscription::create([
-            'name' => 'Free Security',
-            'slug' => 'free-security',
-            'role' => 'security',
-            'price' => 0,
-            'duration' => 30,
-            'duration_type' => 'day',
-            'features' => [],
-            'is_active' => true,
-            'sort_order' => 1,
-        ]);
-
         Storage::fake('public');
         MasterAbility::create(['title' => 'Menjaga kebersihan area', 'category' => 'cs']);
         [$user, $security] = $this->completeSecurityAccount('cutover@example.com');
@@ -148,13 +135,6 @@ class RoleCutoverSmokeTest extends TestCase
             ->assertJsonCount(1, 'data.job_vacancies')
             ->assertJsonPath('data.job_vacancies.0.position', 'Cleaning Staff');
 
-        // Usage is account-wide, so switching role did not reset quota.
-        $this->withToken($token)
-            ->getJson('/api/user-subscriptions/active')
-            ->assertOk()
-            ->assertJsonPath('data.user_subscription.role', 'security')
-            ->assertJsonPath('data.user_subscription.limit_usage.total_active_job_applications', 2)
-            ->assertJsonPath('data.user_subscription.limit_usage.total_active_training_applications', 1);
 
         // Switch back: security data and applications are still available.
         $this->withToken($token)
@@ -474,7 +454,8 @@ class RoleCutoverSmokeTest extends TestCase
             'position' => 'Security Officer',
             'category' => 'security',
             'status' => 'published',
-            'end_date' => now()->addDays(7)->toDateString(),
+            'published_at' => now(),
+            'publication_expires_at' => now()->addDays(7),
             'province' => 'Jawa Barat',
             'working_type' => 'contract',
             'working_system' => 'shift',
@@ -488,6 +469,8 @@ class RoleCutoverSmokeTest extends TestCase
             'provider' => 'Training Provider',
             'category_role' => 'security',
             'status' => 'published',
+            'published_at' => now(),
+            'publication_expires_at' => now()->addDays(30),
             'quota' => 10,
             'start_date' => now()->addDays(7)->toDateString(),
         ], $overrides);

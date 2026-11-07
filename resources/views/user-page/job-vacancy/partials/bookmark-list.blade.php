@@ -704,14 +704,14 @@
                 {{ $bookmark->created_at?->translatedFormat('d M Y') }}
             </span>
 
-            @if($job->end_date)
+            @if($job->publication_expires_at)
 
                 <span class="bookmark-deadline">
 
                     Deadline:
 
                     <strong>
-                        {{ \Carbon\Carbon::parse($job->end_date)->translatedFormat('d M Y') }}
+                        {{ $job->publication_expires_at->translatedFormat('d M Y') }}
                     </strong>
 
                 </span>

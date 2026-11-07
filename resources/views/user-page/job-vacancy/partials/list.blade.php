@@ -342,15 +342,13 @@
                         {{-- DEADLINE --}}
                         {{-- ================================================= --}}
 
-                        @if($job->end_date)
+                        @if($job->publication_expires_at)
 
                             <div class="apply-info mt-1">
 
                                 Batas lamaran
 
-                                {{ \Carbon\Carbon::parse(
-                                    $job->end_date
-                                )->translatedFormat('d M Y') }}
+                                {{ $job->publication_expires_at->translatedFormat('d M Y') }}
 
                             </div>
 

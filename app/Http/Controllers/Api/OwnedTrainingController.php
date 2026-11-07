@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Requests\Api\OwnedTrainingIndexRequest;
 use App\Http\Requests\Api\OwnedTrainingStoreRequest;
-use App\Http\Requests\Api\OwnedTrainingSubmitRequest;
+use App\Http\Requests\Api\OwnedTrainingPublishRequest;
 use App\Http\Requests\Api\OwnedTrainingUpdateRequest;
 use App\Http\Resources\Api\OwnedTrainingResource;
 use App\Http\Resources\Api\TrainingResource;
@@ -13,6 +13,7 @@ use App\Services\Api\TrainingService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class OwnedTrainingController extends OwnedOrganizationController
 {
@@ -112,18 +113,36 @@ class OwnedTrainingController extends OwnedOrganizationController
         );
     }
 
-    public function submit(
-        OwnedTrainingSubmitRequest $request,
+    public function publish(
+        OwnedTrainingPublishRequest $request,
         TrainingService $service,
         string $uuid,
     ): JsonResponse {
         $training = $this->ownedTraining($request, $uuid);
-        $training = $service->submit($training);
+        $training = $service->publish($training);
 
         return $this->mutationResponse(
             $training,
-            'Pelatihan berhasil diajukan untuk ditinjau.',
+            'Pelatihan berhasil dipublikasikan.',
         );
+    }
+    public function closePublication(Request $request, string $uuid): JsonResponse
+    {
+        $owner = $this->owner($request);
+
+        $training = DB::transaction(function () use ($owner, $uuid): Training {
+            $training = Training::query()
+                ->where('uuid', $uuid)
+                ->where($owner['column'], $owner['id'])
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $training->forceFill(['publication_expires_at' => now()])->save();
+
+            return $training->fresh();
+        });
+
+        return $this->mutationResponse($training, 'Publikasi pelatihan berhasil ditutup.');
     }
 
     private function ownedTraining(Request $request, string $uuid): Training

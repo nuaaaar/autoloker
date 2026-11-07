@@ -26,7 +26,7 @@ use App\Http\Controllers\Api\SecurityHistoryController;
 use App\Http\Controllers\Api\TrainingApplicationController;
 use App\Http\Controllers\Api\TrainingController;
 use App\Http\Controllers\Api\UserOrderManualController;
-use App\Http\Controllers\Api\UserSubscriptionController;
+use App\Http\Controllers\Api\TokenController;
 use App\Http\Controllers\Api\DeleteAccountController;
 use App\Http\Controllers\Api\GoogleAuthController;
 use Illuminate\Support\Facades\Route;
@@ -43,14 +43,16 @@ Route::middleware('api.token')->group(function () {
     Route::get('/company/job-vacancies/master-data', [OwnedJobVacancyController::class, 'masterData'])->name('api.company.job-vacancies.master-data');
     Route::get('/company/job-vacancies/{uuid}', [OwnedJobVacancyController::class, 'show'])->name('api.company.job-vacancies.show');
     Route::patch('/company/job-vacancies/{uuid}', [OwnedJobVacancyController::class, 'update'])->name('api.company.job-vacancies.update');
-    Route::post('/company/job-vacancies/{uuid}/submit', [OwnedJobVacancyController::class, 'submit'])->name('api.company.job-vacancies.submit');
+    Route::post('/company/job-vacancies/{uuid}/publish', [OwnedJobVacancyController::class, 'publish'])->name('api.company.job-vacancies.publish');
+    Route::post('/company/job-vacancies/{uuid}/close-publication', [OwnedJobVacancyController::class, 'closePublication'])->name('api.company.job-vacancies.close-publication');
     Route::get('/company/job-vacancies/{uuid}/applicants', [OwnedJobApplicantController::class, 'index'])->name('api.company.job-vacancies.applicants.index');
     Route::patch('/company/job-vacancies/{uuid}/applicants/{applicationUuid}/status', [OwnedJobApplicantController::class, 'updateStatus'])->name('api.company.job-vacancies.applicants.status');
     Route::get('/company/trainings', [OwnedTrainingController::class, 'index'])->name('api.company.trainings.index');
     Route::post('/company/trainings', [OwnedTrainingController::class, 'store'])->name('api.company.trainings.store');
     Route::get('/company/trainings/{uuid}', [OwnedTrainingController::class, 'show'])->name('api.company.trainings.show');
     Route::patch('/company/trainings/{uuid}', [OwnedTrainingController::class, 'update'])->name('api.company.trainings.update');
-    Route::post('/company/trainings/{uuid}/submit', [OwnedTrainingController::class, 'submit'])->name('api.company.trainings.submit');
+    Route::post('/company/trainings/{uuid}/publish', [OwnedTrainingController::class, 'publish'])->name('api.company.trainings.publish');
+    Route::post('/company/trainings/{uuid}/close-publication', [OwnedTrainingController::class, 'closePublication'])->name('api.company.trainings.close-publication');
     Route::get('/company/trainings/{uuid}/participants', [OwnedTrainingParticipantController::class, 'index'])->name('api.company.trainings.participants.index');
     Route::patch('/company/trainings/{uuid}/participants/{applicationUuid}/status', [OwnedTrainingParticipantController::class, 'updateStatus'])->name('api.company.trainings.participants.status');
     Route::get('/job-vacancies', [JobVacancyController::class, 'index'])->name('api.job-vacancies.index');
@@ -73,7 +75,7 @@ Route::middleware('api.token')->group(function () {
     Route::post('/user-order-manuals', [UserOrderManualController::class, 'store'])->name('api.user-order-manuals.store');
     Route::post('/user-order-manuals/{uuid}/cancel', [UserOrderManualController::class, 'cancel'])->name('api.user-order-manuals.cancel');
     Route::post('/user-order-manuals/{uuid}/upload-proof', [UserOrderManualController::class, 'uploadProof'])->name('api.user-order-manuals.upload-proof');
-    Route::get('/user-subscriptions/active', [UserSubscriptionController::class, 'active'])->name('api.user-subscriptions.active');
+    Route::get('/tokens', [TokenController::class, 'show'])->name('api.tokens.show');
     Route::post('/device-tokens', [DeviceTokenController::class, 'store'])->name('api.device-tokens.store');
     Route::post('/device-tokens/unregister', [DeviceTokenController::class, 'unregister'])->name('api.device-tokens.unregister');
     Route::get('/notifications', [NotificationController::class, 'index'])->name('api.notifications.index');
@@ -106,7 +108,6 @@ Route::middleware('api.token')->group(function () {
         Route::get('/placements', [ReferenceDataController::class, 'placements'])->name('api.masters.placements');
         Route::get('/industries', [ReferenceDataController::class, 'industries'])->name('api.masters.industries');
         Route::get('/banks', [ReferenceDataController::class, 'banks'])->name('api.masters.banks');
-        Route::get('/subscriptions', [ReferenceDataController::class, 'subscriptions'])->name('api.masters.subscriptions');
     });
 
     Route::prefix('locations')->group(function () {

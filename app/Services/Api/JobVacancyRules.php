@@ -13,7 +13,7 @@ final class JobVacancyRules
         $rules = self::shared();
         $rules['position'] = ['required', 'string', 'min:3', 'max:150'];
         $rules['category'] = ['required', Rule::in(self::categories())];
-        $rules['workflow_action'] = ['sometimes', Rule::in(['save_draft', 'submit'])];
+        $rules['workflow_action'] = ['sometimes', Rule::in(['save_draft', 'publish'])];
 
         return $rules;
     }
@@ -76,7 +76,6 @@ final class JobVacancyRules
             'is_show_fee' => ['required', 'boolean'],
             'is_urgent' => ['required', 'boolean'],
             'quota' => ['required', 'integer', 'min:1'],
-            'end_date' => ['required', 'date_format:Y-m-d'],
         ];
     }
 
@@ -110,7 +109,7 @@ final class JobVacancyRules
         return array_fill_keys($fields, ['prohibited']);
     }
 
-    public static function submit(): array
+    public static function publish(): array
     {
         return array_merge(self::immutable(), [
             'workflow_action' => ['prohibited'],
@@ -233,7 +232,6 @@ final class JobVacancyRules
             'is_show_fee' => ['sometimes', 'boolean'],
             'is_urgent' => ['sometimes', 'boolean'],
             'quota' => ['sometimes', 'nullable', 'integer', 'min:1'],
-            'end_date' => ['sometimes', 'nullable', 'date_format:Y-m-d'],
         ];
     }
 }

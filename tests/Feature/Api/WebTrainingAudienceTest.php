@@ -6,6 +6,7 @@ use App\Models\Company;
 use App\Models\Training;
 use App\Models\User;
 use App\Models\UserCompany;
+use App\Services\TokenBillingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -35,18 +36,54 @@ class WebTrainingAudienceTest extends TestCase
     {
         Storage::fake('public');
         $user = $this->companyAccount('web-training-without-level@example.com');
+        $wallet = app(TokenBillingService::class)->walletFor([
+            'column' => 'company_id',
+            'id' => $user->user_company->company->id,
+        ]);
+        $wallet->update(['balance' => 4]);
 
-        foreach (['draft', 'submitted'] as $status) {
+        foreach (['save_draft' => 'draft', 'publish' => 'published'] as $action => $status) {
             $this->actingAs($user)
-                ->post(route('dashboard-user.training.store'), $this->payload(['status' => $status]))
+                ->post(route('dashboard-user.training.store'), $this->payload(['workflow_action' => $action]))
                 ->assertOk()
                 ->assertJsonPath('status', true);
 
             $training = Training::query()->latest('id')->firstOrFail();
             $this->assertSame($user->user_company->company->id, $training->company_id);
-            $this->assertSame($status === 'submitted' ? 'published' : $status, $training->status);
+            $this->assertSame($status, $training->status);
             $this->assertNull($training->level);
         }
+    }
+
+    public function test_edit_and_publish_rolls_back_content_when_tokens_are_insufficient(): void
+    {
+        Storage::fake('public');
+        $user = $this->companyAccount('web-edit-publish@example.test');
+        $this->actingAs($user)
+            ->post(route('dashboard-user.training.store'), $this->payload())
+            ->assertOk();
+        $training = Training::query()->latest('id')->firstOrFail();
+        $wallet = app(TokenBillingService::class)->walletFor([
+            'column' => 'company_id',
+            'id' => $user->user_company->company->id,
+        ]);
+        $changes = $this->payload([
+            'poster' => null,
+            'title' => 'Judul publikasi baru',
+            'workflow_action' => 'publish',
+        ]);
+
+        $this->patch(route('dashboard-user.training.update', $training->uuid), $changes, ['Accept' => 'application/json'])
+            ->assertUnprocessable();
+        $this->assertSame('Pelatihan Kebersihan Gedung', $training->fresh()->title);
+        $this->assertSame('draft', $training->fresh()->status);
+
+        $wallet->update(['balance' => 4]);
+        $this->patch(route('dashboard-user.training.update', $training->uuid), $changes, ['Accept' => 'application/json'])
+            ->assertOk();
+        $this->assertSame('Judul publikasi baru', $training->fresh()->title);
+        $this->assertTrue($training->fresh()->isCurrentlyPublished());
+        $this->assertSame(0, $wallet->fresh()->balance);
     }
 
     public function test_web_training_update_without_level_preserves_existing_level(): void
@@ -171,13 +208,13 @@ class WebTrainingAudienceTest extends TestCase
             'province' => '64',
             'city' => '6471',
             'address' => 'Jalan Bersih 1',
-            'start_date' => '2026-11-10',
-            'end_date' => '2026-11-12',
+            'start_date' => now()->addDays(7)->toDateString(),
+            'end_date' => now()->addDays(9)->toDateString(),
             'duration_day' => 3,
             'total_jp' => 24,
             'syllabus' => json_encode(['Teknik mengepel']),
             'requirements' => json_encode(['Sehat jasmani']),
-            'status' => 'draft',
+            'workflow_action' => 'save_draft',
         ], $overrides);
     }
 

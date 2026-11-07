@@ -7,6 +7,17 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Billing token Autoloker
+
+Billing publikasi menggunakan saldo token milik pemberi kerja, menggantikan subscription. Konversi serta satu aturan harga/masa tayang per jenis postingan dikelola melalui pengaturan token admin.
+
+- [Spesifikasi yang disepakati](docs/token-billing.md)
+- [Backup, cutover, dan rollback manual](docs/token-billing-cutover.md)
+- [Perubahan kontrak mobile](docs/api/token-billing-mobile-handoff.md)
+- [OpenAPI](docs/api/openapi.yaml)
+
+Perubahan ini memerlukan migrasi dan pembaruan klien. Jangan deploy sebelum backup database dan berkas pengguna berhasil diverifikasi; migration rollback otomatis sengaja dinonaktifkan.
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:

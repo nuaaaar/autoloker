@@ -6,6 +6,7 @@ use App\Models\Company;
 use App\Models\User;
 use App\Models\UserCompany;
 use App\Models\MasterPosition;
+use App\Models\TokenWallet;
 use App\Services\Api\TokenService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -21,24 +22,30 @@ class JobVacancyManagementTest extends TestCase
         $this->seedLocations();
         MasterPosition::create(['title' => 'Komandan Regu', 'category' => 'security']);
     }
-    public function test_security_position_is_optional_on_draft_and_required_before_submit(): void
+    public function test_security_position_is_optional_on_draft_and_required_before_publish(): void
     {
-        [, , $token] = $this->companyAccount('security-position@example.com', 'Security Position');
+        [, $company, $token] = $this->companyAccount('security-position@example.com', 'Security Position');
         $draftPayload = $this->payload();
         unset($draftPayload['security_position']);
         $draft = $this->withToken($token)->postJson('/api/company/job-vacancies', $draftPayload)
             ->assertCreated()->assertJsonPath('data.job_vacancy.security_position', null);
         $uuid = $draft->json('data.job_vacancy.uuid');
 
-        $this->withToken($token)->postJson("/api/company/job-vacancies/{$uuid}/submit")
+        $this->withToken($token)->postJson("/api/company/job-vacancies/{$uuid}/publish")
             ->assertUnprocessable()->assertJsonValidationErrors(['security_position']);
         $this->assertDatabaseHas('job_vacancies', ['uuid' => $uuid, 'status' => 'draft', 'security_position' => null]);
 
         $this->withToken($token)->patchJson("/api/company/job-vacancies/{$uuid}", [
             'security_position' => 'Komandan Regu',
         ])->assertOk()->assertJsonPath('data.job_vacancy.security_position', 'Komandan Regu');
-        $this->withToken($token)->postJson("/api/company/job-vacancies/{$uuid}/submit")
-            ->assertOk()->assertJsonPath('data.job_vacancy.status', 'submitted');
+        $this->withToken($token)->postJson("/api/company/job-vacancies/{$uuid}/publish")
+            ->assertOk()->assertJsonPath('data.job_vacancy.status', 'published');
+        $this->assertSame(99996, TokenWallet::query()->where('owner_type', 'company')->where('owner_id', $company->id)->value('balance'));
+        $this->withToken($token)->postJson("/api/company/job-vacancies/{$uuid}/publish")
+            ->assertOk();
+        $this->assertSame(99996, TokenWallet::query()->where('owner_type', 'company')->where('owner_id', $company->id)->value('balance'));
+        $this->withToken($token)->patchJson("/api/company/job-vacancies/{$uuid}", ['position' => 'Changed'])
+            ->assertUnprocessable();
         $this->assertSame('Satpam Pabrik', $draftPayload['position']);
     }
 
@@ -107,7 +114,7 @@ class JobVacancyManagementTest extends TestCase
         ]);
 
     }
-    public function test_post_patch_and_submit_preserve_optional_district_and_village(): void
+    public function test_post_patch_and_publish_preserve_optional_district_and_village(): void
     {
         [, , $token] = $this->companyAccount('district_and_village@example.com', 'Location Company');
         $response = $this->withToken($token)->postJson('/api/company/job-vacancies', $this->payload([
@@ -166,7 +173,7 @@ class JobVacancyManagementTest extends TestCase
         $this->withToken($token)->postJson('/api/company/job-vacancies', $this->payload([
             'district' => 'Balikpapan Selatan',
             'village' => 'Sepinggan',
-            'workflow_action' => 'submit',
+            'workflow_action' => 'publish',
         ]))->assertCreated()
             ->assertJsonPath('data.job_vacancy.district', 'Balikpapan Selatan')
             ->assertJsonPath('data.job_vacancy.village', 'Sepinggan');
@@ -177,7 +184,6 @@ class JobVacancyManagementTest extends TestCase
         [, $company, $token] = $this->companyAccount('reliever@example.com', 'Reliever Company');
         $created = $this->withToken($token)->postJson('/api/company/job-vacancies', $this->payload([
             'working_system' => 'reliever',
-            'end_date' => now()->addDays(7)->toDateString(),
         ]))->assertCreated()
             ->assertJsonPath('data.job_vacancy.working_system', 'reliever');
         $uuid = $created->json('data.job_vacancy.uuid');
@@ -197,9 +203,9 @@ class JobVacancyManagementTest extends TestCase
 
         $this->withToken($token)->getJson("/api/company/job-vacancies/{$uuid}")
             ->assertOk()->assertJsonPath('data.job_vacancy.working_system', 'reliever');
-        $this->withToken($token)->postJson("/api/company/job-vacancies/{$uuid}/submit")
+        $this->withToken($token)->postJson("/api/company/job-vacancies/{$uuid}/publish")
             ->assertOk()->assertJsonPath('data.job_vacancy.working_system', 'reliever')
-            ->assertJsonPath('data.job_vacancy.status', 'submitted');
+            ->assertJsonPath('data.job_vacancy.status', 'published');
     }
 
 
@@ -260,7 +266,6 @@ class JobVacancyManagementTest extends TestCase
             'min_price' => 5000000,
             'max_price' => 1000000,
             'quota' => 0,
-            'end_date' => '20-10-2026',
         ]);
 
         $response->assertUnprocessable()
@@ -274,7 +279,6 @@ class JobVacancyManagementTest extends TestCase
                 'max_age',
                 'min_price',
                 'quota',
-                'end_date',
             ]);
 
         $this->assertDatabaseCount('job_vacancies', 0);
@@ -303,19 +307,37 @@ class JobVacancyManagementTest extends TestCase
         ]);
     }
 
-    public function test_post_submit_action_creates_submitted_vacancy(): void
+    public function test_insufficient_balance_rolls_back_a_new_publication(): void
+    {
+        [, $company, $token] = $this->companyAccount('job-no-balance@example.com', 'No Balance Company');
+        TokenWallet::query()
+            ->where('owner_type', 'company')
+            ->where('owner_id', $company->id)
+            ->update(['balance' => 0]);
+
+        $this->withToken($token)->postJson('/api/company/job-vacancies', $this->payload([
+            'workflow_action' => 'publish',
+        ]))->assertUnprocessable()->assertJsonValidationErrors('balance');
+
+        $this->assertDatabaseMissing('job_vacancies', ['company_id' => $company->id]);
+        $this->assertSame(0, TokenWallet::query()
+            ->where('owner_type', 'company')
+            ->where('owner_id', $company->id)
+            ->value('balance'));
+    }
+    public function test_publish_action_creates_a_published_vacancy(): void
     {
         [, , $token] = $this->companyAccount('submit-create@example.com', 'Submit Create Company');
 
         $this->withToken($token)
-            ->postJson('/api/company/job-vacancies', $this->payload(['workflow_action' => 'submit']))
+            ->postJson('/api/company/job-vacancies', $this->payload(['workflow_action' => 'publish']))
             ->assertCreated()
-            ->assertJsonPath('data.job_vacancy.status', 'submitted');
+            ->assertJsonPath('data.job_vacancy.status', 'published');
 
-        $this->assertDatabaseHas('job_vacancies', ['status' => 'submitted']);
+        $this->assertDatabaseHas('job_vacancies', ['status' => 'published']);
     }
 
-    public function test_submit_rejects_incomplete_draft_without_changing_status(): void
+    public function test_publish_rejects_incomplete_draft_without_changing_status(): void
     {
         [, , $token] = $this->companyAccount('submit-invalid@example.com', 'Submit Invalid Company');
         $created = $this->withToken($token)->postJson('/api/company/job-vacancies', [
@@ -326,7 +348,7 @@ class JobVacancyManagementTest extends TestCase
         $uuid = $created->json('data.job_vacancy.uuid');
 
         $this->withToken($token)
-            ->postJson("/api/company/job-vacancies/{$uuid}/submit")
+            ->postJson("/api/company/job-vacancies/{$uuid}/publish")
             ->assertUnprocessable()
             ->assertJsonValidationErrors([
                 'description_work',
@@ -336,7 +358,6 @@ class JobVacancyManagementTest extends TestCase
                 'min_age',
                 'certificate',
                 'quota',
-                'end_date',
             ]);
 
         $this->assertDatabaseHas('job_vacancies', [
@@ -345,7 +366,7 @@ class JobVacancyManagementTest extends TestCase
         ]);
     }
 
-    public function test_submit_changes_owned_complete_draft_to_submitted(): void
+    public function test_publish_changes_owned_complete_draft_to_published(): void
     {
         [, , $token] = $this->companyAccount('submit@example.com', 'Submit Company');
         $created = $this->withToken($token)->postJson('/api/company/job-vacancies', $this->payload())
@@ -353,14 +374,14 @@ class JobVacancyManagementTest extends TestCase
         $uuid = $created->json('data.job_vacancy.uuid');
 
         $this->withToken($token)
-            ->postJson("/api/company/job-vacancies/{$uuid}/submit")
+            ->postJson("/api/company/job-vacancies/{$uuid}/publish")
             ->assertOk()
             ->assertJsonPath('status', true)
-            ->assertJsonPath('data.job_vacancy.status', 'submitted');
+            ->assertJsonPath('data.job_vacancy.status', 'published');
 
         $this->assertDatabaseHas('job_vacancies', [
             'uuid' => $uuid,
-            'status' => 'submitted',
+            'status' => 'published',
         ]);
     }
 
@@ -443,7 +464,6 @@ class JobVacancyManagementTest extends TestCase
             'is_show_fee' => true,
             'is_urgent' => false,
             'quota' => 4,
-            'end_date' => '2026-10-20',
             'workflow_action' => 'save_draft',
         ], $overrides);
     }
@@ -464,6 +484,7 @@ class JobVacancyManagementTest extends TestCase
             'user_company_id' => $userCompany->id,
             'company_name' => $name,
         ]);
+        TokenWallet::create(['owner_type' => 'company', 'owner_id' => $company->id, 'balance' => 100000]);
         $token = app(TokenService::class)->issue($user)['access_token'];
 
         return [$user, $company, $token];

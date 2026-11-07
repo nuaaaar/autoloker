@@ -7,6 +7,7 @@ use App\Models\Training;
 use App\Models\TrainingApplication;
 use App\Models\User;
 use App\Models\UserCompany;
+use App\Models\TokenWallet;
 use App\Models\MasterCategoryCertificate;
 use App\Services\Api\TokenService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -172,9 +173,29 @@ class OwnedTrainingManagementTest extends TestCase
             'duration_day' => 3,
         ]);
     }
+    public function test_training_cannot_be_published_on_or_after_its_start_date(): void
+    {
+        [, $company, $token] = $this->companyAccount('training-start-boundary@example.com', 'Start Boundary');
+        $walletBalance = TokenWallet::query()
+            ->where('owner_type', 'company')
+            ->where('owner_id', $company->id)
+            ->value('balance');
+
+        $this->withToken($token)->postJson('/api/company/trainings', $this->payload([
+            'workflow_action' => 'publish',
+            'start_date' => now()->toDateString(),
+            'end_date' => now()->addDay()->toDateString(),
+        ]))->assertUnprocessable();
+
+        $this->assertDatabaseMissing('trainings', ['company_id' => $company->id]);
+        $this->assertSame($walletBalance, TokenWallet::query()
+            ->where('owner_type', 'company')
+            ->where('owner_id', $company->id)
+            ->value('balance'));
+    }
     public function test_taxonomy_rules_gate_submission_and_reject_invalid_master_titles(): void
     {
-        [, , $token] = $this->companyAccount('training-taxonomy-submit@example.com', 'Taxonomy Submit');
+        [, $company, $token] = $this->companyAccount('training-taxonomy-submit@example.com', 'Taxonomy Submit');
         $securityRoot = MasterCategoryCertificate::query()->where('title', 'Keamanan')->firstOrFail();
         $securityChild = MasterCategoryCertificate::create([
             'title' => 'Patroli',
@@ -205,24 +226,29 @@ class OwnedTrainingManagementTest extends TestCase
         $draft = $this->withToken($token)->postJson('/api/company/trainings', $this->payload())
             ->assertCreated();
         $uuid = $draft->json('data.training.uuid');
-        $this->withToken($token)->postJson("/api/company/trainings/{$uuid}/submit")
+        $this->withToken($token)->postJson("/api/company/trainings/{$uuid}/publish")
             ->assertUnprocessable()->assertJsonValidationErrors('sub_category');
         $this->assertDatabaseHas('trainings', ['uuid' => $uuid, 'status' => 'draft']);
 
         $this->withToken($token)->patchJson("/api/company/trainings/{$uuid}", [
             'sub_category' => 'Patroli',
         ])->assertOk();
-        $this->withToken($token)->postJson("/api/company/trainings/{$uuid}/submit")
+        $this->withToken($token)->postJson("/api/company/trainings/{$uuid}/publish")
             ->assertUnprocessable()->assertJsonValidationErrors('tuk');
         $this->withToken($token)->patchJson("/api/company/trainings/{$uuid}", ['tuk' => 'mandiri'])
             ->assertOk();
-        $this->withToken($token)->postJson("/api/company/trainings/{$uuid}/submit")
-            ->assertOk()->assertJsonPath('data.training.status', 'submitted');
+        $this->withToken($token)->postJson("/api/company/trainings/{$uuid}/publish")
+            ->assertOk()->assertJsonPath('data.training.status', 'published');
+        $this->assertSame(99996, TokenWallet::query()->where('owner_type', 'company')->where('owner_id', $company->id)->value('balance'));
+        $this->withToken($token)->postJson("/api/company/trainings/{$uuid}/publish")->assertOk();
+        $this->assertSame(99996, TokenWallet::query()->where('owner_type', 'company')->where('owner_id', $company->id)->value('balance'));
+        $this->withToken($token)->patchJson("/api/company/trainings/{$uuid}", ['title' => 'Changed'])
+            ->assertUnprocessable();
 
         $this->withToken($token)->postJson('/api/company/trainings', $this->payload([
             'category' => $csRoot->title,
             'category_role' => 'cs',
-            'workflow_action' => 'submit',
+            'workflow_action' => 'publish',
             'tuk' => 'mandiri',
         ]))->assertUnprocessable()->assertJsonValidationErrors('tuk');
 
@@ -257,7 +283,7 @@ class OwnedTrainingManagementTest extends TestCase
         $this->assertDatabaseHas('trainings', ['uuid' => $uuid, 'price' => null, 'discount' => 0]);
     }
 
-    public function test_post_patch_and_submit_preserve_optional_district_and_village(): void
+    public function test_post_patch_and_publish_preserve_optional_district_and_village(): void
     {
         [, , $token] = $this->companyAccount('district_and_village@example.com', 'Location Training');
         $response = $this->withToken($token)->postJson('/api/company/trainings', $this->payload([
@@ -314,7 +340,7 @@ class OwnedTrainingManagementTest extends TestCase
         $this->withToken($token)->postJson('/api/company/trainings', $this->payload([
             'district' => 'Balikpapan Selatan',
             'village' => 'Sepinggan',
-            'workflow_action' => 'submit',
+            'workflow_action' => 'publish',
         ]))->assertCreated()
             ->assertJsonPath('data.training.district', 'Balikpapan Selatan')
             ->assertJsonPath('data.training.village', 'Sepinggan');
@@ -446,19 +472,19 @@ class OwnedTrainingManagementTest extends TestCase
             ->patchJson("/api/company/trainings/{$uuid}", ['title' => 'Hijacked'])
             ->assertNotFound();
         $this->withToken($otherToken)
-            ->postJson("/api/company/trainings/{$uuid}/submit")
+            ->postJson("/api/company/trainings/{$uuid}/publish")
             ->assertNotFound();
     }
 
-    public function test_response_uses_training_resource_key_after_submit_action(): void
+    public function test_response_uses_training_resource_key_after_publish_action(): void
     {
         [, , $token] = $this->companyAccount('training-submit@example.com', 'Submit Training');
 
         $this->withToken($token)
-            ->postJson('/api/company/trainings', $this->payload(['workflow_action' => 'submit']))
+            ->postJson('/api/company/trainings', $this->payload(['workflow_action' => 'publish']))
             ->assertCreated()
             ->assertJsonPath('status', true)
-            ->assertJsonPath('data.training.status', 'submitted')
+            ->assertJsonPath('data.training.status', 'published')
             ->assertJsonMissingPath('data.trainings');
     }
 
@@ -545,12 +571,12 @@ class OwnedTrainingManagementTest extends TestCase
         }
     }
 
-    public function test_create_ignores_legacy_level_and_submit_does_not_require_it(): void
+    public function test_create_ignores_legacy_level_and_publish_does_not_require_it(): void
     {
         [, $company, $token] = $this->companyAccount('training-no-level@example.com', 'No Level Training');
         foreach ([
             ['workflow_action' => 'save_draft', 'legacy' => 'Lanjutan', 'status' => 'draft'],
-            ['workflow_action' => 'submit', 'legacy' => ['legacy'], 'status' => 'submitted'],
+            ['workflow_action' => 'publish', 'legacy' => ['legacy'], 'status' => 'published'],
         ] as $case) {
             $response = $this->withToken($token)->postJson('/api/company/trainings', $this->payload([
                 'workflow_action' => $case['workflow_action'], 'level' => $case['legacy'],
@@ -593,23 +619,23 @@ class OwnedTrainingManagementTest extends TestCase
             ->assertJsonPath('data.trainings.0.uuid', $uuid)->assertJsonMissingPath('data.trainings.0.level');
     }
 
-    public function test_complete_draft_submits_without_level_but_still_requires_syllabus(): void
+    public function test_complete_draft_publishes_without_level_but_still_requires_syllabus(): void
     {
         [, , $token] = $this->companyAccount('training-level-submit@example.com', 'Submit No Level');
         $created = $this->withToken($token)->postJson('/api/company/trainings', $this->payload())->assertCreated();
         $uuid = $created->json('data.training.uuid');
-        $this->withToken($token)->postJson("/api/company/trainings/{$uuid}/submit")
-            ->assertOk()->assertJsonPath('data.training.status', 'submitted')
+        $this->withToken($token)->postJson("/api/company/trainings/{$uuid}/publish")
+            ->assertOk()->assertJsonPath('data.training.status', 'published')
             ->assertJsonMissingPath('data.training.level');
-        $this->assertDatabaseHas('trainings', ['uuid' => $uuid, 'level' => null, 'status' => 'submitted']);
+        $this->assertDatabaseHas('trainings', ['uuid' => $uuid, 'level' => null, 'status' => 'published']);
         $incomplete = $this->withToken($token)->postJson('/api/company/trainings', $this->payload(['syllabus' => []]))->assertCreated();
         $incompleteUuid = $incomplete->json('data.training.uuid');
-        $this->withToken($token)->postJson("/api/company/trainings/{$incompleteUuid}/submit")
+        $this->withToken($token)->postJson("/api/company/trainings/{$incompleteUuid}/publish")
             ->assertUnprocessable()->assertJsonValidationErrors(['syllabus'])->assertJsonMissingValidationErrors(['level']);
         $this->assertDatabaseHas('trainings', ['uuid' => $incompleteUuid, 'status' => 'draft']);
     }
 
-    public function test_submit_endpoint_preserves_draft_when_completion_validation_fails(): void
+    public function test_publish_endpoint_preserves_draft_when_completion_validation_fails(): void
     {
         [, , $token] = $this->companyAccount('training-submit-invalid@example.com', 'Incomplete Training');
         $created = $this->withToken($token)
@@ -618,7 +644,7 @@ class OwnedTrainingManagementTest extends TestCase
         $uuid = $created->json('data.training.uuid');
 
         $this->withToken($token)
-            ->postJson("/api/company/trainings/{$uuid}/submit")
+            ->postJson("/api/company/trainings/{$uuid}/publish")
             ->assertUnprocessable()
             ->assertJsonValidationErrors([
                 'category',
@@ -651,8 +677,8 @@ class OwnedTrainingManagementTest extends TestCase
             'is_certificate' => true,
             'tags' => ['K3', 'Patroli'],
             'description' => 'Pelatihan dasar untuk calon petugas keamanan.',
-            'start_date' => '2026-10-01',
-            'end_date' => '2026-10-03',
+            'start_date' => now()->addDays(20)->toDateString(),
+            'end_date' => now()->addDays(22)->toDateString(),
             'total_jp' => 24,
             'training_mode' => 'online',
             'province' => 'KALIMANTAN TIMUR',
@@ -684,6 +710,7 @@ class OwnedTrainingManagementTest extends TestCase
             'user_company_id' => $userCompany->getKey(),
             'company_name' => $name,
         ]);
+        TokenWallet::create(['owner_type' => 'company', 'owner_id' => $company->id, 'balance' => 100000]);
         $token = app(TokenService::class)->issue($user)['access_token'];
 
         return [$user, $company, $token];

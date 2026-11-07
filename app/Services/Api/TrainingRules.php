@@ -38,7 +38,7 @@ final class TrainingRules
             'instructor' => ['sometimes', 'nullable', 'string', 'max:255'],
             'quota' => ['sometimes', 'nullable', 'integer', 'min:1'],
             'price' => ['sometimes', 'nullable', 'integer', 'min:0'],
-            'workflow_action' => ['sometimes', Rule::in(['save_draft', 'submit'])],
+            'workflow_action' => ['sometimes', Rule::in(['save_draft', 'publish'])],
         ], ['poster' => self::poster($hasPosterFile)]);
     }
 
@@ -129,7 +129,7 @@ final class TrainingRules
         return array_fill_keys($fields, ['prohibited']);
     }
 
-    public static function submit(): array
+    public static function publish(): array
     {
         return array_merge(self::immutable(), [
             'workflow_action' => ['prohibited'],

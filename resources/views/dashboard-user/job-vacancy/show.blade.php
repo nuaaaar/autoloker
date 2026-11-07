@@ -529,11 +529,11 @@
 
                                         <i class="fas fa-calendar-alt me-1"></i>
 
-                                        {{ \Carbon\Carbon::parse($data->start_date)->format('d M Y') }}
-
-                                        -
-
-                                        {{ \Carbon\Carbon::parse($data->end_date)->format('d M Y') }}
+                                        @if($data->published_at)
+                                            Tayang sejak {{ \Carbon\Carbon::parse($data->published_at)->format('d M Y') }}
+                                        @else
+                                            Belum tayang
+                                        @endif
 
                                     </span>
 
@@ -557,14 +557,9 @@
 
                             @break
 
-                            @case('submitted')
-
-                                <span class="badge badge-status badge-warning">
-                                    Menunggu Persetujuan
-                                </span>
-
+                            @case('expired')
+                                <span class="badge badge-status badge-secondary">Iklan berakhir</span>
                             @break
-
                             @case('published')
 
                                 <span class="badge badge-status badge-success">
@@ -600,6 +595,39 @@
         </div>
 
 
+        @if(session('success'))
+            <div class="alert alert-success mt-4" role="status">{{ session('success') }}</div>
+        @endif
+        @if($errors->any())
+            <div class="alert alert-danger mt-4" role="alert">
+                <p>Publikasi belum berhasil.</p>
+                <ul class="mb-0">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
+                <a href="{{ route('dashboard-user.tokens.index') }}">Buka saldo token</a>
+            </div>
+        @endif
+
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-body">
+                @if($data->isCurrentlyPublished())
+                    <p class="mb-2">Masa tayang berakhir {{ optional($data->publication_expires_at)->format('d M Y') }}. Biaya: {{ number_format((int) $data->publication_token_cost) }} token.</p>
+                    <form method="POST" action="{{ route('dashboard-user.job-vacancy.close-publication', $data->uuid) }}">
+                        @csrf
+                        <button type="submit" class="btn btn-outline-secondary">Hentikan masa tayang</button>
+                    </form>
+                @else
+                    <p class="mb-2">Terbitkan dengan {{ number_format((int) $settings->job_post_tokens) }} token untuk masa tayang {{ (int) $settings->job_post_days }} hari. Token tidak kedaluwarsa.</p>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{{ route('dashboard-user.job-vacancy.edit', $data->uuid) }}" class="btn btn-light">Edit lowongan</a>
+                        @if(in_array($data->status, ['draft', 'rejected', 'closed', 'published'], true))
+                            <form method="POST" action="{{ route('dashboard-user.job-vacancy.publish', $data->uuid) }}">
+                                @csrf
+                                <button type="submit" class="btn btn-warning">Terbitkan / terbitkan ulang</button>
+                            </form>
+                        @endif
+                    </div>
+                @endif
+            </div>
+        </div>
         @if($data->status=='rejected')
 
             <div class="alert alert-danger mt-4">
@@ -770,20 +798,20 @@
                                             <span class="badge bg-secondary">Draft</span>
                                         @break
 
-                                        @case('submitted')
-                                            <span class="badge bg-warning">Submitted</span>
-                                        @break
-
                                         @case('published')
-                                            <span class="badge bg-success">Published</span>
+                                            <span class="badge bg-success">{{ $data->isCurrentlyPublished() ? 'Iklan tayang' : 'Iklan berakhir' }}</span>
                                         @break
 
                                         @case('closed')
-                                            <span class="badge bg-dark">Closed</span>
+                                            <span class="badge bg-dark">Ditutup</span>
+                                        @break
+
+                                        @case('expired')
+                                            <span class="badge bg-secondary">Iklan berakhir</span>
                                         @break
 
                                         @case('rejected')
-                                            <span class="badge bg-danger">Rejected</span>
+                                            <span class="badge bg-danger">Ditolak</span>
                                         @break
 
                                     @endswitch
@@ -807,15 +835,15 @@
                             </tr>
 
                             <tr>
-                                <td>Periode Lowongan</td>
+                                <td>Masa tayang iklan</td>
                                 <th>
-
-                                    {{ \Carbon\Carbon::parse($data->start_date)->format('d M Y') }}
-
-                                    -
-
-                                    {{ \Carbon\Carbon::parse($data->end_date)->format('d M Y') }}
-
+                                    @if($data->published_at)
+                                        {{ \Carbon\Carbon::parse($data->published_at)->format('d M Y') }}
+                                        –
+                                        {{ optional($data->publication_expires_at)->format('d M Y') ?? 'Tanpa batas akhir' }}
+                                    @else
+                                        Belum tayang
+                                    @endif
                                 </th>
                             </tr>
 

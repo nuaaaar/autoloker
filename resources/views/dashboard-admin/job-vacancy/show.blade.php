@@ -338,35 +338,6 @@
 
             <div>
 
-                @if($data->status == 'submitted')
-
-                <button
-                    type="button"
-                    class="btn btn-danger me-2"
-                    data-bs-toggle="modal"
-                    data-bs-target="#rejectModal">
-
-                    <i class="fas fa-times-circle me-2"></i>
-
-                    Tolak Lowongan
-
-                </button>
-
-                <button
-                    type="button"
-                    class="btn btn-success"
-                    data-bs-toggle="modal"
-                    data-bs-target="#publishModal">
-
-                    <i class="fas fa-check-circle me-2"></i>
-
-                    Terbitkan Lowongan
-
-                </button>
-
-                @endif
-
-            </div>
 
             <button
                 type="button"
@@ -472,11 +443,11 @@
 
                                         <i class="fas fa-calendar-alt me-1"></i>
 
-                                        {{ \Carbon\Carbon::parse($data->start_date)->format('d M Y') }}
+                                        {{ $data->published_at?->format('d M Y') ?? '-' }}
 
                                         -
 
-                                        {{ \Carbon\Carbon::parse($data->end_date)->format('d M Y') }}
+                                        {{ $data->publication_expires_at?->format('d M Y') ?? '-' }}
 
                                     </span>
 
@@ -753,14 +724,14 @@
                             </tr>
 
                             <tr>
-                                <td>Periode Lowongan</td>
+                                <td>Masa tayang lowongan</td>
                                 <th>
 
-                                    {{ \Carbon\Carbon::parse($data->start_date)->format('d M Y') }}
+                                    {{ $data->published_at?->format('d M Y') ?? '-' }}
 
                                     -
 
-                                    {{ \Carbon\Carbon::parse($data->end_date)->format('d M Y') }}
+                                    {{ $data->publication_expires_at?->format('d M Y') ?? '-' }}
 
                                 </th>
                             </tr>
@@ -1333,240 +1304,4 @@
         </div>
     </div>
 
-    <div class="modal fade" id="publishModal" tabindex="-1">
-
-        <div class="modal-dialog modal-dialog-centered">
-
-            <div class="modal-content">
-
-                <div class="modal-header">
-
-                    <h5 class="modal-title">
-
-                        Terbitkan Lowongan
-
-                    </h5>
-
-                    <button
-                        class="btn-close"
-                        data-bs-dismiss="modal">
-                    </button>
-
-                </div>
-
-                <div class="modal-body text-center">
-
-                    <i class="fas fa-check-circle text-success fs-3x mb-5"></i>
-
-                    <h4>
-
-                        Yakin ingin menerbitkan lowongan ini?
-
-                    </h4>
-
-                    <p class="text-muted mb-0">
-
-                        Setelah diterbitkan, lowongan akan langsung tampil kepada seluruh pelamar.
-
-                    </p>
-
-                </div>
-
-                <div class="modal-footer">
-
-                    <button
-                        class="btn btn-light"
-                        data-bs-dismiss="modal">
-
-                        Batal
-
-                    </button>
-
-                    <button
-                        class="btn btn-success"
-                        id="btnConfirmPublish">
-
-                        Ya, Terbitkan
-
-                    </button>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="modal fade" id="rejectModal" tabindex="-1">
-
-        <div class="modal-dialog modal-dialog-centered">
-
-            <div class="modal-content">
-
-                <div class="modal-header">
-
-                    <h5 class="modal-title">
-
-                        Tolak Lowongan
-
-                    </h5>
-
-                    <button
-                        class="btn-close"
-                        data-bs-dismiss="modal">
-                    </button>
-
-                </div>
-
-                <div class="modal-body">
-
-                    <div class="alert alert-warning">
-
-                        Berikan alasan penolakan agar BUJP / Company dapat memperbaiki lowongan.
-
-                    </div>
-
-                    <label class="form-label required">
-
-                        Alasan Penolakan
-
-                    </label>
-
-                    <textarea
-                        class="form-control"
-                        id="reasonRejected"
-                        rows="5"
-                        placeholder="Tuliskan alasan penolakan..."></textarea>
-
-                    <div
-                        class="invalid-feedback"
-                        id="reasonError">
-                    </div>
-
-                </div>
-
-                <div class="modal-footer">
-
-                    <button
-                        class="btn btn-light"
-                        data-bs-dismiss="modal">
-
-                        Batal
-
-                    </button>
-
-                    <button
-                        class="btn btn-danger"
-                        id="btnConfirmReject">
-
-                        Tolak Lowongan
-
-                    </button>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-@endsection
-
-@section('js')
-    <script>
-        // Publish
-
-        $("#btnConfirmPublish").click(function(){
-
-            $.ajax({
-
-                url: "/dashboard-admin/job-vacancy/{{ $data->uuid }}/publish",
-
-                type:"POST",
-
-                data:{
-                    _token:$('meta[name="csrf-token"]').attr("content")
-                },
-
-                success:function(res){
-
-                    Swal.fire({
-
-                        icon:"success",
-
-                        title:"Berhasil",
-
-                        text:res.message
-
-                    }).then(function(){
-
-                        location.reload();
-
-                    });
-
-                }
-
-            });
-
-        });
-
-
-
-        // Reject
-
-        $("#btnConfirmReject").click(function(){
-
-            $("#reasonRejected").removeClass("is-invalid");
-
-            $("#reasonError").html("");
-
-            let reason = $("#reasonRejected").val();
-
-            if(reason.trim()==""){
-
-                $("#reasonRejected").addClass("is-invalid");
-
-                $("#reasonError").html("Alasan penolakan wajib diisi.");
-
-                return;
-
-            }
-
-            $.ajax({
-
-                url:"/dashboard-admin/job-vacancy/{{ $data->uuid }}/reject",
-
-                type:"POST",
-
-                data:{
-
-                    _token:$('meta[name="csrf-token"]').attr("content"),
-
-                    reason_rejected:reason
-
-                },
-
-                success:function(res){
-
-                    Swal.fire({
-
-                        icon:"success",
-
-                        title:"Berhasil",
-
-                        text:res.message
-
-                    }).then(function(){
-
-                        location.reload();
-
-                    });
-
-                }
-
-            });
-
-        });
-    </script>
 @endsection

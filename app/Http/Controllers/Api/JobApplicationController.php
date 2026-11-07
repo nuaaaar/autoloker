@@ -9,6 +9,7 @@ use App\Models\JobApplication;
 use App\Models\JobVacancy;
 use App\Services\Api\ApplicantProfileResolver;
 use App\Services\NotificationService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -72,7 +73,6 @@ class JobApplicationController extends Controller
         $vacancy = JobVacancy::query()
             ->where('uuid', $uuid)
             ->where('category', $applicant['category'])
-            ->where('status', 'published')
             ->firstOrFail();
 
         $profile = $applicant['profile'];
@@ -93,20 +93,15 @@ class JobApplicationController extends Controller
 
         $column = $applicant['column'];
         $profileId = $applicant['profile_id'];
+        $securityId = $request->user()->user_security?->security?->id;
+        $cleaningServiceId = $request->user()->user_cleaning_service?->cleaning_service?->id;
 
-        $result = DB::transaction(function () use ($vacancy, $column, $profileId): array {
+        $result = DB::transaction(function () use ($vacancy, $column, $profileId, $securityId, $cleaningServiceId): array {
             $vacancy = JobVacancy::query()
                 ->lockForUpdate()
                 ->findOrFail($vacancy->id);
 
-            if ($vacancy->status !== 'published') {
-                return [
-                    'error' => 'Lowongan kerja ini tidak tersedia untuk dilamar.',
-                    'status' => 404,
-                ];
-            }
-
-            if ($vacancy->end_date && now()->startOfDay()->gt($vacancy->end_date)) {
+            if (!$vacancy->isCurrentlyPublished()) {
                 return [
                     'error' => 'Masa lamaran lowongan kerja ini telah berakhir.',
                     'status' => 422,
@@ -114,8 +109,16 @@ class JobApplicationController extends Controller
             }
 
             $application = JobApplication::query()
-                ->where($column, $profileId)
                 ->where('job_vacancy_id', $vacancy->id)
+                ->where(function (Builder $profiles) use ($securityId, $cleaningServiceId): void {
+                    if ($securityId !== null) {
+                        $profiles->where('security_id', $securityId);
+                    }
+                    if ($cleaningServiceId !== null) {
+                        $method = $securityId !== null ? 'orWhere' : 'where';
+                        $profiles->{$method}('cleaning_service_id', $cleaningServiceId);
+                    }
+                })
                 ->first();
 
             if ($application) {

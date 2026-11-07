@@ -15,10 +15,17 @@ class UserOrderManual extends Model
 
     protected $casts = [
         'price' => 'decimal:2',
+        'token_quantity' => 'integer',
+        'idr_per_token' => 'integer',
         'payment_date' => 'datetime',
         'verified_at' => 'datetime',
         'expired_at' => 'datetime',
     ];
+
+    public function tokenWallet(): BelongsTo
+    {
+        return $this->belongsTo(TokenWallet::class, 'token_wallet_id');
+    }
 
 
     /*

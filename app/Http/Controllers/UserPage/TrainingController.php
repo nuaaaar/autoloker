@@ -224,36 +224,7 @@ class TrainingController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            ->where(
-                'status',
-                'published'
-            )
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | DEADLINE TRAINING
-            |--------------------------------------------------------------------------
-            |
-            | Jika end_date NULL -> masih tersedia.
-            | Jika ada end_date -> belum lewat.
-            |
-            */
-
-            ->where(function ($query) {
-
-                $query
-                    ->whereNull(
-                        'end_date'
-                    )
-
-                    ->orWhereDate(
-                        'end_date',
-                        '>=',
-                        now()->toDateString()
-                    );
-
-            });
+            ->currentlyPublished();
 
 
         /*
@@ -440,27 +411,9 @@ class TrainingController extends Controller
             ->firstOrFail();
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | CEK END DATE
-        |--------------------------------------------------------------------------
-        */
-        
-        // if (
-        //     $data->end_date &&
-        //     $data->end_date < now()->toDateString()
-        // ) {
-
-        //     abort(404);
-
-        // }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | HITUNG VIEW / CLICK
-        |--------------------------------------------------------------------------
-        */
+        $isCurrentlyPublished = $data->isCurrentlyPublished();
+        $isRegistrationOpen = $isCurrentlyPublished
+            && (!$data->start_date || now()->lt($data->start_date));
 
         $data->increment(
             'total_clicked'
@@ -545,6 +498,9 @@ class TrainingController extends Controller
             )
 
             ->first();
+        if (!in_array($data->status, ['published', 'closed'], true) && !$application) {
+            abort(404);
+        }
 
 
         /*
@@ -558,7 +514,9 @@ class TrainingController extends Controller
             compact(
                 'data',
                 'registered',
-                'application'
+                'application',
+                'isCurrentlyPublished',
+                'isRegistrationOpen'
             )
         );
     }

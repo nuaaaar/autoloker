@@ -1010,19 +1010,6 @@
                                     $profile = null;
                                 }
 
-                                $subscription = \App\Models\UserSubscription::where('user_id', Auth::user()->id)
-                                    ->where('status', 'active')
-                                    ->where(function ($query) {
-                                        $query->whereNull('expired_at')
-                                            ->orWhere('expired_at', '>', now());
-                                    })
-                                    ->orderByRaw('expired_at IS NULL DESC')
-                                    ->orderByDesc('expired_at')
-                                    ->first();
-
-                                $packageName = $subscription
-                                    ? $subscription->subscription_name
-                                    : 'Free';
                             @endphp
                             <div class="app-navbar-item ms-1 ms-md-4" id="kt_header_user_menu_toggle">
                                 <!--begin::Menu wrapper-->
@@ -1030,9 +1017,9 @@
                                     data-kt-menu-trigger="{default: 'click', lg: 'hover'}"
                                     data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end">
                                     @if(Auth::user()->role == 'company')
-                                        <img src="{{ Storage::url($profile->logo) }}" class="rounded-3" alt="user" />
+                                        <img src="{{ !empty($profile->logo) ? Storage::url($profile->logo) : '/assets/media/logos/autoloker-logo.png' }}" class="rounded-3" alt="user" />
                                     @elseif(Auth::user()->role == 'bujp')
-                                        <img src="{{ Storage::url($profile->logo) }}" class="rounded-3" alt="user" />
+                                        <img src="{{ !empty($profile->logo) ? Storage::url($profile->logo) : '/assets/media/logos/autoloker-logo.png' }}" class="rounded-3" alt="user" />
                                     @else
                                         <img src="/assets/media/logos/autoloker-logo.png" class="rounded-3" alt="user" />
                                     @endif
@@ -1046,9 +1033,9 @@
                                             <!--begin::Avatar-->
                                             <div class="symbol symbol-50px me-5">
                                                 @if(Auth::user()->role == 'company')
-                                                    <img alt="Logo" src="{{ Storage::url($profile->logo) }}" class="h-50px" style="background: white; border-radius: 8px;"/>
+                                                    <img alt="Logo" src="{{ !empty($profile->logo) ? Storage::url($profile->logo) : '/assets/media/logos/autoloker-logo.png' }}" class="h-50px" style="background: white; border-radius: 8px;"/>
                                                 @elseif(Auth::user()->role == 'bujp')
-                                                    <img alt="Logo" src="{{ Storage::url($profile->logo) }}" class="h-50px" style="background: white; border-radius: 8px;"/>
+                                                    <img alt="Logo" src="{{ !empty($profile->logo) ? Storage::url($profile->logo) : '/assets/media/logos/autoloker-logo.png' }}" class="h-50px" style="background: white; border-radius: 8px;"/>
                                                 @else
                                                     <img alt="Logo" src="/assets/media/logos/autoloker-logo.png" class="h-50px" style="background: white; border-radius: 8px;"/>
                                                 @endif
@@ -1067,7 +1054,7 @@
                                                     </span>
 
                                                     <span class="badge badge-light-success fw-bold fs-8 px-2 py-1 ms-2 flex-shrink-0">
-                                                        {{ $packageName }}
+                                                        Fitur gratis
                                                     </span>
 
                                                 </div>
@@ -1501,49 +1488,14 @@
 
                                     </div>
 
-                                    <div class="menu-item">
-
-                                        <div class="menu-content pt-5 pb-2">
-
-                                            <span class="menu-heading text-uppercase fs-7 fw-bold text-muted">
-
-                                                Berlangganan
-
-                                            </span>
-
+                                    @if(in_array(Auth::user()->role, ['company', 'bujp'], true))
+                                        <div class="menu-item">
+                                            <a href="{{ route('dashboard-user.tokens.index') }}" class="menu-link {{ Route::is('dashboard-user.tokens.*') ? 'active' : '' }}">
+                                                <span class="menu-icon"><i class="ki-duotone ki-wallet fs-2"></i></span>
+                                                <span class="menu-title">Saldo token</span>
+                                            </a>
                                         </div>
-
-                                        <a href="{{ route('dashboard-user.subscription.index') }}"
-                                        class="menu-link {{ Route::is('dashboard-user.subscription.*') ? 'active' : '' }}">
-
-                                            <span class="menu-icon">
-
-                                                <i class="ki-duotone ki-star fs-2"></i>
-
-                                            </span>
-
-                                            <span class="menu-title">
-                                                Paket
-                                            </span>
-
-                                        </a>
-
-                                        <a href="{{ route('dashboard-user.user-subscription.index') }}"
-                                        class="menu-link {{ Route::is('dashboard-user.user-subscription.*') ? 'active' : '' }}">
-
-                                            <span class="menu-icon">
-
-                                                <i class="ki-duotone ki-cheque fs-2"></i>
-
-                                            </span>
-
-                                            <span class="menu-title">
-                                                Riwayat Pembayaran
-                                            </span>
-
-                                        </a>
-
-                                    </div>
+                                    @endif
 
 
                                     {{-- ================================================= --}}
@@ -1709,7 +1661,6 @@
     <script src="/assets/js/widgets.bundle.js"></script>
     <script src="/assets/js/custom/widgets.js"></script>
     <script src="/assets/js/custom/apps/chat/chat.js"></script>
-    <script src="/assets/js/custom/utilities/modals/upgrade-plan.js"></script>
     <script src="/assets/js/custom/utilities/modals/create-app.js"></script>
     <script src="/assets/js/custom/utilities/modals/new-target.js"></script>
     <!-- Required datatable js -->

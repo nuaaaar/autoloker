@@ -245,16 +245,7 @@ class HomeController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            ->where(function ($query) {
-
-                $query->whereNull('end_date')
-                    ->orWhereDate(
-                        'end_date',
-                        '>=',
-                        now()->toDateString()
-                    );
-
-            })
+            ->currentlyPublished()
 
 
             ->latest('id')
@@ -301,44 +292,7 @@ class HomeController extends Controller
 
         $data['featuredTrainings'] = Training::query()
 
-            ->where('status', 'published')
-
-            /*
-            |--------------------------------------------------------------------------
-            | FILTER CATEGORY ROLE
-            |--------------------------------------------------------------------------
-            */
-
-            ->when(
-                $categoryRole,
-                function ($query) use ($categoryRole) {
-
-                    $query->where(
-                        'category_role',
-                        $categoryRole
-                    );
-
-                }
-            )
-
-            /*
-            |--------------------------------------------------------------------------
-            | BELUM BERAKHIR
-            |--------------------------------------------------------------------------
-            */
-
-            ->where(function ($query) {
-
-                $query
-                    ->whereNull('end_date')
-
-                    ->orWhereDate(
-                        'end_date',
-                        '>=',
-                        now()->toDateString()
-                    );
-
-            })
+            ->currentlyPublished()
 
             /*
             |--------------------------------------------------------------------------
@@ -418,18 +372,7 @@ class HomeController extends Controller
 
             ->where('category', $category)
 
-            ->where('status', 'published')
-
-            ->where(function ($query) {
-
-                $query->whereNull('end_date')
-                    ->orWhereDate(
-                        'end_date',
-                        '>=',
-                        now()->toDateString()
-                    );
-
-            })
+            ->currentlyPublished()
 
             ->latest('id')
 
@@ -923,16 +866,7 @@ class HomeController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            ->where(function ($query) {
-
-                $query->whereNull('end_date')
-                    ->orWhereDate(
-                        'end_date',
-                        '>=',
-                        now()->toDateString()
-                    );
-
-            })
+            ->currentlyPublished()
 
 
             ->latest('id')

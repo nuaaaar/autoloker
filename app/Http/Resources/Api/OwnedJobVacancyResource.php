@@ -22,6 +22,11 @@ class OwnedJobVacancyResource extends JsonResource
             'security_position' => $this->security_position,
             'category' => $this->category,
             'status' => $this->status,
+            'published_at' => $this->published_at,
+            'publication_expires_at' => $this->publication_expires_at,
+            'publication_token_cost' => $this->publication_token_cost,
+            'publication_cycle' => $this->publication_cycle,
+            'is_currently_published' => $this->resource->isCurrentlyPublished(),
             'bujp' => $bujp ? [
                 'uuid' => $bujp->uuid,
                 'name' => $bujp->company_name,

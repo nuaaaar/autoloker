@@ -74,7 +74,7 @@ class DashboardUserController extends Controller
         $data['totalJobs'] = (clone $jobQuery)->count();
 
         $data['publishedJobs'] = (clone $jobQuery)
-            ->where('status', 'published')
+            ->currentlyPublished()
             ->count();
 
         $data['draftJobs'] = (clone $jobQuery)
@@ -181,7 +181,7 @@ class DashboardUserController extends Controller
                 ->count();
 
             $categoryPublishedJobs = (clone $categoryJobQuery)
-                ->where('status', 'published')
+                ->currentlyPublished()
                 ->count();
 
             $categoryDraftJobs = (clone $categoryJobQuery)

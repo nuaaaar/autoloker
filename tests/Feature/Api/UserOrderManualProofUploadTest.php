@@ -2,8 +2,9 @@
 
 namespace Tests\Feature\Api;
 
-use App\Models\MasterSubscription;
+use App\Models\Company;
 use App\Models\User;
+use App\Models\UserCompany;
 use App\Models\UserOrderManual;
 use App\Services\Api\TokenService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -14,379 +15,114 @@ class UserOrderManualProofUploadTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_authenticated_user_can_create_an_order_when_no_pending_order_exists(): void
+    public function test_company_can_create_token_order_and_pending_order_conflicts_until_expiry(): void
     {
-        $user = $this->createUser('New Order User', 'new-order@example.com', '081234567894', 'new-order-google-id');
-        $subscription = $this->createSubscription();
+        [$user, $company] = $this->companyAccount('order@example.com', 'Order Company');
         $token = app(TokenService::class)->issue($user)['access_token'];
 
-        $this->withToken($token)
-            ->postJson('/api/user-order-manuals', ['subscription_uuid' => $subscription->uuid])
-            ->assertCreated()
-            ->assertJsonPath('status', true)
-            ->assertJsonPath('data.user_order_manual.status', 'pending_payment')
-            ->assertJsonPath('data.user_order_manual.subscription.uuid', $subscription->uuid);
+        $created = $this->withToken($token)->postJson('/api/user-order-manuals', ['token_quantity' => 5])
+            ->assertCreated()->assertJsonPath('data.user_order_manual.status', 'pending_payment')
+            ->assertJsonPath('data.user_order_manual.token_quantity', 5)
+            ->assertJsonPath('data.user_order_manual.idr_per_token', 10000)
+            ->assertJsonPath('data.user_order_manual.price', 50000);
+        $uuid = $created->json('data.user_order_manual.uuid');
 
-        $this->assertDatabaseCount('user_order_manuals', 1);
-    }
+        $this->withToken($token)->postJson('/api/user-order-manuals', ['token_quantity' => 2])
+            ->assertStatus(409)->assertJsonPath('data.user_order_manual.uuid', $uuid);
+        $order = UserOrderManual::where('uuid', $uuid)->firstOrFail();
+        $this->assertSame($company->id, $order->tokenWallet->owner_id);
+        $this->assertSame(5, $order->token_quantity);
 
-    public function test_pending_order_blocks_a_second_order_for_a_different_plan(): void
-    {
-        $user = $this->createUser('Pending User', 'pending@example.com', '081234567894', 'pending-google-id');
-        $firstSubscription = $this->createSubscription();
-        $secondSubscription = $this->createSubscription('professional', 'Professional');
-        $token = app(TokenService::class)->issue($user)['access_token'];
-
-        $firstOrder = $this->withToken($token)
-            ->postJson('/api/user-order-manuals', ['subscription_uuid' => $firstSubscription->uuid])
-            ->assertCreated();
-        $firstOrderUuid = $firstOrder->json('data.user_order_manual.uuid');
-
-        $this->withToken($token)
-            ->postJson('/api/user-order-manuals', ['subscription_uuid' => $secondSubscription->uuid])
-            ->assertStatus(409)
-            ->assertJsonPath('status', false)
-            ->assertJsonPath('code', 'pending_payment_order_exists')
-            ->assertJsonPath('data.user_order_manual.uuid', $firstOrderUuid)
-            ->assertJsonPath('data.user_order_manual.status', 'pending_payment')
-            ->assertJsonPath('data.user_order_manual.subscription.uuid', $firstSubscription->uuid);
-
-        $this->assertDatabaseCount('user_order_manuals', 1);
-        $this->assertDatabaseHas('user_order_manuals', [
-            'uuid' => $firstOrderUuid,
-            'user_id' => $user->id,
-            'master_subscription_id' => $firstSubscription->id,
-            'status' => 'pending_payment',
-        ]);
-        $this->assertDatabaseMissing('user_order_manuals', [
-            'user_id' => $user->id,
-            'master_subscription_id' => $secondSubscription->id,
-        ]);
-    }
-
-    public function test_another_users_pending_order_does_not_block_creation(): void
-    {
-        $existingOwner = $this->createUser('Existing Owner', 'existing-owner@example.com', '081234567894', 'existing-owner-google-id');
-        $newOwner = $this->createUser('New Owner', 'new-owner@example.com', '081234567895', 'new-owner-google-id');
-        $subscription = $this->createSubscription();
-        $existingOwnerToken = app(TokenService::class)->issue($existingOwner)['access_token'];
-        $newOwnerToken = app(TokenService::class)->issue($newOwner)['access_token'];
-
-        $this->withToken($existingOwnerToken)
-            ->postJson('/api/user-order-manuals', ['subscription_uuid' => $subscription->uuid])
-            ->assertCreated();
-
-        $this->withToken($newOwnerToken)
-            ->postJson('/api/user-order-manuals', ['subscription_uuid' => $subscription->uuid])
-            ->assertCreated()
-            ->assertJsonPath('data.user_order_manual.user_id', $newOwner->id)
-            ->assertJsonPath('data.user_order_manual.status', 'pending_payment');
-
-        $this->assertDatabaseCount('user_order_manuals', 2);
-        $this->assertDatabaseHas('user_order_manuals', [
-            'user_id' => $existingOwner->id,
-            'status' => 'pending_payment',
-        ]);
-        $this->assertDatabaseHas('user_order_manuals', [
-            'user_id' => $newOwner->id,
-            'status' => 'pending_payment',
-        ]);
-    }
-
-    public function test_non_pending_order_statuses_do_not_block_creation(): void
-    {
-        $user = $this->createUser('Status User', 'status@example.com', '081234567894', 'status-google-id');
-        $subscription = $this->createSubscription();
-        $token = app(TokenService::class)->issue($user)['access_token'];
-
-        $order = $this->withToken($token)
-            ->postJson('/api/user-order-manuals', ['subscription_uuid' => $subscription->uuid])
-            ->assertCreated();
-        $orderUuid = $order->json('data.user_order_manual.uuid');
-
-        foreach (['verification', 'approved', 'rejected'] as $status) {
-            UserOrderManual::query()->where('uuid', $orderUuid)->update(['status' => $status]);
-
-            $order = $this->withToken($token)
-                ->postJson('/api/user-order-manuals', ['subscription_uuid' => $subscription->uuid])
-                ->assertCreated()
-                ->assertJsonPath('data.user_order_manual.status', 'pending_payment');
-
-            $orderUuid = $order->json('data.user_order_manual.uuid');
-        }
-
-        $this->assertDatabaseCount('user_order_manuals', 4);
-        foreach (['verification', 'approved', 'rejected'] as $status) {
-            $this->assertDatabaseHas('user_order_manuals', [
-                'user_id' => $user->id,
-                'status' => $status,
-            ]);
-        }
-        $this->assertDatabaseHas('user_order_manuals', [
-            'uuid' => $orderUuid,
-            'status' => 'pending_payment',
-        ]);
-    }
-
-    public function test_owner_can_cancel_a_pending_order_and_create_another(): void
-    {
-        $user = $this->createUser('Cancel Owner', 'cancel-owner@example.com', '081234567897', 'cancel-owner-google-id');
-        $subscription = $this->createSubscription();
-        $token = app(TokenService::class)->issue($user)['access_token'];
-
-        $created = $this->withToken($token)
-            ->postJson('/api/user-order-manuals', ['subscription_uuid' => $subscription->uuid])
-            ->assertCreated();
-        $orderUuid = $created->json('data.user_order_manual.uuid');
-
-        $this->withToken($token)
-            ->postJson("/api/user-order-manuals/{$orderUuid}/cancel")
-            ->assertOk()
-            ->assertJsonPath('status', true)
-            ->assertJsonPath('data.user_order_manual.uuid', $orderUuid)
-            ->assertJsonPath('data.user_order_manual.status', 'cancelled');
-
-        $this->assertDatabaseHas('user_order_manuals', [
-            'uuid' => $orderUuid,
-            'user_id' => $user->id,
-            'status' => 'cancelled',
-        ]);
-
-        $this->withToken($token)
-            ->postJson('/api/user-order-manuals', ['subscription_uuid' => $subscription->uuid])
-            ->assertCreated()
-            ->assertJsonPath('data.user_order_manual.status', 'pending_payment');
-
+        $order->update(['expired_at' => now()->subSecond()]);
+        $this->withToken($token)->postJson('/api/user-order-manuals', ['token_quantity' => 2])->assertCreated();
         $this->assertDatabaseCount('user_order_manuals', 2);
     }
 
-    public function test_user_cannot_cancel_another_users_order(): void
+    public function test_proof_upload_preserves_payment_details_and_does_not_credit_wallet(): void
     {
-        $owner = $this->createUser('Cancel Owner', 'cancel-scope-owner@example.com', '081234567897', 'cancel-scope-owner-google-id');
-        $other = $this->createUser('Other User', 'cancel-scope-other@example.com', '081234567898', 'cancel-scope-other-google-id');
-        $subscription = $this->createSubscription();
-        $ownerToken = app(TokenService::class)->issue($owner)['access_token'];
-        $otherToken = app(TokenService::class)->issue($other)['access_token'];
-
-        $created = $this->withToken($ownerToken)
-            ->postJson('/api/user-order-manuals', ['subscription_uuid' => $subscription->uuid])
-            ->assertCreated();
-        $orderUuid = $created->json('data.user_order_manual.uuid');
-
-        $this->withToken($otherToken)
-            ->postJson("/api/user-order-manuals/{$orderUuid}/cancel")
-            ->assertNotFound();
-
-        $this->assertDatabaseHas('user_order_manuals', [
-            'uuid' => $orderUuid,
-            'user_id' => $owner->id,
-            'status' => 'pending_payment',
-        ]);
-    }
-
-    public function test_only_pending_payment_orders_can_be_cancelled(): void
-    {
-        $user = $this->createUser('Cancel Status User', 'cancel-status@example.com', '081234567897', 'cancel-status-google-id');
-        $subscription = $this->createSubscription();
+        [$user] = $this->companyAccount('proof@example.com', 'Proof Company');
         $token = app(TokenService::class)->issue($user)['access_token'];
-
-        foreach (['verification', 'approved', 'rejected'] as $status) {
-            $created = $this->withToken($token)
-                ->postJson('/api/user-order-manuals', ['subscription_uuid' => $subscription->uuid])
-                ->assertCreated();
-            $orderUuid = $created->json('data.user_order_manual.uuid');
-            UserOrderManual::query()->where('uuid', $orderUuid)->update(['status' => $status]);
-
-            $this->withToken($token)
-                ->postJson("/api/user-order-manuals/{$orderUuid}/cancel")
-                ->assertStatus(409)
-                ->assertJsonPath('status', false)
-                ->assertJsonPath('code', 'manual_order_not_cancellable');
-
-            $this->assertDatabaseHas('user_order_manuals', [
-                'uuid' => $orderUuid,
-                'status' => $status,
-            ]);
-        }
-    }
-
-    public function test_authenticated_owner_can_create_an_order_and_upload_payment_proof(): void
-    {
-        $user = $this->createUser('Payment User', 'payment@example.com', '081234567890', 'payment-google-id');
-        $subscription = $this->createSubscription();
-        $token = app(TokenService::class)->issue($user)['access_token'];
-
-        $created = $this->withToken($token)
-            ->postJson('/api/user-order-manuals', ['subscription_uuid' => $subscription->uuid])
-            ->assertCreated()
-            ->assertJsonPath('data.user_order_manual.status', 'pending_payment')
-            ->assertJsonPath('data.user_order_manual.price', '99000.00');
-
-        $orderUuid = $created->json('data.user_order_manual.uuid');
-        $storedPath = null;
+        $uuid = $this->withToken($token)->postJson('/api/user-order-manuals', ['token_quantity' => 3])
+            ->assertCreated()->json('data.user_order_manual.uuid');
+        $path = null;
 
         try {
-            $response = $this->withToken($token)->post(
-                "/api/user-order-manuals/{$orderUuid}/upload-proof",
-                [
-                    'payment_method' => 'BCA',
-                    'payment_account' => '99887766',
-                    'payment_date' => '2026-09-21',
-                    'payment_proof' => UploadedFile::fake()->create('transfer.pdf', 10, 'application/pdf'),
-                ],
-                ['Accept' => 'application/json'],
-            );
-
-            $response->assertOk()
-                ->assertJsonPath('status', true)
+            $this->withToken($token)->post("/api/user-order-manuals/{$uuid}/upload-proof", [
+                'payment_method' => 'BCA', 'payment_account' => '99887766', 'payment_date' => '2026-09-21',
+                'payment_proof' => UploadedFile::fake()->create('transfer.pdf', 10, 'application/pdf'),
+            ], ['Accept' => 'application/json'])->assertOk()
                 ->assertJsonPath('data.user_order_manual.status', 'verification')
-                ->assertJsonPath('data.user_order_manual.payment_method', 'BCA')
-                ->assertJsonPath('data.user_order_manual.payment_account', '99887766');
+                ->assertJsonPath('data.user_order_manual.payment_method', 'BCA');
 
-            $order = UserOrderManual::query()->where('uuid', $orderUuid)->firstOrFail();
-            $storedPath = public_path('uploads/payment/'.$order->file);
-            $this->assertSame('verification', $order->status);
+            $order = UserOrderManual::where('uuid', $uuid)->firstOrFail();
+            $path = public_path('uploads/payment/'.$order->file);
             $this->assertSame('2026-09-21', $order->payment_date->toDateString());
-            $this->assertFileExists($storedPath);
+            $this->assertSame(0, $order->tokenWallet->fresh()->balance);
+            $this->assertFileExists($path);
         } finally {
-            if ($storedPath !== null && is_file($storedPath)) {
-                unlink($storedPath);
-            }
+            if ($path !== null && is_file($path)) unlink($path);
         }
     }
 
-    public function test_rejected_order_can_receive_new_proof_and_clears_rejection_reason(): void
+    public function test_proof_upload_rejects_invalid_mime_and_expired_order(): void
     {
-        $user = $this->createUser('Retry User', 'retry@example.com', '081234567891', 'retry-google-id');
-        $subscription = $this->createSubscription();
+        $this->travelTo(now()->startOfSecond());
+        [$user] = $this->companyAccount('invalid-proof@example.com', 'Invalid Proof Company');
         $token = app(TokenService::class)->issue($user)['access_token'];
-        $created = $this->withToken($token)
-            ->postJson('/api/user-order-manuals', ['subscription_uuid' => $subscription->uuid])
-            ->assertCreated();
-        $orderUuid = $created->json('data.user_order_manual.uuid');
-        UserOrderManual::query()->where('uuid', $orderUuid)->update([
-            'status' => 'rejected',
-            'rejected_reason' => 'Bukti tidak terbaca',
-        ]);
-        $storedPath = null;
-
-        try {
-            $this->withToken($token)->post(
-                "/api/user-order-manuals/{$orderUuid}/upload-proof",
-                [
-                    'payment_method' => 'BCA',
-                    'payment_date' => '2026-09-21',
-                    'payment_proof' => UploadedFile::fake()->create('replacement.pdf', 10, 'application/pdf'),
-                ],
-                ['Accept' => 'application/json'],
-            )->assertOk()
-                ->assertJsonPath('data.user_order_manual.status', 'verification')
-                ->assertJsonPath('data.user_order_manual.rejected_reason', null);
-
-            $order = UserOrderManual::query()->where('uuid', $orderUuid)->firstOrFail();
-            $storedPath = public_path('uploads/payment/'.$order->file);
-            $this->assertSame('verification', $order->status);
-            $this->assertNull($order->rejected_reason);
-            $this->assertFileExists($storedPath);
-        } finally {
-            if ($storedPath !== null && is_file($storedPath)) {
-                unlink($storedPath);
-            }
-        }
+        $uuid = $this->withToken($token)->postJson('/api/user-order-manuals', ['token_quantity' => 1])
+            ->assertCreated()->json('data.user_order_manual.uuid');
+        $proof = ['payment_method' => 'BCA', 'payment_date' => '2026-09-21', 'payment_proof' => UploadedFile::fake()->create('proof.txt', 1, 'text/plain')];
+        $this->withToken($token)->post("/api/user-order-manuals/{$uuid}/upload-proof", $proof, ['Accept' => 'application/json'])->assertUnprocessable();
+        UserOrderManual::where('uuid', $uuid)->update(['expired_at' => now()]);
+        $this->withToken($token)->post("/api/user-order-manuals/{$uuid}/upload-proof", [
+            'payment_method' => 'BCA', 'payment_date' => '2026-09-21', 'payment_proof' => UploadedFile::fake()->create('transfer.pdf', 10, 'application/pdf'),
+        ], ['Accept' => 'application/json'])->assertNotFound();
     }
 
-    public function test_proof_upload_is_owner_scoped_and_rejects_invalid_file_types(): void
+    public function test_order_access_and_cancellation_are_scoped_to_organization(): void
     {
-        $owner = $this->createUser('Order Owner', 'owner@example.com', '081234567892', 'owner-google-id');
-        $other = $this->createUser('Other User', 'other-payment@example.com', '081234567893', 'other-payment-google-id');
-        $subscription = $this->createSubscription();
+        [$owner, $company] = $this->companyAccount('owner@example.com', 'Owner Company');
+        [$other] = $this->companyAccount('other-org@example.com', 'Other Company');
         $ownerToken = app(TokenService::class)->issue($owner)['access_token'];
         $otherToken = app(TokenService::class)->issue($other)['access_token'];
-        $created = $this->withToken($ownerToken)
-            ->postJson('/api/user-order-manuals', ['subscription_uuid' => $subscription->uuid])
-            ->assertCreated();
-        $orderUuid = $created->json('data.user_order_manual.uuid');
-        $endpoint = "/api/user-order-manuals/{$orderUuid}/upload-proof";
+        $uuid = $this->withToken($ownerToken)->postJson('/api/user-order-manuals', ['token_quantity' => 1])
+            ->assertCreated()->json('data.user_order_manual.uuid');
 
-        $this->withToken($otherToken)->post($endpoint, [
-            'payment_method' => 'BCA',
-            'payment_date' => '2026-09-21',
+        $this->withToken($otherToken)->getJson("/api/user-order-manuals/{$uuid}")->assertNotFound();
+        $this->withToken($otherToken)->postJson("/api/user-order-manuals/{$uuid}/cancel")->assertNotFound();
+        $this->withToken($otherToken)->post("/api/user-order-manuals/{$uuid}/upload-proof", [
+            'payment_method' => 'BCA', 'payment_date' => '2026-09-21',
             'payment_proof' => UploadedFile::fake()->create('transfer.pdf', 10, 'application/pdf'),
         ], ['Accept' => 'application/json'])->assertNotFound();
-
-        $this->withToken($ownerToken)->post($endpoint, [
-            'payment_method' => 'BCA',
-            'payment_date' => '2026-09-21',
-            'payment_proof' => UploadedFile::fake()->create('proof.txt', 1, 'text/plain'),
-        ], ['Accept' => 'application/json'])->assertUnprocessable();
-
-        $this->assertDatabaseHas('user_order_manuals', [
-            'uuid' => $orderUuid,
-            'status' => 'pending_payment',
-            'file' => null,
-        ]);
+        $this->withToken($ownerToken)->postJson("/api/user-order-manuals/{$uuid}/cancel")->assertOk()
+            ->assertJsonPath('data.user_order_manual.status', 'cancelled');
     }
 
-    public function test_order_detail_is_owner_scoped_and_returns_latest_payment_status_for_polling(): void
+    public function test_only_pending_orders_can_be_cancelled(): void
     {
-        $owner = $this->createUser('Detail Owner', 'detail-owner@example.com', '081234567895', 'detail-owner-google-id');
-        $other = $this->createUser('Other Detail User', 'other-detail@example.com', '081234567896', 'other-detail-google-id');
-        $subscription = $this->createSubscription();
-        $ownerToken = app(TokenService::class)->issue($owner)['access_token'];
-        $otherToken = app(TokenService::class)->issue($other)['access_token'];
-        $created = $this->withToken($ownerToken)
-            ->postJson('/api/user-order-manuals', ['subscription_uuid' => $subscription->uuid])
-            ->assertCreated();
-        $orderUuid = $created->json('data.user_order_manual.uuid');
-        $endpoint = "/api/user-order-manuals/{$orderUuid}";
-
-        $this->withToken($ownerToken)->getJson($endpoint)
-            ->assertOk()
-            ->assertJsonPath('data.user_order_manual.uuid', $orderUuid)
-            ->assertJsonPath('data.user_order_manual.status', 'pending_payment')
-            ->assertJsonPath('data.user_order_manual.subscription.name', 'Premium')
-            ->assertHeader('Cache-Control', 'no-store, private');
-
-        UserOrderManual::query()->where('uuid', $orderUuid)->update([
-            'status' => 'approved',
-            'notes' => 'Payment verified.',
-        ]);
-
-        $this->withToken($ownerToken)->getJson($endpoint)
-            ->assertOk()
-            ->assertJsonPath('data.user_order_manual.status', 'approved')
-            ->assertJsonPath('data.user_order_manual.notes', 'Payment verified.')
-            ->assertHeader('Cache-Control', 'no-store, private');
-
-        $this->withToken($otherToken)->getJson($endpoint)->assertNotFound();
+        [$user] = $this->companyAccount('cancel@example.com', 'Cancel Company');
+        $token = app(TokenService::class)->issue($user)['access_token'];
+        $uuid = $this->withToken($token)->postJson('/api/user-order-manuals', ['token_quantity' => 1])
+            ->assertCreated()->json('data.user_order_manual.uuid');
+        UserOrderManual::where('uuid', $uuid)->update(['status' => 'verification']);
+        $this->withToken($token)->postJson("/api/user-order-manuals/{$uuid}/cancel")
+            ->assertStatus(409)->assertJsonPath('code', 'manual_order_not_cancellable');
+        $this->assertDatabaseHas('user_order_manuals', ['uuid' => $uuid, 'status' => 'verification']);
     }
 
-    private function createUser(string $name, string $email, string $phone, string $googleId): User
+    /** @return array{0: User, 1: Company} */
+    private function companyAccount(string $email, string $name): array
     {
-        return User::create([
+        $user = User::create([
             'name' => $name,
             'email' => $email,
-            'phone_number' => $phone,
-            'google_id' => $googleId,
+            'google_id' => str_replace(['@', '.'], '-', $email),
             'password' => 'password',
-            'role' => 'satpam',
+            'role' => 'company',
             'status' => 'active',
         ]);
-    }
-
-    private function createSubscription(string $slug = 'premium', string $name = 'Premium'): MasterSubscription
-    {
-        return MasterSubscription::create([
-            'name' => $name,
-            'slug' => $slug,
-            'role' => 'security',
-            'price' => 99000,
-            'duration' => 30,
-            'duration_type' => 'day',
-            'description' => 'Premium security plan',
-            'features' => ['job_vacancy' => ['enabled' => true, 'limit' => 1]],
-            'is_active' => true,
-            'sort_order' => 1,
-        ]);
+        $link = UserCompany::create(['user_id' => $user->id]);
+        $company = Company::create(['user_company_id' => $link->id, 'company_name' => $name]);
+        return [$user, $company];
     }
 }

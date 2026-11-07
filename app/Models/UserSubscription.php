@@ -73,47 +73,4 @@ class UserSubscription extends Model
         );
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | SCOPE ACTIVE
-    |--------------------------------------------------------------------------
-    */
-
-    public function scopeActive($query)
-    {
-        return $query
-            ->where('status', 'active')
-            ->whereNotNull('expired_at')
-            ->where('expired_at', '>', now());
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | CHECK ACTIVE
-    |--------------------------------------------------------------------------
-    */
-
-    public function isActive()
-    {
-        return $this->status === 'active'
-            && $this->expired_at
-            && $this->expired_at->isFuture();
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | REMAINING DAYS
-    |--------------------------------------------------------------------------
-    */
-
-    public function remainingDays()
-    {
-        if (!$this->expired_at || $this->expired_at->isPast()) {
-            return 0;
-        }
-
-        return now()->diffInDays(
-            $this->expired_at
-        );
-    }
 }

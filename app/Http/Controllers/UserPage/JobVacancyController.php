@@ -238,20 +238,10 @@ class JobVacancyController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $isPublished = $job->status === 'published';
+        $isCurrentlyPublished = $job->isCurrentlyPublished();
 
-        $isNotExpired =
-            is_null($job->end_date) ||
-            $job->end_date >= now()->toDateString();
-
-
-        if (
-            (!$isPublished || !$isNotExpired)
-            && !$application
-        ) {
-
+        if (!in_array($job->status, ['published', 'closed'], true) && !$application) {
             abort(404);
-
         }
 
 
@@ -310,7 +300,8 @@ class JobVacancyController extends Controller
             compact(
                 'job',
                 'application',
-                'applicationStatus'
+                'applicationStatus',
+                'isCurrentlyPublished'
             )
         );
     }
@@ -514,16 +505,12 @@ class JobVacancyController extends Controller
 
                     ->orderByRaw("
                         CASE
-                            WHEN job_vacancies.end_date IS NULL
+                            WHEN job_vacancies.publication_expires_at IS NULL
                             THEN 1
                             ELSE 0
                         END ASC
                     ")
-
-                    ->orderBy(
-                        'job_vacancies.end_date',
-                        'asc'
-                    );
+                    ->orderBy('job_vacancies.publication_expires_at', 'asc');
 
                 break;
 
@@ -1127,33 +1114,7 @@ class JobVacancyController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            ->where(
-                'status',
-                'published'
-            )
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | DEADLINE
-            |--------------------------------------------------------------------------
-            */
-
-            ->where(function ($query) {
-
-                $query
-
-                    ->whereNull(
-                        'end_date'
-                    )
-
-                    ->orWhereDate(
-                        'end_date',
-                        '>=',
-                        now()->toDateString()
-                    );
-
-            });
+            ->currentlyPublished();
 
 
         /*
@@ -1779,16 +1740,12 @@ class JobVacancyController extends Controller
 
                     ->orderByRaw("
                         CASE
-                            WHEN job_vacancies.end_date IS NULL
+                            WHEN job_vacancies.publication_expires_at IS NULL
                             THEN 1
                             ELSE 0
                         END ASC
                     ")
-
-                    ->orderBy(
-                        'job_vacancies.end_date',
-                        'asc'
-                    );
+                    ->orderBy('job_vacancies.publication_expires_at', 'asc');
 
                 break;
 

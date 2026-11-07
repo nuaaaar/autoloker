@@ -809,6 +809,9 @@
         <form id="formCreateTraining" enctype="multipart/form-data">
 
             @csrf
+            <div class="alert alert-warning mb-6" role="note">
+                Publikasi langsung memerlukan {{ number_format($settings->training_post_tokens, 0, ',', '.') }} token dan masa tayang iklan {{ number_format($settings->training_post_days, 0, ',', '.') }} hari. Masa tayang berbeda dari jadwal kegiatan dan durasi pelatihan.
+            </div>
 
             <div class="p-10">
 
@@ -1205,22 +1208,6 @@
 
                         </div>
 
-                        {{-- <div class="col-md-4 mb-7">
-
-                            <label class="form-label required">
-                                Status
-                            </label>
-
-                            <select
-                                class="form-select form-select-dark"
-                                name="status">
-
-                                <option value="draft">Draft</option>
-                                <option value="submitted">Ajukan Review</option>
-
-                            </select>
-
-                        </div> --}}
 
                         <div class="col-md-4 mb-7">
 
@@ -1951,33 +1938,6 @@
 
                     <div class="row">
 
-                        <!-- Status -->
-
-                        {{-- <div class="col-lg-6 mb-8">
-
-                            <label class="form-label required">
-                                Status Publikasi
-                            </label>
-
-                            <select
-                                name="status"
-                                class="form-select">
-
-                                <option value="draft">
-                                    Simpan sebagai Draft
-                                </option>
-
-                                <option value="submitted">
-                                    Ajukan untuk Dipublikasikan
-                                </option>
-
-                            </select>
-
-                            <small class="text-muted">
-                                Draft dapat diedit kembali kapan saja. Pengajuan akan direview oleh Admin.
-                            </small>
-
-                        </div> --}}
 
 
                         <!-- Total Dilihat -->
@@ -2222,7 +2182,7 @@
 
                 <i class="fas fa-paper-plane me-2"></i>
 
-                Submit Lowongan
+                Terbitkan pelatihan
 
             </button>
 
@@ -3367,7 +3327,7 @@
 
                 e.preventDefault();
 
-                submitTraining("submitted");
+                submitTraining("publish");
 
             });
 
@@ -3378,13 +3338,13 @@
 
             $("#btnDraft").click(function(){
 
-                submitTraining("draft");
+                submitTraining("save_draft");
 
             });
 
             $("#btnSubmit").click(function(){
 
-                submitTraining("submitted");
+                submitTraining("publish");
 
             });
 
@@ -3395,7 +3355,7 @@
 
             function submitTraining(status){
 
-                if(status=="submitted" && !$("#confirmTraining").is(":checked")){
+                if(status=="publish" && !$("#confirmTraining").is(":checked")){
 
                     Swal.fire({
                         icon:"warning",
@@ -3408,7 +3368,7 @@
 
                 let formData = new FormData($("#formCreateTraining")[0]);
 
-                formData.set("status", status);
+                formData.set("workflow_action", status);
 
                 $("#btnSubmit").prop("disabled", true);
                 $("#btnDraft").prop("disabled", true);

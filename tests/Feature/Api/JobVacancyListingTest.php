@@ -29,7 +29,7 @@ class JobVacancyListingTest extends TestCase
 
         JobVacancy::create($this->vacancyAttributes([
             'position' => 'Expired Security',
-            'end_date' => now()->subDay()->toDateString(),
+            'publication_expires_at' => now()->subSecond(),
         ]));
         JobVacancy::create($this->vacancyAttributes([
             'position' => 'Draft Security',
@@ -208,11 +208,10 @@ class JobVacancyListingTest extends TestCase
             ->assertJsonPath('data.job_vacancies.1.is_appled', false);
     }
 
-    public function test_applicant_can_read_only_its_applied_vacancy_detail(): void
+    public function test_applicant_can_read_public_and_expired_vacancy_details(): void
     {
-        [$user, $security] = $this->securityAccount('vacancy-detail@example.com');
+        [$user] = $this->securityAccount('vacancy-detail@example.com');
         $vacancy = JobVacancy::create($this->vacancyAttributes());
-        JobApplication::create(['security_id' => $security->id, 'job_vacancy_id' => $vacancy->id, 'status' => 'pending']);
         $token = app(TokenService::class)->issue($user)['access_token'];
 
         $this->withToken($token)
@@ -220,15 +219,24 @@ class JobVacancyListingTest extends TestCase
             ->assertOk()
             ->assertJsonPath('status', true)
             ->assertJsonPath('data.job_vacancy.uuid', (string) $vacancy->uuid)
-            ->assertJsonPath('data.job_vacancy.is_applied', true)
-            ->assertJsonPath('data.job_vacancy.application_status', 'pending');
+            ->assertJsonPath('data.job_vacancy.is_currently_published', true);
 
-        $otherToken = app(TokenService::class)->issue($this->securityAccount('unrelated-vacancy@example.com')[0])['access_token'];
-        $this->withToken($otherToken)
-            ->getJson("/api/job-vacancies/{$vacancy->uuid}")
-            ->assertNotFound()
-            ->assertJsonPath('status', false)
-            ->assertJsonMissingPath('data.job_vacancy');
+        $archived = JobVacancy::create($this->vacancyAttributes([
+            'position' => 'Archived Security',
+            'publication_expires_at' => now()->subSecond(),
+        ]));
+        $this->withToken($token)
+            ->getJson("/api/job-vacancies/{$archived->uuid}")
+            ->assertOk()
+            ->assertJsonPath('data.job_vacancy.is_currently_published', false);
+
+        $draft = JobVacancy::create($this->vacancyAttributes([
+            'position' => 'Draft Security',
+            'status' => 'draft',
+        ]));
+        $this->withToken($token)
+            ->getJson("/api/job-vacancies/{$draft->uuid}")
+            ->assertNotFound();
     }
 
     /** @return array{0: User, 1: Security} */
@@ -276,6 +284,10 @@ class JobVacancyListingTest extends TestCase
             'position' => 'Security Officer',
             'category' => 'security',
             'status' => 'published',
+            'published_at' => now()->subDay(),
+            'publication_expires_at' => now()->addDays(13),
+            'publication_token_cost' => 0,
+            'publication_cycle' => 1,
             'end_date' => now()->addDays(7)->toDateString(),
             'province' => 'Jawa Barat',
             'working_type' => 'contract',

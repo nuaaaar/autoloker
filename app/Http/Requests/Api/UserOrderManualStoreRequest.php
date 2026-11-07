@@ -12,15 +12,16 @@ class UserOrderManualStoreRequest extends ApiFormRequest
     public function rules(): array
     {
         return [
-            'subscription_uuid' => ['required', 'string'],
+            'token_quantity' => ['required', 'integer', 'min:1', 'max:4294967295'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'subscription_uuid.required' => 'Pilih paket langganan terlebih dahulu.',
-            'subscription_uuid.string' => 'ID paket langganan tidak valid.',
+            'token_quantity.required' => 'Jumlah token wajib diisi.',
+            'token_quantity.integer' => 'Jumlah token harus berupa bilangan bulat.',
+            'token_quantity.min' => 'Jumlah token minimal satu.',
         ];
     }
 }

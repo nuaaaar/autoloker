@@ -7,8 +7,6 @@ use App\Models\MasterAbility;
 use App\Models\MasterBank;
 use App\Models\MasterCategoryCertificate;
 use App\Models\MasterIndustry;
-use App\Http\Resources\Api\MasterSubscriptionResource;
-use App\Models\MasterSubscription;
 use App\Models\MasterPlacement;
 use App\Models\MasterPosition;
 use App\Models\MasterPositionSecurity;
@@ -22,13 +20,6 @@ use Laravolt\Indonesia\Models\Village;
 
 class ReferenceDataController extends Controller
 {
-    private const SUBSCRIPTION_ROLE_MAPPING = [
-        'satpam' => 'security',
-        'cs' => 'security',
-        'bujp' => 'bujp',
-        'company' => 'client',
-        'perusahaan' => 'client',
-    ];
 
     public function positions(Request $request): JsonResponse
     {
@@ -93,42 +84,6 @@ class ReferenceDataController extends Controller
         return $this->master(MasterIndustry::query());
     }
 
-    public function subscriptions(Request $request): JsonResponse
-    {
-        $role = self::SUBSCRIPTION_ROLE_MAPPING[
-            strtolower(trim((string) $request->user()?->role))
-        ] ?? null;
-
-        $subscriptions = $role === null
-            ? collect()
-            : MasterSubscription::query()
-                ->where('role', $role)
-                ->where('is_active', true)
-                ->orderBy('sort_order')
-                ->orderBy('id')
-            ->get([
-                'id',
-                'uuid',
-                'name',
-                'slug',
-                'role',
-                'price',
-                'duration',
-                'duration_type',
-                'description',
-                'features',
-                'is_active',
-                'is_highlight',
-                'sort_order',
-            ])
-            ->map(fn (MasterSubscription $subscription): array => MasterSubscriptionResource::shape($subscription))
-            ->values();
-
-        return response()->json([
-            'status' => true,
-            'data' => $subscriptions,
-        ]);
-    }
 
     public function provinces(): JsonResponse
     {

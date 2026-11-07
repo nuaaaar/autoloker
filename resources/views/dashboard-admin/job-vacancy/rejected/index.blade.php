@@ -473,19 +473,19 @@
 
                         render: function (data) {
 
-                            if (!data.start_date || !data.end_date) {
+                            if (!data.published_at || !data.publication_expires_at) {
 
                                 return `
                                     <span class="badge badge-light-warning">
-                                        Belum Diatur
+                                        Belum Terbit
                                     </span>
                                 `;
                             }
 
-                            let start = moment(data.start_date)
+                            let start = moment(data.published_at)
                                 .format("DD-MM-YYYY");
 
-                            let end = moment(data.end_date)
+                            let end = moment(data.publication_expires_at)
                                 .format("DD-MM-YYYY");
 
                             return `

@@ -16,7 +16,7 @@ class PublishNotificationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_admin_publishing_vacancy_stores_history_and_queues_push_for_company_owner(): void
+    public function test_admin_cannot_publish_a_vacancy_without_an_owner_charge(): void
     {
         Queue::fake();
         $admin = User::create([
@@ -40,33 +40,21 @@ class PublishNotificationTest extends TestCase
             'user_company_id' => $userCompany->id,
             'company_name' => 'Example Company',
         ]);
-        $master = MasterNotification::create([
-            'code' => 'job_vacancy_published',
-            'name' => 'Lowongan Disetujui',
-            'category' => 'lowongan',
-            'title_template' => 'Lowongan :position disetujui',
-            'message_template' => 'Lowongan :position telah disetujui dan dipublikasikan.',
-            'push_enabled' => true,
-            'is_active' => true,
-        ]);
         $vacancy = JobVacancy::create([
             'company_id' => $company->id,
             'position' => 'Security Officer',
-            'status' => 'submitted',
+            'status' => 'draft',
             'working_type' => 'contract',
             'working_system' => 'shift',
         ]);
 
         $this->actingAs($admin)
             ->postJson("/dashboard-admin/job-vacancy/{$vacancy->uuid}/publish")
-            ->assertOk()
-            ->assertJsonPath('status', true);
+            ->assertNotFound();
 
-        $this->assertDatabaseHas('notifications', [
-            'user_id' => $owner->id,
-            'notification_id' => $master->id,
-            'title' => 'Lowongan Security Officer disetujui',
+        $this->assertDatabaseHas('job_vacancies', [
+            'id' => $vacancy->id,
+            'status' => 'draft',
         ]);
-        Queue::assertPushed(SendFcmNotification::class);
     }
 }

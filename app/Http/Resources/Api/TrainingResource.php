@@ -16,6 +16,11 @@ class TrainingResource extends JsonResource
     public function toArray(Request $request): array
     {
         $data = $this->resource->toArray();
+        $data['is_currently_published'] = $this->resource->isCurrentlyPublished();
+        $data['is_registration_open'] = $this->resource->isCurrentlyPublished()
+            && (!$this->resource->start_date || now()->lt($this->resource->start_date));
+        $data['publication_expires_at'] = $this->resource->publication_expires_at;
+        $data['publication_token_cost'] = $this->resource->publication_token_cost;
         unset($data['level']);
         $data['discount'] = is_numeric($data['discount'] ?? null) ? (float) $data['discount'] : 0.0;
 

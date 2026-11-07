@@ -164,8 +164,8 @@ class JobBookmarkController extends Controller
         */
 
         $job = JobVacancy::where('uuid', $uuid)
-            ->where('status', 'published')
             ->where('category', $category)
+            ->currentlyPublished()
             ->firstOrFail();
 
         /*

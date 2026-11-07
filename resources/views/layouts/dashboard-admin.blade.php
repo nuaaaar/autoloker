@@ -698,18 +698,10 @@
                                             </div>
 
 
-                                            <!-- Subscription -->
                                             <div class="menu-item">
-                                                <a class="menu-link {{ Route::is('dashboard-admin.master.subscription.*') ? 'active' : '' }}"
-                                                    href="{{ route('dashboard-admin.master.subscription.index') }}">
-
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
-                                                    </span>
-
-                                                    <span class="menu-title">
-                                                        Subscription
-                                                    </span>
+                                                <a class="menu-link {{ Route::is('dashboard-admin.token-settings.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.token-settings.index') }}">
+                                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                                    <span class="menu-title">Pengaturan token</span>
                                                 </a>
                                             </div>
 
@@ -830,179 +822,54 @@
                                             <span class="menu-arrow"></span>
                                         </span>
                                         <!--end:Menu link-->
-                                        <!--begin:Menu sub-->
                                         <div class="menu-sub menu-sub-accordion">
-                                            <!--begin:Menu item-->
                                             <div class="menu-item">
-                                                <!--begin:Menu link-->
-                                                <a class="menu-link {{ Route::is('dashboard-admin.job-vacancy.submitted.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.job-vacancy.submitted.index') }}">
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
-                                                    </span>
-                                                    <span class="menu-title">Menunggu Review</span>
-                                                </a>
-                                                <!--end:Menu link-->
-                                            </div>
-                                            <!--end:Menu item-->
-                                        </div>
-                                        <!--end:Menu sub-->
-                                        <!--begin:Menu sub-->
-                                        <div class="menu-sub menu-sub-accordion">
-                                            <!--begin:Menu item-->
-                                            <div class="menu-item">
-                                                <!--begin:Menu link-->
                                                 <a class="menu-link {{ Route::is('dashboard-admin.job-vacancy.rejected.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.job-vacancy.rejected.index') }}">
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
-                                                    </span>
+                                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
                                                     <span class="menu-title">Ditolak</span>
                                                 </a>
-                                                <!--end:Menu link-->
-                                            </div>
-                                            <!--end:Menu item-->
-                                        </div>
-                                        <!--end:Menu sub-->
-                                        <!--begin:Menu sub-->
-                                        <div class="menu-sub menu-sub-accordion">
-                                            <!--begin:Menu item-->
-                                            <div class="menu-item">
-                                                <!--begin:Menu link-->
                                                 <a class="menu-link {{ Route::is('dashboard-admin.job-vacancy.published.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.job-vacancy.published.index') }}">
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
-                                                    </span>
+                                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
                                                     <span class="menu-title">Terpublish</span>
                                                 </a>
-                                                <!--end:Menu link-->
-                                            </div>
-                                            <!--end:Menu item-->
-                                        </div>
-                                        <!--end:Menu sub-->
-                                        <!--begin:Menu sub-->
-                                        <div class="menu-sub menu-sub-accordion">
-                                            <!--begin:Menu item-->
-                                            <div class="menu-item">
-                                                <!--begin:Menu link-->
                                                 <a class="menu-link {{ Route::is('dashboard-admin.job-vacancy.closed.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.job-vacancy.closed.index') }}">
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
-                                                    </span>
+                                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
                                                     <span class="menu-title">Ditutup</span>
                                                 </a>
-                                                <!--end:Menu link-->
                                             </div>
-                                            <!--end:Menu item-->
                                         </div>
-                                        <!--end:Menu sub-->
                                     </div>
 
                                     <div data-kt-menu-trigger="click" class="menu-item {{ Route::is('dashboard-admin.training.*') ? 'here show' : '' }} menu-accordion">
-                                        <!--begin:Menu link-->
                                         <span class="menu-link">
-                                            <span class="menu-icon">
-                                                <i class="ki-duotone ki-award fs-2">
-                                                </i>
-                                            </span>
+                                            <span class="menu-icon"><i class="ki-duotone ki-award fs-2"></i></span>
                                             <span class="menu-title">Manajemen Pelatihan</span>
                                             <span class="menu-arrow"></span>
                                         </span>
-                                        <!--end:Menu link-->
-                                        <!--begin:Menu sub-->
                                         <div class="menu-sub menu-sub-accordion">
-                                            <!--begin:Menu item-->
                                             <div class="menu-item">
-                                                <!--begin:Menu link-->
-                                                <a class="menu-link {{ Route::is('dashboard-admin.training.submitted.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.training.submitted.index') }}">
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
-                                                    </span>
-                                                    <span class="menu-title">Menunggu Review</span>
-                                                </a>
-                                                <!--end:Menu link-->
-                                            </div>
-                                            <!--end:Menu item-->
-                                        </div>
-                                        <!--end:Menu sub-->
-                                        <!--begin:Menu sub-->
-                                        <div class="menu-sub menu-sub-accordion">
-                                            <!--begin:Menu item-->
-                                            <div class="menu-item">
-                                                <!--begin:Menu link-->
                                                 <a class="menu-link {{ Route::is('dashboard-admin.training.rejected.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.training.rejected.index') }}">
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
-                                                    </span>
+                                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
                                                     <span class="menu-title">Ditolak</span>
                                                 </a>
-                                                <!--end:Menu link-->
-                                            </div>
-                                            <!--end:Menu item-->
-                                        </div>
-                                        <!--end:Menu sub-->
-                                        <!--begin:Menu sub-->
-                                        <div class="menu-sub menu-sub-accordion">
-                                            <!--begin:Menu item-->
-                                            <div class="menu-item">
-                                                <!--begin:Menu link-->
                                                 <a class="menu-link {{ Route::is('dashboard-admin.training.published.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.training.published.index') }}">
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
-                                                    </span>
+                                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
                                                     <span class="menu-title">Terpublish</span>
                                                 </a>
-                                                <!--end:Menu link-->
-                                            </div>
-                                            <!--end:Menu item-->
-                                        </div>
-                                        <!--end:Menu sub-->
-                                        <!--begin:Menu sub-->
-                                        <div class="menu-sub menu-sub-accordion">
-                                            <!--begin:Menu item-->
-                                            <div class="menu-item">
-                                                <!--begin:Menu link-->
                                                 <a class="menu-link {{ Route::is('dashboard-admin.training.cancelled.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.training.cancelled.index') }}">
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
-                                                    </span>
+                                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
                                                     <span class="menu-title">Dibatalkan</span>
                                                 </a>
-                                                <!--end:Menu link-->
-                                            </div>
-                                            <!--end:Menu item-->
-                                        </div>
-                                        <!--end:Menu sub-->
-                                        <!--begin:Menu sub-->
-                                        <div class="menu-sub menu-sub-accordion">
-                                            <!--begin:Menu item-->
-                                            <div class="menu-item">
-                                                <!--begin:Menu link-->
                                                 <a class="menu-link {{ Route::is('dashboard-admin.training.running.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.training.running.index') }}">
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
-                                                    </span>
+                                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
                                                     <span class="menu-title">Berjalan</span>
                                                 </a>
-                                                <!--end:Menu link-->
-                                            </div>
-                                            <!--end:Menu item-->
-                                        </div>
-                                        <!--end:Menu sub-->
-                                        <!--begin:Menu sub-->
-                                        <div class="menu-sub menu-sub-accordion">
-                                            <!--begin:Menu item-->
-                                            <div class="menu-item">
-                                                <!--begin:Menu link-->
                                                 <a class="menu-link {{ Route::is('dashboard-admin.training.closed.*') ? 'active' : '' }}" href="{{ route('dashboard-admin.training.closed.index') }}">
-                                                    <span class="menu-bullet">
-                                                        <span class="bullet bullet-dot"></span>
-                                                    </span>
+                                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
                                                     <span class="menu-title">Ditutup</span>
                                                 </a>
-                                                <!--end:Menu link-->
                                             </div>
-                                            <!--end:Menu item-->
                                         </div>
-                                        <!--end:Menu sub-->
                                     </div>
 
                                     <div data-kt-menu-trigger="click" class="menu-item {{ Route::is('dashboard-admin.payment.*') ? 'here show' : '' }} menu-accordion">
@@ -1162,7 +1029,6 @@
     <script src="/assets/js/widgets.bundle.js"></script>
     <script src="/assets/js/custom/widgets.js"></script>
     <script src="/assets/js/custom/apps/chat/chat.js"></script>
-    <script src="/assets/js/custom/utilities/modals/upgrade-plan.js"></script>
     <script src="/assets/js/custom/utilities/modals/create-app.js"></script>
     <script src="/assets/js/custom/utilities/modals/new-target.js"></script>
     <!-- Required datatable js -->

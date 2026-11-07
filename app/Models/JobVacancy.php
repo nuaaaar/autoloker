@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Concerns\HasTokenPublication;
 use Illuminate\Support\Str;
 
 class JobVacancy extends Model
 {
+    use HasTokenPublication;
     protected $guarded = ['id'];
 
     public function bujp()

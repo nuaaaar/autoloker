@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\JobApplication;
 use App\Models\JobVacancy;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\Security;
 use App\Models\CleaningService;
 use App\Services\NotificationService;
@@ -181,7 +182,6 @@ class JobApplicationController extends Controller
         */
 
         $job = JobVacancy::where('uuid', $uuid)
-            ->where('status', 'published')
             ->where('category', $category)
             ->firstOrFail();
 
@@ -191,71 +191,49 @@ class JobApplicationController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $application = JobApplication::where(
-                $ownerColumn,
-                $profile->id
-            )
-            ->where(
-                'job_vacancy_id',
-                $job->id
-            )
-            ->first();
+        $securityId = Auth::user()->user_security?->security?->id;
+        $cleaningServiceId = Auth::user()->user_cleaning_service?->cleaning_service?->id;
+        $result = DB::transaction(function () use ($job, $ownerColumn, $profile, $securityId, $cleaningServiceId): array {
+            $job = JobVacancy::query()->lockForUpdate()->findOrFail($job->id);
 
-        if ($application) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Anda sudah melamar lowongan ini.'
-            ], 422);
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | CEK DEADLINE
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-            $job->end_date &&
-            now()->startOfDay()->gt($job->end_date)
-        ) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Masa pendaftaran lowongan sudah berakhir.'
-            ], 422);
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | CEK KUOTA
-        |--------------------------------------------------------------------------
-        */
-
-        if ($job->kuota) {
-
-            $totalApplicant = JobApplication::where(
-                'job_vacancy_id',
-                $job->id
-            )->count();
-
-            if ($totalApplicant >= $job->kuota) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Kuota pelamar sudah penuh.'
-                ], 422);
+            if (!$job->isCurrentlyPublished()) {
+                return ['error' => 'Masa pendaftaran lowongan sudah berakhir.'];
             }
+
+            $application = JobApplication::where('job_vacancy_id', $job->id)
+                ->where(function ($profiles) use ($securityId, $cleaningServiceId) {
+                    if ($securityId !== null) {
+                        $profiles->where('security_id', $securityId);
+                    }
+                    if ($cleaningServiceId !== null) {
+                        $method = $securityId !== null ? 'orWhere' : 'where';
+                        $profiles->{$method}('cleaning_service_id', $cleaningServiceId);
+                    }
+                })
+                ->first();
+            if ($application) {
+                return ['error' => 'Anda sudah melamar lowongan ini.'];
+            }
+
+            if ($job->kuota && JobApplication::where('job_vacancy_id', $job->id)->count() >= $job->kuota) {
+                return ['error' => 'Kuota pelamar sudah penuh.'];
+            }
+
+            JobApplication::create([
+                $ownerColumn => $profile->id,
+                'job_vacancy_id' => $job->id,
+            ]);
+
+            return ['job' => $job];
+        });
+
+        if (isset($result['error'])) {
+            return response()->json([
+                'success' => false,
+                'message' => $result['error'],
+            ], 422);
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | CREATE APPLICATION
-        |--------------------------------------------------------------------------
-        */
-
-        JobApplication::create([
-            $ownerColumn => $profile->id,
-            'job_vacancy_id' => $job->id,
-        ]);
-
+        $job = $result['job'];
         $owner = $job->company?->userCompany?->user ?? $job->bujp?->userBujp?->user;
 
         if ($owner) {

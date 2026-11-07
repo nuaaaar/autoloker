@@ -17,6 +17,9 @@ class JobVacancyResource extends JsonResource
     public function toArray(Request $request): array
     {
         $data = $this->resource->toArray();
+        $data['is_currently_published'] = $this->resource->isCurrentlyPublished();
+        $data['publication_expires_at'] = $this->resource->publication_expires_at;
+        $data['publication_token_cost'] = $this->resource->publication_token_cost;
         $data['security_position'] = $this->security_position;
 
         foreach (['bujp', 'company'] as $organization) {

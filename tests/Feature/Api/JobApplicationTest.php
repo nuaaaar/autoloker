@@ -40,6 +40,19 @@ class JobApplicationTest extends TestCase
             ->assertJsonPath('status', false);
     }
 
+    public function test_application_is_rejected_at_publication_expiry(): void
+    {
+        [$user] = $this->securityAccount('expired-publication@example.com');
+        $vacancy = JobVacancy::create($this->vacancyAttributes([
+            'publication_expires_at' => now(),
+        ]));
+        $token = app(TokenService::class)->issue($user)['access_token'];
+
+        $this->withToken($token)
+            ->postJson("/api/job-vacancies/{$vacancy->uuid}/apply")
+            ->assertUnprocessable();
+    }
+
     public function test_my_applications_returns_only_authenticated_security_vacancies_with_pagination(): void
     {
         [$user, $security] = $this->securityAccount('my-applications@example.com');
@@ -162,6 +175,10 @@ class JobApplicationTest extends TestCase
             'position' => 'Security Officer',
             'category' => 'security',
             'status' => 'published',
+            'published_at' => now()->subDay(),
+            'publication_expires_at' => now()->addDays(13),
+            'publication_token_cost' => 0,
+            'publication_cycle' => 1,
             'end_date' => now()->addDays(7)->toDateString(),
             'province' => 'Jawa Barat',
             'working_type' => 'contract',
