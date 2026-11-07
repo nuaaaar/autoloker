@@ -1488,16 +1488,6 @@
 
                                     </div>
 
-                                    @if(in_array(Auth::user()->role, ['company', 'bujp'], true))
-                                        <div class="menu-item">
-                                            <a href="{{ route('dashboard-user.tokens.index') }}" class="menu-link {{ Route::is('dashboard-user.tokens.*') ? 'active' : '' }}">
-                                                <span class="menu-icon"><i class="ki-duotone ki-wallet fs-2"></i></span>
-                                                <span class="menu-title">Saldo token</span>
-                                            </a>
-                                        </div>
-                                    @endif
-
-
                                     {{-- ================================================= --}}
                                     {{-- PENGATURAN --}}
                                     {{-- ================================================= --}}
@@ -1513,6 +1503,15 @@
                                             </span>
 
                                         </div>
+
+                                        @if(in_array(Auth::user()->role, ['company', 'bujp'], true))
+                                            <div class="menu-item">
+                                                <a href="{{ route('dashboard-user.tokens.index') }}" class="menu-link {{ Route::is('dashboard-user.tokens.*') ? 'active' : '' }}">
+                                                    <span class="menu-icon"><i class="ki-duotone ki-wallet fs-2"></i></span>
+                                                    <span class="menu-title">Saldo token</span>
+                                                </a>
+                                            </div>
+                                        @endif
 
 
                                         <a href="{{ route('dashboard-user.profile.index') }}"
